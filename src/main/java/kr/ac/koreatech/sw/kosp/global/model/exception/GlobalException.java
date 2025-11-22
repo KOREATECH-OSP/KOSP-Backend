@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.exception;
+package kr.ac.koreatech.sw.kosp.global.model.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
