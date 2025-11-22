@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.model.exception.handler;
+package kr.ac.koreatech.sw.kosp.global.exception.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import java.util.HashMap;
 import java.util.Map;
 
-import kr.ac.koreatech.sw.kosp.global.model.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {

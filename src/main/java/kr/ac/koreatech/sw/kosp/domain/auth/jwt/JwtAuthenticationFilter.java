@@ -1,7 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.jwt;
 
-import static kr.ac.koreatech.sw.kosp.global.model.exception.ExceptionMessage.BAD_REQUEST;
-import static kr.ac.koreatech.sw.kosp.global.model.exception.ExceptionMessage.INVALID_TOKEN;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.BAD_REQUEST;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.INVALID_TOKEN;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -23,7 +23,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.annotation.UserId;
-import kr.ac.koreatech.sw.kosp.global.model.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,11 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.jwt.service;
 
-import static kr.ac.koreatech.sw.kosp.global.model.exception.ExceptionMessage.INVALID_TOKEN;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.INVALID_TOKEN;
 
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.JwtTokenProvider;
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.model.JwtToken;
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.repository.JwtTokenRedisRepository;
-import kr.ac.koreatech.sw.kosp.global.model.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

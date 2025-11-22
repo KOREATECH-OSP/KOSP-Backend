@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.model.exception;
+package kr.ac.koreatech.sw.kosp.global.exception;
 
 import org.springframework.http.HttpStatus;
 

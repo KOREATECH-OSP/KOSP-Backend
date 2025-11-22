@@ -1,13 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.resolver;
 
-import static kr.ac.koreatech.sw.kosp.global.model.exception.ExceptionMessage.AUTHENTICATION;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.AUTHENTICATION;
 
 import java.util.Collection;
 import java.util.Collections;
 
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.model.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

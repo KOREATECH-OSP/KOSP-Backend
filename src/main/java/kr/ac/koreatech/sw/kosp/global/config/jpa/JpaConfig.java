@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.model.config.jpa;
+package kr.ac.koreatech.sw.kosp.global.config.jpa;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;

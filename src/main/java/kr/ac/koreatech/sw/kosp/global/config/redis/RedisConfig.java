@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.model.config.redis;
+package kr.ac.koreatech.sw.kosp.global.config.redis;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -1,13 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.jwt.repository;
 
-import static kr.ac.koreatech.sw.kosp.global.model.exception.ExceptionMessage.USER_NOT_FOUND;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.USER_NOT_FOUND;
 
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
 
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.model.JwtToken;
-import kr.ac.koreatech.sw.kosp.global.model.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 
 public interface JwtTokenRedisRepository extends Repository<JwtToken, Integer> {
     Optional<JwtToken> findById(Integer userId);

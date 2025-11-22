@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.global.model.config.security;
+package kr.ac.koreatech.sw.kosp.global.config.security;
 
 import java.util.List;
 
