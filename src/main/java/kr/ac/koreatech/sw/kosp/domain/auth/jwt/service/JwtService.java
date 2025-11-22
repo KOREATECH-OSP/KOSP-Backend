@@ -2,14 +2,15 @@ package kr.ac.koreatech.sw.kosp.domain.auth.jwt.service;
 
 import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.INVALID_TOKEN;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.JwtTokenProvider;
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.model.JwtToken;
 import kr.ac.koreatech.sw.kosp.domain.auth.jwt.repository.JwtTokenRedisRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -24,6 +25,14 @@ public class JwtService {
 
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
+
+    public JwtToken createJwtToken(Integer userId) {
+        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
+        String refreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(userId));
+
+        JwtToken jwtToken = createJwtToken(userId, accessToken, refreshToken);
+        return jwtTokenRedisRepository.save(jwtToken);
+    }
 
     public JwtToken createJwtToken(Integer id, String accessToken, String refreshToken) {
         return JwtToken.builder()
