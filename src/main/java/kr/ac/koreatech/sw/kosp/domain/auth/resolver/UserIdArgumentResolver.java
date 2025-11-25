@@ -1,6 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.resolver;
 
 import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.AUTHENTICATION;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.UNAUTHORIZED;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,7 @@ public class UserIdArgumentResolver implements HandlerMethodArgumentResolver {
     ) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
-            throw new IllegalStateException("인증 정보가 없습니다.");
+            throw new GlobalException(UNAUTHORIZED.getMessage(), UNAUTHORIZED.getStatus());
         }
 
         Object principal = authentication.getPrincipal();

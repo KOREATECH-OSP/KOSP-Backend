@@ -1,5 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.user.controller;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +25,12 @@ public class UserController {
 
     private final UserService userService;
 
+    @Value("${jwt.access-token-expiration}")
+    private long accessTokenExpiration;
+
+    @Value("${jwt.refresh-token-expiration}")
+    private long refreshTokenExpiration;
+
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(
         @RequestBody @Valid UserSignUpRequest request,
@@ -37,7 +46,7 @@ public class UserController {
             .secure(true)
             .sameSite("None")
             .path("/")
-            .maxAge(60 * 60 * 24 * 14L)
+            .maxAge(TimeUnit.MILLISECONDS.toSeconds(accessTokenExpiration))
             .build();
 
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refresh_token", jwtToken.getRefreshToken())
@@ -45,7 +54,7 @@ public class UserController {
             .secure(true)
             .sameSite("None")
             .path("/")
-            .maxAge(60 * 60 * 24 * 14L)
+            .maxAge(TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpiration))
             .build();
 
         response.addHeader("Set-Cookie", accessTokenCookie.toString());

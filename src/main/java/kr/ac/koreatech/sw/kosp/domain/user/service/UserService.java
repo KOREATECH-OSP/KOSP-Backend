@@ -22,7 +22,9 @@ public class UserService {
 
     @Transactional
     public JwtToken signUp(UserSignUpRequest request) {
-        User user = request.toUser(passwordEncoder);
+        User user = request.toUser();
+        user.encodePassword(passwordEncoder);
+
         User savedUser = userRepository.save(user);
 
         return jwtService.createJwtToken(savedUser.getId());

@@ -2,8 +2,6 @@ package kr.ac.koreatech.sw.kosp.domain.user.dto.request;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,12 +31,12 @@ public record UserSignUpRequest(
     String password
 ) {
 
-    public User toUser(PasswordEncoder passwordEncoder) {
+    public User toUser() {
         return User.builder()
             .name(name)
             .kutId(kutId)
             .kutEmail(kutEmail)
-            .password(passwordEncoder.encode(password))
+            .password(password)
             .build();
     }
 }

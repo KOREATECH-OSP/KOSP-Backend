@@ -71,12 +71,4 @@ public class JwtService {
 
         return jwtTokenRedisRepository.save(updatedToken);
     }
-
-    public JwtToken generateAndStoreJwt(Integer userId) {
-        String accessToken = jwtTokenProvider.generateAccessToken(String.valueOf(userId));
-        String refreshToken = jwtTokenProvider.generateRefreshToken(String.valueOf(userId));
-
-        JwtToken jwtToken = createJwtToken(userId, accessToken, refreshToken);
-        return jwtTokenRedisRepository.save(jwtToken);
-    }
 }

@@ -2,6 +2,8 @@ package kr.ac.koreatech.sw.kosp.domain.user.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -65,4 +67,9 @@ public class User extends BaseEntity {
         this.password = password;
         this.isDeleted = isDeleted;
     }
+
+    public void encodePassword(PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(password);
+    }
+
 }

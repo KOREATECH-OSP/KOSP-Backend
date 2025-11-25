@@ -44,10 +44,12 @@ public class JwtController {
         Cookie accessTokenCookie = new Cookie("access_token", savedJwtToken.getAccessToken());
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setPath("/");
+        accessTokenCookie.setSecure(true);
 
         Cookie refreshTokenCookie = new Cookie("refresh_token", savedJwtToken.getRefreshToken());
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setSecure(true);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
