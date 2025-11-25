@@ -1,12 +1,10 @@
 plugins {
 	java
-	id("org.springframework.boot") version "3.5.7"
-	id("io.spring.dependency-management") version "1.1.7"
+    alias(libs.plugins.org.springframework.boot)
+    alias(libs.plugins.io.spring.dependency.management)
 }
 
-group = "kr.ac.koreatech"
-version = "0.0.1-SNAPSHOT"
-description = "Koreatech Open Source Platform"
+group = "kr.ac.koreatech.sw"
 
 java {
 	toolchain {
@@ -25,13 +23,36 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	compileOnly("org.projectlombok:lombok")
-	runtimeOnly("com.mysql:mysql-connector-j")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation(libs.spring.boot.devtools)
+    implementation(libs.spring.boot.starter.actuator)
+
+    implementation(libs.spring.boot.starter.web)
+    implementation(libs.spring.boot.starter.validation)
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.data.redis)
+    implementation(libs.springdoc.openapi.starter.webmvc.ui)
+    implementation(libs.mysql.connector.j)
+
+    implementation(libs.jjwt.api)
+    implementation(libs.spring.boot.starter.security)
+
+    runtimeOnly(libs.jjwt.impl)
+    runtimeOnly(libs.jjwt.jackson)
+
+    runtimeOnly(libs.mysql.connector.j)
+    runtimeOnly(libs.h2database)
+
+    compileOnly(libs.lombok)
+
+	annotationProcessor(libs.lombok)
+
+    testImplementation(libs.spring.boot.starter.test)
+    testImplementation(libs.spring.security.test)
+	testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.clean {
+    delete(file("src/main/generated"))
 }
 
 tasks.withType<Test> {
