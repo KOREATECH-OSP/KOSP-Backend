@@ -24,10 +24,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        Integer id = Integer.parseInt(userId);
-
-        User user = userRepository.findById(id)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByKutEmail(email)
             .orElseThrow(() -> new GlobalException(AUTHENTICATION.getMessage(), AUTHENTICATION.getStatus()));
 
         Collection<GrantedAuthority> authorities = Collections.emptyList();
