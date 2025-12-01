@@ -16,7 +16,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/v1/users")
 @RequiredArgsConstructor
 public class UserController {
 

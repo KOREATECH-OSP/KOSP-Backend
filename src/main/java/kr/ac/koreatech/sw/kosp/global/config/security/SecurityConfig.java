@@ -53,8 +53,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/",
                     "/error/**",
-                    "/auth/login/**",
-                    "/users/signup"
+                    "/v1/auth/login/**",
+                    "/v1/users/signup"
                 ).permitAll()
                 .anyRequest().authenticated()
         );
