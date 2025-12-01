@@ -18,6 +18,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.OAuth2LoginSuccessHandler;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -27,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CorsProperties corsProperties;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -37,9 +39,15 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         ;
 
-        // http.oauth2Login(oauth2 -> oauth2
-        //     .successHandler(oAuth2LoginSuccessHandler)
-        // );
+        http.oauth2Login(oauth2 -> oauth2
+            .authorizationEndpoint(authEndpoint ->
+                authEndpoint.baseUri("/v1/oauth2")
+            )
+            .redirectionEndpoint(redirectionEndpoint ->
+                redirectionEndpoint.baseUri("/v1/oauth2/*/callback")
+            )
+            .successHandler(oAuth2LoginSuccessHandler)
+        );
 
         http.authorizeHttpRequests(auth ->
             auth.requestMatchers(
@@ -53,6 +61,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/",
                     "/error/**",
+                    "/v1/auth/github/**",
                     "/v1/auth/login/**",
                     "/v1/users/signup"
                 ).permitAll()
