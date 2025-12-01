@@ -30,17 +30,14 @@ public class AuthService {
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
-    @Transactional
     public void login(
-        LoginRequest request,
+        String username,
+        String password,
         HttpServletRequest servletRequest,
         HttpServletResponse servletResponse
     ) {
         // 1. 인증 토큰 생성
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(
-            request.email(),
-            request.password()
-        );
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 
         // 2. AuthenticationManager에게 인증 위임 (실패 시 예외 발생)
         Authentication authentication = authenticationManager.authenticate(token);
@@ -52,6 +49,14 @@ public class AuthService {
 
         // 4. 세션에 SecurityContext 저장
         securityContextRepository.saveContext(context, servletRequest, servletResponse);
+    }
+
+    public void login(
+        LoginRequest request,
+        HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse
+    ) {
+        login(request.email(), request.password(), servletRequest, servletResponse);
     }
 
     /**
