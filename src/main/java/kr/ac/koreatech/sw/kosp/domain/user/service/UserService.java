@@ -4,13 +4,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.jwt.model.JwtToken;
-import kr.ac.koreatech.sw.kosp.domain.auth.jwt.service.JwtService;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignUpRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -18,16 +18,15 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
 
     @Transactional
-    public JwtToken signUp(UserSignUpRequest request) {
+    public void signup(UserSignupRequest request) {
+        // 1. User 생성
         User user = request.toUser();
         user.encodePassword(passwordEncoder);
-
         User savedUser = userRepository.save(user);
 
-        return jwtService.createJwtToken(savedUser.getId());
+        log.info("✅ 사용자 생성 완료: userId={}, kutEmail={}", savedUser.getId(), savedUser.getKutEmail());
     }
 
 }
