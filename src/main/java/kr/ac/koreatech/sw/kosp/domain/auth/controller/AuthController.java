@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.api.AuthApi;
