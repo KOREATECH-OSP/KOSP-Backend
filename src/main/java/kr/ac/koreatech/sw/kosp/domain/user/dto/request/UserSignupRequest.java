@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 
-public record UserSignUpRequest(
+public record UserSignupRequest(
 
     @Schema(description = "이름", example = "박성빈", requiredMode = REQUIRED)
     @NotBlank(message = "이름은 필수입니다.")
