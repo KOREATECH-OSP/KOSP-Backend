@@ -1,19 +1,19 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
-import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.AUTHENTICATION;
-
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.LoginResponse;
-import kr.ac.koreatech.sw.kosp.domain.auth.jwt.model.JwtToken;
-import kr.ac.koreatech.sw.kosp.domain.auth.jwt.repository.JwtTokenRedisRepository;
-import kr.ac.koreatech.sw.kosp.domain.auth.jwt.service.JwtService;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.UserSignInRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,51 +23,59 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
-    private final JwtTokenRedisRepository jwtTokenRedisRepository;
+    private final AuthenticationManager authenticationManager;
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+    private final SecurityContextRepository securityContextRepository;
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
-    @Transactional
-    public JwtToken login(UserSignInRequest request) {
-        User user = userRepository.getByKutEmail(request.email());
+    public void login(
+        String username,
+        String password,
+        HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse
+    ) {
+        // 1. 인증 토큰 생성
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 
-        // 비밀번호 검증
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            log.warn("❌ 비밀번호 불일치: email={}", request.email());
-            throw new GlobalException(AUTHENTICATION.getMessage(), AUTHENTICATION.getStatus());
-        }
+        // 2. AuthenticationManager에게 인증 위임 (실패 시 예외 발생)
+        Authentication authentication = authenticationManager.authenticate(token);
 
-        // 삭제된 사용자 체크
-        if (user.isDeleted()) {
-            log.warn("❌ 삭제된 사용자: userId={}", user.getId());
-            throw new GlobalException(AUTHENTICATION.getMessage(), AUTHENTICATION.getStatus());
-        }
+        // 3. 인증 정보를 담을 SecurityContext 생성
+        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+        context.setAuthentication(authentication);
+        securityContextHolderStrategy.setContext(context);
 
-        log.info("✅ 로그인 성공: userId={}, email={}", user.getId(), user.getKutEmail());
-        return jwtService.createJwtToken(user.getId());
+        // 4. 세션에 SecurityContext 저장
+        securityContextRepository.saveContext(context, servletRequest, servletResponse);
     }
 
-    /**
-     * 사용자 정보 조회
-     */
-    public LoginResponse getUserInfo(Integer userId) {
-        User user = userRepository.getById(userId);
-
-        return new LoginResponse(
-            user.getKutEmail()
-        );
+    public void login(
+        LoginRequest request,
+        HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse
+    ) {
+        login(request.email(), request.password(), servletRequest, servletResponse);
     }
 
     /**
      * 로그아웃
      */
     @Transactional
-    public void logout(Integer userId) {
-        jwtTokenRedisRepository.deleteById(userId);
-        log.info("✅ 로그아웃 성공: userId={}", userId);
+    public void logout(HttpServletRequest request) {
+        securityContextHolderStrategy.clearContext();
+        request.getSession().invalidate();
+    }
+
+    /**
+     * 사용자 정보 조회
+     */
+    public AuthMeResponse getUserInfo() {
+        Authentication auth = securityContextHolderStrategy.getContext().getAuthentication();
+
+        return new AuthMeResponse(
+            auth.getName()
+        );
     }
 }
