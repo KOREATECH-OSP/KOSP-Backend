@@ -19,6 +19,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.dto.response.OAuth2Response;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,12 +30,14 @@ import lombok.RequiredArgsConstructor;
 public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
+    private final GithubUserRepository githubUserRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Long githubId = getGithubId(attributes);
+        String subToken = userRequest.getAccessToken().getTokenValue();
 
         Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
         Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
@@ -43,6 +47,29 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private Long getGithubId(Map<String, Object> attributes) {
         return Long.valueOf(String.valueOf(attributes.get("id")));
+    }
+
+    private void updateOrSaveGithubUser(
+        Optional<User> userOptional,
+        OAuth2User oAuth2User,
+        String token,
+        Long githubId
+    ) {
+        GithubUser githubUser = userOptional.map(User::getGithubUser)
+            .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
+            .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
+
+        saveGithubUser(githubUser, oAuth2User, token);
+    }
+
+    private void saveGithubUser(GithubUser githubUser, OAuth2User oAuth2User, String token) {
+        githubUser.updateProfile(
+            oAuth2User.getAttribute("login"),
+            oAuth2User.getAttribute("name"),
+            oAuth2User.getAttribute("avatar_url"),
+            token
+        );
+        githubUserRepository.save(githubUser);
     }
 
     private Map<String, Object> buildAttributes(Map<String, Object> original, Optional<User> userOptional) {
