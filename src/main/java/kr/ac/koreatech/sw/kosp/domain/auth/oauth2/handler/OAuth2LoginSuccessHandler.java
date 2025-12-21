@@ -22,16 +22,15 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             HttpServletResponse response,
             Authentication authentication
     ) throws IOException, ServletException {
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        setRequestAttributes(request, oAuth2User);
 
-        GithubUser githubUser = getOrUpdateUser(githubUserOptional, oAuth2User, authentication);
-        githubUserRepository.save(githubUser);
-
-        setRequestAttributes(request, isNew, githubId);
         request.getRequestDispatcher("/v1/oauth2/result").forward(request, response);
     }
 
-    private void setRequestAttributes(HttpServletRequest request, boolean isNew, Long githubId) {
-        request.setAttribute("isNew", isNew);
-        request.setAttribute("githubId", githubId);
+    private void setRequestAttributes(HttpServletRequest request, OAuth2User oAuth2User) {
+        boolean isRegistered = Boolean.TRUE.equals(oAuth2User.getAttribute("isRegistered"));
+        request.setAttribute("isNew", !isRegistered);
+        request.setAttribute("githubId", oAuth2User.getAttribute("id"));
     }
 }
