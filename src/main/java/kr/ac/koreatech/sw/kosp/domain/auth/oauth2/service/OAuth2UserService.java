@@ -43,6 +43,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         String subToken = userRequest.getAccessToken().getTokenValue();
 
         Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
+        updateOrSaveGithubUser(userOptional, oAuth2User, subToken, githubId);
+
         Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
 
         return new DefaultOAuth2User(Collections.emptyList(), modifiedAttributes, "id");
@@ -134,7 +136,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private String addQueryParams(String targetUrl, HttpServletRequest request) {
         boolean isNew = (boolean)request.getAttribute("isNew");
-        Long githubId = (Long)request.getAttribute("githubId");
+        Long githubId = Long.valueOf(String.valueOf(request.getAttribute("githubId")));
 
         return OAuth2Response.of(isNew, githubId).appendQueryParams(targetUrl);
     }
