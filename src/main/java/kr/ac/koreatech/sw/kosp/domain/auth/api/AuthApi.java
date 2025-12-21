@@ -13,7 +13,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.OAuth2Response;
 
 @Tag(
     name = "Auth",
@@ -46,7 +45,4 @@ public interface AuthApi {
         description = "현재 로그인된 사용자의 기본 정보를 조회하여 반환함."
     )
     ResponseEntity<AuthMeResponse> getMyInfo();
-
-    @RequestMapping("/oauth2/result")
-    ResponseEntity<OAuth2Response> oAuth2ResultHandler(HttpServletRequest request);
 }
