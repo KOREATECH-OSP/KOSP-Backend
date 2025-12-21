@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import kr.ac.koreatech.sw.kosp.global.dto.ErrorResponse;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 
 @ControllerAdvice
@@ -18,10 +16,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-    public ResponseEntity<Map<String, Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("error", "Unsupported Media Type");
-        response.put("message", ex.getMessage());
+    public ResponseEntity<ErrorResponse> handleHttpMediaTypeNotSupportedException(
+        HttpMediaTypeNotSupportedException ex
+    ) {
+        ErrorResponse response = ErrorResponse.of(ex.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE.value());
 
         return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
             .contentType(MediaType.APPLICATION_JSON)
@@ -29,9 +27,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(GlobalException.class)
-    public ResponseEntity<Map<String, String>> handleGlobalException(GlobalException ex) {
-        Map<String, String> errorBody = new HashMap<>();
-        errorBody.put("error", ex.getMessage());
-        return ResponseEntity.status(ex.getStatus()).body(errorBody);
+    public ResponseEntity<ErrorResponse> handleGlobalException(GlobalException ex) {
+        ErrorResponse response = ErrorResponse.of(ex.getMessage(), ex.getStatus().value());
+        return ResponseEntity.status(ex.getStatus()).body(response);
     }
 }
