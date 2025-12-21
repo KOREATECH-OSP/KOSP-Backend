@@ -1,0 +1,111 @@
+package kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service;
+
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.*;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.dto.response.OAuth2Response;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class OAuth2UserService extends DefaultOAuth2UserService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User oAuth2User = super.loadUser(userRequest);
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+        Long githubId = getGithubId(attributes);
+
+        Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
+        Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
+
+        return new DefaultOAuth2User(Collections.emptyList(), modifiedAttributes, "id");
+    }
+
+    private Long getGithubId(Map<String, Object> attributes) {
+        return Long.valueOf(String.valueOf(attributes.get("id")));
+    }
+
+    private Map<String, Object> buildAttributes(Map<String, Object> original, Optional<User> userOptional) {
+        Map<String, Object> attributes = new LinkedHashMap<>(original);
+        if (userOptional.isEmpty()) {
+            return buildNewUserAttributes(attributes);
+        }
+        return buildExistingUserAttributes(attributes, userOptional.get());
+    }
+
+    private Map<String, Object> buildExistingUserAttributes(Map<String, Object> attributes, User user) {
+        if (user.isDeleted()) {
+            return buildReregistrationAttributes(attributes, user);
+        }
+        return buildLoginAttributes(attributes, user);
+    }
+
+    private Map<String, Object> buildNewUserAttributes(Map<String, Object> attributes) {
+        attributes.put(IS_REGISTERED_ATTR, false);
+        attributes.put(NEEDS_ADDITIONAL_INFO_ATTR, true);
+        return attributes;
+    }
+
+    private Map<String, Object> buildReregistrationAttributes(Map<String, Object> attributes, User user) {
+        attributes.put(IS_REGISTERED_ATTR, false);
+        attributes.put(IS_REREGISTRATION_ATTR, true);
+        attributes.put(USER_ATTR, user);
+        return attributes;
+    }
+
+    private Map<String, Object> buildLoginAttributes(Map<String, Object> attributes, User user) {
+        attributes.put(IS_REGISTERED_ATTR, true);
+        attributes.put(USER_ATTR, user);
+        return attributes;
+    }
+
+    public void oAuth2ResultHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String targetUrl = determineTargetUrl(request);
+        String redirectUrl = addQueryParams(targetUrl, request);
+        response.sendRedirect(redirectUrl);
+    }
+
+    private String determineTargetUrl(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return "/";
+        }
+        return getRedirectUriFromSession(session);
+    }
+
+    private String getRedirectUriFromSession(HttpSession session) {
+        String redirectUri = (String)session.getAttribute(REDIRECT_URI_SESSION_ATTR);
+        if (redirectUri != null && !redirectUri.isBlank()) {
+            session.removeAttribute(REDIRECT_URI_SESSION_ATTR);
+            return redirectUri;
+        }
+        return "/";
+    }
+
+    private String addQueryParams(String targetUrl, HttpServletRequest request) {
+        boolean isNew = (boolean)request.getAttribute("isNew");
+        Long githubId = (Long)request.getAttribute("githubId");
+
+        return OAuth2Response.of(isNew, githubId).appendQueryParams(targetUrl);
+    }
+}
