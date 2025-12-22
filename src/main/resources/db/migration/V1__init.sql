@@ -1,8 +1,8 @@
 CREATE TABLE user
 (
     id         INT AUTO_INCREMENT NOT NULL,
-    created_at timestamp          NOT NULL,
-    updated_at timestamp          NOT NULL,
+    created_at TIMESTAMP          NOT NULL,
+    updated_at TIMESTAMP          NOT NULL,
     name       VARCHAR(50)        NOT NULL,
     kut_id     VARCHAR(255)       NOT NULL,
     kut_email  VARCHAR(255)       NOT NULL,
@@ -15,8 +15,8 @@ CREATE TABLE user
 CREATE TABLE github_user
 (
     github_id          BIGINT       NOT NULL,
-    created_at         timestamp    NOT NULL,
-    updated_at         timestamp    NOT NULL,
+    created_at         TIMESTAMP    NOT NULL,
+    updated_at         TIMESTAMP    NOT NULL,
     github_login       VARCHAR(255) NULL,
     github_name        VARCHAR(255) NULL,
     github_avatar_url VARCHAR(255) NULL,
