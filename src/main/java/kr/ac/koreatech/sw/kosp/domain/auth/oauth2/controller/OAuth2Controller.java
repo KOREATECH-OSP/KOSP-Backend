@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.api.OAuth2Api;
-import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2UserService;
+import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2LoginService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class OAuth2Controller implements OAuth2Api {
 
-    private final OAuth2UserService oAuth2UserService;
+    private final OAuth2LoginService oAuth2LoginService;
 
     @Override
     @RequestMapping(value = "/result", method = {RequestMethod.GET, RequestMethod.POST})
@@ -26,7 +26,7 @@ public class OAuth2Controller implements OAuth2Api {
         HttpServletResponse response
     ) throws IOException {
 
-        String redirectUrl = oAuth2UserService.oAuth2ResultHandler(request, response);
+        String redirectUrl = oAuth2LoginService.oAuth2ResultHandler(request, response);
         response.sendRedirect(redirectUrl);
     }
 }
