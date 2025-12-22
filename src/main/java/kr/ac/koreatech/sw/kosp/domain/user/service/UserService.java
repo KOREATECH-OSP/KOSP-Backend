@@ -30,17 +30,16 @@ public class UserService {
     public void signup(UserSignupRequest request) {
         GithubUser githubUser = githubUserRepository.getByGithubId(request.githubId());
 
-        // 1. User 생성
-        User user = request.toUser();
-
         // 유저가 있는지 검증
-        if (userRepository.findByKutEmail(user.getKutEmail()).isPresent()) {
+        if (userRepository.findByKutEmail(request.kutEmail()).isPresent()) {
             throw new GlobalException(
                 ExceptionMessage.USER_ALREADY_EXISTS.getMessage(),
                 ExceptionMessage.USER_ALREADY_EXISTS.getStatus()
             );
         }
 
+        // 1. User 생성
+        User user = request.toUser();
         user.encodePassword(passwordEncoder);
         user.updateGithubUser(githubUser);
 
