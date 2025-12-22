@@ -9,9 +9,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -22,7 +25,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "user")
 @NoArgsConstructor(access = PROTECTED)
-@ToString(exclude = "password")
+@ToString(exclude = {"password", "githubUser"})
 public class User extends BaseEntity {
 
     @Id
@@ -51,6 +54,10 @@ public class User extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @OneToOne
+    @JoinColumn(name = "github_id")
+    private GithubUser githubUser;
+
     @Builder
     private User(
         Integer id,
@@ -58,7 +65,8 @@ public class User extends BaseEntity {
         String kutId,
         String kutEmail,
         String password,
-        boolean isDeleted
+        boolean isDeleted,
+        GithubUser githubUser
     ) {
         this.id = id;
         this.name = name;
@@ -66,10 +74,15 @@ public class User extends BaseEntity {
         this.kutEmail = kutEmail;
         this.password = password;
         this.isDeleted = isDeleted;
+        updateGithubUser(githubUser);
     }
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
+    }
+
+    public void updateGithubUser(GithubUser githubUser) {
+        this.githubUser = githubUser;
     }
 
 }

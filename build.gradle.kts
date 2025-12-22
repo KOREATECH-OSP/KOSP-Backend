@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.jjwt.api)
     implementation(libs.spring.boot.starter.security)
 
+    implementation(libs.spring.boot.starter.oauth2.client)
+
     runtimeOnly(libs.jjwt.impl)
     runtimeOnly(libs.jjwt.jackson)
 

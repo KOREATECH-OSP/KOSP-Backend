@@ -30,12 +30,7 @@ public class AuthService {
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
-    public void login(
-        String username,
-        String password,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
-    ) {
+    public SecurityContext login(String username, String password) {
         // 1. 인증 토큰 생성
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
 
@@ -46,6 +41,17 @@ public class AuthService {
         SecurityContext context = securityContextHolderStrategy.createEmptyContext();
         context.setAuthentication(authentication);
         securityContextHolderStrategy.setContext(context);
+
+        return context;
+    }
+
+    public void login(
+        String username,
+        String password,
+        HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse
+    ) {
+        SecurityContext context = login(username, password);
 
         // 4. 세션에 SecurityContext 저장
         securityContextRepository.saveContext(context, servletRequest, servletResponse);
