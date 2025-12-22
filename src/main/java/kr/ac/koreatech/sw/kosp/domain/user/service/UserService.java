@@ -4,6 +4,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
@@ -17,13 +19,19 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final GithubUserRepository githubUserRepository;
+
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void signup(UserSignupRequest request) {
+        GithubUser githubUser = githubUserRepository.getByGithubId(request.githubId());
+
         // 1. User 생성
         User user = request.toUser();
         user.encodePassword(passwordEncoder);
+        user.updateGithubUser(githubUser);
+
         User savedUser = userRepository.save(user);
 
         log.info("✅ 사용자 생성 완료: userId={}, kutEmail={}", savedUser.getId(), savedUser.getKutEmail());

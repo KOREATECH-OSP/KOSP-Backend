@@ -17,6 +17,8 @@ public interface UserRepository extends Repository<User, Integer> {
 
     Optional<User> findByKutEmail(String univEmail);
 
+    Optional<User> findByGithubUser_GithubId(Long githubId);
+
     default User getById(Integer id) {
         return findById(id).orElseThrow(
             () -> new GlobalException(USER_NOT_FOUND.getMessage(), USER_NOT_FOUND.getStatus())
