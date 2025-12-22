@@ -15,9 +15,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
-import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.dto.response.OAuth2Response;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
@@ -57,23 +54,25 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private void updateOrSaveGithubUser(
-            Optional<User> userOptional,
-            OAuth2User oAuth2User,
-            String token,
-            Long githubId) {
+        Optional<User> userOptional,
+        OAuth2User oAuth2User,
+        String token,
+        Long githubId
+    ) {
         GithubUser githubUser = userOptional.map(User::getGithubUser)
-                .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
-                        .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
+            .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
+                .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
 
         saveGithubUser(githubUser, oAuth2User, token);
     }
 
     private void saveGithubUser(GithubUser githubUser, OAuth2User oAuth2User, String token) {
         githubUser.updateProfile(
-                oAuth2User.getAttribute("login"),
-                oAuth2User.getAttribute("name"),
-                oAuth2User.getAttribute("avatar_url"),
-                token);
+            oAuth2User.getAttribute("login"),
+            oAuth2User.getAttribute("name"),
+            oAuth2User.getAttribute("avatar_url"),
+            token
+        );
         githubUserRepository.save(githubUser);
     }
 
@@ -111,33 +110,4 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return attributes;
     }
 
-    public String oAuth2ResultHandler(HttpServletRequest request) {
-        String targetUrl = determineTargetUrl(request);
-        return addQueryParams(targetUrl, request);
-    }
-
-    private String determineTargetUrl(HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
-        if (session == null) {
-            return "/";
-        }
-        return getRedirectUriFromSession(session);
-    }
-
-    private String getRedirectUriFromSession(HttpSession session) {
-        String redirectUri = (String) session.getAttribute(REDIRECT_URI_SESSION_ATTR);
-        if (redirectUri != null && !redirectUri.isBlank()) {
-            session.removeAttribute(REDIRECT_URI_SESSION_ATTR);
-            return redirectUri;
-        }
-        return "/";
-    }
-
-    private String addQueryParams(String targetUrl, HttpServletRequest request) {
-        boolean isNew = Boolean.TRUE.equals(request.getAttribute("isNew"));
-        Object id = request.getAttribute("githubId");
-        Long githubId = (id instanceof Number number) ? number.longValue() : Long.parseLong(String.valueOf(id));
-
-        return OAuth2Response.of(isNew, githubId).appendQueryParams(targetUrl);
-    }
 }
