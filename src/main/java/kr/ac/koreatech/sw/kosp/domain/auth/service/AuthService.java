@@ -52,8 +52,8 @@ public class AuthService {
     }
 
     /**
-     * 강제 로그인 (비밀번호 검증 없이 세션 생성)
-     * OAuth2 인증 후 사용
+     * 강제 로그인 (비밀번호 검증 없이 UserDetails를 신뢰하여 인증 컨텍스트 설정)
+     * OAuth2 인증 등 외부 인증 성공 후, 비밀번호 재검증 없이 SecurityContext에 인증 정보를 저장할 때 사용
      */
     public void login(
         String username,
