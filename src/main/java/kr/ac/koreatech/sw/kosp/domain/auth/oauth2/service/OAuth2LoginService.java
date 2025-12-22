@@ -40,7 +40,7 @@ public class OAuth2LoginService {
 
             if (isRegistered) {
                 User user = (User)attributes.get(USER_ATTR);
-                authService.login(user.getKutEmail(), user.getPassword(), request, response);
+                authService.login(user.getKutEmail(), request, response);
             }
         }
 
