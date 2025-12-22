@@ -2,7 +2,6 @@ package kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service;
 
 import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.*;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.dto.response.OAuth2Response;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
@@ -40,10 +38,10 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         OAuth2User oAuth2User = super.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
         Long githubId = getGithubId(attributes);
-        String subToken = userRequest.getAccessToken().getTokenValue();
+        String githubAccessToken = userRequest.getAccessToken().getTokenValue();
 
         Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
-        updateOrSaveGithubUser(userOptional, oAuth2User, subToken, githubId);
+        updateOrSaveGithubUser(userOptional, oAuth2User, githubAccessToken, githubId);
 
         Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
 
@@ -51,29 +49,31 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private Long getGithubId(Map<String, Object> attributes) {
-        return Long.valueOf(String.valueOf(attributes.get("id")));
+        Object id = attributes.get("id");
+        if (id instanceof Number number) {
+            return number.longValue();
+        }
+        return Long.valueOf(String.valueOf(id));
     }
 
     private void updateOrSaveGithubUser(
-        Optional<User> userOptional,
-        OAuth2User oAuth2User,
-        String token,
-        Long githubId
-    ) {
+            Optional<User> userOptional,
+            OAuth2User oAuth2User,
+            String token,
+            Long githubId) {
         GithubUser githubUser = userOptional.map(User::getGithubUser)
-            .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
-            .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
+                .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
+                        .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
 
         saveGithubUser(githubUser, oAuth2User, token);
     }
 
     private void saveGithubUser(GithubUser githubUser, OAuth2User oAuth2User, String token) {
         githubUser.updateProfile(
-            oAuth2User.getAttribute("login"),
-            oAuth2User.getAttribute("name"),
-            oAuth2User.getAttribute("avatar_url"),
-            token
-        );
+                oAuth2User.getAttribute("login"),
+                oAuth2User.getAttribute("name"),
+                oAuth2User.getAttribute("avatar_url"),
+                token);
         githubUserRepository.save(githubUser);
     }
 
@@ -111,10 +111,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return attributes;
     }
 
-    public void oAuth2ResultHandler(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public String oAuth2ResultHandler(HttpServletRequest request) {
         String targetUrl = determineTargetUrl(request);
-        String redirectUrl = addQueryParams(targetUrl, request);
-        response.sendRedirect(redirectUrl);
+        return addQueryParams(targetUrl, request);
     }
 
     private String determineTargetUrl(HttpServletRequest request) {
@@ -126,7 +125,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String getRedirectUriFromSession(HttpSession session) {
-        String redirectUri = (String)session.getAttribute(REDIRECT_URI_SESSION_ATTR);
+        String redirectUri = (String) session.getAttribute(REDIRECT_URI_SESSION_ATTR);
         if (redirectUri != null && !redirectUri.isBlank()) {
             session.removeAttribute(REDIRECT_URI_SESSION_ATTR);
             return redirectUri;
@@ -135,8 +134,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String addQueryParams(String targetUrl, HttpServletRequest request) {
-        boolean isNew = (boolean)request.getAttribute("isNew");
-        Long githubId = Long.valueOf(String.valueOf(request.getAttribute("githubId")));
+        boolean isNew = Boolean.TRUE.equals(request.getAttribute("isNew"));
+        Object id = request.getAttribute("githubId");
+        Long githubId = (id instanceof Number number) ? number.longValue() : Long.parseLong(String.valueOf(id));
 
         return OAuth2Response.of(isNew, githubId).appendQueryParams(targetUrl);
     }

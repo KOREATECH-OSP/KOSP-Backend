@@ -65,7 +65,8 @@ public class User extends BaseEntity {
         String kutId,
         String kutEmail,
         String password,
-        boolean isDeleted
+        boolean isDeleted,
+        GithubUser githubUser
     ) {
         this.id = id;
         this.name = name;
@@ -73,10 +74,15 @@ public class User extends BaseEntity {
         this.kutEmail = kutEmail;
         this.password = password;
         this.isDeleted = isDeleted;
+        updateGithubUser(githubUser);
     }
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
+    }
+
+    public void updateGithubUser(GithubUser githubUser) {
+        this.githubUser = githubUser;
     }
 
 }
