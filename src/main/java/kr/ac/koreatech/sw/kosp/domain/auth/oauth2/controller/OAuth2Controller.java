@@ -26,7 +26,7 @@ public class OAuth2Controller implements OAuth2Api {
         HttpServletResponse response
     ) throws IOException {
 
-        String redirectUrl = oAuth2UserService.oAuth2ResultHandler(request);
+        String redirectUrl = oAuth2UserService.oAuth2ResultHandler(request, response);
         response.sendRedirect(redirectUrl);
     }
 }

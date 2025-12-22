@@ -7,6 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -16,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.dto.response.OAuth2Response;
+import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
@@ -31,6 +36,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
+
+    private final AuthService authService;
 
     @Override
     @Transactional
@@ -57,23 +64,25 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private void updateOrSaveGithubUser(
-            Optional<User> userOptional,
-            OAuth2User oAuth2User,
-            String token,
-            Long githubId) {
+        Optional<User> userOptional,
+        OAuth2User oAuth2User,
+        String token,
+        Long githubId
+    ) {
         GithubUser githubUser = userOptional.map(User::getGithubUser)
-                .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
-                        .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
+            .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
+                .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
 
         saveGithubUser(githubUser, oAuth2User, token);
     }
 
     private void saveGithubUser(GithubUser githubUser, OAuth2User oAuth2User, String token) {
         githubUser.updateProfile(
-                oAuth2User.getAttribute("login"),
-                oAuth2User.getAttribute("name"),
-                oAuth2User.getAttribute("avatar_url"),
-                token);
+            oAuth2User.getAttribute("login"),
+            oAuth2User.getAttribute("name"),
+            oAuth2User.getAttribute("avatar_url"),
+            token
+        );
         githubUserRepository.save(githubUser);
     }
 
@@ -111,8 +120,26 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         return attributes;
     }
 
-    public String oAuth2ResultHandler(HttpServletRequest request) {
+    public String oAuth2ResultHandler(HttpServletRequest request, HttpServletResponse response) {
         String targetUrl = determineTargetUrl(request);
+        return processOAuth2Result(targetUrl, request, response);
+    }
+
+    private String processOAuth2Result(String targetUrl, HttpServletRequest request, HttpServletResponse response) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication instanceof OAuth2AuthenticationToken oauthToken) {
+            OAuth2User oAuth2User = oauthToken.getPrincipal();
+            Map<String, Object> attributes = oAuth2User.getAttributes();
+
+            boolean isRegistered = Boolean.TRUE.equals(attributes.get(IS_REGISTERED_ATTR));
+
+            if (isRegistered) {
+                User user = (User)attributes.get(USER_ATTR);
+                authService.login(user.getKutEmail(), user.getPassword(), request, response);
+            }
+        }
+
         return addQueryParams(targetUrl, request);
     }
 
@@ -125,7 +152,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private String getRedirectUriFromSession(HttpSession session) {
-        String redirectUri = (String) session.getAttribute(REDIRECT_URI_SESSION_ATTR);
+        String redirectUri = (String)session.getAttribute(REDIRECT_URI_SESSION_ATTR);
         if (redirectUri != null && !redirectUri.isBlank()) {
             session.removeAttribute(REDIRECT_URI_SESSION_ATTR);
             return redirectUri;
