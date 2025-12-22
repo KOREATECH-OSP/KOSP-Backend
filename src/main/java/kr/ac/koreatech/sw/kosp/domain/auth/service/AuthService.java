@@ -6,6 +6,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,35 +28,19 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository;
+    private final UserDetailsService userDetailsService;
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
-    public SecurityContext login(String username, String password) {
-        // 1. 인증 토큰 생성
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
-
-        // 2. AuthenticationManager에게 인증 위임 (실패 시 예외 발생)
-        Authentication authentication = authenticationManager.authenticate(token);
-
-        // 3. 인증 정보를 담을 SecurityContext 생성
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-        context.setAuthentication(authentication);
-        securityContextHolderStrategy.setContext(context);
-
-        return context;
-    }
-
     public void login(
         String username,
         String password,
         HttpServletRequest servletRequest,
         HttpServletResponse servletResponse
     ) {
-        SecurityContext context = login(username, password);
-
-        // 4. 세션에 SecurityContext 저장
-        securityContextRepository.saveContext(context, servletRequest, servletResponse);
+        Authentication authentication = authenticate(username, password);
+        setAuthentication(authentication, servletRequest, servletResponse);
     }
 
     public void login(
@@ -63,6 +49,24 @@ public class AuthService {
         HttpServletResponse servletResponse
     ) {
         login(request.email(), request.password(), servletRequest, servletResponse);
+    }
+
+    /**
+     * 강제 로그인 (비밀번호 검증 없이 UserDetails를 신뢰하여 인증 컨텍스트 설정)
+     * OAuth2 인증 등 외부 인증 성공 후, 비밀번호 재검증 없이 SecurityContext에 인증 정보를 저장할 때 사용
+     */
+    public void login(
+        String username,
+        HttpServletRequest servletRequest,
+        HttpServletResponse servletResponse
+    ) {
+        // 1. UserDetails 로드
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        // 2. 인증 토큰 생성 (비밀번호는 null)
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+
+        setAuthentication(token, servletRequest, servletResponse);
     }
 
     /**
@@ -83,5 +87,26 @@ public class AuthService {
         return new AuthMeResponse(
             auth.getName()
         );
+    }
+
+    private SecurityContext setAuthentication(Authentication authentication) {
+        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+        context.setAuthentication(authentication);
+        securityContextHolderStrategy.setContext(context);
+        return context;
+    }
+
+    private void setAuthentication(
+        Authentication authentication,
+        HttpServletRequest request,
+        HttpServletResponse response
+    ) {
+        SecurityContext context = setAuthentication(authentication);
+        securityContextRepository.saveContext(context, request, response);
+    }
+
+    private Authentication authenticate(String username, String password) {
+        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
+        return authenticationManager.authenticate(token);
     }
 }

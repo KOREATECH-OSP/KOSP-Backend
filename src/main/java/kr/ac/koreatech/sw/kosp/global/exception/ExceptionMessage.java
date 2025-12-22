@@ -13,6 +13,7 @@ public enum ExceptionMessage {
     BAD_REQUEST("잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
     NEED_EMAIL("닉네임 또는 이메일 중 하나는 필수입니다.", HttpStatus.BAD_REQUEST),
     INVALID_TOKEN("유효하지 않은 토큰이거나 토큰이 없습니다.", HttpStatus.UNAUTHORIZED),
+    USER_ALREADY_EXISTS("이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
     ;
 
     private final String message;
