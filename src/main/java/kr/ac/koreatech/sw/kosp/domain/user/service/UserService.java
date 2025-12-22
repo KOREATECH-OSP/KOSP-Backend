@@ -1,5 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +32,15 @@ public class UserService {
 
         // 1. User 생성
         User user = request.toUser();
+
+        // 유저가 있는지 검증
+        if (userRepository.findByKutEmail(user.getKutEmail()).isPresent()) {
+            throw new GlobalException(
+                ExceptionMessage.USER_ALREADY_EXISTS.getMessage(),
+                ExceptionMessage.USER_ALREADY_EXISTS.getStatus()
+            );
+        }
+
         user.encodePassword(passwordEncoder);
         user.updateGithubUser(githubUser);
 
