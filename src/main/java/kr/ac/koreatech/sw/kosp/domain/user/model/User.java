@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.user.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import jakarta.persistence.Column;
@@ -26,7 +27,7 @@ import lombok.ToString;
 @Table(name = "user")
 @NoArgsConstructor(access = PROTECTED)
 @ToString(exclude = {"password", "githubUser"})
-public class User extends BaseEntity {
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -85,4 +86,35 @@ public class User extends BaseEntity {
         this.githubUser = githubUser;
     }
 
+    // UserDetails Implementation
+
+    @Override
+    public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
+        return java.util.Collections.emptyList();
+    }
+
+    @Override
+    public String getUsername() {
+        return this.kutEmail;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return !this.isDeleted;
+    }
 }

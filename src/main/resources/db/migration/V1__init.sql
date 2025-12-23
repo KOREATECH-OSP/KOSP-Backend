@@ -36,3 +36,18 @@ ALTER TABLE user
 
 ALTER TABLE user
     ADD CONSTRAINT FK_USER_ON_GITHUB FOREIGN KEY (github_id) REFERENCES github_user (github_id);
+
+CREATE TABLE article
+(
+    id             BIGINT AUTO_INCREMENT NOT NULL,
+    created_at     TIMESTAMP             NOT NULL,
+    updated_at     TIMESTAMP             NOT NULL,
+    author_id      INT                   NOT NULL,
+    category       VARCHAR(255)          NOT NULL,
+    title          VARCHAR(255)          NOT NULL,
+    body           TEXT                  NOT NULL,
+    views          INT                   NOT NULL,
+    likes          INT                   NOT NULL,
+    comments_count INT                   NOT NULL,
+    CONSTRAINT pk_article PRIMARY KEY (id)
+);

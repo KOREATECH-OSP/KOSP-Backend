@@ -12,10 +12,12 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 
+import java.io.Serializable;
+
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity {
+public class BaseEntity implements Serializable {
 
     @NotNull
     @CreatedDate
