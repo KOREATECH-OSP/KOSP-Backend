@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.global.config.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -13,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -44,6 +46,10 @@ public class SecurityConfig {
                 authEndpoint -> authEndpoint.authorizationRequestRepository(authorizationRequestRepository))
             .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
             .successHandler(oAuth2LoginSuccessHandler));
+
+        http.exceptionHandling(exception -> exception
+            .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+        );
 
         http.authorizeHttpRequests(auth ->
             auth.requestMatchers(
