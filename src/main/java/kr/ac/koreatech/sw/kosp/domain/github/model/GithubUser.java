@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.github.model;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @Table(name = "github_user")
 @NoArgsConstructor
-public class GithubUser extends BaseEntity {
+public class GithubUser extends BaseEntity implements Serializable {
 
     @Id
     @Column(name = "github_id")
