@@ -83,10 +83,13 @@ public class AuthService {
      */
     public AuthMeResponse getUserInfo() {
         Authentication auth = securityContextHolderStrategy.getContext().getAuthentication();
+        Object principal = auth.getPrincipal();
 
-        return new AuthMeResponse(
-            auth.getName()
-        );
+        if (principal instanceof kr.ac.koreatech.sw.kosp.domain.user.model.User user) {
+            return new AuthMeResponse(user.getName());
+        }
+
+        return new AuthMeResponse(auth.getName());
     }
 
     private SecurityContext setAuthentication(Authentication authentication) {
