@@ -193,7 +193,8 @@
         "createdAt": "2024-03-15T12:00:00Z",
         "views": 120,
         "likes": 5,
-        "comments": 2
+        "comments": 2,
+        "tags": ["React", "Frontend"]
       }
     ],
     "pagination": {
@@ -222,6 +223,7 @@
     "views": 150,
     "likes": 5,
     "comments": 2,
+    "tags": ["React", "Frontend", "Update"],
     "isLiked": true,
     "isBookmarked": false
   }
@@ -236,7 +238,8 @@
   {
     "boardId": 1,
     "title": "제목",
-    "content": "내용"
+    "content": "내용",
+    "tags": ["태그1", "태그2"]
   }
   ```
 - **Response**: `201 Created`
@@ -256,7 +259,8 @@
   {
     "boardId": 1,
     "title": "수정된 제목",
-    "content": "수정된 내용"
+    "content": "수정된 내용",
+    "tags": ["수정된태그1"]
   }
   ```
 - **Response**: `200 OK`
@@ -397,7 +401,8 @@
         "author": { "id": 12, "name": "팀리더" },
         "createdAt": "2024-03-16T12:00:00",
         "views": 300,
-        "likes": 10
+        "likes": 10,
+        "tags": ["SideProject", "Frontend"]
       }
     ],
     "pagination": {
@@ -428,6 +433,7 @@
     "createdAt": "2024-03-16T12:00:00",
     "views": 300,
     "likes": 10,
+    "tags": ["SideProject", "Frontend"],
     "isLiked": false,
     "isBookmarked": true
   }
@@ -444,7 +450,8 @@
     "content": "내용",
     "teamId": 5,
     "startDate": "2024-03-16T09:00:00",
-    "endDate": "2024-03-31T18:00:00"
+    "endDate": "2024-03-31T18:00:00",
+    "tags": ["Tag1", "Tag2"]
   }
   ```
 - **Response**: `201 Created`
@@ -460,7 +467,8 @@
     "title": "수정된 제목",
     "content": "수정된 내용",
     "startDate": "2024-03-17T09:00:00",
-    "endDate": "2024-04-01T18:00:00"
+    "endDate": "2024-04-01T18:00:00",
+    "tags": ["UpdatedTag"]
   }
   ```
 - **Response**: `200 OK`
