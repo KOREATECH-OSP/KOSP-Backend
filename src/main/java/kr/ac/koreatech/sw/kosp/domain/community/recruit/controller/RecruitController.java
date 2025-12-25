@@ -47,7 +47,7 @@ public class RecruitController implements RecruitApi {
     @Override
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody @Valid RecruitRequest request) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         Long id = recruitService.create(userId, request);
         return ResponseEntity.created(URI.create("/v1/community/recruits/" + id)).build();
     }
@@ -58,7 +58,7 @@ public class RecruitController implements RecruitApi {
         @PathVariable Long id,
         @RequestBody @Valid RecruitRequest request
     ) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         recruitService.update(userId, id, request);
         return ResponseEntity.ok().build();
     }
@@ -66,7 +66,7 @@ public class RecruitController implements RecruitApi {
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         recruitService.delete(userId, id);
         return ResponseEntity.noContent().build();
     }

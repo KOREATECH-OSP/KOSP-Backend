@@ -47,7 +47,7 @@ public class ArticleController implements ArticleApi {
     @Override
     @PostMapping
     public ResponseEntity<Void> create(@RequestBody @Valid ArticleRequest request) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         Long id = articleService.create(userId, request);
         return ResponseEntity.created(URI.create("/v1/community/articles/" + id)).build();
     }
@@ -58,7 +58,7 @@ public class ArticleController implements ArticleApi {
         @PathVariable Long id,
         @RequestBody @Valid ArticleRequest request
     ) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         articleService.update(userId, id, request);
         return ResponseEntity.ok().build();
     }
@@ -66,7 +66,7 @@ public class ArticleController implements ArticleApi {
     @Override
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        Long userId = 1L; // TODO: user support
+        Integer userId = 1; // TODO: user support
         articleService.delete(userId, id);
         return ResponseEntity.noContent().build();
     }

@@ -14,7 +14,7 @@ public class RecruitResponse {
     private final Long boardId;
     private final String title;
     private final String content;
-    private final Long authorId;
+    private final Integer authorId;
     private final Integer views;
     private final Integer likes;
     private final Integer comments;
