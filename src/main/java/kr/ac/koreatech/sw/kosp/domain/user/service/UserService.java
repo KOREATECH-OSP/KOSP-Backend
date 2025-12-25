@@ -32,10 +32,7 @@ public class UserService {
 
         // 유저가 있는지 검증
         if (userRepository.findByKutEmail(request.kutEmail()).isPresent()) {
-            throw new GlobalException(
-                ExceptionMessage.USER_ALREADY_EXISTS.getMessage(),
-                ExceptionMessage.USER_ALREADY_EXISTS.getStatus()
-            );
+            throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
         }
 
         // 1. User 생성
