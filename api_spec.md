@@ -3,11 +3,46 @@
 ## 개요
 이 문서는 KOSP 프로젝트의 통합 REST API 명세서입니다. 모든 API는 RESTful 원칙을 따르며 JSON 형식을 사용합니다.
 
+## 진행 현황
+- [x] 1.1 로그인
+- [x] 1.2 로그아웃
+- [x] 1.3 내 정보 조회 (Current User)
+- [ ] 2.1 사용자 정보 수정
+- [ ] 2.2 사용자 상세 조회 (타인 조회)
+- [ ] 2.3 사용자 활동 조회 (GitHub 활동)
+- [ ] 2.4 사용자 작성 글 목록
+- [ ] 3.1 게시판 목록 조회
+- [ ] 3.2 게시글 목록 조회
+- [ ] 3.3 게시글 상세 조회
+- [ ] 3.4 게시글 작성
+- [ ] 3.5 게시글 수정
+- [ ] 3.6 게시글 삭제
+- [ ] 3.7 댓글 목록 조회
+- [ ] 3.8 댓글 작성
+- [ ] 3.9 댓글 삭제
+- [ ] 3.10 게시글 좋아요/북마크
+- [ ] 3.11 댓글 좋아요
+- [ ] 4.1 모집 공고 목록 조회
+- [ ] 4.2 모집 공고 상세 조회
+- [ ] 4.3 모집 공고 작성
+- [ ] 4.4 모집 공고 수정
+- [ ] 4.5 모집 상태 변경
+- [ ] 4.6 모집 공고 삭제
+- [ ] 4.7 모집 공고 댓글 목록 조회
+- [ ] 4.8 모집 공고 댓글 작성
+- [ ] 4.9 모집 공고 댓글 삭제
+- [ ] 4.10 모집 공고 좋아요/북마크
+- [ ] 4.11 모집 공고 댓글 좋아요
+- [ ] 5.1 팀 목록 조회
+- [ ] 5.2 팀 생성
+- [ ] 5.3 팀 상세 조회
+- [ ] 6.1 도전 과제 목록 및 진행도 조회
+
 ---
 
 ## 1. 인증 (Auth)
 
-### [x] 1.1 로그인
+### 1.1 로그인
 세션 기반 인증을 사용합니다. 성공 시 세션 쿠키가 발급됩니다.
 
 - **Endpoint**: `POST /auth/login`
@@ -24,7 +59,7 @@
   - `400 Bad Request`: 이메일/비밀번호 형식 오류
   - `401 Unauthorized`: 이메일 또는 비밀번호 불일치
 
-### [x] 1.2 로그아웃
+### 1.2 로그아웃
 서버 세션을 무효화하고 클라이언트 쿠키를 만료시킵니다.
 
 - **Endpoint**: `POST /auth/logout`
@@ -32,7 +67,7 @@
 - **Error Response**:
   - `401 Unauthorized`: 로그인되지 않은 상태
 
-### [x] 1.3 내 정보 조회 (Current User)
+### 1.3 내 정보 조회 (Current User)
 현재 로그인된 세션의 사용자 정보를 조회합니다.
 
 - **Endpoint**: `GET /auth/me`
@@ -51,7 +86,7 @@
 
 ## 2. 사용자 (Users)
 
-### [ ] 2.1 사용자 정보 수정
+### 2.1 사용자 정보 수정
 
 - **Endpoint**: `PUT /users/{userId}`
 - **Request Body**:
@@ -64,7 +99,7 @@
   ```
 - **Response**: `200 OK` (Body 없음)
 
-### [ ] 2.2 사용자 상세 조회 (타인 조회)
+### 2.2 사용자 상세 조회 (타인 조회)
 - **Endpoint**: `GET /users/{userId}`
 - **Response**: `200 OK`
   ```json
@@ -77,7 +112,7 @@
   }
   ```
 
-### [ ] 2.3 사용자 활동 조회 (GitHub 활동)
+### 2.3 사용자 활동 조회 (GitHub 활동)
 - **Endpoint**: `GET /users/{userId}/activities/github`
 - **Response**: `200 OK`
   ```json
@@ -95,7 +130,7 @@
   }
   ```
 
-### [ ] 2.4 사용자 작성 글 목록
+### 2.4 사용자 작성 글 목록
 - **Endpoint**: `GET /users/{userId}/posts`
 - **Response**: `200 OK`
   ```json
@@ -117,7 +152,7 @@
 ## 3. 커뮤니티 (Community & Articles)
 일반 게시글(자유, 정보, 홍보 등)을 관리합니다. 모집 관련 필드가 포함되지 않습니다.
 
-### [ ] 3.1 게시판 목록 조회
+### 3.1 게시판 목록 조회
 - **Endpoint**: `GET /community/boards`
 - **Response**: `200 OK`
   ```json
@@ -139,7 +174,7 @@
   }
   ```
 
-### [ ] 3.2 게시글 목록 조회
+### 3.2 게시글 목록 조회
 - **Endpoint**: `GET /community/articles`
 - **Query Parameters**:
   - `page`: number (기본값: 1)
@@ -169,7 +204,7 @@
   }
   ```
 
-### [ ] 3.3 게시글 상세 조회
+### 3.3 게시글 상세 조회
 - **Endpoint**: `GET /community/articles/{articleId}`
 - **Response**: `200 OK`
   ```json
@@ -194,7 +229,7 @@
 - **Error Response**:
   - `404 Not Found`: 게시글이 존재하지 않음
 
-### [ ] 3.4 게시글 작성
+### 3.4 게시글 작성
 - **Endpoint**: `POST /community/articles`
 - **Request Body**:
   ```json
@@ -214,7 +249,7 @@
   - `400 Bad Request`: 입력 형식 오류
   - `401 Unauthorized`: 인증 실패
 
-### [ ] 3.5 게시글 수정
+### 3.5 게시글 수정
 - **Endpoint**: `PUT /community/articles/{articleId}`
 - **Request Body**:
   ```json
@@ -231,7 +266,7 @@
   - `403 Forbidden`: 수정 권한 없음
   - `404 Not Found`: 커뮤니티가 존재하지 않음
 
-### [ ] 3.6 게시글 삭제
+### 3.6 게시글 삭제
 - **Endpoint**: `DELETE /community/articles/{articleId}`
 - **Response**: `204 No Content`
 - **Error Response**:
@@ -239,7 +274,7 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 커뮤니티가 존재하지 않음
 
-### [ ] 3.7 댓글 목록 조회
+### 3.7 댓글 목록 조회
 - **Endpoint**: `GET /community/articles/{articleId}/comments`
 - **Query Parameters**:
   - `lastCommentId`: number
@@ -271,7 +306,7 @@
 - **Error Response**:
   - `404 Not Found`: 게시글이 존재하지 않음
 
-### [ ] 3.8 댓글 작성
+### 3.8 댓글 작성
 - **Endpoint**: `POST /community/articles/{articleId}/comments`
 - **Request Body**:
   ```json
@@ -297,7 +332,7 @@
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 게시글 없음
 
-### [ ] 3.9 댓글 삭제
+### 3.9 댓글 삭제
 - **Endpoint**: `DELETE /community/articles/{articleId}/comments/{commentId}`
 - **Response**: `204 No Content`
 - **Error Response**:
@@ -305,7 +340,7 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 댓글 또는 게시글 없음
 
-### [ ] 3.10 게시글 좋아요/북마크
+### 3.10 게시글 좋아요/북마크
 - **Endpoint**: `POST /community/articles/{articleId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -324,7 +359,7 @@
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 게시글 없음
 
-### [ ] 3.11 댓글 좋아요
+### 3.11 댓글 좋아요
 - **Endpoint**: `POST /community/articles/{articleId}/comments/{commentId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -341,7 +376,7 @@
 ## 4. 모집 공고 (Recruits)
 팀원 모집을 위한 전용 커뮤니티입니다. 팀 정보와 모집 기간, 상태를 포함합니다.
 
-### [ ] 4.1 모집 공고 목록 조회
+### 4.1 모집 공고 목록 조회
 - **Endpoint**: `GET /community/recruits`
 - **Query Parameters**:
   - `page`: number
@@ -373,7 +408,7 @@
   }
   ```
 
-### [ ] 4.2 모집 공고 상세 조회
+### 4.2 모집 공고 상세 조회
 - **Endpoint**: `GET /community/recruits/{recruitmentId}`
 - **Response**: `200 OK`
   ```json
@@ -400,7 +435,7 @@
 - **Error Response**:
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### [ ] 4.3 모집 공고 작성
+### 4.3 모집 공고 작성
 - **Endpoint**: `POST /community/recruits`
 - **Request Body**:
   ```json
@@ -417,7 +452,7 @@
   - `400 Bad Request`: 입력 형식 오류
   - `401 Unauthorized`: 인증 실패
 
-### [ ] 4.4 모집 공고 수정
+### 4.4 모집 공고 수정
 - **Endpoint**: `PUT /community/recruits/{recruitmentId}`
 - **Request Body**:
   ```json
@@ -435,7 +470,7 @@
   - `403 Forbidden`: 수정 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### [ ] 4.5 모집 상태 변경
+### 4.5 모집 상태 변경
 - **Endpoint**: `PATCH /community/recruits/{recruitmentId}/status`
 - **Request Body**:
   ```json
@@ -456,7 +491,7 @@
   - `403 Forbidden`: 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### [ ] 4.6 모집 공고 삭제
+### 4.6 모집 공고 삭제
 - **Endpoint**: `DELETE /community/recruits/{recruitmentId}`
 - **Response**: `204 No Content`
 - **Error Response**:
@@ -464,7 +499,7 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### [ ] 4.7 모집 공고 댓글 목록 조회
+### 4.7 모집 공고 댓글 목록 조회
 - **Endpoint**: `GET /community/recruits/{recruitmentId}/comments`
 - **Query Parameters**:
   - `lastCommentId`: number
@@ -489,7 +524,7 @@
 - **Error Response**:
   - `404 Not Found`: 모집 공고 없음
 
-### [ ] 4.8 모집 공고 댓글 작성
+### 4.8 모집 공고 댓글 작성
 - **Endpoint**: `POST /community/recruits/{recruitmentId}/comments`
 - **Request Body**:
   ```json
@@ -511,7 +546,7 @@
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 모집 공고 없음
 
-### [ ] 4.9 모집 공고 댓글 삭제
+### 4.9 모집 공고 댓글 삭제
 - **Endpoint**: `DELETE /community/recruits/{recruitmentId}/comments/{commentId}`
 - **Response**: `204 No Content`
 - **Error Response**:
@@ -519,7 +554,7 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 댓글 또는 모집 공고 없음
 
-### [ ] 4.10 모집 공고 좋아요/북마크
+### 4.10 모집 공고 좋아요/북마크
 - **Endpoint**: `POST /community/recruits/{recruitmentId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -538,7 +573,7 @@
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 모집 공고 없음
 
-### [ ] 4.11 모집 공고 댓글 좋아요
+### 4.11 모집 공고 댓글 좋아요
 - **Endpoint**: `POST /community/recruits/{recruitmentId}/comments/{commentId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -555,7 +590,7 @@
 ## 5. 팀 (Teams)
 팀 자체를 관리하는 API입니다. (모집 공고는 Communities API로 통합됨)
 
-### [ ] 5.1 팀 목록 조회
+### 5.1 팀 목록 조회
 - **Endpoint**: `GET /teams`
 - **Query Parameters**:
   - `search`: string (검색어)
@@ -575,7 +610,7 @@
   }
   ```
 
-### [ ] 5.2 팀 생성
+### 5.2 팀 생성
 - **Endpoint**: `POST /teams`
 - **Request Body**:
   ```json
@@ -592,7 +627,7 @@
   }
   ```
 
-### [ ] 5.3 팀 상세 조회
+### 5.3 팀 상세 조회
 - **Endpoint**: `GET /teams/{teamId}`
 - **Response**: `200 OK`
   ```json
@@ -611,7 +646,7 @@
 
 ## 6. 도전 과제 (Challenges)
 
-### [ ] 6.1 도전 과제 목록 및 진행도 조회
+### 6.1 도전 과제 목록 및 진행도 조회
 - **Endpoint**: `GET /challenges`
 - **Response**: `200 OK`
   ```json
