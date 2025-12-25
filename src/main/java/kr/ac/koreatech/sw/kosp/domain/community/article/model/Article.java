@@ -91,7 +91,7 @@ public class Article extends BaseEntity {
         return board.getId();
     }
 
-    public Long getAuthorId() {
+    public Integer getAuthorId() {
         return author.getId();
     }
 
