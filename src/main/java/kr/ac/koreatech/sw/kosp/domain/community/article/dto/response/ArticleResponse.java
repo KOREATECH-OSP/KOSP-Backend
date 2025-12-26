@@ -3,22 +3,19 @@ package kr.ac.koreatech.sw.kosp.domain.community.article.dto.response;
 import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 @Builder
-public class ArticleResponse {
-    private final Long id;
-    private final Long boardId;
-    private final String title;
-    private final String content;
-    private final Integer authorId;
-    private final Integer views;
-    private final Integer likes;
-    private final Integer comments;
-    private final List<String> tags;
-
+public record ArticleResponse(
+    Long id,
+    Long boardId,
+    String title,
+    String content,
     Long authorId,
+    Integer views,
+    Integer likes,
+    Integer comments,
+    List<String> tags
+) {
     public static ArticleResponse from(Article article) {
         return ArticleResponse.builder()
             .id(article.getId())
