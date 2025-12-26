@@ -6,19 +6,19 @@ import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import org.springframework.data.repository.Repository;
 
-public interface UserRepository extends Repository<User, Integer> {
+public interface UserRepository extends Repository<User, Long> {
 
     User save(User user);
 
-    Optional<User> findById(Integer id);
+    Optional<User> findById(Long id);
 
     Optional<User> findByKutEmail(String kutEmail);
 
     Optional<User> findByGithubUser_GithubId(Long githubId);
 
-    void deleteById(Integer id);
+    void deleteById(Long id);
 
-    default User getById(Integer id) {
+    default User getById(Long id) {
         return findById(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
     }

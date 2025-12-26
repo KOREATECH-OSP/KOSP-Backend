@@ -1,6 +1,6 @@
 CREATE TABLE user
 (
-    id         INT AUTO_INCREMENT NOT NULL,
+    id         BIGINT AUTO_INCREMENT NOT NULL,
     created_at TIMESTAMP          NOT NULL,
     updated_at TIMESTAMP          NOT NULL,
     name       VARCHAR(50)        NOT NULL,
@@ -52,8 +52,6 @@ CREATE TABLE article
     id             BIGINT AUTO_INCREMENT NOT NULL,
     created_at     TIMESTAMP             NOT NULL,
     updated_at     TIMESTAMP             NOT NULL,
-    author_id      INT                   NOT NULL,
-    category       VARCHAR(255)          NOT NULL,
     board_id       BIGINT                NOT NULL,
     author_id      BIGINT                NOT NULL,
     dtype          VARCHAR(31)           NOT NULL,
