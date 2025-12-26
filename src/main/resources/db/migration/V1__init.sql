@@ -57,7 +57,7 @@ CREATE TABLE article
     author_id      BIGINT                NOT NULL,
     dtype          VARCHAR(31)           NOT NULL,
     title          VARCHAR(255)          NOT NULL,
-    body           TEXT                  NOT NULL,
+    content        MEDIUMTEXT            NOT NULL,
     views          INT                   NOT NULL,
     likes          INT                   NOT NULL,
     comments_count INT                   NOT NULL,
