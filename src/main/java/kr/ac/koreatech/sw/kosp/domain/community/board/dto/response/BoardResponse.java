@@ -2,16 +2,14 @@ package kr.ac.koreatech.sw.kosp.domain.community.board.dto.response;
 
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import lombok.Builder;
-import lombok.Getter;
 
-@Getter
 @Builder
-public class BoardResponse {
-    private final Long id;
-    private final String name;
-    private final String description;
-    private final Boolean isRecruitmentAllowed;
-
+public record BoardResponse(
+    Long id,
+    String name,
+    String description,
+    Boolean isRecruitAllowed
+) {
     public static BoardResponse from(Board board) {
         return BoardResponse.builder()
             .id(board.getId())
