@@ -28,8 +28,8 @@ public class RecruitService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long create(Integer authorId, RecruitRequest req) {
-        Board board = boardRepository.getById(req.getBoardId());
+    public Long create(Long authorId, RecruitRequest req) {
+        Board board = boardRepository.getById(req.boardId());
         User author = userRepository.getById(authorId);
         
         Recruitment recruitment = Recruitment.recruitBuilder()
@@ -61,28 +61,28 @@ public class RecruitService {
     }
 
     @Transactional
-    public void update(Integer authorId, Long id, RecruitRequest req) {
         Recruitment recruit = recruitRepository.getById(id);
         validateOwner(recruit, authorId);
         
         recruit.updateRecruit(
-            req.getTitle(), 
             req.getContent(), 
-            req.getTags(),
             req.getTeamId(),
-            req.getStartDate(),
             req.getEndDate()
+            req.title(), 
+            req.content(), 
+            req.tags(),
+            req.teamId(),
+            req.startDate(),
+            req.endDate()
         );
     }
 
     @Transactional
-    public void delete(Integer authorId, Long id) {
         Recruitment recruit = recruitRepository.getById(id);
         validateOwner(recruit, authorId);
         recruitRepository.delete(recruit);
     }
 
-    private void validateOwner(Recruitment recruit, Integer authorId) {
         if (!recruit.getAuthor().getId().equals(authorId)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }

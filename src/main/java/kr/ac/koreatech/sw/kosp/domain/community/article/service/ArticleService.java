@@ -27,11 +27,11 @@ public class ArticleService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long create(Integer authorId, ArticleRequest req) {
-        Board board = boardRepository.getById(req.getBoardId());
+    public Long create(Long authorId, ArticleRequest req) {
+        Board board = boardRepository.getById(req.boardId());
         User author = userRepository.getById(authorId);
         
-        Article article = Article.create(author, board, req.getTitle(), req.getContent(), req.getTags());
+        Article article = Article.create(author, board, req.title(), req.content(), req.tags());
         articleRepository.save(article);
         return article.getId();
     }
@@ -49,20 +49,20 @@ public class ArticleService {
     }
 
     @Transactional
-    public void update(Integer authorId, Long id, ArticleRequest req) {
+    public void update(Long authorId, Long id, ArticleRequest req) {
         Article article = articleRepository.getById(id);
         validateOwner(article, authorId);
-        article.update(req.getTitle(), req.getContent(), req.getTags());
+        article.update(req.title(), req.content(), req.tags());
     }
 
     @Transactional
-    public void delete(Integer authorId, Long id) {
+    public void delete(Long authorId, Long id) {
         Article article = articleRepository.getById(id);
         validateOwner(article, authorId);
         articleRepository.delete(article);
     }
 
-    private void validateOwner(Article article, Integer authorId) {
+    private void validateOwner(Article article, Long authorId) {
         if (!article.getAuthor().getId().equals(authorId)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }

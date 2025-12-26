@@ -18,6 +18,7 @@ public class ArticleResponse {
     private final Integer comments;
     private final List<String> tags;
 
+    Long authorId,
     public static ArticleResponse from(Article article) {
         return ArticleResponse.builder()
             .id(article.getId())

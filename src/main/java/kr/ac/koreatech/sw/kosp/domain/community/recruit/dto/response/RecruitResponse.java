@@ -25,6 +25,7 @@ public class RecruitResponse {
     private final LocalDateTime endDate;
 
     public static RecruitResponse from(Recruitment recruit) {
+    Long authorId,
         return RecruitResponse.builder()
             .id(recruit.getId())
             .boardId(recruit.getBoardId())

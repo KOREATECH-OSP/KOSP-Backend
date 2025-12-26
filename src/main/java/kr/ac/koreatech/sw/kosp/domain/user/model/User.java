@@ -24,14 +24,14 @@ import lombok.ToString;
 
 @Getter
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @NoArgsConstructor(access = PROTECTED)
 @ToString(exclude = {"password", "githubUser"})
 public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @NotNull
     @Size(max = 50)
@@ -61,7 +61,7 @@ public class User extends BaseEntity implements UserDetails {
 
     @Builder
     private User(
-        Integer id,
+        Long id,
         String name,
         String kutId,
         String kutEmail,
