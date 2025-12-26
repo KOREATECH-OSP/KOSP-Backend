@@ -5,9 +5,9 @@ import kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruitment;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitmentStatus;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitmentRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class RecruitService {
 
-    private final RecruitmentRepository recruitRepository;
+    private final RecruitRepository recruitRepository;
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
 
@@ -32,42 +32,40 @@ public class RecruitService {
         Board board = boardRepository.getById(req.boardId());
         User author = userRepository.getById(authorId);
         
-        Recruitment recruitment = Recruitment.recruitBuilder()
+        Recruit recruit = Recruit.builder()
             .author(author)
             .board(board)
-            .title(req.getTitle())
-            .content(req.getContent())
-            .tags(req.getTags())
-            .teamId(req.getTeamId())
-            .status(RecruitmentStatus.OPEN)
-            .startDate(req.getStartDate())
-            .endDate(req.getEndDate())
+            .title(req.title())
+            .content(req.content())
+            .tags(req.tags())
+            .teamId(req.teamId())
+            .status(RecruitStatus.OPEN)
+            .startDate(req.startDate())
+            .endDate(req.endDate())
             .build();
             
-        recruitRepository.save(recruitment);
-        return recruitment.getId();
+        recruitRepository.save(recruit);
+        return recruit.getId();
     }
 
     public RecruitResponse getOne(Long id) {
-        Recruitment recruit = recruitRepository.getById(id);
+        Recruit recruit = recruitRepository.getById(id);
         recruit.increaseViews();
         return RecruitResponse.from(recruit);
     }
 
     public RecruitListResponse getList(Long boardId, Pageable pageable) {
         Board board = boardRepository.getById(boardId);
-        Page<Recruitment> page = recruitRepository.findByBoard(board, pageable);
+        Page<Recruit> page = recruitRepository.findByBoard(board, pageable);
         return RecruitListResponse.from(page);
     }
 
     @Transactional
-        Recruitment recruit = recruitRepository.getById(id);
+    public void update(Long authorId, Long id, RecruitRequest req) {
+        Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, authorId);
         
         recruit.updateRecruit(
-            req.getContent(), 
-            req.getTeamId(),
-            req.getEndDate()
             req.title(), 
             req.content(), 
             req.tags(),
@@ -78,11 +76,13 @@ public class RecruitService {
     }
 
     @Transactional
-        Recruitment recruit = recruitRepository.getById(id);
+    public void delete(Long authorId, Long id) {
+        Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, authorId);
         recruitRepository.delete(recruit);
     }
 
+    private void validateOwner(Recruit recruit, Long authorId) {
         if (!recruit.getAuthor().getId().equals(authorId)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }

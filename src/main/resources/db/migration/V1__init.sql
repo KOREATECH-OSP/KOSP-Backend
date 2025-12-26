@@ -69,3 +69,24 @@ ALTER TABLE article
 ALTER TABLE article
     ADD CONSTRAINT FK_ARTICLE_ON_AUTHOR FOREIGN KEY (author_id) REFERENCES users (id);
 
+CREATE TABLE recruit
+(
+    id         BIGINT       NOT NULL,
+    team_id    BIGINT       NOT NULL,
+    status     VARCHAR(255) NOT NULL,
+    start_date TIMESTAMP    NOT NULL,
+    end_date   TIMESTAMP    NULL,
+    CONSTRAINT pk_recruit PRIMARY KEY (id)
+);
+
+ALTER TABLE recruit
+    ADD CONSTRAINT FK_RECRUIT_ON_ARTICLE FOREIGN KEY (id) REFERENCES article (id);
+
+CREATE TABLE article_tags
+(
+    article_id BIGINT       NOT NULL,
+    tag        VARCHAR(255) NULL
+);
+
+ALTER TABLE article_tags
+    ADD CONSTRAINT fk_article_tags_on_article FOREIGN KEY (article_id) REFERENCES article (id);
