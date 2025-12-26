@@ -1,4 +1,4 @@
-CREATE TABLE user
+CREATE TABLE users
 (
     id         BIGINT AUTO_INCREMENT NOT NULL,
     created_at TIMESTAMP          NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE user
     password   VARCHAR(255)       NOT NULL,
     is_deleted BIT(1)             NOT NULL,
     github_id  BIGINT             NULL,
-    CONSTRAINT pk_user PRIMARY KEY (id)
+    CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
 CREATE TABLE github_user
@@ -25,17 +25,18 @@ CREATE TABLE github_user
     CONSTRAINT pk_github_user PRIMARY KEY (github_id)
 );
 
-ALTER TABLE user
-    ADD CONSTRAINT uc_user_github UNIQUE (github_id);
+ALTER TABLE users
+    ADD CONSTRAINT uc_users_github UNIQUE (github_id);
 
-ALTER TABLE user
-    ADD CONSTRAINT uc_user_kut UNIQUE (kut_id);
+ALTER TABLE users
+    ADD CONSTRAINT uc_users_kut UNIQUE (kut_id);
 
-ALTER TABLE user
-    ADD CONSTRAINT uc_user_kut_email UNIQUE (kut_email);
+ALTER TABLE users
+    ADD CONSTRAINT uc_users_kut_email UNIQUE (kut_email);
 
-ALTER TABLE user
-    ADD CONSTRAINT FK_USER_ON_GITHUB FOREIGN KEY (github_id) REFERENCES github_user (github_id);
+ALTER TABLE users
+    ADD CONSTRAINT FK_USERS_ON_GITHUB FOREIGN KEY (github_id) REFERENCES github_user (github_id);
+
 CREATE TABLE board
 (
     id                     BIGINT AUTO_INCREMENT NOT NULL,
