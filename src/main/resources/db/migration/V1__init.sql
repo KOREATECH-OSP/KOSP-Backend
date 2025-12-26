@@ -36,6 +36,16 @@ ALTER TABLE user
 
 ALTER TABLE user
     ADD CONSTRAINT FK_USER_ON_GITHUB FOREIGN KEY (github_id) REFERENCES github_user (github_id);
+CREATE TABLE board
+(
+    id                     BIGINT AUTO_INCREMENT NOT NULL,
+    created_at             TIMESTAMP             NOT NULL,
+    updated_at             TIMESTAMP             NOT NULL,
+    name                   VARCHAR(30)           NOT NULL,
+    description            VARCHAR(255)          NOT NULL,
+    is_recruit_allowed BIT(1)                NOT NULL,
+    CONSTRAINT pk_board PRIMARY KEY (id)
+);
 
 CREATE TABLE article
 (
@@ -44,6 +54,9 @@ CREATE TABLE article
     updated_at     TIMESTAMP             NOT NULL,
     author_id      INT                   NOT NULL,
     category       VARCHAR(255)          NOT NULL,
+    board_id       BIGINT                NOT NULL,
+    author_id      BIGINT                NOT NULL,
+    dtype          VARCHAR(31)           NOT NULL,
     title          VARCHAR(255)          NOT NULL,
     body           TEXT                  NOT NULL,
     views          INT                   NOT NULL,
@@ -51,3 +64,10 @@ CREATE TABLE article
     comments_count INT                   NOT NULL,
     CONSTRAINT pk_article PRIMARY KEY (id)
 );
+
+ALTER TABLE article
+    ADD CONSTRAINT FK_ARTICLE_ON_BOARD FOREIGN KEY (board_id) REFERENCES board (id);
+
+ALTER TABLE article
+    ADD CONSTRAINT FK_ARTICLE_ON_AUTHOR FOREIGN KEY (author_id) REFERENCES users (id);
+
