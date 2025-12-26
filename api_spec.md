@@ -162,13 +162,13 @@
         "id": 1,
         "name": "자유게시판",
         "description": "자유롭게 이야기하는 공간",
-        "isRecuitmentAllowed": false
+        "isRecruitAllowed": false
       },
       {
         "id": 2,
         "name": "정보공유",
         "description": "개발 정보를 공유합니다",
-        "isRecuitmentAllowed": false
+        "isRecruitAllowed": false
       }
     ]
   }
@@ -390,7 +390,7 @@
 - **Response**: `200 OK`
   ```json
   {
-    "recruitments": [
+    "recruits": [
       {
         "id": 2,
         "title": "사이드 프로젝트 프론트엔드 구합니다",
@@ -414,7 +414,7 @@
   ```
 
 ### 4.2 모집 공고 상세 조회
-- **Endpoint**: `GET /community/recruits/{recruitmentId}`
+- **Endpoint**: `GET /community/recruits/{recruitId}`
 - **Response**: `200 OK`
   ```json
   {
@@ -460,7 +460,7 @@
   - `401 Unauthorized`: 인증 실패
 
 ### 4.4 모집 공고 수정
-- **Endpoint**: `PUT /community/recruits/{recruitmentId}`
+- **Endpoint**: `PUT /community/recruits/{recruitId}`
 - **Request Body**:
   ```json
   {
@@ -479,7 +479,7 @@
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
 ### 4.5 모집 상태 변경
-- **Endpoint**: `PATCH /community/recruits/{recruitmentId}/status`
+- **Endpoint**: `PATCH /community/recruits/{recruitId}/status`
 - **Request Body**:
   ```json
   {
@@ -500,7 +500,7 @@
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
 ### 4.6 모집 공고 삭제
-- **Endpoint**: `DELETE /community/recruits/{recruitmentId}`
+- **Endpoint**: `DELETE /community/recruits/{recruitId}`
 - **Response**: `204 No Content`
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
@@ -508,7 +508,7 @@
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
 ### 4.7 모집 공고 댓글 목록 조회
-- **Endpoint**: `GET /community/recruits/{recruitmentId}/comments`
+- **Endpoint**: `GET /community/recruits/{recruitId}/comments`
 - **Query Parameters**:
   - `lastCommentId`: number
   - `limit`: number
@@ -533,7 +533,7 @@
   - `404 Not Found`: 모집 공고 없음
 
 ### 4.8 모집 공고 댓글 작성
-- **Endpoint**: `POST /community/recruits/{recruitmentId}/comments`
+- **Endpoint**: `POST /community/recruits/{recruitId}/comments`
 - **Request Body**:
   ```json
   {
@@ -555,7 +555,7 @@
   - `404 Not Found`: 모집 공고 없음
 
 ### 4.9 모집 공고 댓글 삭제
-- **Endpoint**: `DELETE /community/recruits/{recruitmentId}/comments/{commentId}`
+- **Endpoint**: `DELETE /community/recruits/{recruitId}/comments/{commentId}`
 - **Response**: `204 No Content`
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
@@ -563,14 +563,14 @@
   - `404 Not Found`: 댓글 또는 모집 공고 없음
 
 ### 4.10 모집 공고 좋아요/북마크
-- **Endpoint**: `POST /community/recruits/{recruitmentId}/likes`
+- **Endpoint**: `POST /community/recruits/{recruitId}/likes`
 - **Response**: `200 OK`
   ```json
   {
     "isLiked": true
   }
   ```
-- **Endpoint**: `POST /community/recruits/{recruitmentId}/bookmarks`
+- **Endpoint**: `POST /community/recruits/{recruitId}/bookmarks`
 - **Response**: `200 OK`
   ```json
   {
@@ -582,7 +582,7 @@
   - `404 Not Found`: 모집 공고 없음
 
 ### 4.11 모집 공고 댓글 좋아요
-- **Endpoint**: `POST /community/recruits/{recruitmentId}/comments/{commentId}/likes`
+- **Endpoint**: `POST /community/recruits/{recruitId}/comments/{commentId}/likes`
 - **Response**: `200 OK`
   ```json
   {
