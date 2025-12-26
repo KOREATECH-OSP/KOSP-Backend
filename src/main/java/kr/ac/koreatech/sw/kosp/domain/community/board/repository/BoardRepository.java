@@ -9,6 +9,8 @@ import org.springframework.data.repository.Repository;
 
 public interface BoardRepository extends Repository<Board, Long> {
 
+    Board save(Board board);
+
     List<Board> findAll();
 
     Optional<Board> findById(Long id);

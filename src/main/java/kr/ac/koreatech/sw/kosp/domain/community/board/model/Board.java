@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,12 +28,13 @@ public class Board extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "is_recruitment_allowed", nullable = false)
-    private boolean isRecruitmentAllowed = false;
+    @Column(name = "is_recruit_allowed", nullable = false)
+    private boolean isRecruitAllowed = false;
 
-    public Board(String name, String description, boolean isRecruitmentAllowed) {
+    @Builder
+    private Board(String name, String description, boolean isRecruitAllowed) {
         this.name = name;
         this.description = description;
-        this.isRecruitmentAllowed = isRecruitmentAllowed;
+        this.isRecruitAllowed = isRecruitAllowed;
     }
 }

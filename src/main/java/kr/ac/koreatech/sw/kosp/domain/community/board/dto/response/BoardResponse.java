@@ -17,7 +17,7 @@ public class BoardResponse {
             .id(board.getId())
             .name(board.getName())
             .description(board.getDescription())
-            .isRecruitmentAllowed(board.isRecruitmentAllowed())
+            .isRecruitAllowed(board.isRecruitAllowed())
             .build();
     }
 }
