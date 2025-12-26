@@ -2,24 +2,24 @@ package kr.ac.koreatech.sw.kosp.domain.community.recruit.repository;
 
 import java.util.Optional;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruitment;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
 
-public interface RecruitmentRepository extends Repository<Recruitment, Long> {
+public interface RecruitRepository extends Repository<Recruit, Long> {
 
-    Recruitment save(Recruitment recruitment);
+    Recruit save(Recruit recruit);
 
-    Optional<Recruitment> findById(Long id);
+    Optional<Recruit> findById(Long id);
 
-    void delete(Recruitment recruitment);
+    void delete(Recruit recruit);
 
-    Page<Recruitment> findByBoard(Board board, Pageable pageable);
+    Page<Recruit> findByBoard(Board board, Pageable pageable);
 
-    default Recruitment getById(Long id) {
+    default Recruit getById(Long id) {
         return findById(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.RECRUITMENT_NOT_FOUND));
     }

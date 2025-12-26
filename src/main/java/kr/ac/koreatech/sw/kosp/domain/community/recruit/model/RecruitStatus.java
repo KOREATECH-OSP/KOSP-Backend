@@ -1,6 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.model;
 
-public enum RecruitmentStatus {
+public enum RecruitStatus {
     OPEN,
     CLOSED
 }

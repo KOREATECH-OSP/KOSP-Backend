@@ -2,8 +2,8 @@ package kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruitment;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitmentStatus;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
 import lombok.Builder;
 import lombok.Getter;
 
