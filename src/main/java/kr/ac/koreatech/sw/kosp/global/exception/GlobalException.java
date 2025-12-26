@@ -12,4 +12,9 @@ public class GlobalException extends RuntimeException {
         super(message);
         this.status = status;
     }
+
+    public GlobalException(ExceptionMessage exceptionMessage) {
+        super(exceptionMessage.getMessage());
+        this.status = exceptionMessage.getStatus();
+    }
 }
