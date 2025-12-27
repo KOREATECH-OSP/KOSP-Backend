@@ -676,4 +676,53 @@
       "overallProgress": 20 // 퍼센트
     }
   }
+
+---
+
+## 7. 관리자 (Admin)
+관리자 전용 API입니다.
+
+### 7.1 역할 목록 조회
+- **Endpoint**: `GET /admin/roles`
+- **Response**: `200 OK`
+  ```json
+  [
+    {
+      "name": "ROLE_STUDENT",
+      "description": "학생",
+      "policies": ["StudentPolicy"]
+    }
+  ]
+  ```
+
+### 7.2 역할 생성
+- **Endpoint**: `POST /admin/roles`
+- **Request Body**:
+  ```json
+  {
+    "name": "ROLE_MENTOR",
+    "description": "멘토"
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.3 역할에 정책 할당
+- **Endpoint**: `POST /admin/roles/{roleName}/policies`
+- **Request Body**:
+  ```json
+  {
+    "policyName": "MentorPolicy"
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.4 사용자 역할 변경
+- **Endpoint**: `PUT /admin/users/{userId}/roles`
+- **Request Body**:
+  ```json
+  {
+    "roles": ["ROLE_STUDENT", "ROLE_MENTOR"]
+  }
+  ```
+- **Response**: `200 OK`
   ```

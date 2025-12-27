@@ -24,4 +24,21 @@ import io.swagger.v3.oas.annotations.info.License;
     )
 )
 public class SwaggerConfig {
+
+    @org.springframework.context.annotation.Bean
+    public org.springdoc.core.models.GroupedOpenApi defaultApi() {
+        return org.springdoc.core.models.GroupedOpenApi.builder()
+            .group("default")
+            .pathsToMatch("/**")
+            .pathsToExclude("/v1/admin/**")
+            .build();
+    }
+
+    @org.springframework.context.annotation.Bean
+    public org.springdoc.core.models.GroupedOpenApi adminApi() {
+        return org.springdoc.core.models.GroupedOpenApi.builder()
+            .group("admin")
+            .pathsToMatch("/v1/admin/**")
+            .build();
+    }
 }

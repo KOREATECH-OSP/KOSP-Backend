@@ -44,7 +44,7 @@ public class Recruit extends Article {
         LocalDateTime startDate,
         LocalDateTime endDate
     ) {
-        super.update(title, content, tags);
+        super.updateArticle(title, content, tags);
         this.teamId = teamId;
         this.startDate = startDate;
         this.endDate = endDate;

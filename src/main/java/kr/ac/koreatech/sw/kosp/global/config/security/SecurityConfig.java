@@ -22,6 +22,9 @@ import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.handler.OAuth2LoginSuccessHand
 import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2UserService;
 import lombok.RequiredArgsConstructor;
 
+import kr.ac.koreatech.sw.kosp.global.security.filter.ReloadAuthenticationFilter;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,6 +35,7 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2UserService oAuth2UserService;
     private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository;
+    private final ReloadAuthenticationFilter reloadAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,6 +44,8 @@ public class SecurityConfig {
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource));
+
+        http.addFilterAfter(reloadAuthenticationFilter, SecurityContextHolderAwareRequestFilter.class);
 
         http.oauth2Login(oauth2 -> oauth2
             .authorizationEndpoint(
@@ -60,15 +66,7 @@ public class SecurityConfig {
                     "/api-docs/**",
                     "/v3/api-docs/**"
                 ).permitAll()
-                .requestMatchers(
-                    "/",
-                    "/error/**",
-                    "/v1/auth/github/**",
-                    "/v1/oauth2/result",
-                    "/v1/auth/login/**",
-                    "/v1/users/signup"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
         );
 
         return http.build();

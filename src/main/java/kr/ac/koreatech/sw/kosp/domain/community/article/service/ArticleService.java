@@ -1,14 +1,16 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.service;
 
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
+import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -23,42 +25,50 @@ import org.springframework.transaction.annotation.Transactional;
 public class ArticleService {
 
     private final ArticleRepository articleRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
+    private final ArticleLikeRepository articleLikeRepository;
+    private final ArticleBookmarkRepository articleBookmarkRepository;
 
     @Transactional
-    public Long create(Long authorId, ArticleRequest req) {
-        Board board = boardRepository.getById(req.boardId());
-        User author = userRepository.getById(authorId);
-        
-        Article article = Article.create(author, board, req.title(), req.content(), req.tags());
-        articleRepository.save(article);
-        return article.getId();
+    public Long create(User author, Board board, ArticleRequest req) {
+        Article article = Article.builder()
+            .author(author)
+            .board(board)
+            .title(req.title())
+            .content(req.content())
+            .tags(req.tags())
+            .build();
+        return articleRepository.save(article).getId();
     }
 
-    public ArticleResponse getOne(Long id) {
+    public ArticleResponse getOne(Long id, User user) {
         Article article = articleRepository.getById(id);
-        article.increaseViews(); 
-        return ArticleResponse.from(article);
+        article.increaseViews();
+
+        boolean isLiked = isLiked(user, article);
+        boolean isBookmarked = isBookmarked(user, article);
+
+        return ArticleResponse.from(article, isLiked, isBookmarked);
     }
 
-    public ArticleListResponse getList(Long boardId, Pageable pageable) {
-        Board board = boardRepository.getById(boardId);
+    public ArticleListResponse getList(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoard(board, pageable);
-        return ArticleListResponse.from(page);
+        List<ArticleResponse> posts = page.getContent().stream()
+            .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
+            .toList();
+        return new ArticleListResponse(posts, PageMeta.from(page));
     }
 
     @Transactional
-    public void update(Long authorId, Long id, ArticleRequest req) {
+    public void update(User author, Long id, ArticleRequest req) {
         Article article = articleRepository.getById(id);
-        validateOwner(article, authorId);
-        article.update(req.title(), req.content(), req.tags());
+        validateOwner(article, author.getId());
+        article.updateArticle(req.title(), req.content(), req.tags());
     }
 
     @Transactional
-    public void delete(Long authorId, Long id) {
+    public void delete(User author, Long id) {
         Article article = articleRepository.getById(id);
-        validateOwner(article, authorId);
+        validateOwner(article, author.getId());
         articleRepository.delete(article);
     }
 
@@ -66,5 +76,13 @@ public class ArticleService {
         if (!article.getAuthor().getId().equals(authorId)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
+    }
+
+    private boolean isLiked(User user, Article article) {
+        return user != null && articleLikeRepository.existsByUserAndArticle(user, article);
+    }
+
+    private boolean isBookmarked(User user, Article article) {
+        return user != null && articleBookmarkRepository.existsByUserAndArticle(user, article);
     }
 }
