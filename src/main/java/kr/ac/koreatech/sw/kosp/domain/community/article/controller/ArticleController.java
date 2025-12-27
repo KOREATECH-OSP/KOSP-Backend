@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/community/articles")
@@ -29,6 +31,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @GetMapping
+    @Permit(permitAll = true, description = "게시글 목록 조회")
     public ResponseEntity<ArticleListResponse> getList(
         @RequestParam Long boardId,
         Pageable pageable
@@ -39,6 +42,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @GetMapping("/{id}")
+    @Permit(permitAll = true, description = "게시글 상세 조회")
     public ResponseEntity<ArticleResponse> getOne(@PathVariable Long id) {
         ArticleResponse response = articleService.getOne(id);
         return ResponseEntity.ok(response);
@@ -46,6 +50,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @PostMapping
+    @Permit(name = "article:create", description = "게시글 작성")
     public ResponseEntity<Void> create(@RequestBody @Valid ArticleRequest request) {
         Long userId = 1L; // TODO: user support
         Long id = articleService.create(userId, request);
@@ -54,6 +59,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @PutMapping("/{id}")
+    @Permit(name = "article:update", description = "게시글 수정")
     public ResponseEntity<Void> update(
         @PathVariable Long id,
         @RequestBody @Valid ArticleRequest request
@@ -65,6 +71,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @DeleteMapping("/{id}")
+    @Permit(name = "article:delete", description = "게시글 삭제")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Long userId = 1L; // TODO: user support
         articleService.delete(userId, id);
