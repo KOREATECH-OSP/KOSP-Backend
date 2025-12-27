@@ -28,6 +28,7 @@ import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 
@@ -107,12 +108,9 @@ public class User extends BaseEntity implements UserDetails {
 
     // UserDetails Implementation
 
+    @Setter
     @Transient
     private Collection<? extends GrantedAuthority> authorities;
-
-    public void setAuthorities(Collection<? extends GrantedAuthority> authorities) {
-        this.authorities = authorities;
-    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
