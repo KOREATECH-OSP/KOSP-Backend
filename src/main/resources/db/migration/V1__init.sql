@@ -169,3 +169,35 @@ ALTER TABLE user_role
 
 ALTER TABLE user_role
     ADD CONSTRAINT fk_user_role_on_role FOREIGN KEY (role_id) REFERENCES role (id);
+
+CREATE TABLE article_like
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    article_id BIGINT                NOT NULL,
+    CONSTRAINT pk_article_like PRIMARY KEY (id)
+);
+
+ALTER TABLE article_like
+    ADD CONSTRAINT fk_article_like_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE article_like
+    ADD CONSTRAINT fk_article_like_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+CREATE TABLE article_bookmark
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    article_id BIGINT                NOT NULL,
+    CONSTRAINT pk_article_bookmark PRIMARY KEY (id)
+);
+
+ALTER TABLE article_bookmark
+    ADD CONSTRAINT fk_article_bookmark_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE article_bookmark
+    ADD CONSTRAINT fk_article_bookmark_on_article FOREIGN KEY (article_id) REFERENCES article (id);
