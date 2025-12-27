@@ -19,4 +19,6 @@ public interface BoardRepository extends Repository<Board, Long> {
         return findById(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.BOARD_NOT_FOUND));
     }
+
+    long count();
 }
