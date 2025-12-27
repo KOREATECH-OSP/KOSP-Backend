@@ -35,34 +35,32 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByKutEmail(username)
             .orElseThrow(() -> new GlobalException(AUTHENTICATION.getMessage(), AUTHENTICATION.getStatus()));
 
-        return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            user.isEnabled(),
-            user.isAccountNonExpired(),
-            user.isCredentialsNonExpired(),
-            user.isAccountNonLocked(),
-            getAuthorities(user.getRoles())
-        );
+        user.setAuthorities(getAuthorities(user.getRoles()));
+
+        return user;
     }
 
     private Collection<? extends GrantedAuthority> getAuthorities(Set<Role> roles) {
-        Set<String> permissions = new HashSet<>();
-
-        // 1. Add Roles as authorities (convention: ROLE_PREFIX)
+        Set<String> authorities = new HashSet<>();
         for (Role role : roles) {
-            permissions.add(role.getName());
-            
-            // 2. Extract Policies -> Permissions
-            for (Policy policy : role.getPolicies()) {
-                permissions.addAll(policy.getPermissions().stream()
-                    .map(Permission::getName)
-                    .collect(Collectors.toSet()));
-            }
+            processRole(role, authorities);
         }
-
-        return permissions.stream()
+        return authorities.stream()
             .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toSet());
+    }
+
+    private void processRole(Role role, Set<String> authorities) {
+        authorities.add(role.getName());
+        for (Policy policy : role.getPolicies()) {
+            extractPermissions(policy, authorities);
+        }
+    }
+
+    private void extractPermissions(Policy policy, Set<String> authorities) {
+        Set<String> perms = policy.getPermissions().stream()
+            .map(Permission::getName)
+            .collect(Collectors.toSet());
+        authorities.addAll(perms);
     }
 }
