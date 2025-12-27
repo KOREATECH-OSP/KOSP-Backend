@@ -43,4 +43,9 @@ public class Policy extends BaseEntity {
     )
     @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
+
+    public void updatePermissions(Set<Permission> newPermissions) {
+        this.permissions.clear();
+        this.permissions.addAll(newPermissions);
+    }
 }
