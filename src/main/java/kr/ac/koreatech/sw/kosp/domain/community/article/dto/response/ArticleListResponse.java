@@ -2,19 +2,11 @@ package kr.ac.koreatech.sw.kosp.domain.community.article.dto.response;
 
 import java.util.List;
 
-import org.springframework.data.domain.Page;
-
-import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 
 public record ArticleListResponse(
-    List<ArticleResponse> articles,
-    Integer totalPages,
-    Long totalItems
+    List<ArticleResponse> posts,
+    PageMeta pagination
 ) {
-    public static ArticleListResponse from(Page<Article> page) {
-        List<ArticleResponse> responses = page.getContent().stream()
-            .map(ArticleResponse::from)
-            .toList();
-        return new ArticleListResponse(responses, page.getTotalPages(), page.getTotalElements());
-    }
+    // Static factory removed. Service handles mapping with isLiked logic.
 }
