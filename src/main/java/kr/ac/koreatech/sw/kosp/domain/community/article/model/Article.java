@@ -87,10 +87,6 @@ public class Article extends BaseEntity {
         return board.getId();
     }
 
-    public Long getAuthorId() {
-        return author.getId();
-    }
-
     public void updateArticle(String title, String content, List<String> tags) {
         this.title = title;
         this.content = content;
