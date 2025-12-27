@@ -16,6 +16,8 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
@@ -26,6 +28,7 @@ public class UserController implements UserApi {
 
     @Override
     @PostMapping("/signup")
+    @Permit(permitAll = true, description = "회원가입")
     public ResponseEntity<Void> signup(
         @RequestBody @Valid UserSignupRequest request,
         HttpServletRequest servletRequest,

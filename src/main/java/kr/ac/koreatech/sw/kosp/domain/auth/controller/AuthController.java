@@ -16,6 +16,8 @@ import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
 import lombok.RequiredArgsConstructor;
 
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/login")
+    @Permit(permitAll = true, description = "로그인")
     public ResponseEntity<Void> login(
         @RequestBody @Valid LoginRequest request,
         HttpServletRequest servletRequest,
@@ -37,6 +40,7 @@ public class AuthController implements AuthApi {
 
     @Override
     @PostMapping("/logout")
+    @Permit(description = "로그아웃") // Default permitAll=false
     public ResponseEntity<Void> logout(HttpServletRequest request) {
         authService.logout(request);
         return ResponseEntity.ok().build();
@@ -44,6 +48,7 @@ public class AuthController implements AuthApi {
 
     @Override
     @GetMapping("/me")
+    @Permit(description = "내 정보 조회")
     public ResponseEntity<AuthMeResponse> getMyInfo() {
         return ResponseEntity.ok(authService.getUserInfo());
     }

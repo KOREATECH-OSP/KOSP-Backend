@@ -1,0 +1,51 @@
+package kr.ac.koreatech.sw.kosp.domain.auth.model;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
+import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import static lombok.AccessLevel.PROTECTED;
+
+@Entity
+@Table(name = "policy")
+@Getter
+@NoArgsConstructor(access = PROTECTED)
+@SuperBuilder
+public class Policy extends BaseEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    private String description;
+
+    @ManyToMany
+    @JoinTable(
+        name = "policy_permission",
+        joinColumns = @JoinColumn(name = "policy_id"),
+        inverseJoinColumns = @JoinColumn(name = "permission_id")
+    )
+    @Builder.Default
+    private Set<Permission> permissions = new HashSet<>();
+
+    public void updatePermissions(Set<Permission> newPermissions) {
+        this.permissions.clear();
+        this.permissions.addAll(newPermissions);
+    }
+}

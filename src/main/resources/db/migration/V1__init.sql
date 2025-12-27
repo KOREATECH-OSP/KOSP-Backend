@@ -91,3 +91,113 @@ CREATE TABLE article_tags
 
 ALTER TABLE article_tags
     ADD CONSTRAINT fk_article_tags_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+CREATE TABLE permission
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(255)          NOT NULL,
+    description VARCHAR(255)          NULL,
+    CONSTRAINT pk_permission PRIMARY KEY (id)
+);
+
+ALTER TABLE permission
+    ADD CONSTRAINT uc_permission_name UNIQUE (name);
+
+CREATE TABLE policy
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(255)          NOT NULL,
+    description VARCHAR(255)          NULL,
+    CONSTRAINT pk_policy PRIMARY KEY (id)
+);
+
+ALTER TABLE policy
+    ADD CONSTRAINT uc_policy_name UNIQUE (name);
+
+CREATE TABLE role
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(255)          NOT NULL,
+    description VARCHAR(255)          NULL,
+    CONSTRAINT pk_role PRIMARY KEY (id)
+);
+
+ALTER TABLE role
+    ADD CONSTRAINT uc_role_name UNIQUE (name);
+
+CREATE TABLE policy_permission
+(
+    policy_id     BIGINT NOT NULL,
+    permission_id BIGINT NOT NULL,
+    CONSTRAINT pk_policy_permission PRIMARY KEY (policy_id, permission_id)
+);
+
+ALTER TABLE policy_permission
+    ADD CONSTRAINT fk_policy_permission_on_policy FOREIGN KEY (policy_id) REFERENCES policy (id);
+
+ALTER TABLE policy_permission
+    ADD CONSTRAINT fk_policy_permission_on_permission FOREIGN KEY (permission_id) REFERENCES permission (id);
+
+CREATE TABLE role_policy
+(
+    role_id   BIGINT NOT NULL,
+    policy_id BIGINT NOT NULL,
+    CONSTRAINT pk_role_policy PRIMARY KEY (role_id, policy_id)
+);
+
+ALTER TABLE role_policy
+    ADD CONSTRAINT fk_role_policy_on_role FOREIGN KEY (role_id) REFERENCES role (id);
+
+ALTER TABLE role_policy
+    ADD CONSTRAINT fk_role_policy_on_policy FOREIGN KEY (policy_id) REFERENCES policy (id);
+
+CREATE TABLE user_role
+(
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    CONSTRAINT pk_user_role PRIMARY KEY (user_id, role_id)
+);
+
+ALTER TABLE user_role
+    ADD CONSTRAINT fk_user_role_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE user_role
+    ADD CONSTRAINT fk_user_role_on_role FOREIGN KEY (role_id) REFERENCES role (id);
+
+CREATE TABLE article_like
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    article_id BIGINT                NOT NULL,
+    CONSTRAINT pk_article_like PRIMARY KEY (id)
+);
+
+ALTER TABLE article_like
+    ADD CONSTRAINT fk_article_like_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE article_like
+    ADD CONSTRAINT fk_article_like_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+CREATE TABLE article_bookmark
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    article_id BIGINT                NOT NULL,
+    CONSTRAINT pk_article_bookmark PRIMARY KEY (id)
+);
+
+ALTER TABLE article_bookmark
+    ADD CONSTRAINT fk_article_bookmark_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE article_bookmark
+    ADD CONSTRAINT fk_article_bookmark_on_article FOREIGN KEY (article_id) REFERENCES article (id);

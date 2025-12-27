@@ -1,15 +1,17 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.service;
 
+import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +26,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class RecruitService {
 
     private final RecruitRepository recruitRepository;
-    private final BoardRepository boardRepository;
-    private final UserRepository userRepository;
+    private final ArticleLikeRepository articleLikeRepository;
+    private final ArticleBookmarkRepository articleBookmarkRepository;
 
     @Transactional
-    public Long create(Long authorId, RecruitRequest req) {
-        Board board = boardRepository.getById(req.boardId());
-        User author = userRepository.getById(authorId);
-        
+    public Long create(User author, Board board, RecruitRequest req) {
         Recruit recruit = Recruit.builder()
             .author(author)
             .board(board)
@@ -44,26 +43,31 @@ public class RecruitService {
             .endDate(req.endDate())
             .build();
             
-        recruitRepository.save(recruit);
-        return recruit.getId();
+        return recruitRepository.save(recruit).getId();
     }
 
-    public RecruitResponse getOne(Long id) {
+    public RecruitResponse getOne(Long id, User user) {
         Recruit recruit = recruitRepository.getById(id);
         recruit.increaseViews();
-        return RecruitResponse.from(recruit);
+        
+        boolean isLiked = isLiked(user, recruit);
+        boolean isBookmarked = isBookmarked(user, recruit);
+        
+        return RecruitResponse.from(recruit, isLiked, isBookmarked);
     }
 
-    public RecruitListResponse getList(Long boardId, Pageable pageable) {
-        Board board = boardRepository.getById(boardId);
+    public RecruitListResponse getList(Board board, Pageable pageable, User user) {
         Page<Recruit> page = recruitRepository.findByBoard(board, pageable);
-        return RecruitListResponse.from(page);
+        List<RecruitResponse> recruits = page.getContent().stream()
+            .map(recruit -> RecruitResponse.from(recruit, isLiked(user, recruit), isBookmarked(user, recruit)))
+            .toList();
+        return new RecruitListResponse(recruits, PageMeta.from(page));
     }
 
     @Transactional
-    public void update(Long authorId, Long id, RecruitRequest req) {
+    public void update(User author, Long id, RecruitRequest req) {
         Recruit recruit = recruitRepository.getById(id);
-        validateOwner(recruit, authorId);
+        validateOwner(recruit, author.getId());
         
         recruit.updateRecruit(
             req.title(), 
@@ -76,9 +80,9 @@ public class RecruitService {
     }
 
     @Transactional
-    public void delete(Long authorId, Long id) {
+    public void delete(User author, Long id) {
         Recruit recruit = recruitRepository.getById(id);
-        validateOwner(recruit, authorId);
+        validateOwner(recruit, author.getId());
         recruitRepository.delete(recruit);
     }
 
@@ -86,5 +90,13 @@ public class RecruitService {
         if (!recruit.getAuthor().getId().equals(authorId)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
+    }
+
+    private boolean isLiked(User user, Recruit recruit) {
+        return user != null && articleLikeRepository.existsByUserAndArticle(user, recruit);
+    }
+
+    private boolean isBookmarked(User user, Recruit recruit) {
+        return user != null && articleBookmarkRepository.existsByUserAndArticle(user, recruit);
     }
 }

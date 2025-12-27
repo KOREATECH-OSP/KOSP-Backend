@@ -6,13 +6,15 @@ import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
 import lombok.Builder;
 
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
+
 @Builder
 public record RecruitResponse(
     Long id,
     Long boardId,
     String title,
     String content,
-    Long authorId,
+    AuthorResponse author,
     Integer views,
     Integer likes,
     Integer comments,
@@ -20,23 +22,27 @@ public record RecruitResponse(
     Long teamId,
     RecruitStatus status,
     LocalDateTime startDate,
-    LocalDateTime endDate
+    LocalDateTime endDate,
+    Boolean isLiked,
+    Boolean isBookmarked
 ) {
-    public static RecruitResponse from(Recruit recruit) {
+    public static RecruitResponse from(Recruit recruit, boolean isLiked, boolean isBookmarked) {
         return RecruitResponse.builder()
             .id(recruit.getId())
             .boardId(recruit.getBoardId())
             .title(recruit.getTitle())
             .content(recruit.getContent())
-            .authorId(recruit.getAuthorId())
+            .author(AuthorResponse.from(recruit.getAuthor()))
             .views(recruit.getViews())
             .likes(recruit.getLikes())
             .comments(recruit.getCommentsCount())
-            .tags(recruit.getTags())
+            .tags(new java.util.ArrayList<>(recruit.getTags()))
             .teamId(recruit.getTeamId())
             .status(recruit.getStatus())
             .startDate(recruit.getStartDate())
             .endDate(recruit.getEndDate())
+            .isLiked(isLiked)
+            .isBookmarked(isBookmarked)
             .build();
     }
 }

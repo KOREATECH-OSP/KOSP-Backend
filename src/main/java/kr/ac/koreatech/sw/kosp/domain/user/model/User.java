@@ -11,16 +11,26 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import org.springframework.security.core.GrantedAuthority;
 
 @Getter
 @Entity
@@ -59,6 +69,14 @@ public class User extends BaseEntity implements UserDetails {
     @JoinColumn(name = "github_id")
     private GithubUser githubUser;
 
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "user_role",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
     @Builder
     private User(
         Long id,
@@ -67,7 +85,8 @@ public class User extends BaseEntity implements UserDetails {
         String kutEmail,
         String password,
         boolean isDeleted,
-        GithubUser githubUser
+        GithubUser githubUser,
+        Set<Role> roles
     ) {
         this.id = id;
         this.name = name;
@@ -76,6 +95,7 @@ public class User extends BaseEntity implements UserDetails {
         this.password = password;
         this.isDeleted = isDeleted;
         updateGithubUser(githubUser);
+        this.roles = roles != null ? roles : new HashSet<>();
     }
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
@@ -88,9 +108,13 @@ public class User extends BaseEntity implements UserDetails {
 
     // UserDetails Implementation
 
+    @Setter
+    @Transient
+    private Collection<? extends GrantedAuthority> authorities;
+
     @Override
-    public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
-        return java.util.Collections.emptyList();
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.authorities;
     }
 
     @Override

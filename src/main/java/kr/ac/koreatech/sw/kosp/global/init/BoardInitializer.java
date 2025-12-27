@@ -1,0 +1,33 @@
+package kr.ac.koreatech.sw.kosp.global.init;
+
+import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
+import kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class BoardInitializer implements CommandLineRunner {
+
+    private final BoardRepository boardRepository;
+
+    @Override
+    public void run(String... args) throws Exception {
+        if (boardRepository.count() == 0) {
+            log.info("Initializing default boards...");
+            saveBoard("자유게시판", "자유롭게 이야기하는 공간");
+            saveBoard("정보공유", "개발 정보를 공유합니다");
+            saveBoard("공지사항", "중요한 공지사항입니다"); // Added common board
+        }
+    }
+
+    private void saveBoard(String name, String description) {
+        boardRepository.save(Board.builder()
+            .name(name)
+            .description(description)
+            .build());
+    }
+}
