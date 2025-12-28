@@ -65,6 +65,13 @@ public class RecruitService {
     }
 
     @Transactional
+    public void updateStatus(User author, Long id, RecruitStatus status) {
+        Recruit recruit = recruitRepository.getById(id);
+        validateOwner(recruit, author.getId());
+        recruit.updateStatus(status);
+    }
+
+    @Transactional
     public void update(User author, Long id, RecruitRequest req) {
         Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, author.getId());

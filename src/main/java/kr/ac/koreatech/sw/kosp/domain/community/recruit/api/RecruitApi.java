@@ -58,4 +58,12 @@ public interface RecruitApi {
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long id
     );
+
+    @Operation(summary = "모집 상태 변경", description = "모집 공고의 상태를 변경합니다.")
+    @org.springframework.web.bind.annotation.PatchMapping("/{id}/status")
+    ResponseEntity<Void> updateStatus(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long id,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest request
+    );
 }
