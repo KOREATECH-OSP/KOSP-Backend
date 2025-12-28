@@ -40,6 +40,14 @@ public class AdminMemberService {
         permissionAdminService.publishPermissionChange(user.getKutEmail());
     }
 
+    @Transactional
+    public void deleteUser(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        
+        user.delete();
+    }
+
     private Role findRole(String name) {
         return roleRepository.findByName(name)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));

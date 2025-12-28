@@ -50,10 +50,10 @@
 | 기능 ID | 대분류 | 소분류 | 기능명 | 예상 난이도 | 비고 |
 |:---:|:---:|:---:|:---:|:---:|:---|
 | **USR-005** | 회원정보 | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController.getComments` |
-| **USR-006** | 회원정보 | 활동 | 즐겨찾기 조회 | Level 1 | `UserActivityController`에 구현 예정 |
-| **ADM-002** | 관리자 | 사용자 | 사용자 삭제 | Level 1 | `Soft Delete` 처리 |
-| **ADM-006** | 관리자 | 게시글 | 게시글 삭제 | Level 1 | `Soft Delete` (관리자 권한) |
-| **ADM-008** | 관리자 | 게시글 | 공지 삭제 | Level 1 | 단순 삭제 |
+| **USR-006** | 회원정보 | 활동 | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController.getBookmarks` |
+| **ADM-002** | 관리자 | 사용자 | 사용자 삭제 | ✅ 완료 | `Soft Delete` 처리 |
+| **ADM-006** | 관리자 | 게시글 | 게시글 삭제 | ✅ 완료 | `Soft Delete` (관리자 권한) |
+| **ADM-008** | 관리자 | 게시글 | 공지 삭제 | ✅ 완료 | 단순 삭제 (게시글 로직 공유) |
 
 ---
 
