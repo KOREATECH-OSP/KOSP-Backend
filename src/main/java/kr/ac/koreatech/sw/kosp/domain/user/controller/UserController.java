@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.user.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -53,6 +54,14 @@ public class UserController implements UserApi {
         }
         userService.update(userId, request);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @DeleteMapping("/me")
+    @Permit(description = "회원 탈퇴")
+    public ResponseEntity<Void> delete(@AuthUser User user) {
+        userService.delete(user.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @Override
