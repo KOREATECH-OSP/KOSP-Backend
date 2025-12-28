@@ -55,6 +55,10 @@ public class ArticleService {
 
     public ArticleListResponse getList(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoard(board, pageable);
+        return toResponse(page, user);
+    }
+    
+    private ArticleListResponse toResponse(Page<Article> page, User user) {
         List<ArticleResponse> posts = page.getContent().stream()
             .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
             .toList();
