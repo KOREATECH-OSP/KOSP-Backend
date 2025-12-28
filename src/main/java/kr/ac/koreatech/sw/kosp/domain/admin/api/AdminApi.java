@@ -23,6 +23,8 @@ import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
+import kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest;
+
 @Tag(name = "Admin", description = "관리자 전용 API")
 @RequestMapping("/v1/admin")
 public interface AdminApi {
@@ -71,4 +73,11 @@ public interface AdminApi {
         @Parameter(description = "사용자 ID") @PathVariable Long userId,
         @RequestBody @Valid UserRoleUpdateRequest request
     );
+    @Operation(summary = "챌린지 생성", description = "관리자 권한으로 새로운 챌린지를 생성합니다. (SpEL 조건식 검증 포함)")
+    @PostMapping("/challenges")
+    ResponseEntity<Void> createChallenge(@RequestBody @Valid ChallengeRequest request);
+
+    @Operation(summary = "챌린지 삭제", description = "관리자 권한으로 챌린지를 삭제합니다.")
+    @DeleteMapping("/challenges/{challengeId}")
+    ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId);
 }
