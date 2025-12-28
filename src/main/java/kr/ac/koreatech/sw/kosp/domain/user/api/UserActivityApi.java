@@ -25,6 +25,14 @@ public interface UserActivityApi {
         @Parameter(hidden = true) Pageable pageable
     );
 
+    @Operation(summary = "사용자 즐겨찾기 목록", description = "사용자가 즐겨찾기한 게시글 목록을 조회합니다.")
+    @GetMapping("/{userId}/bookmarks")
+    ResponseEntity<ArticleListResponse> getBookmarks(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long userId,
+        @Parameter(hidden = true) Pageable pageable
+    );
+
     @Operation(summary = "사용자 작성 댓글 목록", description = "사용자가 작성한 댓글 목록을 조회합니다.")
     @GetMapping("/{userId}/comments")
     ResponseEntity<CommentListResponse> getComments(

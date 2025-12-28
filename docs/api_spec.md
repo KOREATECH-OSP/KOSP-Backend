@@ -624,6 +624,23 @@
     }
   }
 
+### 2.6 사용자 즐겨찾기 목록
+- **Endpoint**: `GET /users/{userId}/bookmarks`
+- **Response**: `200 OK`
+  ```json
+  {
+    "posts": [
+      {
+        "id": 1,
+        "title": "즐겨찾기한 글 제목",
+        "createdAt": "2024-11-28",
+        "views": 10,
+        "comments": 2
+      }
+    ]
+  }
+  ```
+
 ---
 
 ## 7. 관리자 (Admin)

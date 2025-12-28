@@ -40,6 +40,11 @@ public class UserActivityService {
         return toArticleResponse(page, user);
     }
 
+    public ArticleListResponse getBookmarks(Long userId, Pageable pageable, User user) {
+        Page<Article> page = articleBookmarkRepository.findArticlesByUserId(userId, pageable);
+        return toArticleResponse(page, user);
+    }
+
     public CommentListResponse getComments(Long userId, Pageable pageable, User user) {
         Page<Comment> page = commentRepository.findByAuthorId(userId, pageable);
         return toCommentResponse(page, user);

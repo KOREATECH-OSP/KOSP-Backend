@@ -1,17 +1,9 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
-import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
@@ -19,7 +11,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
