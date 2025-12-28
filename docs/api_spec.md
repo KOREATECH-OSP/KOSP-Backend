@@ -40,6 +40,8 @@
 - [x] 7.2 역할 생성
 - [x] 7.3 역할에 정책 할당
 - [x] 7.4 사용자 역할 변경
+- [x] 7.10 챌린지 생성
+- [x] 7.11 챌린지 삭제
 
 ---
 
@@ -768,19 +770,25 @@
   ```
 - **Response**: `200 OK`
 
-### 7.10 챌린지 관리
+### 7.10 챌린지 생성
 - **Endpoint**: `POST /admin/challenges`
 - **Request Body**:
   ```json
   {
-    "title": "New Challenge",
-    "description": "...",
-    "condition": "PR_COUNT >= 5"
+    "name": "성실한 커미터",
+    "description": "커밋 100회 달성",
+    "condition": "#activity.totalCommits >= 100",
+    "tier": 1,
+    "imageUrl": "https://..."
   }
   ```
 - **Response**: `201 Created`
 
-### 7.11 공지사항 삭제
+### 7.11 챌린지 삭제
+- **Endpoint**: `DELETE /admin/challenges/{challengeId}`
+- **Response**: `204 No Content`
+
+### 7.12 공지사항 삭제
 - **Endpoint**: `DELETE /admin/notices/{noticeId}`
 - **Response**: `204 No Content`
 
