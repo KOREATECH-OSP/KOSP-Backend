@@ -25,6 +25,12 @@ public class UserActivityController implements UserActivityApi {
     }
 
     @Override
+    @Permit(permitAll = true, description = "사용자 즐겨찾기 목록")
+    public ResponseEntity<ArticleListResponse> getBookmarks(User user, Long userId, Pageable pageable) {
+        return ResponseEntity.ok(userActivityService.getBookmarks(userId, pageable, user));
+    }
+
+    @Override
     @Permit(permitAll = true, description = "사용자 작성 댓글 목록")
     public ResponseEntity<CommentListResponse> getComments(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getComments(userId, pageable, user));
