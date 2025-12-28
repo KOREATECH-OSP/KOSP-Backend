@@ -282,6 +282,8 @@
   - `404 Not Found`: 커뮤니티가 존재하지 않음
 
 ### 3.7 댓글 목록 조회
+> **Note**: 모집 공고(Recruit)에 대한 댓글도 이 API를 사용합니다. `articleId`에 `recruitId`를 입력하세요.
+
 - **Endpoint**: `GET /community/articles/{articleId}/comments`
 - **Query Parameters**:
   - `lastCommentId`: number
