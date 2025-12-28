@@ -1,6 +1,5 @@
 package kr.ac.koreatech.sw.kosp.domain.user.api;
 
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,7 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
