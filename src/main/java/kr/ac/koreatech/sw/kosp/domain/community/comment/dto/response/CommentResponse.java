@@ -7,6 +7,8 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
 public record CommentResponse(
     Long id,
     AuthorResponse author,
+    Long articleId,
+    String articleTitle,
     String content,
     LocalDateTime createdAt,
     Integer likes,
@@ -17,6 +19,8 @@ public record CommentResponse(
         return new CommentResponse(
             comment.getId(),
             AuthorResponse.from(comment.getAuthor()),
+            comment.getArticle().getId(),
+            comment.getArticle().getTitle(),
             comment.getContent(),
             comment.getCreatedAt(),
             comment.getLikes(),
