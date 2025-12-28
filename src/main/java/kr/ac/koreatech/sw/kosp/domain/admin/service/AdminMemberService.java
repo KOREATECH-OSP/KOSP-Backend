@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.PermissionAdminService;
@@ -31,9 +32,6 @@ public class AdminMemberService {
             .map(this::findRole)
             .collect(Collectors.toSet());
             
-        // User.roles is Set<Role>. We need to update it.
-        // User entity should expose method to update roles? 
-        // Direct access via getter if modifiable collection works inside transaction.
         user.getRoles().clear();
         user.getRoles().addAll(roles);
 
@@ -51,5 +49,19 @@ public class AdminMemberService {
     private Role findRole(String name) {
         return roleRepository.findByName(name)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    }
+
+    @Transactional
+    public void updateUser(Long userId, AdminUserUpdateRequest request) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+
+        // Update User info (name, introduction)
+        user.updateInfo(request.name(), request.introduction());
+
+        // Update GithubUser info (profileImage) if exists and requested
+        if (request.profileImageUrl() != null && user.getGithubUser() != null) {
+            user.getGithubUser().updateAvatarUrl(request.profileImageUrl());
+        }
     }
 }

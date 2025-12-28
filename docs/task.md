@@ -60,12 +60,14 @@
 ## 7. 관리자 (ADM)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
-| **ADM-001** | 사용자 | 사용자 정보 변경 | ⚠️ 부분 | 본인 수정만 구현됨. 관리자용 API 필요 |
-| **ADM-002** | 사용자 | 사용자 삭제 | ✅ 완료 | `AdminController` (Soft Delete) |
-| **ADM-003** | 챌린지 | 챌린지 추가 | ✅ 완료 | SpEL 검증 로직 포함 (`AdminController`) |
-| **ADM-004** | 챌린지 | 챌린지 삭제 | ✅ 완료 | `AdminController` |
-| **ADM-005** | 챌린지 | 챌린지 수정 | 🧪 예정 | (우선순위 낮음 - 삭제 후 재생성 권장) |
-| **ADM-006** | 게시글 | 게시글 삭제 | ✅ 완료 | `AdminController` |
+| **ADM-001** | 사용자 | 사용자 목록 조회 | ✅ 완료 | `AdminController.getAllUsers` |
+| **ADM-001** | 사용자 | 사용자 상세 조회 | ✅ 완료 | `AdminController.getUserDetail` |
+| **ADM-001** | 사용자 | 사용자 정보 변경 (관리자) | ✅ 완료 | `AdminController.updateUser` (강제 수정) |
+| **ADM-002** | 사용자 | 사용자 강제 탈퇴 | ✅ 완료 | `AdminController.deleteUser` |
+| **ADM-003** | 챌린지 | 챌린지 생성 | ✅ 완료 | `AdminController.createChallenge` (SpEL 검증 포함) |
+| **ADM-004** | 챌린지 | 챌린지 목록/상세 조회 | ✅ 완료 | `ChallengeController` (공용) |
+| **ADM-005** | 챌린지 | 챌린지 수정 | ✅ 완료 | `AdminController.updateChallenge` |
+| **ADM-006** | 챌린지 | 챌린지 삭제 | ✅ 완료 | `AdminController.deleteChallenge` |
 | **ADM-007** | 게시글 | 공지 작성 | ✅ 완료 | `AdminController` (`isPinned`) |
 | **ADM-008** | 게시글 | 공지 삭제 | ✅ 완료 | `AdminController` |
 | **ADM-009** | 신고 | 신고 처리 | 🧪 예정 | 신고 데이터 집계 및 제재 |
@@ -114,8 +116,8 @@
 ### 4. 기타 관리자 기능 (ADM-001, ADM-005)
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
-| **Controller** | `AdminController` | ❌ 미구현 | 타인 정보 수정 API (`PUT /admin/users/{id}`) |
-| **Controller** | `AdminController` | ❌ 미구현 | 챌린지 수정 API (`PUT /admin/challenges/{id}`) |
+| **Controller** | `AdminController` | ✅ 완료 | 타인 정보 수정 API (`PUT /admin/users/{id}`) |
+| **Controller** | `AdminController` | ✅ 완료 | 챌린지 수정 API (`PUT /admin/challenges/{id}`) |
 
 ### 5. 시스템 초기화
 | Layer | Component | Status | Note |
