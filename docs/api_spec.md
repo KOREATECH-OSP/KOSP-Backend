@@ -7,31 +7,31 @@
 - [x] 1.1 로그인
 - [x] 1.2 로그아웃
 - [x] 1.3 내 정보 조회 (Current User)
-- [ ] 2.1 사용자 정보 수정
-- [ ] 2.2 사용자 상세 조회 (타인 조회)
+- [x] 2.1 사용자 정보 수정
+- [x] 2.2 사용자 상세 조회 (타인 조회)
 - [ ] 2.3 사용자 활동 조회 (GitHub 활동)
-- [ ] 2.4 사용자 작성 글 목록
+- [x] 2.4 사용자 작성 글 목록
 - [x] 3.1 게시판 목록 조회
 - [x] 3.2 게시글 목록 조회
 - [x] 3.3 게시글 상세 조회
 - [x] 3.4 게시글 작성
 - [x] 3.5 게시글 수정
 - [x] 3.6 게시글 삭제
-- [ ] 3.7 댓글 목록 조회
-- [ ] 3.8 댓글 작성
-- [ ] 3.9 댓글 삭제
+- [x] 3.7 댓글 목록 조회
+- [x] 3.8 댓글 작성
+- [x] 3.9 댓글 삭제
 - [x] 3.10 게시글 좋아요/북마크
-- [ ] 3.11 댓글 좋아요
+- [x] 3.11 댓글 좋아요
 - [x] 4.1 모집 공고 목록 조회
 - [x] 4.2 모집 공고 상세 조회
 - [x] 4.3 모집 공고 작성
 - [x] 4.4 모집 공고 수정
 - [x] 4.5 모집 상태 변경
 - [x] 4.6 모집 공고 삭제
-- [ ] 4.7 모집 공고 댓글 목록 조회
-- [ ] 4.8 모집 공고 댓글 작성
-- [ ] 4.9 모집 공고 댓글 삭제
-- [ ] 4.11 모집 공고 댓글 좋아요
+- [x] 4.7 모집 공고 댓글 목록 조회 (통합됨 -> 3.7)
+- [x] 4.8 모집 공고 댓글 작성 (통합됨 -> 3.8)
+- [x] 4.9 모집 공고 댓글 삭제 (통합됨 -> 3.9)
+- [x] 4.11 모집 공고 댓글 좋아요 (통합됨 -> 3.11)
 - [x] 5.1 팀 목록 조회
 - [x] 5.2 팀 생성
 - [x] 5.3 팀 상세 조회
@@ -96,7 +96,7 @@
   ```json
   {
     "name": "김수정",
-    "bio": "수정된 자기소개",
+    "introduction": "수정된 자기소개",
     "profileImage": "https://..."
   }
   ```
@@ -514,72 +514,7 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### 4.7 모집 공고 댓글 목록 조회
-- **Endpoint**: `GET /community/recruits/{recruitId}/comments`
-- **Query Parameters**:
-  - `lastCommentId`: number
-  - `limit`: number
-- **Response**: `200 OK`
-  ```json
-  {
-    "comments": [
-      {
-        "id": 105,
-        "author": { "id": 50, "name": "유저", "profileImage": "..." },
-        "content": "문의합니다.",
-        "createdAt": "...",
-        "likes": 1,
-        "isLiked": false,
-        "isMine": false
-      }
-    ],
-    "meta": { "hasNext": true, "lastCommentId": 105 }
-  }
-  ```
-- **Error Response**:
-  - `404 Not Found`: 모집 공고 없음
 
-### 4.8 모집 공고 댓글 작성
-- **Endpoint**: `POST /community/recruits/{recruitId}/comments`
-- **Request Body**:
-  ```json
-  {
-    "content": "문의 댓글입니다."
-  }
-  ```
-- **Response**: `201 Created`
-  ```json
-  {
-    "id": 202,
-    "content": "문의 댓글입니다.",
-    "createdAt": "...",
-    "author": { "id": 1, "name": "김개발", "profileImage": "..." }
-  }
-  ```
-- **Error Response**:
-  - `400 Bad Request`: 내용 없음
-  - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 모집 공고 없음
-
-### 4.9 모집 공고 댓글 삭제
-- **Endpoint**: `DELETE /community/recruits/{recruitId}/comments/{commentId}`
-- **Response**: `204 No Content`
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `403 Forbidden`: 삭제 권한 없음
-  - `404 Not Found`: 댓글 또는 모집 공고 없음
-
-### 4.11 모집 공고 댓글 좋아요
-- **Endpoint**: `POST /community/recruits/{recruitId}/comments/{commentId}/likes`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isLiked": true
-  }
-  ```
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 댓글 또는 모집 공고 없음
 
 ---
 
@@ -632,8 +567,8 @@
     "name": "React 스터디",
     "description": "상세 설명...",
     "members": [
-      { "id": 1, "name": "김개발", "role": "LEADER" },
-      { "id": 3, "name": "박팀원", "role": "MEMBER" }
+      { "id": 1, "name": "김개발", "profileImage": "...", "role": "LEADER" },
+      { "id": 3, "name": "박팀원", "profileImage": "...", "role": "MEMBER" }
     ]
   }
   ```
