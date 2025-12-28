@@ -20,4 +20,6 @@ public interface CommentRepository extends Repository<Comment, Long> {
     }
     
     Page<Comment> findByArticleId(Long articleId, Pageable pageable);
+    
+    Page<Comment> findByAuthorId(Long authorId, Pageable pageable);
 }
