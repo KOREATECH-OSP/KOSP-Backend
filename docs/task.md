@@ -81,9 +81,9 @@
 1.  **챌린지 데이터 초기화**: `ChallengeInitializer`를 통해 기본 티어(브론즈/실버/골드) 자동 생성.
 2.  **깃허브 연동 (USR-003)**: Mock 데이터를 실제 GitHub API로 교체.
 
+
 **Priority 4: Infrastructure / AI**
 1.  **신고 기능 (TAK-004, ADM-009)**: 기획 확정 후 구현.
-2.  **챌린지 수정 (ADM-005)**: 필요 시 구현 (현재는 삭제 후 생성으로 대체 가능).
 
 
 
@@ -113,13 +113,7 @@
 | **Service** | `MailService` | ❌ 미구현 | `JavaMailSender` 연동 메일 발송 |
 | **Controller** | `UserController` | ❌ 미구현 | 비밀번호 변경 API (`POST /users/password`) |
 
-### 4. 기타 관리자 기능 (ADM-001, ADM-005)
-| Layer | Component | Status | Note |
-|:---:|:---|:---:|:---|
-| **Controller** | `AdminController` | ✅ 완료 | 타인 정보 수정 API (`PUT /admin/users/{id}`) |
-| **Controller** | `AdminController` | ✅ 완료 | 챌린지 수정 API (`PUT /admin/challenges/{id}`) |
-
-### 5. 시스템 초기화
+### 4. 시스템 초기화
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
 | **Initializer** | `ChallengeInitializer` | ⚠️ 부분 | 기본 챌린지 데이터 적재 로직 비어있음 |
