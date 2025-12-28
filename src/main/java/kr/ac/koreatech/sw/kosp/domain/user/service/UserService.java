@@ -55,4 +55,9 @@ public class UserService {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
     }
+    @Transactional
+    public void delete(Long userId) {
+        User user = userRepository.getById(userId);
+        user.delete();
+    }
 }
