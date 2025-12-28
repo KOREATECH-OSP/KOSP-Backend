@@ -5,6 +5,7 @@ import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleReque
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleBookmark;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
@@ -56,6 +57,18 @@ public class ArticleService {
             .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
             .toList();
         return new ArticleListResponse(posts, PageMeta.from(page));
+    }
+
+    @Transactional
+    public boolean toggleBookmark(User user, Long id) {
+        Article article = articleRepository.getById(id);
+        Optional<ArticleBookmark> bookmark = articleBookmarkRepository.findByUserAndArticle(user, article);
+        if (bookmark.isPresent()) {
+            articleBookmarkRepository.delete(bookmark.get());
+            return false;
+        }
+        articleBookmarkRepository.save(ArticleBookmark.builder().user(user).article(article).build());
+        return true;
     }
 
     @Transactional
