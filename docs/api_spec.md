@@ -31,7 +31,6 @@
 - [ ] 4.7 모집 공고 댓글 목록 조회
 - [ ] 4.8 모집 공고 댓글 작성
 - [ ] 4.9 모집 공고 댓글 삭제
-- [x] 4.10 모집 공고 좋아요/북마크
 - [ ] 4.11 모집 공고 댓글 좋아요
 - [ ] 5.1 팀 목록 조회
 - [ ] 5.2 팀 생성
@@ -348,7 +347,9 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 댓글 또는 게시글 없음
 
-### 3.10 게시글 좋아요/북마크
+### 3.10 게시글/모집 공고 좋아요/북마크
+> **Note**: 모집 공고(Recruit)도 게시글(Article)의 일종이므로, 모집 공고에 대한 좋아요/북마크도 이 API를 사용합니다. `articleId`에 `recruitId`를 입력하여 요청하세요.
+
 - **Endpoint**: `POST /community/articles/{articleId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -365,7 +366,7 @@
   ```
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 게시글 없음
+  - `404 Not Found`: 게시글(또는 모집 공고) 없음
 
 ### 3.11 댓글 좋아요
 - **Endpoint**: `POST /community/articles/{articleId}/comments/{commentId}/likes`
@@ -565,25 +566,6 @@
   - `401 Unauthorized`: 인증 실패
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 댓글 또는 모집 공고 없음
-
-### 4.10 모집 공고 좋아요/북마크
-- **Endpoint**: `POST /community/recruits/{recruitId}/likes`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isLiked": true
-  }
-  ```
-- **Endpoint**: `POST /community/recruits/{recruitId}/bookmarks`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isBookmarked": true
-  }
-  ```
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 모집 공고 없음
 
 ### 4.11 모집 공고 댓글 좋아요
 - **Endpoint**: `POST /community/recruits/{recruitId}/comments/{commentId}/likes`
