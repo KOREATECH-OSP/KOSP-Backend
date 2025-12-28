@@ -7,8 +7,6 @@ CREATE TABLE users
     kut_id       VARCHAR(255)          NOT NULL,
     kut_email    VARCHAR(255)          NOT NULL,
     password     VARCHAR(255)          NOT NULL,
-    kut_email    VARCHAR(255)          NOT NULL,
-    password     VARCHAR(255)          NOT NULL,
     introduction VARCHAR(255)          NULL,
     github_id    BIGINT                NOT NULL,
     is_deleted   BIT(1)                NOT NULL,
@@ -64,6 +62,8 @@ CREATE TABLE article
     views          INT                   NOT NULL,
     likes          INT                   NOT NULL,
     comments_count INT                   NOT NULL,
+    is_deleted     BIT(1)                NOT NULL,
+    is_pinned      BIT(1)                NOT NULL,
     CONSTRAINT pk_article PRIMARY KEY (id)
 );
 

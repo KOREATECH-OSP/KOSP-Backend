@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
@@ -18,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Admin", description = "관리자 전용 API")
 @RequestMapping("/v1/admin")
@@ -34,6 +38,13 @@ public interface AdminApi {
     @Operation(summary = "공지사항 삭제", description = "관리자 권한으로 공지사항을 삭제합니다. (게시글 삭제와 동일 로직)")
     @DeleteMapping("/notices/{noticeId}")
     ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId);
+
+    @Operation(summary = "공지사항 작성", description = "관리자 권한으로 공지사항을 작성합니다.")
+    @PostMapping("/notices")
+    ResponseEntity<Void> createNotice(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid NoticeCreateRequest request
+    );
 
     @Operation(summary = "모든 역할(Role) 조회")
     @ApiResponse(responseCode = "200", description = "성공")

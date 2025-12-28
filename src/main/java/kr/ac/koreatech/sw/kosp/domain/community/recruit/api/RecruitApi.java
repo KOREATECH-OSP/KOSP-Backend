@@ -66,4 +66,12 @@ public interface RecruitApi {
         @PathVariable Long id,
         @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest request
     );
+
+    @Operation(summary = "모집 공고 지원", description = "모집 공고에 지원합니다.")
+    @PostMapping("/{recruitId}/apply")
+    ResponseEntity<Void> applyRecruit(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long recruitId,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
+    );
 }
