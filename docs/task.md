@@ -82,3 +82,42 @@
 **Priority 4: Infrastructure / AI**
 1.  **신고 기능 (TAK-004, ADM-009)**: 기획 확정 후 구현.
 2.  **챌린지 수정 (ADM-005)**: 필요 시 구현 (현재는 삭제 후 생성으로 대체 가능).
+
+
+
+## 🏗️ 미구현 컴포넌트 현황 (기능별 → Layer별)
+
+### 1. GitHub 활동 연동 (USR-003)
+| Layer | Component | Status | Note |
+|:---:|:---|:---:|:---|
+| **Client** | `GithubApiClient` | ❌ 미구현 | GitHub REST API 연동 (UserInfo, RepoInfo) |
+| **Client** | `GithubCrawlingClient` | ❌ 미구현 | Jsoup 활용 크롤링 (Contribution Chart) |
+| **Service** | `GithubDataSyncService` | ❌ 미구현 | Client 데이터를 DB 엔티티로 변환 및 적재 |
+
+### 2. 신고 시스템 (TAK-004, ADM-009)
+| Layer | Component | Status | Note |
+|:---:|:---|:---:|:---|
+| **Entity** | `Report` | ❌ 미구현 | 게시글/댓글 신고 정보 |
+| **Repository** | `ReportRepository` | ❌ 미구현 | |
+| **Service** | `ReportService` | ❌ 미구현 | 신고 접수 비즈니스 로직 |
+| **Service** | `AdminReportService` | ❌ 미구현 | 신고 처리(삭제/차단) 로직 |
+| **Controller** | `ReportController` | ❌ 미구현 | `POST /community/articles/{id}/reports` |
+| **Controller** | `AdminController` | ❌ 미구현 | 신고 목록 조회 및 처리 API |
+
+### 3. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
+| Layer | Component | Status | Note |
+|:---:|:---|:---:|:---|
+| **Domain** | `EmailVerification` | ❌ 미구현 | 인증 코드 관리 (Redis 권장) |
+| **Service** | `MailService` | ❌ 미구현 | `JavaMailSender` 연동 메일 발송 |
+| **Controller** | `UserController` | ❌ 미구현 | 비밀번호 변경 API (`POST /users/password`) |
+
+### 4. 기타 관리자 기능 (ADM-001, ADM-005)
+| Layer | Component | Status | Note |
+|:---:|:---|:---:|:---|
+| **Controller** | `AdminController` | ❌ 미구현 | 타인 정보 수정 API (`PUT /admin/users/{id}`) |
+| **Controller** | `AdminController` | ❌ 미구현 | 챌린지 수정 API (`PUT /admin/challenges/{id}`) |
+
+### 5. 시스템 초기화
+| Layer | Component | Status | Note |
+|:---:|:---|:---:|:---|
+| **Initializer** | `ChallengeInitializer` | ⚠️ 부분 | 기본 챌린지 데이터 적재 로직 비어있음 |
