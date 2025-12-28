@@ -53,6 +53,10 @@ public class CommentService {
 
     public CommentListResponse getList(Long articleId, Pageable pageable, User user) {
         Page<Comment> page = commentRepository.findByArticleId(articleId, pageable);
+        return toResponse(page, user);
+    }
+
+    private CommentListResponse toResponse(Page<Comment> page, User user) {
         List<CommentResponse> comments = page.getContent().stream()
             .map(comment -> CommentResponse.from(
                 comment,
