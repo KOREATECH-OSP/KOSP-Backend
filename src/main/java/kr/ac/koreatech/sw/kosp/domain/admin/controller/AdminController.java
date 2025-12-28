@@ -10,6 +10,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminMemberService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminContentService;
+import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminReportService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.RoleAdminService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.challenge.service.ChallengeService;
@@ -24,6 +25,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AdminController implements AdminApi {
 
+    private final AdminReportService adminReportService;
+    private final kr.ac.koreatech.sw.kosp.domain.admin.service.PolicyAdminService policyAdminService;
+    private final kr.ac.koreatech.sw.kosp.domain.admin.service.AdminSearchService adminSearchService;
     private final RoleAdminService roleAdminService;
     private final AdminMemberService adminMemberService;
     private final AdminContentService adminContentService;
@@ -110,5 +114,36 @@ public class AdminController implements AdminApi {
     public ResponseEntity<Void> updateChallenge(Long challengeId, ChallengeRequest request) {
         challengeService.updateChallenge(challengeId, request);
         return ResponseEntity.ok().build();
+    }
+    @Override
+    @Permit(name = "admin:reports:read", description = "신고 목록 조회")
+    public ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.ReportResponse>> getAllReports() {
+        return ResponseEntity.ok(adminReportService.getAllReports());
+    }
+
+    @Override
+    @Permit(name = "admin:reports:process", description = "신고 처리")
+    public ResponseEntity<Void> processReport(Long reportId, kr.ac.koreatech.sw.kosp.domain.admin.dto.request.ReportProcessRequest request) {
+        adminReportService.processReport(reportId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "admin:policies:read", description = "정책 목록 조회")
+    public ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.PolicyResponse>> getAllPolicies() {
+        return ResponseEntity.ok(policyAdminService.getAllPolicies());
+    }
+
+    @Override
+    @Permit(name = "admin:policies:create", description = "정책 생성")
+    public ResponseEntity<Void> createPolicy(kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyCreateRequest request) {
+        policyAdminService.createPolicy(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Override
+    @Permit(name = "admin:search", description = "통합 검색")
+    public ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.AdminSearchResponse> search(String keyword, String type) {
+        return ResponseEntity.ok(adminSearchService.search(keyword, type));
     }
 }
