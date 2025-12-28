@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminContentService {
 
     private final ArticleRepository articleRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository boardRepository;
 
     @Transactional
     public void deleteArticle(Long articleId) {
@@ -25,7 +26,26 @@ public class AdminContentService {
 
     @Transactional
     public void deleteNotice(Long noticeId) {
-        // Notice Logic: Currently treated as Article
         deleteArticle(noticeId);
+    }
+
+    @Transactional
+    public void createNotice(kr.ac.koreatech.sw.kosp.domain.user.model.User user, kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest request) {
+        // Find "NOTICE" board or "공지사항"
+        var board = boardRepository.findAll().stream()
+            .filter(b -> "공지사항".equals(b.getName()) || "NOTICE".equalsIgnoreCase(b.getName()))
+            .findFirst()
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.BOARD_NOT_FOUND));
+
+        Article notice = Article.builder()
+            .author(user)
+            .board(board)
+            .title(request.title())
+            .content(request.content())
+            .isPinned(request.isPinned())
+            .tags(request.tags())
+            .build();
+
+        articleRepository.save(notice);
     }
 }

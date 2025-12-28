@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.controller;
 
 import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.admin.api.AdminApi;
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
@@ -9,6 +10,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminMemberService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminContentService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.RoleAdminService;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -42,6 +44,13 @@ public class AdminController implements AdminApi {
     public ResponseEntity<Void> deleteNotice(Long noticeId) {
         adminContentService.deleteNotice(noticeId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(name = "admin:notices:create", description = "공지사항 작성")
+    public ResponseEntity<Void> createNotice(User user, NoticeCreateRequest request) {
+        adminContentService.createNotice(user, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @Override

@@ -72,6 +72,10 @@ public class Article extends BaseEntity {
     private boolean isDeleted = false;
 
     @Builder.Default
+    @Column(name = "is_pinned", nullable = false)
+    private boolean isPinned = false;
+
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"))
     @Column(name = "tag")

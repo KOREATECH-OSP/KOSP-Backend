@@ -1,22 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.controller;
 
-import jakarta.validation.Valid;
 import java.net.URI;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.api.RecruitApi;
-import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitService;
 
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -25,9 +15,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
+import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.api.RecruitApi;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,6 +35,7 @@ import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 public class RecruitController implements RecruitApi {
 
     private final RecruitService recruitService;
+    private final kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitApplyService recruitApplyService;
     private final BoardService boardService;
 
     @Override
@@ -95,9 +96,8 @@ public class RecruitController implements RecruitApi {
         recruitService.delete(user, id);
         return ResponseEntity.noContent().build();
     }
-    
+
     @Override
-    @PatchMapping("/{id}/status")
     @Permit(name = "recruit:status", description = "모집 상태 변경")
     public ResponseEntity<Void> updateStatus(
         @AuthUser User user,
@@ -106,5 +106,16 @@ public class RecruitController implements RecruitApi {
     ) {
         recruitService.updateStatus(user, id, request.status());
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "community:recruits:apply", description = "공고 지원")
+    public ResponseEntity<Void> applyRecruit(
+        kr.ac.koreatech.sw.kosp.domain.user.model.User user,
+        Long recruitId,
+        kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
+    ) {
+        recruitApplyService.applyRecruit(recruitId, user, request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
