@@ -10,6 +10,8 @@ import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
+import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -28,6 +30,7 @@ public class RecruitService {
     private final RecruitRepository recruitRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
+    private final TeamRepository teamRepository;
 
     @Transactional
     public Long create(User author, Board board, RecruitRequest req) {
@@ -37,7 +40,7 @@ public class RecruitService {
             .title(req.title())
             .content(req.content())
             .tags(req.tags())
-            .teamId(req.teamId())
+            .team(teamRepository.getById(req.teamId()))
             .status(RecruitStatus.OPEN)
             .startDate(req.startDate())
             .endDate(req.endDate())
@@ -80,7 +83,7 @@ public class RecruitService {
             req.title(), 
             req.content(), 
             req.tags(),
-            req.teamId(),
+            teamRepository.getById(req.teamId()),
             req.startDate(),
             req.endDate()
         );

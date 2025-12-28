@@ -1,12 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
-import lombok.Builder;
-
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
+import lombok.Builder;
 
 @Builder
 public record RecruitResponse(
@@ -36,8 +37,8 @@ public record RecruitResponse(
             .views(recruit.getViews())
             .likes(recruit.getLikes())
             .comments(recruit.getCommentsCount())
-            .tags(new java.util.ArrayList<>(recruit.getTags()))
-            .teamId(recruit.getTeamId())
+            .tags(new ArrayList<>(recruit.getTags()))
+            .teamId(recruit.getTeam().getId())
             .status(recruit.getStatus())
             .startDate(recruit.getStartDate())
             .endDate(recruit.getEndDate())

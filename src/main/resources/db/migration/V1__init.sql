@@ -235,3 +235,34 @@ ALTER TABLE comment_like
 
 ALTER TABLE comment_like
     ADD CONSTRAINT fk_comment_like_on_comment FOREIGN KEY (comment_id) REFERENCES comment (id);
+
+CREATE TABLE team
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(50)           NOT NULL,
+    description VARCHAR(255)          NOT NULL,
+    image_url   VARCHAR(255)          NULL,
+    CONSTRAINT pk_team PRIMARY KEY (id)
+);
+
+CREATE TABLE team_member
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    team_id    BIGINT                NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    role       VARCHAR(255)          NOT NULL,
+    CONSTRAINT pk_team_member PRIMARY KEY (id)
+);
+
+ALTER TABLE team_member
+    ADD CONSTRAINT fk_team_member_on_team FOREIGN KEY (team_id) REFERENCES team (id);
+
+ALTER TABLE team_member
+    ADD CONSTRAINT fk_team_member_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE recruit
+    ADD CONSTRAINT FK_RECRUIT_ON_TEAM FOREIGN KEY (team_id) REFERENCES team (id);

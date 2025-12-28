@@ -10,6 +10,10 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,8 +27,9 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorValue("RECRUIT")
 public class Recruit extends Article {
 
-    @Column(name = "team_id", nullable = false)
-    private Long teamId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "team_id", nullable = false)
+    private Team team;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,12 +45,12 @@ public class Recruit extends Article {
         String title,
         String content,
         List<String> tags,
-        Long teamId,
+        Team team,
         LocalDateTime startDate,
         LocalDateTime endDate
     ) {
         super.updateArticle(title, content, tags);
-        this.teamId = teamId;
+        this.team = team;
         this.startDate = startDate;
         this.endDate = endDate;
     }
