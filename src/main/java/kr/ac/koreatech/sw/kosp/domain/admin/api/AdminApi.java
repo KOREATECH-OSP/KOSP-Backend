@@ -95,4 +95,30 @@ public interface AdminApi {
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId,
         @RequestBody @Valid ChallengeRequest request
     );
+
+    @Operation(summary = "신고 목록 조회", description = "접수된 모든 신고 목록을 조회합니다.")
+    @GetMapping("/reports")
+    ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.ReportResponse>> getAllReports();
+
+    @Operation(summary = "신고 처리", description = "신고를 처리(삭제 또는 기각)합니다.")
+    @PostMapping("/reports/{reportId}")
+    ResponseEntity<Void> processReport(
+        @Parameter(description = "신고 ID") @PathVariable Long reportId,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.admin.dto.request.ReportProcessRequest request
+    );
+
+    @Operation(summary = "정책 목록 조회", description = "시스템에 등록된 모든 정책을 조회합니다.")
+    @GetMapping("/policies")
+    ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.PolicyResponse>> getAllPolicies();
+
+    @Operation(summary = "정책 생성", description = "새로운 정책을 생성합니다.")
+    @PostMapping("/policies")
+    ResponseEntity<Void> createPolicy(@RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyCreateRequest request);
+
+    @Operation(summary = "통합 검색", description = "키워드로 사용자 및 게시글을 검색합니다.")
+    @GetMapping("/search")
+    ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.AdminSearchResponse> search(
+        @Parameter(description = "검색어") @org.springframework.web.bind.annotation.RequestParam String keyword,
+        @Parameter(description = "검색 유형 (USER, ARTICLE, ALL)") @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "ALL") String type
+    );
 }

@@ -71,6 +71,9 @@
     *   코드는 읽기 쉬워야 하며, 하나의 메서드는 하나의 기능만 수행해야 합니다.
     *   주석보다는 코드 자체로 의도를 드러내도록 명명합니다.
 
+### 2.4 Import Rules
+*   **No Wildcards**: 와일드카드 import(`*`) 사용을 금지합니다.
+*   **Explicit Imports**: 클래스명은 명시적으로 import 하여 사용합니다. 동일한 클래스명이 존재할 경우에만 풀 패키지 경로를 사용합니다.
 ---
 
 ## 3. Documentation & API Security

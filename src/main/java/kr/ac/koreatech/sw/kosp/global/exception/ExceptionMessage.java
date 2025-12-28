@@ -22,6 +22,8 @@ public enum ExceptionMessage {
     NOT_FOUND("리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     CHALLENGE_NOT_FOUND("챌린지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CHALLENGE_CONDITION("유효하지 않은 챌린지 조건식입니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_REPORTED("이미 신고한 게시글입니다.", HttpStatus.CONFLICT),
+    SELF_REPORT_NOT_ALLOWED("본인의 게시글은 신고할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ;
 
     private final String message;

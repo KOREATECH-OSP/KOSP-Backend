@@ -18,6 +18,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
     void delete(Article article);
 
     Page<Article> findByBoard(Board board, Pageable pageable);
+    java.util.List<Article> findByTitleContaining(String keyword);
 
     default Article getById(Long id) {
         return findById(id)

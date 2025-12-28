@@ -46,6 +46,9 @@
 - [x] 7.12 사용자 정보 수정 (관리자)
 - [x] 7.13 챌린지 수정
 - [x] 7.14 공지사항 삭제
+- [ ] 7.15 정책 목록 조회
+- [ ] 7.16 정책 생성
+- [ ] 7.17 통합 검색
 
 ---
 
@@ -837,3 +840,39 @@
 - **Endpoint**: `DELETE /admin/notices/{noticeId}`
 - **Response**: `204 No Content`
 
+
+### 7.15 정책 목록 조회
+- **Endpoint**: `GET /admin/policies`
+- **Response**: `200 OK`
+  ```json
+  [
+    {
+      "name": "StudentPolicy",
+      "description": "학생 권한 정책"
+    }
+  ]
+  ```
+
+### 7.16 정책 생성
+- **Endpoint**: `POST /admin/policies`
+- **Request Body**:
+  ```json
+  {
+    "name": "NewPolicy",
+    "description": "새로운 정책"
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.17 통합 검색
+- **Endpoint**: `GET /admin/search`
+- **Query Parameters**:
+  - `keyword`: string (검색어)
+  - `type`: 'USER' | 'ARTICLE' | 'ALL'
+- **Response**: `200 OK`
+  ```json
+  {
+    "users": [...],
+    "articles": [...]
+  }
+  ```

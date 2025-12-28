@@ -7,4 +7,5 @@ import org.springframework.data.repository.Repository;
 public interface PolicyRepository extends Repository<Policy, Long> {
     Policy save(Policy policy);
     Optional<Policy> findByName(String name);
+    java.util.List<Policy> findAll();
 }

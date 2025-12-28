@@ -43,7 +43,7 @@
 | **TAK-001** | 게시글 | 게시글 작성 | ✅ 완료 | `@Valid` + 권한 체크 완료 |
 | **TAK-002** | 게시글 | 댓글 작성 | ✅ 완료 | `CommentController` |
 | **TAK-003** | 게시글 | 즐겨찾기 | ✅ 완료 | `ArticleController` |
-| **TAK-004** | 게시글 | 신고 | 🧪 예정 | 기획 미정 (추후 논의) |
+| **TAK-004** | 게시글 | 신고 | ✅ 완료 | `ReportController` (중복 방지, 댓글 신고 추가 필요) |
 | **TAK-005** | 게시글 | 좋아요 | ✅ 완료 | `ArticleController` |
 | **TAK-006** | 게시글 | 게시글 조회 | ✅ 완료 | `ArticleController` (404 처리) |
 
@@ -70,8 +70,10 @@
 | **ADM-006** | 챌린지 | 챌린지 삭제 | ✅ 완료 | `AdminController.deleteChallenge` |
 | **ADM-007** | 게시글 | 공지 작성 | ✅ 완료 | `AdminController` (`isPinned`) |
 | **ADM-008** | 게시글 | 공지 삭제 | ✅ 완료 | `AdminController` |
-| **ADM-009** | 신고 | 신고 처리 | 🧪 예정 | 신고 데이터 집계 및 제재 |
+| **ADM-009** | 신고 | 신고 처리 | ✅ 완료 | `AdminController` (접수 목록/처리) |
 | **ADM-010** | 점검 | 접근 제한 | ✅ 완료 | `PermissionAspect` (AOP) |
+| **ADM-011** | 정책 | 정책 관리 | 🧪 예정 | 정책 생성/수정/삭제 (`PolicyAdminService`) |
+| **ADM-012** | 조회 | 통합 검색 | 🧪 예정 | 사용자/게시글/댓글 등 통합 검색 기능 |
 
 ---
 
@@ -83,7 +85,9 @@
 
 
 **Priority 4: Infrastructure / AI**
-1.  **신고 기능 (TAK-004, ADM-009)**: 기획 확정 후 구현.
+1.  **신고 기능 고도화 (TAK-004)**: 중복 신고 방지 및 댓글 신고 기능 구현.
+2.  **정책 관리 (ADM-011)**: 관리자 정책 관리 기능 추가.
+3.  **검색 기능 (ADM-012)**: 통합 검색 API 구현.
 
 
 
@@ -96,24 +100,14 @@
 | **Client** | `GithubCrawlingClient` | ❌ 미구현 | Jsoup 활용 크롤링 (Contribution Chart) |
 | **Service** | `GithubDataSyncService` | ❌ 미구현 | Client 데이터를 DB 엔티티로 변환 및 적재 |
 
-### 2. 신고 시스템 (TAK-004, ADM-009)
-| Layer | Component | Status | Note |
-|:---:|:---|:---:|:---|
-| **Entity** | `Report` | ❌ 미구현 | 게시글/댓글 신고 정보 |
-| **Repository** | `ReportRepository` | ❌ 미구현 | |
-| **Service** | `ReportService` | ❌ 미구현 | 신고 접수 비즈니스 로직 |
-| **Service** | `AdminReportService` | ❌ 미구현 | 신고 처리(삭제/차단) 로직 |
-| **Controller** | `ReportController` | ❌ 미구현 | `POST /community/articles/{id}/reports` |
-| **Controller** | `AdminController` | ❌ 미구현 | 신고 목록 조회 및 처리 API |
-
-### 3. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
+### 2. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
 | **Domain** | `EmailVerification` | ❌ 미구현 | 인증 코드 관리 (Redis 권장) |
 | **Service** | `MailService` | ❌ 미구현 | `JavaMailSender` 연동 메일 발송 |
 | **Controller** | `UserController` | ❌ 미구현 | 비밀번호 변경 API (`POST /users/password`) |
 
-### 4. 시스템 초기화
+### 3. 시스템 초기화
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
 | **Initializer** | `ChallengeInitializer` | ⚠️ 부분 | 기본 챌린지 데이터 적재 로직 비어있음 |

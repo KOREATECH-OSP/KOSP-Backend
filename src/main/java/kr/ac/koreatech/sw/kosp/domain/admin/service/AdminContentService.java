@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminContentService {
 
     private final ArticleRepository articleRepository;
+
     private final kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository boardRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentRepository commentRepository;
 
     @Transactional
     public void deleteArticle(Long articleId) {
@@ -27,6 +29,13 @@ public class AdminContentService {
     @Transactional
     public void deleteNotice(Long noticeId) {
         deleteArticle(noticeId);
+    }
+
+    @Transactional
+    public void deleteComment(Long commentId) {
+        var comment = commentRepository.getById(commentId);
+        // comment.delete(); // Comment 엔티티에 delete 메서드 필요. 현재는 리포지토리로 삭제 대체
+        commentRepository.delete(comment);
     }
 
     @Transactional

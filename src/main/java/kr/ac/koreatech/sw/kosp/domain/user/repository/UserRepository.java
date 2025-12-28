@@ -16,6 +16,8 @@ public interface UserRepository extends Repository<User, Long> {
     boolean existsByKutEmail(String kutEmail);
     boolean existsByKutId(String kutId);
 
+    java.util.List<User> findByNameContaining(String keyword);
+
     Optional<User> findByGithubUser_GithubId(Long githubId);
 
     void deleteById(Long id);
