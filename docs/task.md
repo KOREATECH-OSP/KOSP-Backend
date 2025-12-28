@@ -27,7 +27,7 @@
 |:---:|:---:|:---:|:---:|:---|
 | **USR-001** | 비밀번호 | 비밀번호 변경 | ⏳ 대기 | 이메일 발송 선행 필요 |
 | **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (Soft Delete) |
-| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | GitHub API 연동 (크롤링 데이터 구조 설계) 완료 |
+| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ⚠️ 부분 | 스키마/엔티티 설계 완료 (API 연동 구현 전) |
 | **USR-004** | 활동 | 작성한 글 조회 | ✅ 완료 | `UserActivityController` (빈 리스트 반환 확인) |
 | **USR-005** | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController` |
 | **USR-006** | 활동 | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController` |
