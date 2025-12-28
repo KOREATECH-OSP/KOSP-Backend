@@ -569,10 +569,16 @@
   ```json
   {
     "reason": "지원 동기 및 각오",
-    "portfolioUrl": "https://..."
+    "portfolioUrl": "https://example.com/portfolio"
   }
   ```
 - **Response**: `201 Created`
+- **Error Response**:
+  - `400 Bad Request`: 모집이 마감되었거나 중복 지원
+  - `401 Unauthorized`: 인증 실패
+  - `404 Not Found`: 모집 공고 없음
+
+### 4.11 모집 공고 댓글 목록 조회 (통합됨 -> 3.7)
 
 
 
@@ -773,3 +779,8 @@
   }
   ```
 - **Response**: `201 Created`
+
+### 7.11 공지사항 삭제
+- **Endpoint**: `DELETE /admin/notices/{noticeId}`
+- **Response**: `204 No Content`
+
