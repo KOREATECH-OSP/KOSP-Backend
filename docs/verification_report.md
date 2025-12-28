@@ -34,12 +34,15 @@
 | **TBD-003** | 팀 별 모집공고 조회 | ✅ 완료 | `TeamController` | 팀 상세에서 확인 가능 |
 | **TBD-004** | 공고 상세 조회 | ✅ 완료 | `RecruitController.getDetail` | |
 | **TBD-005** | 공고 댓글 작성 | ✅ 완료 | `CommentController` | 커뮤니티 댓글과 통합 |
-| **TBD-006** | 공고 지원 | ❌ 미구현 | | `Recruit` 엔티티는 존재하나 지원(Apply) 로직 없음 |
+| **TBD-006** | 공고 지원 | ✅ 완료 | `RecruitController.applyRecruit` | `RecruitApply` (M:N) 구현됨 |
 
 ### 1.4 관리자 (Admin)
 | 기능 ID | 기능명 | 상태 | 구현 코드 | 비고 |
 |:---:|:---:|:---:|:---:|:---|
 | - | 역할/권한 관리 | ✅ 완료 | `AdminController` | 명세서엔 없으나 구현됨 (RBAC) |
+| **ADM-002** | 사용자 삭제 | ✅ 완료 | `AdminController.deleteUser` | Soft Delete |
+| **ADM-006** | 게시글 삭제 | ✅ 완료 | `AdminController.deleteArticle` | Soft Delete |
+| **ADM-007** | 공지사항 작성 | ✅ 완료 | `AdminController.createNotice` | `Article.isPinned` 활용 |
 
 ---
 
@@ -50,12 +53,11 @@
 ### 2.1 인증 및 회원관리 (Critical)
 *   **SGU-001 (아우누리 이메일 인증)**: `UserSignupRequest`에 이메일 필드는 있으나, 메일 발송 및 인증 코드 검증 로직이 없습니다.
 *   **USR-001 (비밀번호 변경)**: 초기화 링크 전송 및 재설정 API가 없습니다.
-*   **USR-002 (회원 탈퇴)**: 탈퇴 API 및 유예 기간 처리 로직이 없습니다.
 
 ### 2.2 기타 (Minor)
 *   **TAK-004 (신고)**: 게시글/사용자 신고 기능이 전무합니다.
 *   **CLG-001 (챌린지/도전과제)**: Phase 4 Part 2 예정으로 현재 미구현입니다.
-*   **ADM (관리자 상세)**: 공지사항 관리, 회원 관리(강제 탈퇴 등), 신고 처리 기능이 미구현입니다.
+*   **ADM (관리자 상세)**: 신고 처리 기능이 미구현입니다.
 
 ## 3. 결론
 
