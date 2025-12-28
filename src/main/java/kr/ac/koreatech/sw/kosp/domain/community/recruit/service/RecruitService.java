@@ -10,7 +10,7 @@ import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
-import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
+
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;

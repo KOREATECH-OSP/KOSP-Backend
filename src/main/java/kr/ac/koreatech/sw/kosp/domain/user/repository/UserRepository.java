@@ -13,6 +13,8 @@ public interface UserRepository extends Repository<User, Long> {
     Optional<User> findById(Long id);
 
     Optional<User> findByKutEmail(String kutEmail);
+    boolean existsByKutEmail(String kutEmail);
+    boolean existsByKutId(String kutId);
 
     Optional<User> findByGithubUser_GithubId(Long githubId);
 

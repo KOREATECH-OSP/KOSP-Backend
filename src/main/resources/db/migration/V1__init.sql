@@ -1,14 +1,17 @@
 CREATE TABLE users
 (
-    id         BIGINT AUTO_INCREMENT NOT NULL,
-    created_at TIMESTAMP          NOT NULL,
-    updated_at TIMESTAMP          NOT NULL,
-    name       VARCHAR(50)        NOT NULL,
-    kut_id     VARCHAR(255)       NOT NULL,
-    kut_email  VARCHAR(255)       NOT NULL,
-    password   VARCHAR(255)       NOT NULL,
-    is_deleted BIT(1)             NOT NULL,
-    github_id  BIGINT             NULL,
+    id           BIGINT AUTO_INCREMENT NOT NULL,
+    created_at   TIMESTAMP             NOT NULL,
+    updated_at   TIMESTAMP             NOT NULL,
+    name         VARCHAR(50)           NOT NULL,
+    kut_id       VARCHAR(255)          NOT NULL,
+    kut_email    VARCHAR(255)          NOT NULL,
+    password     VARCHAR(255)          NOT NULL,
+    kut_email    VARCHAR(255)          NOT NULL,
+    password     VARCHAR(255)          NOT NULL,
+    introduction VARCHAR(255)          NULL,
+    github_id    BIGINT                NOT NULL,
+    is_deleted   BIT(1)                NOT NULL,
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 

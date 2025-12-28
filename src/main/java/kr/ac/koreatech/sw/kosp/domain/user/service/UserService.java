@@ -1,17 +1,27 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
-import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
-import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,6 +33,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
+    private final ArticleRepository articleRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -45,4 +56,23 @@ public class UserService {
         log.info("✅ 사용자 생성 완료: userId={}, kutEmail={}", savedUser.getId(), savedUser.getKutEmail());
     }
 
+    @Transactional
+    public void update(Long userId, UserUpdateRequest req) {
+        User user = userRepository.getById(userId);
+        user.updateInfo(req.name(), req.introduction());
+    }
+
+    public UserProfileResponse getProfile(Long userId) {
+        User user = userRepository.getById(userId);
+        return UserProfileResponse.from(user);
+    }
+
+    public ArticleListResponse getPosts(Long userId, Pageable pageable) {
+        User user = userRepository.getById(userId);
+        Page<Article> page = articleRepository.findByAuthor(user, pageable);
+        List<ArticleResponse> posts = page.getContent().stream()
+            .map(article -> ArticleResponse.from(article, false, false)) // Auth not needed for list
+            .toList();
+        return new ArticleListResponse(posts, PageMeta.from(page));
+    }
 }

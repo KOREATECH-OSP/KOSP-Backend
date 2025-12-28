@@ -1,25 +1,30 @@
 package kr.ac.koreatech.sw.kosp.domain.user.api;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
-@Tag(
-    name = "User",
-    description = "사용자 계정(User) 도메인과 관련된 API 모음임. 회원가입과 같이 사용자 엔티티를 생성·관리하는 기능을 제공함."
-)
+@Tag(name = "User", description = "사용자 관리 API")
 @RequestMapping("/v1/users")
 public interface UserApi {
 
-    @PostMapping("/signup")
     @Operation(
         summary = "회원가입 및 즉시 로그인",
         description = """
@@ -28,9 +33,30 @@ public interface UserApi {
             클라이언트는 이 API 한 번 호출로 회원가입과 세션/토큰 발급 과정을 한 번에 수행할 수 있음.
             """
     )
+    @PostMapping("/signup")
     ResponseEntity<Void> signup(
         @RequestBody @Valid UserSignupRequest request,
         HttpServletRequest servletRequest,
         HttpServletResponse servletResponse
+    );
+
+    @Operation(summary = "사용자 정보 수정", description = "자신의 사용자 정보를 수정합니다.")
+    ResponseEntity<Void> update(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long userId,
+        @RequestBody @Valid UserUpdateRequest request
+    );
+
+    @Operation(summary = "사용자 상세 조회 (타인)", description = "다른 사용자의 프로필을 조회합니다.")
+    @GetMapping("/{userId}")
+    ResponseEntity<UserProfileResponse> getProfile(
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "사용자 작성 글 목록", description = "사용자가 작성한 게시글 목록을 조회합니다.")
+    @GetMapping("/{userId}/posts")
+    ResponseEntity<ArticleListResponse> getPosts(
+        @PathVariable Long userId,
+        @Parameter(hidden = true) Pageable pageable
     );
 }
