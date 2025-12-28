@@ -127,8 +127,10 @@ public class PermissionInitializer implements CommandLineRunner {
         Policy policy = policyRepository.findByName(policyName)
             .orElseGet(() -> createPolicy(policyName, policyDesc, permissions));
 
-        policy.updatePermissions(permissions);
-        policyRepository.save(policy);
+        // If policy exists, we do NOT overwrite permissions.
+        // This respects dynamic changes made by Admin.
+        // policy.updatePermissions(permissions);
+        // policyRepository.save(policy);
 
         if (roleRepository.existsByName(roleName)) {
             return;
