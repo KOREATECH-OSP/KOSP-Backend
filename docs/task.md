@@ -65,7 +65,7 @@
 |:---:|:---:|:---:|:---:|:---:|:---|
 | **TBD-006** | 팀게시판 | 모집공고 | 공고 지원 | ✅ 완료 | `Recruit` <-> `User` M:N 관계 (`RecruitApply`) |
 | **ADM-007** | 관리자 | 게시글 | 공지 작성 | ✅ 완료 | `Article.isPinned` + 상단 고정 로직 |
-| **ADM-010** | 관리자 | 점검 | 접근 제한 | Level 2 | Interceptor/Filter 수준에서 제어 필요 (Global Config) |
+| **ADM-010** | 관리자 | 점검 | 접근 제한 | ✅ 완료 | `PermissionAspect` (AOP) + `SecurityContext` |
 
 ---
 
