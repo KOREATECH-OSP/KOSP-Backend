@@ -150,6 +150,30 @@
   }
   ```
 
+### 2.5 사용자 작성 댓글 목록
+- **Endpoint**: `GET /users/{userId}/comments`
+- **Response**: `200 OK`
+  ```json
+  {
+    "comments": [
+      {
+        "id": 105,
+        "articleId": 1,
+        "articleTitle": "React 19 업데이트 정리",
+        "content": "이 부분 자세히 설명해 주실 수 있나요?",
+        "createdAt": "2024-03-15T13:00:00Z",
+        "likes": 2,
+        "isLiked": false,
+        "isMine": true
+      }
+    ],
+    "meta": {
+      "hasNext": false,
+      "lastCommentId": 105
+    }
+  }
+  ```
+
 ---
 
 ## 3. 커뮤니티 (Community & Articles)
