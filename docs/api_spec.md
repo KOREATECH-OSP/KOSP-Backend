@@ -43,6 +43,9 @@
 - [x] 7.4 사용자 역할 변경
 - [x] 7.10 챌린지 생성
 - [x] 7.11 챌린지 삭제
+- [x] 7.12 사용자 정보 수정 (관리자)
+- [x] 7.13 챌린지 수정
+- [x] 7.14 공지사항 삭제
 
 ---
 
@@ -804,7 +807,33 @@
 - **Endpoint**: `DELETE /admin/challenges/{challengeId}`
 - **Response**: `204 No Content`
 
-### 7.12 공지사항 삭제
+### 7.12 사용자 정보 수정 (관리자)
+- **Endpoint**: `PUT /admin/users/{userId}`
+- **Request Body**:
+  ```json
+  {
+    "name": "홍길동",
+    "introduction": "관리자에 의한 수정",
+    "profileImageUrl": "https://..."
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.13 챌린지 수정
+- **Endpoint**: `PUT /admin/challenges/{challengeId}`
+- **Request Body**:
+  ```json
+  {
+    "name": "수정된 챌린지명",
+    "description": "수정된 설명",
+    "condition": "#activity.commits >= 50",
+    "tier": 2,
+    "imageUrl": "https://..."
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.14 공지사항 삭제
 - **Endpoint**: `DELETE /admin/notices/{noticeId}`
 - **Response**: `204 No Content`
 
