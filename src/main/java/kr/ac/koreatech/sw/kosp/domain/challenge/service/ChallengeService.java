@@ -47,6 +47,27 @@ public class ChallengeService {
         log.info("Deleted challenge: {}", challengeId);
     }
 
+
+
+    @Transactional
+    public void updateChallenge(Long challengeId, ChallengeRequest request) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+
+        if (!challenge.getCondition().equals(request.condition())) {
+            validateSpelCondition(request.condition());
+        }
+
+        challenge.update(
+            request.name(),
+            request.description(),
+            request.condition(),
+            request.tier(),
+            request.imageUrl()
+        );
+        log.info("Updated challenge: {}", challengeId);
+    }
+
     private void validateSpelCondition(String condition) {
         try {
             parser.parseExpression(condition);

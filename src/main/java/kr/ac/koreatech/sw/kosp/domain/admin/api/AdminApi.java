@@ -10,6 +10,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -80,4 +81,18 @@ public interface AdminApi {
     @Operation(summary = "챌린지 삭제", description = "관리자 권한으로 챌린지를 삭제합니다.")
     @DeleteMapping("/challenges/{challengeId}")
     ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId);
+
+    @Operation(summary = "사용자 정보 수정 (관리자)", description = "관리자 권한으로 사용자의 정보를 강제로 수정합니다.")
+    @PutMapping("/users/{userId}")
+    ResponseEntity<Void> updateUser(
+        @Parameter(description = "사용자 ID") @PathVariable Long userId,
+        @RequestBody @Valid AdminUserUpdateRequest request
+    );
+
+    @Operation(summary = "챌린지 수정", description = "관리자 권한으로 챌린지 정보를 수정합니다. SpEL 조건을 변경하는 경우 유효성을 검증합니다.")
+    @PutMapping("/challenges/{challengeId}")
+    ResponseEntity<Void> updateChallenge(
+        @Parameter(description = "챌린지 ID") @PathVariable Long challengeId,
+        @RequestBody @Valid ChallengeRequest request
+    );
 }

@@ -46,4 +46,12 @@ public class Challenge extends BaseEntity {
         this.tier = tier;
         this.imageUrl = imageUrl;
     }
+
+    public void update(String name, String description, String condition, Integer tier, String imageUrl) {
+        this.name = name;
+        this.description = description;
+        this.condition = condition;
+        this.tier = tier;
+        this.imageUrl = imageUrl;
+    }
 }

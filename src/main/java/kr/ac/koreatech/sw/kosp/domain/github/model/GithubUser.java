@@ -66,4 +66,8 @@ public class GithubUser extends BaseEntity {
         this.githubToken = githubToken;
     }
 
+    public void updateAvatarUrl(String githubAvatarUrl) {
+        this.githubAvatarUrl = githubAvatarUrl;
+    }
+
 }

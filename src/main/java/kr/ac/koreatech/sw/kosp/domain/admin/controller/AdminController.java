@@ -6,6 +6,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminMemberService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminContentService;
@@ -95,5 +96,19 @@ public class AdminController implements AdminApi {
     public ResponseEntity<Void> deleteChallenge(Long challengeId) {
         challengeService.deleteChallenge(challengeId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(name = "admin:users:update", description = "사용자 정보 수정")
+    public ResponseEntity<Void> updateUser(Long userId, AdminUserUpdateRequest request) {
+        adminMemberService.updateUser(userId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "admin:challenges:update", description = "챌린지 수정")
+    public ResponseEntity<Void> updateChallenge(Long challengeId, ChallengeRequest request) {
+        challengeService.updateChallenge(challengeId, request);
+        return ResponseEntity.ok().build();
     }
 }
