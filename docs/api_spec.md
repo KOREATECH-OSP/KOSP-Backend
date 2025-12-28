@@ -22,6 +22,7 @@
 - [x] 3.9 댓글 삭제
 - [x] 3.10 게시글 좋아요/북마크
 - [x] 3.11 댓글 좋아요
+- [ ] 3.12 게시글 신고
 - [x] 4.1 모집 공고 목록 조회
 - [x] 4.2 모집 공고 상세 조회
 - [x] 4.3 모집 공고 작성
@@ -432,6 +433,21 @@
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 댓글 또는 게시글 없음
+
+### 3.12 게시글 신고
+- **Endpoint**: `POST /community/articles/{articleId}/reports`
+- **Request Body**:
+  ```json
+  {
+    "reason": "SPAM", // "SPAM", "ABUSE", "ADVERTISEMENT", "OTHER"
+    "description": "신고 사유 상세..."
+  }
+  ```
+- **Response**: `201 Created`
+- **Error Response**:
+  - `400 Bad Request`: 사유 없음
+  - `401 Unauthorized`: 인증 실패
+  - `404 Not Found`: 게시글 없음
 
 ---
 
