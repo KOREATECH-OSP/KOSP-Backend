@@ -20,8 +20,8 @@ public class UserActivityController implements UserActivityApi {
 
     @Override
     @Permit(permitAll = true, description = "사용자 작성 글 목록")
-    public ResponseEntity<ArticleListResponse> getPosts(Long userId, Pageable pageable) {
-        return ResponseEntity.ok(userActivityService.getPosts(userId, pageable));
+    public ResponseEntity<ArticleListResponse> getPosts(User user, Long userId, Pageable pageable) {
+        return ResponseEntity.ok(userActivityService.getPosts(userId, pageable, user));
     }
 
     @Override

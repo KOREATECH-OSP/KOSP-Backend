@@ -33,17 +33,11 @@ public class UserActivityService {
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final CommentLikeRepository commentLikeRepository;
 
-    public ArticleListResponse getPosts(Long userId, Pageable pageable) {
+    public ArticleListResponse getPosts(Long userId, Pageable pageable, User user) {
         User author = User.builder().id(userId).build();
         Page<Article> page = articleRepository.findByAuthor(author, pageable);
         
-        // AuthUser(currentUser)가 없으므로 본인의 좋아요/북마크 여부는 알 수 없음 (false 처리)
-        // 하지만 만약 조회 기능에 로그인한 유저 정보가 넘어온다면 여기서 처리 가능.
-        // 현재 API 스펙상 getPosts에는 로그인 유저 정보가 안 넘어옴 (Controller 확인 필요).
-        // Controller에서는 getPosts(Long userId, Pageable pageable) 만 받음.
-        // 따라서 isLiked, isBookmarked는 false로 처리.
-        
-        return toArticleResponse(page, null);
+        return toArticleResponse(page, user);
     }
 
     public CommentListResponse getComments(Long userId, Pageable pageable, User user) {
