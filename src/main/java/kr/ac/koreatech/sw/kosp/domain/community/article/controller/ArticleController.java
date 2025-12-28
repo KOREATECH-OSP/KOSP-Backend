@@ -8,6 +8,7 @@ import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleLikeResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
@@ -93,6 +94,17 @@ public class ArticleController implements ArticleApi {
         articleService.delete(user, id);
         return ResponseEntity.noContent().build();
     }
+    @Override
+    @PostMapping("/{id}/likes")
+    @Permit(name = "article:like", description = "게시글 좋아요")
+    public ResponseEntity<ToggleLikeResponse> toggleLike(
+        @AuthUser User user,
+        @PathVariable Long id
+    ) {
+        boolean isLiked = articleService.toggleLike(user, id);
+        return ResponseEntity.ok(new ToggleLikeResponse(isLiked));
+    }
+
     @Override
     @PostMapping("/{id}/bookmarks")
     @Permit(name = "article:bookmark", description = "게시글 북마크")

@@ -58,6 +58,14 @@ public interface ArticleApi {
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long id
     );
+
+    @Operation(summary = "게시글 좋아요", description = "게시글 좋아요를 토글합니다.")
+    @PostMapping("/{id}/likes")
+    ResponseEntity<kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleLikeResponse> toggleLike(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long id
+    );
+
     @Operation(summary = "게시글 북마크", description = "게시글 북마크를 토글합니다.")
     @PostMapping("/{id}/bookmarks")
     ResponseEntity<kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleBookmarkResponse> toggleBookmark(
