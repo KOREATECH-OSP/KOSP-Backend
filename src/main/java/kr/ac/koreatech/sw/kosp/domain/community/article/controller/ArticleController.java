@@ -8,6 +8,7 @@ import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.service.ArticleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -91,5 +92,15 @@ public class ArticleController implements ArticleApi {
     ) {
         articleService.delete(user, id);
         return ResponseEntity.noContent().build();
+    }
+    @Override
+    @PostMapping("/{id}/bookmarks")
+    @Permit(name = "article:bookmark", description = "게시글 북마크")
+    public ResponseEntity<ToggleBookmarkResponse> toggleBookmark(
+        @AuthUser User user,
+        @PathVariable Long id
+    ) {
+        boolean isBookmarked = articleService.toggleBookmark(user, id);
+        return ResponseEntity.ok(new ToggleBookmarkResponse(isBookmarked));
     }
 }
