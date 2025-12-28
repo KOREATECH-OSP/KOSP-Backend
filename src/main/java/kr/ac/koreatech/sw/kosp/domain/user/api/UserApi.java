@@ -52,11 +52,4 @@ public interface UserApi {
     ResponseEntity<UserProfileResponse> getProfile(
         @PathVariable Long userId
     );
-
-    @Operation(summary = "사용자 작성 글 목록", description = "사용자가 작성한 게시글 목록을 조회합니다.")
-    @GetMapping("/{userId}/posts")
-    ResponseEntity<ArticleListResponse> getPosts(
-        @PathVariable Long userId,
-        @Parameter(hidden = true) Pageable pageable
-    );
 }

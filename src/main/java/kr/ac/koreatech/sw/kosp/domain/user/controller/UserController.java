@@ -62,10 +62,4 @@ public class UserController implements UserApi {
     public ResponseEntity<UserProfileResponse> getProfile(Long userId) {
         return ResponseEntity.ok(userService.getProfile(userId));
     }
-
-    @Override
-    @Permit(permitAll = true, description = "사용자 작성 글 목록")
-    public ResponseEntity<ArticleListResponse> getPosts(Long userId, Pageable pageable) {
-        return ResponseEntity.ok(userService.getPosts(userId, pageable));
-    }
 }
