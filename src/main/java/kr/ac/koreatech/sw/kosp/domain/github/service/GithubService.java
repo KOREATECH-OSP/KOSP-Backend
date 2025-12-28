@@ -5,8 +5,9 @@ package kr.ac.koreatech.sw.kosp.domain.github.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubActivity;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubActivityRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubProfileRepository;
+import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -20,15 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class GithubService {
 
-    private final GithubActivityRepository githubActivityRepository;
+    private final GithubProfileRepository githubProfileRepository;
     private final UserRepository userRepository;
 
     /**
      * GitHub API를 통해 활동 데이터를 수집하고 저장합니다.
-     * (현재는 Mock 데이터로 시뮬레이션 구현, 실제 API 연동 시 교체 필요)
-     */
-    /**
-     * GitHub API를 통해 활동 데이터를 수집하고 저장합니다.
+     * (현재는 Mock 데이터로 시뮬레이션 구현, 추후 GithubApiClient로 분리 예정)
      */
     @Transactional
     public void updateActivity(Long userId) {
@@ -38,8 +36,9 @@ public class GithubService {
              log.warn("User {} has no linked GitHub account.", userId);
              return;
         }
-
-        processActivityUpdate(user);
+        
+        // MongoDB Update (Mock)
+        updateGithubProfile(user.getGithubUser().getGithubId());
     }
 
     private User findUserOrThrow(Long userId) {
@@ -51,20 +50,26 @@ public class GithubService {
         return user.getGithubUser() == null;
     }
 
-    private void processActivityUpdate(User user) {
-        // Mock data for Phase 2
-        long mockCommits = (long) (Math.random() * 500);
-        long mockStars = (long) (Math.random() * 50);
+    private void updateGithubProfile(Long githubId) {
+        // Mock Data Creation
+        GithubProfile profile = GithubProfile.builder()
+            .githubId(githubId)
+            .bio("Open Source Enthusiast")
+            .tier(2) // Silver
+            .followers(100)
+            .following(50)
+            .achievements(List.of("Pull Shark", "YOLO"))
+            .stats(GithubProfile.Stats.builder()
+                .totalCommits(150L)
+                .totalIssues(10L)
+                .totalPrs(5L)
+                .totalStars(20L)
+                .totalRepos(15L)
+                .build())
+            .score(1250.5)
+            .build();
 
-        GithubActivity activity = getOrCreateActivity(user);
-        activity.update(mockCommits, 20L, 5L, mockStars, 3L);
-        
-        githubActivityRepository.save(activity);
-        log.info("Updated GitHub activity for user {}: commits={}", user.getId(), mockCommits);
-    }
-
-    private GithubActivity getOrCreateActivity(User user) {
-        return githubActivityRepository.findByUser(user)
-            .orElse(GithubActivity.builder().user(user).build());
+        githubProfileRepository.save(profile);
+        log.info("Updated GitHub profile for githubId {}: tier={}", githubId, profile.getTier());
     }
 }

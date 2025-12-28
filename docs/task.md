@@ -27,7 +27,7 @@
 |:---:|:---:|:---:|:---:|:---|
 | **USR-001** | 비밀번호 | 비밀번호 변경 | ⏳ 대기 | 이메일 발송 선행 필요 |
 | **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (Soft Delete) |
-| **USR-003** | 활동 | 깃허브 활동 내역 조회 | 🧪 예정 | GitHub API 연동 필요 |
+| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | GitHub API 연동 (크롤링 데이터 구조 설계) 완료 |
 | **USR-004** | 활동 | 작성한 글 조회 | ✅ 완료 | `UserActivityController` (빈 리스트 반환 확인) |
 | **USR-005** | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController` |
 | **USR-006** | 활동 | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController` |
@@ -62,9 +62,9 @@
 |:---:|:---:|:---:|:---:|:---|
 | **ADM-001** | 사용자 | 사용자 정보 변경 | ⚠️ 부분 | 본인 수정만 구현됨. 관리자용 API 필요 |
 | **ADM-002** | 사용자 | 사용자 삭제 | ✅ 완료 | `AdminController` (Soft Delete) |
-| **ADM-003** | 챌린지 | 챌린지 추가 | 🧪 예정 | SpEL 조건 파싱 (다음 할 일) |
-| **ADM-004** | 챌린지 | 챌린지 삭제 | 🧪 예정 | |
-| **ADM-005** | 챌린지 | 챌린지 수정 | 🧪 예정 | |
+| **ADM-003** | 챌린지 | 챌린지 추가 | ✅ 완료 | SpEL 검증 로직 포함 (`AdminController`) |
+| **ADM-004** | 챌린지 | 챌린지 삭제 | ✅ 완료 | `AdminController` |
+| **ADM-005** | 챌린지 | 챌린지 수정 | 🧪 예정 | (우선순위 낮음 - 삭제 후 재생성 권장) |
 | **ADM-006** | 게시글 | 게시글 삭제 | ✅ 완료 | `AdminController` |
 | **ADM-007** | 게시글 | 공지 작성 | ✅ 완료 | `AdminController` (`isPinned`) |
 | **ADM-008** | 게시글 | 공지 삭제 | ✅ 완료 | `AdminController` |
@@ -76,8 +76,9 @@
 ## Next Action Plan
 
 **Priority 3: Complex Logic (진행 중)**
-1.  **챌린지 관리자 기능 (ADM-003~005)**: 관리자가 SpEL을 사용하여 동적으로 챌린지를 생성/수정/삭제하는 기능.
+1.  **챌린지 데이터 초기화**: `ChallengeInitializer`를 통해 기본 티어(브론즈/실버/골드) 자동 생성.
 2.  **깃허브 연동 (USR-003)**: Mock 데이터를 실제 GitHub API로 교체.
 
 **Priority 4: Infrastructure / AI**
 1.  **신고 기능 (TAK-004, ADM-009)**: 기획 확정 후 구현.
+2.  **챌린지 수정 (ADM-005)**: 필요 시 구현 (현재는 삭제 후 생성으로 대체 가능).

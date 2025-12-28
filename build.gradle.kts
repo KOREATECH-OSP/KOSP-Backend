@@ -31,6 +31,7 @@ dependencies {
     implementation(libs.spring.boot.starter.validation)
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.data.redis)
+    implementation(libs.spring.boot.starter.data.mongodb)
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
     implementation(libs.mysql.connector.j)
 

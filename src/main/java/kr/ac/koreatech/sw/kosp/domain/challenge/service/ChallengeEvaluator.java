@@ -13,8 +13,8 @@ import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubActivity;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubActivityRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubProfileRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class ChallengeEvaluator {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
-    private final GithubActivityRepository githubActivityRepository;
+    private final GithubProfileRepository githubProfileRepository;
     
     // SpEL Parser is thread-safe
     private final ExpressionParser parser = new SpelExpressionParser();
@@ -38,23 +38,29 @@ public class ChallengeEvaluator {
     public void evaluate(User user) {
         log.info("Starting challenge evaluation for user: {}", user.getId());
 
-        githubActivityRepository.findByUser(user)
+        if (user.getGithubUser() == null) {
+            log.warn("No linked GitHub account for user {}", user.getId());
+            return;
+        }
+
+        Long githubId = user.getGithubUser().getGithubId();
+        githubProfileRepository.findByGithubId(githubId)
             .ifPresentOrElse(
-                activity -> evaluateAll(user, activity),
-                () -> log.warn("No GitHub activity found for user {}", user.getId())
+                profile -> evaluateAll(user, profile),
+                () -> log.warn("No GitHub profile found for githubId {}", githubId)
             );
     }
 
-    private void evaluateAll(User user, GithubActivity activity) {
-        StandardEvaluationContext context = createEvaluationContext(activity);
+    private void evaluateAll(User user, GithubProfile profile) {
+        StandardEvaluationContext context = createEvaluationContext(profile);
         List<Challenge> challenges = challengeRepository.findAll();
         
         challenges.forEach(challenge -> tryEvaluate(user, challenge, context));
     }
 
-    private StandardEvaluationContext createEvaluationContext(GithubActivity activity) {
+    private StandardEvaluationContext createEvaluationContext(GithubProfile profile) {
         StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("activity", activity.getStats());
+        context.setVariable("activity", profile.getStats());
         return context;
     }
 
