@@ -201,3 +201,37 @@ ALTER TABLE article_bookmark
 
 ALTER TABLE article_bookmark
     ADD CONSTRAINT fk_article_bookmark_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+CREATE TABLE comment
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    article_id BIGINT                NOT NULL,
+    author_id  BIGINT                NOT NULL,
+    content    TEXT                  NOT NULL,
+    likes      INT                   NOT NULL,
+    CONSTRAINT pk_comment PRIMARY KEY (id)
+);
+
+ALTER TABLE comment
+    ADD CONSTRAINT fk_comment_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+ALTER TABLE comment
+    ADD CONSTRAINT fk_comment_on_author FOREIGN KEY (author_id) REFERENCES users (id);
+
+CREATE TABLE comment_like
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    comment_id BIGINT                NOT NULL,
+    CONSTRAINT pk_comment_like PRIMARY KEY (id)
+);
+
+ALTER TABLE comment_like
+    ADD CONSTRAINT fk_comment_like_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE comment_like
+    ADD CONSTRAINT fk_comment_like_on_comment FOREIGN KEY (comment_id) REFERENCES comment (id);
