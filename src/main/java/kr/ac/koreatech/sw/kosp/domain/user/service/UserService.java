@@ -33,8 +33,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
-    private final ArticleRepository articleRepository;
-
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
@@ -65,14 +63,5 @@ public class UserService {
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
-    }
-
-    public ArticleListResponse getPosts(Long userId, Pageable pageable) {
-        User user = userRepository.getById(userId);
-        Page<Article> page = articleRepository.findByAuthor(user, pageable);
-        List<ArticleResponse> posts = page.getContent().stream()
-            .map(article -> ArticleResponse.from(article, false, false)) // Auth not needed for list
-            .toList();
-        return new ArticleListResponse(posts, PageMeta.from(page));
     }
 }
