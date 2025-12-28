@@ -9,11 +9,14 @@ import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitList
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitService;
+
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -91,5 +94,17 @@ public class RecruitController implements RecruitApi {
     ) {
         recruitService.delete(user, id);
         return ResponseEntity.noContent().build();
+    }
+    
+    @Override
+    @PatchMapping("/{id}/status")
+    @Permit(name = "recruit:status", description = "모집 상태 변경")
+    public ResponseEntity<Void> updateStatus(
+        @AuthUser User user,
+        @PathVariable Long id,
+        @RequestBody @Valid RecruitStatusRequest request
+    ) {
+        recruitService.updateStatus(user, id, request.status());
+        return ResponseEntity.ok().build();
     }
 }
