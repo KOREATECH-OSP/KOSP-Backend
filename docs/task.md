@@ -20,7 +20,7 @@
 | **SGI-001** | 로그인 | 이메일 | 이메일 로그인 | ✅ 완료 | `AuthController.login` | 400(형식), 401(불일치), 미가입시 가입유도 |
 | **SGI-002** | 로그인 | 깃허브 | 소셜 로그인 | ✅ 완료 | `OAuth2Controller` | 연동 계정 없음(가입유도), 서버오류 |
 | **SGU-002** | 회원가입 | 계정정보 | 회원가입 처리 | ✅ 완료 | `UserController.signup` | 필드검증(학번,이름 등), 중복시 오류 |
-| **USR-004** | 회원정보 | 활동 | 작성한 글 조회 | ✅ 완료 | `UserController.getPosts` | 글 없을 시 빈 배열 |
+| **USR-004** | 회원정보 | 활동 | 작성한 글 조회 | ✅ 완료 | `UserActivityController.getPosts` | 글 없을 시 빈 배열 |
 | **ADM-001** | 관리자 | 사용자 | 사용자 정보 변경 | ⚠️ 부분 | `UserController.update` | 본인 정보 수정만 구현됨. 관리자 기능 추후 필요 |
 
 ### Community (Article)
@@ -50,7 +50,7 @@
 | 기능 ID | 대분류 | 소분류 | 기능명 | 예상 난이도 | 비고 |
 |:---:|:---:|:---:|:---:|:---:|:---|
 | **USR-005** | 회원정보 | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController.getComments` |
-| **USR-006** | 회원정보 | 활동 | 즐겨찾기 조회 | Level 1 | 단순 DB 조회 테이블 조인 |
+| **USR-006** | 회원정보 | 활동 | 즐겨찾기 조회 | Level 1 | `UserActivityController`에 구현 예정 |
 | **ADM-002** | 관리자 | 사용자 | 사용자 삭제 | Level 1 | `Soft Delete` 처리 |
 | **ADM-006** | 관리자 | 게시글 | 게시글 삭제 | Level 1 | `Soft Delete` (관리자 권한) |
 | **ADM-008** | 관리자 | 게시글 | 공지 삭제 | Level 1 | 단순 삭제 |
@@ -108,8 +108,8 @@
 ## Next Action Plan (Suggested)
 
 **Step 1: Priority 1 (Simple CRUD) 구현**
-1.  `MyCommentController` (USR-005): 내 댓글 목록
-2.  `MyBookmarkController` (USR-006): 즐겨찾기 목록
+1.  `UserActivityController` (USR-005): 내 댓글 목록
+2.  `UserActivityController` (USR-006): 즐겨찾기 목록 (예정)
 3.  `AdminController` 추가: 사용자 삭제, 공지 삭제
 
 **Step 2: Priority 2 (Connected) 구현**
