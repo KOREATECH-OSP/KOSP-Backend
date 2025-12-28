@@ -16,11 +16,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
 
 @Tag(name = "Admin", description = "관리자 전용 API")
 @RequestMapping("/v1/admin")
 public interface AdminApi {
+
+    @Operation(summary = "사용자 삭제 (강제 탈퇴)", description = "관리자 권한으로 사용자를 강제 탈퇴(Soft Delete) 처리합니다.")
+    @DeleteMapping("/users/{userId}")
+    ResponseEntity<Void> deleteUser(@PathVariable Long userId);
+
+    @Operation(summary = "게시글 삭제", description = "관리자 권한으로 게시글을 삭제(Soft Delete)합니다.")
+    @DeleteMapping("/articles/{articleId}")
+    ResponseEntity<Void> deleteArticle(@PathVariable Long articleId);
+
+    @Operation(summary = "공지사항 삭제", description = "관리자 권한으로 공지사항을 삭제합니다. (게시글 삭제와 동일 로직)")
+    @DeleteMapping("/notices/{noticeId}")
+    ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId);
 
     @Operation(summary = "모든 역할(Role) 조회")
     @ApiResponse(responseCode = "200", description = "성공")

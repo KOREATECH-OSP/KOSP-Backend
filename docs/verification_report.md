@@ -12,7 +12,9 @@
 | **SGI-001** | 이메일 로그인 | ✅ 완료 | `AuthController.login` | DB 기반 로그인 |
 | **SGI-002** | 소셜 로그인 | ✅ 완료 | `OAuth2Controller` | GitHub 로그인 |
 | **SGU-002** | 회원가입 처리 | ✅ 완료 (복구됨) | `UserController.signup` | `UserApi` 복구 완료 |
-| **USR-004** | 작성한 글 조회 | ✅ 완료 | `UserController.getPosts` | |
+| **USR-004** | 작성한 글 조회 | ✅ 완료 | `UserActivityController.getPosts` | |
+| **USR-005** | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController.getComments` | |
+| **USR-006** | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController.getBookmarks` | |
 | **ADM-001** | 사용자 정보 변경 | ⚠️ 부분 완료 | `UserController.update` | 본인 정보 수정만 구현됨 (관리자 기능은 미구현) |
 
 ### 1.2 커뮤니티 (Community)
@@ -49,8 +51,6 @@
 *   **SGU-001 (아우누리 이메일 인증)**: `UserSignupRequest`에 이메일 필드는 있으나, 메일 발송 및 인증 코드 검증 로직이 없습니다.
 *   **USR-001 (비밀번호 변경)**: 초기화 링크 전송 및 재설정 API가 없습니다.
 *   **USR-002 (회원 탈퇴)**: 탈퇴 API 및 유예 기간 처리 로직이 없습니다.
-*   **USR-005 (작성한 댓글 조회)**: `UserApi`에 엔드포인트가 없습니다.
-*   **USR-006 (즐겨찾기 조회)**: `UserApi`에 엔드포인트가 없습니다.
 
 ### 2.2 기타 (Minor)
 *   **TAK-004 (신고)**: 게시글/사용자 신고 기능이 전무합니다.

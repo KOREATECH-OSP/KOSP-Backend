@@ -174,6 +174,31 @@
   }
   ```
 
+
+### 2.6 사용자 즐겨찾기 목록
+- **Endpoint**: `GET /users/{userId}/bookmarks`
+- **Response**: `200 OK`
+  ```json
+  {
+    "posts": [
+      {
+        "id": 1,
+        "title": "즐겨찾기한 글 제목",
+        "createdAt": "2024-11-28",
+        "views": 10,
+        "comments": 2
+      }
+    ]
+  }
+  ```
+
+### 2.7 회원 탈퇴
+- **Endpoint**: `DELETE /users/{userId}`
+- **Response**: `204 No Content`
+- **Error Response**:
+  - `401 Unauthorized`: 인증 실패
+  - `403 Forbidden`: 본인 아님
+
 ---
 
 ## 3. 커뮤니티 (Community & Articles)
@@ -538,6 +563,18 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
+### 4.10 모집 공고 지원
+- **Endpoint**: `POST /community/recruits/{recruitId}/apply`
+- **Request Body**:
+  ```json
+  {
+    "reason": "지원 동기 및 각오",
+    "portfolioUrl": "https://..."
+  }
+  ```
+- **Response**: `201 Created`
+
+
 
 
 ---
@@ -624,22 +661,7 @@
     }
   }
 
-### 2.6 사용자 즐겨찾기 목록
-- **Endpoint**: `GET /users/{userId}/bookmarks`
-- **Response**: `200 OK`
-  ```json
-  {
-    "posts": [
-      {
-        "id": 1,
-        "title": "즐겨찾기한 글 제목",
-        "createdAt": "2024-11-28",
-        "views": 10,
-        "comments": 2
-      }
-    ]
-  }
-  ```
+
 
 ---
 
@@ -690,3 +712,64 @@
   ```
 - **Response**: `200 OK`
   ```
+  ```
+
+### 7.5 사용자 삭제 (강제 탈퇴)
+- **Endpoint**: `DELETE /admin/users/{userId}`
+- **Response**: `204 No Content`
+
+### 7.6 게시글 삭제
+- **Endpoint**: `DELETE /admin/articles/{articleId}`
+- **Response**: `204 No Content`
+
+### 7.7 공지사항 작성
+- **Endpoint**: `POST /admin/notices`
+- **Request Body**:
+  ```json
+  {
+    "title": "공지 제목",
+    "content": "공지 내용",
+    "isPinned": true
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.8 신고 목록 조회
+- **Endpoint**: `GET /admin/reports`
+- **Response**: `200 OK`
+  ```json
+  {
+    "reports": [
+      {
+        "id": 1,
+        "targetType": "ARTICLE",
+        "targetId": 100,
+        "reason": "SPAM",
+        "reporterId": 10,
+        "status": "PENDING"
+      }
+    ]
+  }
+  ```
+
+### 7.9 신고 처리
+- **Endpoint**: `POST /admin/reports/{reportId}`
+- **Request Body**:
+  ```json
+  {
+    "action": "DELETE_CONTENT" // or "BAN_USER", "REJECT"
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.10 챌린지 관리
+- **Endpoint**: `POST /admin/challenges`
+- **Request Body**:
+  ```json
+  {
+    "title": "New Challenge",
+    "description": "...",
+    "condition": "PR_COUNT >= 5"
+  }
+  ```
+- **Response**: `201 Created`

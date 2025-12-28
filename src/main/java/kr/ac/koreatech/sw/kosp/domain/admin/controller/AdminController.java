@@ -7,6 +7,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminMemberService;
+import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminContentService;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.RoleAdminService;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,28 @@ public class AdminController implements AdminApi {
 
     private final RoleAdminService roleAdminService;
     private final AdminMemberService adminMemberService;
+    private final AdminContentService adminContentService;
+
+    @Override
+    @Permit(name = "admin:users:delete", description = "사용자 강제 탈퇴")
+    public ResponseEntity<Void> deleteUser(Long userId) {
+        adminMemberService.deleteUser(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(name = "admin:articles:delete", description = "게시글 삭제")
+    public ResponseEntity<Void> deleteArticle(Long articleId) {
+        adminContentService.deleteArticle(articleId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(name = "admin:notices:delete", description = "공지 삭제")
+    public ResponseEntity<Void> deleteNotice(Long noticeId) {
+        adminContentService.deleteNotice(noticeId);
+        return ResponseEntity.noContent().build();
+    }
 
     @Override
     @Permit(name = "admin:roles:read", description = "역할 목록 조회")

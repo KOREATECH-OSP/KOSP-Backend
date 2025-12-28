@@ -68,6 +68,10 @@ public class Article extends BaseEntity {
     private Integer commentsCount = 0;
 
     @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"))
     @Column(name = "tag")
@@ -95,5 +99,9 @@ public class Article extends BaseEntity {
 
     public void increaseViews() {
         this.views++;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

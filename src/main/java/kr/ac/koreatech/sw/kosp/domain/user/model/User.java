@@ -116,6 +116,10 @@ public class User extends BaseEntity implements UserDetails {
         this.githubUser = githubUser;
     }
 
+    public void delete() {
+        this.isDeleted = true;
+    }
+
     // UserDetails Implementation
 
     @Setter
