@@ -25,4 +25,8 @@ public class EmailVerification {
     public void verify() {
         this.isVerified = true;
     }
+
+    public void updateTtl(long ttl) {
+        this.ttl = ttl;
+    }
 }

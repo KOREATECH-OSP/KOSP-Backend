@@ -23,6 +23,8 @@ public class EmailVerificationService {
     
     private static final long CODE_TTL = 300L; // 5 minutes
 
+    private static final long SIGNUP_WINDOW_TTL = 1800L; // 30 minutes for signup completion
+
     @Transactional
     public void sendCertificationMail(String email) {
         String code = generateCode();
@@ -51,8 +53,21 @@ public class EmailVerificationService {
         }
 
         verification.verify();
+        verification.updateTtl(SIGNUP_WINDOW_TTL); // Extend TTL for signup
         emailVerificationRepository.save(verification);
         return true;
+    }
+    
+    @Transactional
+    public void completeSignupVerification(String email) {
+        EmailVerification verification = emailVerificationRepository.findById(email)
+                .orElseThrow(() -> new GlobalException(EMAIL_NOT_FOUND));
+
+        if (!verification.isVerified()) {
+            throw new GlobalException(EMAIL_NOT_VERIFIED);
+        }
+
+        emailVerificationRepository.delete(verification);
     }
     
     public EmailVerification getVerification(String email) {
