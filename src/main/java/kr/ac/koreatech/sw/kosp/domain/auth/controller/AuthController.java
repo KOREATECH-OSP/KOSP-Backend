@@ -75,8 +75,11 @@ public class AuthController implements AuthApi {
     @Override
     @PostMapping("/password/reset")
     @Permit(permitAll = true, description = "비밀번호 재설정 메일 발송")
-    public ResponseEntity<Void> sendPasswordResetMail(@RequestBody @Valid EmailRequest request) {
-        userPasswordService.sendPasswordResetMail(request.email());
+    public ResponseEntity<Void> sendPasswordResetMail(
+        @RequestBody @Valid EmailRequest request,
+        @kr.ac.koreatech.sw.kosp.global.host.ServerURL String serverUrl
+    ) {
+        userPasswordService.sendPasswordResetMail(request.email(), serverUrl);
         return ResponseEntity.ok().build();
     }
 

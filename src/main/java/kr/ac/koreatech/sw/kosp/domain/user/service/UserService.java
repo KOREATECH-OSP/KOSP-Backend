@@ -78,4 +78,15 @@ public class UserService {
         User user = userRepository.getById(userId);
         user.delete();
     }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.getById(userId);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new GlobalException(ExceptionMessage.AUTHENTICATION);
+        }
+
+        user.changePassword(newPassword, passwordEncoder);
+    }
 }
