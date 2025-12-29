@@ -112,12 +112,12 @@ public class PermissionInitializer implements CommandLineRunner {
     }
 
     private void initStudentRole(Set<Permission> permissions) {
-        Set<Permission> filtered = filterPermissions(permissions, "article", "recruit");
+        Set<Permission> filtered = filterPermissions(permissions, "article", "recruit", "comment", "team");
         createRoleIfNotExists("ROLE_STUDENT", "학생", "StudentPolicy", "학생 권한 정책 (게시글 및 모집 공고 관리)", filtered);
     }
 
     private void initEmployeeRole(Set<Permission> permissions) {
-        Set<Permission> filtered = filterPermissions(permissions, "article", "recruit");
+        Set<Permission> filtered = filterPermissions(permissions, "article", "recruit", "comment", "team");
         createRoleIfNotExists("ROLE_EMPLOYEE", "교직원", "EmployeePolicy", "교직원 권한 정책 (게시글 및 모집 공고 관리)", filtered);
     }
 

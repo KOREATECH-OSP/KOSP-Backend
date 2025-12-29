@@ -71,9 +71,11 @@ public class ArticleService {
         Optional<ArticleLike> like = articleLikeRepository.findByUserAndArticle(user, article);
         if (like.isPresent()) {
             articleLikeRepository.delete(like.get());
+            article.decrementLikes();
             return false;
         }
         articleLikeRepository.save(ArticleLike.builder().user(user).article(article).build());
+        article.incrementLikes();
         return true;
     }
 

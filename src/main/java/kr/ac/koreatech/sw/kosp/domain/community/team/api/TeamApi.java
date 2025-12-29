@@ -21,21 +21,21 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface TeamApi {
 
     @Operation(summary = "팀 목록 조회", description = "팀 목록을 조회합니다.")
-    @GetMapping("/teams")
+    @GetMapping("/v1/teams")
     ResponseEntity<TeamListResponse> getList(
         @RequestParam(required = false, defaultValue = "") String search,
         @Parameter(hidden = true) Pageable pageable
     );
 
     @Operation(summary = "팀 생성", description = "새로운 팀을 생성합니다.")
-    @PostMapping("/teams")
+    @PostMapping("/v1/teams")
     ResponseEntity<Void> create(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestBody @Valid TeamCreateRequest request
     );
 
     @Operation(summary = "팀 상세 조회", description = "팀 상세 정보를 조회합니다.")
-    @GetMapping("/teams/{teamId}")
+    @GetMapping("/v1/teams/{teamId}")
     ResponseEntity<TeamDetailResponse> getTeam(
         @PathVariable Long teamId
     );
