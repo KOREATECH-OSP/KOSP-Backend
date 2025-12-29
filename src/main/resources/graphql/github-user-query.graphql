@@ -5,14 +5,26 @@ query {
     followers { totalCount }
     following { totalCount }
     contributionsCollection {
-      contributionCalendar { totalContributions }
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays {
+            date
+            contributionCount
+          }
+        }
+      }
       totalCommitContributions
       totalIssueContributions
       totalPullRequestContributions
       totalRepositoryContributions
     }
-    repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: PUSHED_AT, direction: DESC}) {
+    repositories(first: 10, after: %s, ownerAffiliations: OWNER, orderBy: {field: PUSHED_AT, direction: DESC}) {
       totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       nodes {
         name
         url
@@ -35,10 +47,16 @@ query {
         defaultBranchRef {
           target {
             ... on Commit {
-              history(first: 100) {
+              history(first: 20) {
                 totalCount
                 edges {
                   node {
+                    committedDate
+                    author {
+                      user {
+                        login
+                      }
+                    }
                     additions
                     deletions
                   }

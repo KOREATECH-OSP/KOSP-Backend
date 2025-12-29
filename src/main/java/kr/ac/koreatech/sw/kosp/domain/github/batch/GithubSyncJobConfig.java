@@ -51,6 +51,7 @@ public class GithubSyncJobConfig {
             .reader(userReader())
             .processor(githubActivityProcessor)
             .writer(userSyncWriter)
+            .taskExecutor(taskExecutor()) // Enable Parallel Processing
             .build();
     }
 
@@ -63,6 +64,16 @@ public class GithubSyncJobConfig {
             .pageSize(CHUNK_SIZE)
             .sorts(Collections.singletonMap("id", Sort.Direction.ASC))
             .build();
+    }
+
+    @Bean
+    public org.springframework.core.task.TaskExecutor taskExecutor() {
+        org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor executor = new org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(4); // 4 concurrent threads
+        executor.setMaxPoolSize(8);
+        executor.setThreadNamePrefix("github-sync-");
+        executor.initialize();
+        return executor;
     }
     
     // Removed MongoItemWriter bean as we use custom UserSyncWriter
