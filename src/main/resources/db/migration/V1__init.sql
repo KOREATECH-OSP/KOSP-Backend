@@ -300,3 +300,40 @@ ALTER TABLE challenge_history
 
 ALTER TABLE challenge_history
     ADD CONSTRAINT fk_challenge_history_on_challenge FOREIGN KEY (challenge_id) REFERENCES challenge (id);
+
+CREATE TABLE recruit_apply
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    created_at    TIMESTAMP             NOT NULL,
+    updated_at    TIMESTAMP             NOT NULL,
+    recruit_id    BIGINT                NOT NULL,
+    user_id       BIGINT                NOT NULL,
+    status        VARCHAR(255)          NOT NULL,
+    reason        VARCHAR(255)          NOT NULL,
+    portfolio_url VARCHAR(255)          NULL,
+    CONSTRAINT pk_recruit_apply PRIMARY KEY (id)
+);
+
+ALTER TABLE recruit_apply
+    ADD CONSTRAINT fk_recruit_apply_on_recruit FOREIGN KEY (recruit_id) REFERENCES recruit (id);
+
+ALTER TABLE recruit_apply
+    ADD CONSTRAINT fk_recruit_apply_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+CREATE TABLE report
+(
+    id           BIGINT AUTO_INCREMENT NOT NULL,
+    created_at   TIMESTAMP             NOT NULL,
+    updated_at   TIMESTAMP             NOT NULL,
+    reporter_id  BIGINT                NOT NULL,
+    target_type  VARCHAR(255)          NOT NULL,
+    target_id    BIGINT                NOT NULL,
+    reason       VARCHAR(255)          NOT NULL,
+    description  TEXT                  NULL,
+    status       VARCHAR(255)          NOT NULL,
+    processed_at TIMESTAMP             NULL,
+    CONSTRAINT pk_report PRIMARY KEY (id)
+);
+
+ALTER TABLE report
+    ADD CONSTRAINT fk_report_on_reporter FOREIGN KEY (reporter_id) REFERENCES users (id);
