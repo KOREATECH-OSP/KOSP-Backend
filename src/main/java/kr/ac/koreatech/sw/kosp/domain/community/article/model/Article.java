@@ -105,6 +105,16 @@ public class Article extends BaseEntity {
         this.views++;
     }
 
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
     public void delete() {
         this.isDeleted = true;
     }

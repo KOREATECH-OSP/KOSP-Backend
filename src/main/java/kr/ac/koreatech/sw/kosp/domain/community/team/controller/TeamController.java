@@ -31,7 +31,7 @@ public class TeamController implements TeamApi {
     @Permit(name = "team:create", description = "팀 생성")
     public ResponseEntity<Void> create(@AuthUser User user, TeamCreateRequest request) {
         Long id = teamService.create(user, request);
-        return ResponseEntity.created(URI.create("/teams/" + id)).build();
+        return ResponseEntity.created(URI.create("/v1/teams/" + id)).build();
     }
 
     @Override

@@ -39,7 +39,7 @@ public class CommentController implements CommentApi {
         CommentCreateRequest request
     ) {
         Long id = commentService.create(user, articleId, request);
-        return ResponseEntity.created(URI.create("/community/articles/" + articleId + "/comments/" + id)).build();
+        return ResponseEntity.created(URI.create("/v1/community/articles/" + articleId + "/comments/" + id)).build();
     }
 
     @Override

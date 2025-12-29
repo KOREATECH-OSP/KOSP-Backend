@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface CommentApi {
 
     @Operation(summary = "댓글 목록 조회", description = "게시글의 댓글 목록을 조회합니다.")
-    @GetMapping("/community/articles/{articleId}/comments")
+    @GetMapping("/v1/community/articles/{articleId}/comments")
     ResponseEntity<CommentListResponse> getList(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long articleId,
@@ -29,7 +29,7 @@ public interface CommentApi {
     );
 
     @Operation(summary = "댓글 작성", description = "게시글에 댓글을 작성합니다.")
-    @PostMapping("/community/articles/{articleId}/comments")
+    @PostMapping("/v1/community/articles/{articleId}/comments")
     ResponseEntity<Void> create(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long articleId,
@@ -37,7 +37,7 @@ public interface CommentApi {
     );
 
     @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다.")
-    @DeleteMapping("/community/articles/{articleId}/comments/{commentId}")
+    @DeleteMapping("/v1/community/articles/{articleId}/comments/{commentId}")
     ResponseEntity<Void> delete(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long articleId,
@@ -45,7 +45,7 @@ public interface CommentApi {
     );
 
     @Operation(summary = "댓글 좋아요", description = "댓글 좋아요를 토글합니다.")
-    @PostMapping("/community/articles/{articleId}/comments/{commentId}/likes")
+    @PostMapping("/v1/community/articles/{articleId}/comments/{commentId}/likes")
     ResponseEntity<CommentToggleLikeResponse> toggleLike(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long articleId,
