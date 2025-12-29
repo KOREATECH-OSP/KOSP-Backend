@@ -29,16 +29,16 @@ public class AuthService {
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository;
     private final UserDetailsService userDetailsService;
-    private final kr.ac.koreatech.sw.kosp.domain.mail.service.MailService mailService;
+    private final kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService emailVerificationService;
 
     @Transactional
     public void sendCertificationMail(String email) {
-        mailService.sendCertificationMail(email);
+        emailVerificationService.sendCertificationMail(email);
     }
 
     @Transactional
     public void verifyCode(String email, String code) {
-        mailService.verifyCode(email, code);
+        emailVerificationService.verifyCode(email, code);
     }
 
     /**
@@ -97,10 +97,17 @@ public class AuthService {
         Object principal = auth.getPrincipal();
 
         if (principal instanceof kr.ac.koreatech.sw.kosp.domain.user.model.User user) {
-            return new AuthMeResponse(user.getName());
+            String profileImage = user.getGithubUser() != null ? user.getGithubUser().getGithubAvatarUrl() : null;
+            return new AuthMeResponse(
+                user.getId(),
+                user.getKutEmail(),
+                user.getName(),
+                profileImage,
+                user.getIntroduction()
+            );
         }
 
-        return new AuthMeResponse(auth.getName());
+        return new AuthMeResponse(null, null, auth.getName(), null, null);
     }
 
     private SecurityContext setAuthentication(Authentication authentication) {

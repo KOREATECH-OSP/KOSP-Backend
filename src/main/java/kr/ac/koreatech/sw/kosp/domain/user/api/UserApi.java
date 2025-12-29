@@ -62,4 +62,11 @@ public interface UserApi {
     ResponseEntity<UserProfileResponse> getProfile(
         @PathVariable Long userId
     );
+
+    @Operation(summary = "비밀번호 변경", description = "로그인한 사용자의 비밀번호를 변경합니다.")
+    @PutMapping("/me/password")
+    ResponseEntity<Void> updatePassword(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest request
+    );
 }

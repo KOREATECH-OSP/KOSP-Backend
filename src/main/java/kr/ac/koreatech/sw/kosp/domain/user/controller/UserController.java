@@ -15,6 +15,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
 import kr.ac.koreatech.sw.kosp.domain.user.api.UserApi;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
@@ -71,5 +72,12 @@ public class UserController implements UserApi {
     @Permit(permitAll = true, description = "사용자 상세 조회")
     public ResponseEntity<UserProfileResponse> getProfile(Long userId) {
         return ResponseEntity.ok(userService.getProfile(userId));
+    }
+
+    @Override
+    @Permit(description = "비밀번호 변경")
+    public ResponseEntity<Void> updatePassword(@AuthUser User user, @Valid UserPasswordChangeRequest request) {
+        userService.changePassword(user.getId(), request.currentPassword(), request.newPassword());
+        return ResponseEntity.ok().build();
     }
 }

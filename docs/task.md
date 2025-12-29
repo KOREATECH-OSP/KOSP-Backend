@@ -19,14 +19,14 @@
 ## 2. 회원가입 (SGU)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
-| **SGU-001** | 재학생 인증 | 아우누리 이메일 인증 | ⏳ 대기 | (팀원 담당) MailSender 미구현 |
+| **SGU-001** | 재학생 인증 | 아우누리 이메일 인증 | ✅ 완료 | `MailService` + `Redis` 구현 (koreatech.ac.kr 인증) |
 | **SGU-002** | 계정정보 | 회원가입 처리 | ✅ 완료 | `UserService` (이메일 중복 체크 포함) |
 | **SGU-003** | 권한 | 기본 권한(학생) 할당 | ✅ 완료 | `UserService` (Fix & Refactor: 재가입 복구 로직 포함) |
 
 ## 3. 회원정보 (USR)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
-| **USR-001** | 비밀번호 | 비밀번호 변경 | ⏳ 대기 | 이메일 발송 선행 필요 |
+| **USR-001** | 비밀번호 | 비밀번호 재설정 (이메일 발송, 토큰 검증, 변경) | ✅ 완료 | `UserController` (비밀번호 변경 API) |
 | **USR-007** | 정보 | 사용자 정보 수정 | ✅ 완료 | `UserController.update` |
 | **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (`/users/{id}` Spec 일치화) |
 | **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | **Spring Batch** + `getGithubActivities` API 구현 (Repo List) |
@@ -94,9 +94,9 @@
 ### 1. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
-| **Domain** | `EmailVerification` | ❌ 미구현 | 인증 코드 관리 (Redis 권장) |
-| **Service** | `MailService` | ❌ 미구현 | `JavaMailSender` 연동 메일 발송 |
-| **Controller** | `UserController` | ❌ 미구현 | 비밀번호 변경 API (`POST /users/password`) |
+| **Domain** | `EmailVerification` | ✅ 완료 | Redis Hash 기반 인증 코드 관리 |
+| **Service** | `MailService` | ✅ 완료 | `JavaMailSender` 사용 (AWS SES 호환) |
+| **Controller** | `UserController` | ✅ 완료 | 비밀번호 변경 API 구현 |
 
 ### 3. 시스템 초기화
 | Layer | Component | Status | Note |
