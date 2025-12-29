@@ -18,6 +18,7 @@ public class GithubApiClient {
 
     private final RestClient restClient = RestClient.builder()
         .baseUrl("https://api.github.com/graphql")
+        .defaultHeader("User-Agent", "KOSP-Server/1.0")
         .build();
 
     @org.springframework.beans.factory.annotation.Value("classpath:graphql/github-user-query.graphql")
@@ -29,50 +30,86 @@ public class GithubApiClient {
             return null;
         }
 
-        String query;
+        String rawQuery;
         try {
-            query = new String(queryResource.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+            rawQuery = new String(queryResource.getInputStream().readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
         } catch (java.io.IOException e) {
             log.error("Failed to read GraphQL query file", e);
             throw new GlobalException(ExceptionMessage.SERVER_ERROR);
         }
+
+        kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.UserNode firstUserNode = null;
+        java.util.List<kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.RepositoryNode> allRepositories = new java.util.ArrayList<>();
+        String cursor = "null";
         
-        query = query.formatted(username);
-
         try {
-            org.springframework.http.ResponseEntity<kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse> entity = restClient.post()
-                .header("Authorization", "Bearer " + token)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(new GithubGraphQLRequest(query))
-                .retrieve()
-                .toEntity(kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.class);
-            
-            // Log Rate Limit
-            String remaining = entity.getHeaders().getFirst("X-RateLimit-Remaining");
-            if (remaining != null) {
-                log.info("GitHub API Rate Limit Remaining for {}: {}", username, remaining);
-                try {
-                    int remainingCount = Integer.parseInt(remaining);
-                    if (remainingCount < 100) {
-                        log.warn("Warning: GitHub API Rate Limit is running low ({}) for user {}", remainingCount, username);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
+            while (true) {
+                // Determine format: params are (username, cursor)
+                // Note: The GraphQL file now expects: user(login: "%s") ... repositories(... after: %s ...)
+                String query = rawQuery.formatted(username, cursor);
 
-            kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse response = entity.getBody();
-            
-            if (response != null && response.data() == null) {
-                // Check if errors exist? Structure of error response might be different from success.
-                // RestClient might throw if body mapping fails or returns partial.
-                // For now, assuming standard response.
-                log.error("GraphQL Data is null for user {}", username);
-                return null;
-            }
+                org.springframework.http.ResponseEntity<kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse> entity = restClient.post()
+                    .header("Authorization", "Bearer " + token)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(new GithubGraphQLRequest(query))
+                    .retrieve()
+                    .toEntity(kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.class);
 
-            return response;
+                kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse response = entity.getBody();
+
+                if (response == null || response.data() == null || response.data().user() == null) {
+                    log.error("GraphQL Data is null or partial for user {}", username);
+                     // If first request failed, return null. If subsequent, break and return what we have?
+                     // Breaking is safer to salvage partial data.
+                     break; 
+                }
+
+                if (firstUserNode == null) {
+                    firstUserNode = response.data().user();
+                }
+
+                if (response.data().user().repositories() != null && response.data().user().repositories().nodes() != null) {
+                    allRepositories.addAll(response.data().user().repositories().nodes());
+                }
+
+                // Check Pagination
+                if (response.data().user().repositories() != null 
+                    && response.data().user().repositories().pageInfo() != null 
+                    && response.data().user().repositories().pageInfo().hasNextPage()) {
+                    
+                    String endCursor = response.data().user().repositories().pageInfo().endCursor();
+                    cursor = "\"" + endCursor + "\""; // Must quote the cursor string for GraphQL
+                } else {
+                    break;
+                }
+            } // end while
+
+            if (firstUserNode == null) return null;
+
+            // Reconstruct Response with ALL repositories
+            kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.RepositoriesNode combinedRepos = 
+                new kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.RepositoriesNode(
+                    firstUserNode.repositories().totalCount(), 
+                    null, // No PageInfo needed for final result
+                    allRepositories
+                );
+            
+            kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.UserNode combinedUser = 
+                new kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.UserNode(
+                    firstUserNode.bio(),
+                    firstUserNode.company(),
+                    firstUserNode.followers(),
+                    firstUserNode.following(),
+                    firstUserNode.contributionsCollection(),
+                    combinedRepos
+                );
+
+            return new kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse(
+                new kr.ac.koreatech.sw.kosp.infra.github.dto.GithubGraphQLResponse.DataNode(combinedUser)
+            );
 
         } catch (Exception e) {
-            log.error("Failed to fetch GitHub activity for user {}: {}", username, e.getMessage());
+            log.error("Failed to fetch GitHub activity loop for user {}: {}", username, e.getMessage());
             return null;
         }
     }

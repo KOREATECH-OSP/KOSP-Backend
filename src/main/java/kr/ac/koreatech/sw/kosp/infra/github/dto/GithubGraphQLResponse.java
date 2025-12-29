@@ -29,10 +29,17 @@ public record GithubGraphQLResponse(
         long totalRepositoryContributions
     ) {}
 
-    public record ContributionCalendarNode(long totalContributions) {}
+    public record ContributionCalendarNode(
+        long totalContributions,
+        List<WeekNode> weeks
+    ) {}
+
+    public record WeekNode(List<ContributionDayNode> contributionDays) {}
+    public record ContributionDayNode(String date, int contributionCount) {}
 
     public record RepositoriesNode(
         long totalCount,
+        PageInfo pageInfo,
         List<RepositoryNode> nodes
     ) {}
 
@@ -55,15 +62,7 @@ public record GithubGraphQLResponse(
         String pushedAt,
         DefaultBranchRefNode defaultBranchRef
     ) {}
-    
-    // Helper needed because diskUsage is direct field, not object in some contexts, 
-    // but here we map from Map<String, Object> usually. 
-    // Wait, RestClient with records maps JSON directly.
-    // In GraphQL: 
-    // repositories { nodes { diskUsage } } -> simply int.
-    // So RepositoryNode should have 'int diskUsage'.
-    // See revised RepositoryNode below.
-    
+
     public record PrimaryLanguageNode(String name) {}
     
     public record LanguagesNode(List<LanguageEdge> edges) {}
@@ -71,13 +70,23 @@ public record GithubGraphQLResponse(
 
     public record RepositoryStatsNode(int totalCount) {}
     
-    // Handling diskUsage (int) directly in RepositoryNode
-    // public record DiskUsageNode... No.
-
     public record DefaultBranchRefNode(TargetNode target) {}
     public record TargetNode(HistoryNode history) {}
-    public record HistoryNode(int totalCount, List<CommitEdge> edges) {}
+    public record HistoryNode(
+        int totalCount, 
+        PageInfo pageInfo, 
+        List<CommitEdge> edges
+    ) {}
     public record CommitEdge(CommitNode node) {}
-    public record CommitNode(int additions, int deletions) {}
+    public record CommitNode(
+        String committedDate,
+        AuthorNode author,
+        int additions, 
+        int deletions
+    ) {}
 
+    public record AuthorNode(UserSummaryNode user) {}
+    public record UserSummaryNode(String login) {}
+
+    public record PageInfo(boolean hasNextPage, String endCursor) {}
 }

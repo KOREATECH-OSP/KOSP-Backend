@@ -24,6 +24,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     java.util.List<User> findByNameContaining(String keyword);
 
     Optional<User> findByGithubUser_GithubId(Long githubId);
+    Optional<User> findByGithubUser_GithubLogin(String githubLogin);
 
     void deleteById(Long id);
 

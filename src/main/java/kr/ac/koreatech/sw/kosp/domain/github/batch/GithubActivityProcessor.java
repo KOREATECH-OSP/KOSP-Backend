@@ -44,10 +44,10 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
             return null; // Token expired or API error
         }
 
-        return mapToResult(githubId, response.data().user());
+        return mapToResult(githubId, response.data().user(), username);
     }
 
-    private UserSyncResult mapToResult(Long githubId, UserNode userNode) {
+    private UserSyncResult mapToResult(Long githubId, UserNode userNode, String username) {
         List<GithubRepository> repositories = new ArrayList<>();
         Map<String, Long> userLanguageStats = new HashMap<>();
         long totalAdditions = 0;
@@ -147,15 +147,16 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
             .following((int) userNode.following().totalCount())
             .score((double) totalContributions)
             .stats(Stats.builder()
-                .totalCommits(totalCommitContributions) // Contribution count is different from repo commit sum
+                .totalCommits(totalCommitContributions)
                 .totalIssues(totalIssueContributions)
                 .totalPrs(totalPrContributions)
                 .totalStars(totalStars)
-                .totalRepos(userNode.repositories().totalCount()) // Total including private/forks based on query
+                .totalRepos(userNode.repositories().totalCount())
                 .build())
             .totalAdditions(totalAdditions)
             .totalDeletions(totalDeletions)
             .languageStats(userLanguageStats)
+            .analysis(calculateAnalysis(userNode, username))
             .build();
 
         return new UserSyncResult(profile, repositories);
@@ -166,6 +167,171 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         if (score > 1000) return 3; // Gold
         if (score > 300) return 2;  // Silver
         return 1;                   // Bronze
+    }
+
+    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.Analysis calculateAnalysis(UserNode userNode, String myUsername) {
+        Map<String, Integer> monthlyContributions = calculateMonthlyContributions(userNode);
+        
+        CommitAnalysisResult commitAnalysis = analyzeCommitHistory(userNode, myUsername);
+        Map<Integer, Integer> timeOfDayStats = commitAnalysis.timeOfDayStats;
+        Map<String, Integer> dayOfWeekStats = commitAnalysis.dayOfWeekStats;
+        Map<String, Integer> collaborators = commitAnalysis.collaborators;
+
+        String workingStyle = determineWorkingStyle(timeOfDayStats);
+        String collaborationStyle = collaborators.isEmpty() ? "Independent" : "Team Player";
+
+        kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary bestRepo = findBestRepository(userNode);
+
+        return kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.Analysis.builder()
+            .monthlyContributions(monthlyContributions)
+            .timeOfDayStats(timeOfDayStats)
+            .dayOfWeekStats(dayOfWeekStats)
+            .collaborators(collaborators)
+            .workingStyle(workingStyle)
+            .collaborationStyle(collaborationStyle)
+            .bestRepository(bestRepo)
+            .build();
+    }
+
+    private Map<String, Integer> calculateMonthlyContributions(UserNode userNode) {
+        Map<String, Integer> monthlyContributions = new HashMap<>();
+        if (userNode.contributionsCollection() == null || 
+            userNode.contributionsCollection().contributionCalendar() == null ||
+            userNode.contributionsCollection().contributionCalendar().weeks() == null) {
+            return monthlyContributions;
+        }
+
+        for (var week : userNode.contributionsCollection().contributionCalendar().weeks()) {
+            if (week.contributionDays() != null) {
+                for (var day : week.contributionDays()) {
+                    if (day.contributionCount() > 0) {
+                        String month = day.date().substring(0, 7); // YYYY-MM
+                        monthlyContributions.merge(month, day.contributionCount(), Integer::sum);
+                    }
+                }
+            }
+        }
+        return monthlyContributions;
+    }
+
+    private record CommitAnalysisResult(
+        Map<Integer, Integer> timeOfDayStats,
+        Map<String, Integer> dayOfWeekStats,
+        Map<String, Integer> collaborators
+    ) {}
+
+    private CommitAnalysisResult analyzeCommitHistory(UserNode userNode, String myUsername) {
+        Map<Integer, Integer> timeOfDayStats = new HashMap<>();
+        Map<String, Integer> dayOfWeekStats = new HashMap<>();
+        Map<String, Integer> collaborators = new HashMap<>();
+
+        if (userNode.repositories() != null && userNode.repositories().nodes() != null) {
+            for (var repo : userNode.repositories().nodes()) {
+                processRepositoryCommits(repo, myUsername, timeOfDayStats, dayOfWeekStats, collaborators);
+            }
+        }
+        return new CommitAnalysisResult(timeOfDayStats, dayOfWeekStats, collaborators);
+    }
+
+    private void processRepositoryCommits(RepositoryNode repo, String myUsername, 
+                                          Map<Integer, Integer> timeStats, 
+                                          Map<String, Integer> dayStats, 
+                                          Map<String, Integer> collaborators) {
+        if (repo.defaultBranchRef() == null || repo.defaultBranchRef().target() == null || 
+            repo.defaultBranchRef().target().history() == null || repo.defaultBranchRef().target().history().edges() == null) {
+            return;
+        }
+
+        for (var edge : repo.defaultBranchRef().target().history().edges()) {
+            if (edge.node() == null || edge.node().committedDate() == null) continue;
+
+            LocalDateTime committedAt = parseDateTime(edge.node().committedDate());
+            if (committedAt == null) continue;
+
+            String author = (edge.node().author() != null && edge.node().author().user() != null) 
+                            ? edge.node().author().user().login() : "unknown";
+
+            if (myUsername.equals(author)) {
+                timeStats.merge(committedAt.getHour(), 1, Integer::sum);
+                dayStats.merge(committedAt.getDayOfWeek().name(), 1, Integer::sum);
+            } else if (!"unknown".equals(author)) {
+                collaborators.merge(author, 1, Integer::sum);
+            }
+        }
+    }
+
+    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary findBestRepository(UserNode userNode) {
+        if (userNode.repositories() == null || userNode.repositories().nodes() == null) return null;
+
+        RepositoryNode bestNode = null;
+        long maxScore = -1;
+
+        for (var repo : userNode.repositories().nodes()) {
+            long score = calculateRepoScore(repo);
+            if (score > maxScore) {
+                maxScore = score;
+                bestNode = repo;
+            }
+        }
+
+        if (bestNode == null) return null;
+
+        return buildBestRepoSummary(bestNode);
+    }
+
+    private long calculateRepoScore(RepositoryNode repo) {
+        long commits = 0;
+        long lines = 0;
+        if (repo.defaultBranchRef() != null && repo.defaultBranchRef().target() != null && repo.defaultBranchRef().target().history() != null) {
+            commits = repo.defaultBranchRef().target().history().totalCount();
+            if (repo.defaultBranchRef().target().history().edges() != null) {
+                for (var edge : repo.defaultBranchRef().target().history().edges()) {
+                     if (edge.node() != null) {
+                         lines += (edge.node().additions() + edge.node().deletions());
+                     }
+                }
+            }
+        }
+        return commits * 10 + lines;
+    }
+
+    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary buildBestRepoSummary(RepositoryNode repo) {
+        long commits = 0;
+        long lines = 0;
+        // Re-calculate to populate fields (or reuse if performance is key, but here cleanliness is preferred)
+        // ... (Logic duplicated for clean method structure, or pass result)
+        // Optimization: Let's just recalculate since it's only done once for the best repo.
+        
+        if (repo.defaultBranchRef() != null && repo.defaultBranchRef().target() != null && repo.defaultBranchRef().target().history() != null) {
+            commits = repo.defaultBranchRef().target().history().totalCount();
+            if (repo.defaultBranchRef().target().history().edges() != null) {
+                for (var edge : repo.defaultBranchRef().target().history().edges()) {
+                        if (edge.node() != null) {
+                            lines += (edge.node().additions() + edge.node().deletions());
+                        }
+                }
+            }
+        }
+
+        return kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary.builder()
+            .name(repo.name())
+            .totalCommits(commits)
+            .totalLines(lines)
+            .totalPrs((long) repo.pullRequests().totalCount())
+            .totalIssues((long) repo.issues().totalCount())
+            .build();
+    }
+
+    private String determineWorkingStyle(Map<Integer, Integer> timeStats) {
+        long nightCommits = 0;
+        long dayCommits = 0;
+        for (var entry : timeStats.entrySet()) {
+            int hour = entry.getKey();
+            int count = entry.getValue();
+            if (hour >= 22 || hour < 6) nightCommits += count;
+            else dayCommits += count;
+        }
+        return nightCommits > dayCommits ? "Night Owl" : "Day Walker";
     }
 
     private LocalDateTime parseDateTime(String isoString) {
