@@ -25,6 +25,7 @@ public enum ExceptionMessage {
     ALREADY_REPORTED("이미 신고한 게시글입니다.", HttpStatus.CONFLICT),
     SELF_REPORT_NOT_ALLOWED("본인의 게시글은 신고할 수 없습니다.", HttpStatus.BAD_REQUEST),
     SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ;
 
     private final String message;
