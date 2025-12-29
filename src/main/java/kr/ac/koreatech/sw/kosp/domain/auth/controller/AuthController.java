@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.auth.api.AuthApi;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailVerificationRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
@@ -53,4 +55,19 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(authService.getUserInfo());
     }
 
+    @Override
+    @PostMapping("/email/send")
+    @Permit(permitAll = true, description = "이메일 인증 코드 발송")
+    public ResponseEntity<Void> sendCertificationMail(@RequestBody @Valid EmailRequest request) {
+        authService.sendCertificationMail(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @PostMapping("/email/verify")
+    @Permit(permitAll = true, description = "이메일 인증 코드 검증")
+    public ResponseEntity<Void> verifyCode(@RequestBody @Valid EmailVerificationRequest request) {
+        authService.verifyCode(request.email(), request.code());
+        return ResponseEntity.ok().build();
+    }
 }

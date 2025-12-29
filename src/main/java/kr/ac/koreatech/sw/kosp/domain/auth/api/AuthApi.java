@@ -11,8 +11,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailVerificationRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
+import io.swagger.v3.oas.annotations.Parameter;
 
 @Tag(
     name = "Auth",
@@ -45,4 +48,10 @@ public interface AuthApi {
         description = "현재 로그인된 사용자의 기본 정보를 조회하여 반환함."
     )
     ResponseEntity<AuthMeResponse> getMyInfo();
+
+    @Operation(summary = "이메일 인증 코드 발송", description = "입력한 이메일로 인증 코드를 발송합니다.")
+    ResponseEntity<Void> sendCertificationMail(@Parameter(description = "이메일 정보") @RequestBody @Valid EmailRequest request);
+
+    @Operation(summary = "이메일 인증 코드 검증", description = "이메일로 발송된 인증 코드를 검증합니다.")
+    ResponseEntity<Void> verifyCode(@Parameter(description = "이메일 및 인증 코드 정보") @RequestBody @Valid EmailVerificationRequest request);
 }

@@ -29,6 +29,17 @@ public class AuthService {
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     private final SecurityContextRepository securityContextRepository;
     private final UserDetailsService userDetailsService;
+    private final kr.ac.koreatech.sw.kosp.domain.mail.service.MailService mailService;
+
+    @Transactional
+    public void sendCertificationMail(String email) {
+        mailService.sendCertificationMail(email);
+    }
+
+    @Transactional
+    public void verifyCode(String email, String code) {
+        mailService.verifyCode(email, code);
+    }
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
