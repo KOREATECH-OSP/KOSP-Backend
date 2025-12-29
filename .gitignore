@@ -249,3 +249,5 @@ gradle-app.setting
 
 **/application.yml
 
+references/
+docs/coverage/
