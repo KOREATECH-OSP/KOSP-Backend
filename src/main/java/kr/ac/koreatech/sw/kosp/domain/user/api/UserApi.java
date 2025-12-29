@@ -1,9 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.user.api;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -38,10 +40,17 @@ public interface UserApi {
         HttpServletResponse servletResponse
     );
 
+
+
     @Operation(summary = "회원 탈퇴", description = "로그인한 사용자가 본인의 계정을 탈퇴(Soft Delete) 처리합니다.")
-    ResponseEntity<Void> delete(User user);
+    @DeleteMapping("/{userId}")
+    ResponseEntity<Void> delete(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long userId
+    );
 
     @Operation(summary = "사용자 정보 수정", description = "자신의 사용자 정보를 수정합니다.")
+    @PutMapping("/{userId}")
     ResponseEntity<Void> update(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long userId,

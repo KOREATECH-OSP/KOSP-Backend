@@ -26,8 +26,9 @@
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
 | **USR-001** | 비밀번호 | 비밀번호 변경 | ⏳ 대기 | 이메일 발송 선행 필요 |
-| **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (Soft Delete) |
-| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | **Spring Batch** + **Nested GraphQL Query** (Full Data) 구현 완료 |
+| **USR-007** | 정보 | 사용자 정보 수정 | ✅ 완료 | `UserController.update` |
+| **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (`/users/{id}` Spec 일치화) |
+| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | **Spring Batch** + `getGithubActivities` API 구현 (Repo List) |
 | **USR-004** | 활동 | 작성한 글 조회 | ✅ 완료 | `UserActivityController` (빈 리스트 반환 확인) |
 | **USR-005** | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController` |
 | **USR-006** | 활동 | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController` |
@@ -36,6 +37,7 @@
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
 | **CLG-001** | 도전과제 | 깃허브 활동내역 조회/평가 | ✅ 완료 | **SpEL** 기반 평가 로직 구현 완료 |
+| **CLG-002** | 도전과제 | 챌린지 목록 조회 | ✅ 완료 | `ChallengeController.getChallenges` (`/v1/challenges`) |
 
 ## 5. 커뮤니티 (TAK)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
@@ -65,7 +67,7 @@
 | **ADM-001** | 사용자 | 사용자 정보 변경 (관리자) | ✅ 완료 | `AdminController.updateUser` (강제 수정) |
 | **ADM-002** | 사용자 | 사용자 강제 탈퇴 | ✅ 완료 | `AdminController.deleteUser` |
 | **ADM-003** | 챌린지 | 챌린지 생성 | ✅ 완료 | `AdminController.createChallenge` (SpEL 검증 포함) |
-| **ADM-004** | 챌린지 | 챌린지 목록/상세 조회 | ✅ 완료 | `ChallengeController` (공용) |
+| **ADM-004** | 챌린지 | 챌린지 목록/상세 조회 | ✅ 완료 | `ChallengeController` (사용자/관리자 공용) |
 | **ADM-005** | 챌린지 | 챌린지 수정 | ✅ 완료 | `AdminController.updateChallenge` |
 | **ADM-006** | 챌린지 | 챌린지 삭제 | ✅ 완료 | `AdminController.deleteChallenge` |
 | **ADM-007** | 게시글 | 공지 작성 | ✅ 완료 | `AdminController` (`isPinned`) |

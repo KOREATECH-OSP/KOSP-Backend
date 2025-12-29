@@ -35,4 +35,10 @@ public class UserActivityController implements UserActivityApi {
     public ResponseEntity<CommentListResponse> getComments(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getComments(userId, pageable, user));
     }
+
+    @Override
+    @Permit(permitAll = true, description = "사용자 활동 조회 (GitHub)")
+    public ResponseEntity<kr.ac.koreatech.sw.kosp.domain.user.dto.response.GithubActivityResponse> getGithubActivities(User user, Long userId, Pageable pageable) {
+        return ResponseEntity.ok(userActivityService.getGithubActivities(userId));
+    }
 }
