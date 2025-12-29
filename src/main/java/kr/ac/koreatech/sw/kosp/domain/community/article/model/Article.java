@@ -68,6 +68,14 @@ public class Article extends BaseEntity {
     private Integer commentsCount = 0;
 
     @Builder.Default
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
+    @Builder.Default
+    @Column(name = "is_pinned", nullable = false)
+    private boolean isPinned = false;
+
+    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"))
     @Column(name = "tag")
@@ -95,5 +103,19 @@ public class Article extends BaseEntity {
 
     public void increaseViews() {
         this.views++;
+    }
+
+    public void incrementLikes() {
+        this.likes++;
+    }
+
+    public void decrementLikes() {
+        if (this.likes > 0) {
+            this.likes--;
+        }
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

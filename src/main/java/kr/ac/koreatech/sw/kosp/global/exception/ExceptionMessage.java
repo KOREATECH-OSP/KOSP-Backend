@@ -20,6 +20,12 @@ public enum ExceptionMessage {
     USER_ALREADY_EXISTS("이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
     CONFLICT("이미 존재하는 리소스입니다.", HttpStatus.CONFLICT),
     NOT_FOUND("리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    CHALLENGE_NOT_FOUND("챌린지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_CHALLENGE_CONDITION("유효하지 않은 챌린지 조건식입니다.", HttpStatus.BAD_REQUEST),
+    ALREADY_REPORTED("이미 신고한 게시글입니다.", HttpStatus.CONFLICT),
+    SELF_REPORT_NOT_ALLOWED("본인의 게시글은 신고할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ;
 
     private final String message;

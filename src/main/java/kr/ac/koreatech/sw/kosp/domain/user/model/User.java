@@ -61,6 +61,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "introduction")
+    private String introduction;
+
     @NotNull
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
@@ -86,7 +89,8 @@ public class User extends BaseEntity implements UserDetails {
         String password,
         boolean isDeleted,
         GithubUser githubUser,
-        Set<Role> roles
+        Set<Role> roles,
+        String introduction
     ) {
         this.id = id;
         this.name = name;
@@ -96,14 +100,33 @@ public class User extends BaseEntity implements UserDetails {
         this.isDeleted = isDeleted;
         updateGithubUser(githubUser);
         this.roles = roles != null ? roles : new HashSet<>();
+        this.introduction = introduction;
+    }
+
+    public void updateInfo(String name, String introduction) {
+        if (name != null) this.name = name;
+        if (introduction != null) this.introduction = introduction;
     }
 
     public void encodePassword(PasswordEncoder passwordEncoder) {
         this.password = passwordEncoder.encode(password);
     }
 
+    public void changePassword(String rawPassword, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(rawPassword);
+    }
+
     public void updateGithubUser(GithubUser githubUser) {
         this.githubUser = githubUser;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+    }
+
+    public void reactivate() {
+        this.isDeleted = false;
+        this.roles.clear();
     }
 
     // UserDetails Implementation

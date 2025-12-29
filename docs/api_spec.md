@@ -7,36 +7,48 @@
 - [x] 1.1 로그인
 - [x] 1.2 로그아웃
 - [x] 1.3 내 정보 조회 (Current User)
-- [ ] 2.1 사용자 정보 수정
-- [ ] 2.2 사용자 상세 조회 (타인 조회)
+- [x] 2.1 사용자 정보 수정
+- [x] 2.2 사용자 상세 조회 (타인 조회)
 - [ ] 2.3 사용자 활동 조회 (GitHub 활동)
-- [ ] 2.4 사용자 작성 글 목록
+- [x] 2.4 사용자 작성 글 목록
 - [x] 3.1 게시판 목록 조회
 - [x] 3.2 게시글 목록 조회
 - [x] 3.3 게시글 상세 조회
 - [x] 3.4 게시글 작성
 - [x] 3.5 게시글 수정
 - [x] 3.6 게시글 삭제
-- [ ] 3.7 댓글 목록 조회
-- [ ] 3.8 댓글 작성
-- [ ] 3.9 댓글 삭제
-- [ ] 3.10 게시글 좋아요/북마크
-- [ ] 3.11 댓글 좋아요
+- [x] 3.7 댓글 목록 조회
+- [x] 3.8 댓글 작성
+- [x] 3.9 댓글 삭제
+- [x] 3.10 게시글 좋아요/북마크
+- [x] 3.11 댓글 좋아요
+- [ ] 3.12 게시글 신고
 - [x] 4.1 모집 공고 목록 조회
 - [x] 4.2 모집 공고 상세 조회
 - [x] 4.3 모집 공고 작성
 - [x] 4.4 모집 공고 수정
-- [ ] 4.5 모집 상태 변경
+- [x] 4.5 모집 상태 변경
 - [x] 4.6 모집 공고 삭제
-- [ ] 4.7 모집 공고 댓글 목록 조회
-- [ ] 4.8 모집 공고 댓글 작성
-- [ ] 4.9 모집 공고 댓글 삭제
-- [ ] 4.10 모집 공고 좋아요/북마크
-- [ ] 4.11 모집 공고 댓글 좋아요
-- [ ] 5.1 팀 목록 조회
-- [ ] 5.2 팀 생성
-- [ ] 5.3 팀 상세 조회
+- [x] 4.7 모집 공고 댓글 목록 조회 (통합됨 -> 3.7)
+- [x] 4.8 모집 공고 댓글 작성 (통합됨 -> 3.8)
+- [x] 4.9 모집 공고 댓글 삭제 (통합됨 -> 3.9)
+- [x] 4.11 모집 공고 댓글 좋아요 (통합됨 -> 3.11)
+- [x] 5.1 팀 목록 조회
+- [x] 5.2 팀 생성
+- [x] 5.3 팀 상세 조회
 - [ ] 6.1 도전 과제 목록 및 진행도 조회
+- [x] 7.1 역할 목록 조회
+- [x] 7.2 역할 생성
+- [x] 7.3 역할에 정책 할당
+- [x] 7.4 사용자 역할 변경
+- [x] 7.10 챌린지 생성
+- [x] 7.11 챌린지 삭제
+- [x] 7.12 사용자 정보 수정 (관리자)
+- [x] 7.13 챌린지 수정
+- [x] 7.14 공지사항 삭제
+- [ ] 7.15 정책 목록 조회
+- [ ] 7.16 정책 생성
+- [ ] 7.17 통합 검색
 
 ---
 
@@ -93,7 +105,7 @@
   ```json
   {
     "name": "김수정",
-    "bio": "수정된 자기소개",
+    "introduction": "수정된 자기소개",
     "profileImage": "https://..."
   }
   ```
@@ -146,6 +158,55 @@
     ]
   }
   ```
+
+### 2.5 사용자 작성 댓글 목록
+- **Endpoint**: `GET /users/{userId}/comments`
+- **Response**: `200 OK`
+  ```json
+  {
+    "comments": [
+      {
+        "id": 105,
+        "articleId": 1,
+        "articleTitle": "React 19 업데이트 정리",
+        "content": "이 부분 자세히 설명해 주실 수 있나요?",
+        "createdAt": "2024-03-15T13:00:00Z",
+        "likes": 2,
+        "isLiked": false,
+        "isMine": true
+      }
+    ],
+    "meta": {
+      "hasNext": false,
+      "lastCommentId": 105
+    }
+  }
+  ```
+
+
+### 2.6 사용자 즐겨찾기 목록
+- **Endpoint**: `GET /users/{userId}/bookmarks`
+- **Response**: `200 OK`
+  ```json
+  {
+    "posts": [
+      {
+        "id": 1,
+        "title": "즐겨찾기한 글 제목",
+        "createdAt": "2024-11-28",
+        "views": 10,
+        "comments": 2
+      }
+    ]
+  }
+  ```
+
+### 2.7 회원 탈퇴
+- **Endpoint**: `DELETE /users/{userId}`
+- **Response**: `204 No Content`
+- **Error Response**:
+  - `401 Unauthorized`: 인증 실패
+  - `403 Forbidden`: 본인 아님
 
 ---
 
@@ -279,6 +340,8 @@
   - `404 Not Found`: 커뮤니티가 존재하지 않음
 
 ### 3.7 댓글 목록 조회
+> **Note**: 모집 공고(Recruit)에 대한 댓글도 이 API를 사용합니다. `articleId`에 `recruitId`를 입력하세요.
+
 - **Endpoint**: `GET /community/articles/{articleId}/comments`
 - **Query Parameters**:
   - `lastCommentId`: number
@@ -344,7 +407,9 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 댓글 또는 게시글 없음
 
-### 3.10 게시글 좋아요/북마크
+### 3.10 게시글/모집 공고 좋아요/북마크
+> **Note**: 모집 공고(Recruit)도 게시글(Article)의 일종이므로, 모집 공고에 대한 좋아요/북마크도 이 API를 사용합니다. `articleId`에 `recruitId`를 입력하여 요청하세요.
+
 - **Endpoint**: `POST /community/articles/{articleId}/likes`
 - **Response**: `200 OK`
   ```json
@@ -361,7 +426,7 @@
   ```
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 게시글 없음
+  - `404 Not Found`: 게시글(또는 모집 공고) 없음
 
 ### 3.11 댓글 좋아요
 - **Endpoint**: `POST /community/articles/{articleId}/comments/{commentId}/likes`
@@ -374,6 +439,21 @@
 - **Error Response**:
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 댓글 또는 게시글 없음
+
+### 3.12 게시글 신고
+- **Endpoint**: `POST /community/articles/{articleId}/reports`
+- **Request Body**:
+  ```json
+  {
+    "reason": "SPAM", // "SPAM", "ABUSE", "ADVERTISEMENT", "OTHER"
+    "description": "신고 사유 상세..."
+  }
+  ```
+- **Response**: `201 Created`
+- **Error Response**:
+  - `400 Bad Request`: 사유 없음
+  - `401 Unauthorized`: 인증 실패
+  - `404 Not Found`: 게시글 없음
 
 ---
 
@@ -507,91 +587,25 @@
   - `403 Forbidden`: 삭제 권한 없음
   - `404 Not Found`: 모집 공고가 존재하지 않음
 
-### 4.7 모집 공고 댓글 목록 조회
-- **Endpoint**: `GET /community/recruits/{recruitId}/comments`
-- **Query Parameters**:
-  - `lastCommentId`: number
-  - `limit`: number
-- **Response**: `200 OK`
-  ```json
-  {
-    "comments": [
-      {
-        "id": 105,
-        "author": { "id": 50, "name": "유저", "profileImage": "..." },
-        "content": "문의합니다.",
-        "createdAt": "...",
-        "likes": 1,
-        "isLiked": false,
-        "isMine": false
-      }
-    ],
-    "meta": { "hasNext": true, "lastCommentId": 105 }
-  }
-  ```
-- **Error Response**:
-  - `404 Not Found`: 모집 공고 없음
-
-### 4.8 모집 공고 댓글 작성
-- **Endpoint**: `POST /community/recruits/{recruitId}/comments`
+### 4.10 모집 공고 지원
+- **Endpoint**: `POST /community/recruits/{recruitId}/apply`
 - **Request Body**:
   ```json
   {
-    "content": "문의 댓글입니다."
+    "reason": "지원 동기 및 각오",
+    "portfolioUrl": "https://example.com/portfolio"
   }
   ```
 - **Response**: `201 Created`
-  ```json
-  {
-    "id": 202,
-    "content": "문의 댓글입니다.",
-    "createdAt": "...",
-    "author": { "id": 1, "name": "김개발", "profileImage": "..." }
-  }
-  ```
 - **Error Response**:
-  - `400 Bad Request`: 내용 없음
+  - `400 Bad Request`: 모집이 마감되었거나 중복 지원
   - `401 Unauthorized`: 인증 실패
   - `404 Not Found`: 모집 공고 없음
 
-### 4.9 모집 공고 댓글 삭제
-- **Endpoint**: `DELETE /community/recruits/{recruitId}/comments/{commentId}`
-- **Response**: `204 No Content`
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `403 Forbidden`: 삭제 권한 없음
-  - `404 Not Found`: 댓글 또는 모집 공고 없음
+### 4.11 모집 공고 댓글 목록 조회 (통합됨 -> 3.7)
 
-### 4.10 모집 공고 좋아요/북마크
-- **Endpoint**: `POST /community/recruits/{recruitId}/likes`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isLiked": true
-  }
-  ```
-- **Endpoint**: `POST /community/recruits/{recruitId}/bookmarks`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isBookmarked": true
-  }
-  ```
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 모집 공고 없음
 
-### 4.11 모집 공고 댓글 좋아요
-- **Endpoint**: `POST /community/recruits/{recruitId}/comments/{commentId}/likes`
-- **Response**: `200 OK`
-  ```json
-  {
-    "isLiked": true
-  }
-  ```
-- **Error Response**:
-  - `401 Unauthorized`: 인증 실패
-  - `404 Not Found`: 댓글 또는 모집 공고 없음
+
 
 ---
 
@@ -644,8 +658,8 @@
     "name": "React 스터디",
     "description": "상세 설명...",
     "members": [
-      { "id": 1, "name": "김개발", "role": "LEADER" },
-      { "id": 3, "name": "박팀원", "role": "MEMBER" }
+      { "id": 1, "name": "김개발", "profileImage": "...", "role": "LEADER" },
+      { "id": 3, "name": "박팀원", "profileImage": "...", "role": "MEMBER" }
     ]
   }
   ```
@@ -676,6 +690,8 @@
       "overallProgress": 20 // 퍼센트
     }
   }
+
+
 
 ---
 
@@ -725,4 +741,138 @@
   }
   ```
 - **Response**: `200 OK`
+  ```
+  ```
+
+### 7.5 사용자 삭제 (강제 탈퇴)
+- **Endpoint**: `DELETE /admin/users/{userId}`
+- **Response**: `204 No Content`
+
+### 7.6 게시글 삭제
+- **Endpoint**: `DELETE /admin/articles/{articleId}`
+- **Response**: `204 No Content`
+
+### 7.7 공지사항 작성
+- **Endpoint**: `POST /admin/notices`
+- **Request Body**:
+  ```json
+  {
+    "title": "공지 제목",
+    "content": "공지 내용",
+    "isPinned": true
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.8 신고 목록 조회
+- **Endpoint**: `GET /admin/reports`
+- **Response**: `200 OK`
+  ```json
+  {
+    "reports": [
+      {
+        "id": 1,
+        "targetType": "ARTICLE",
+        "targetId": 100,
+        "reason": "SPAM",
+        "reporterId": 10,
+        "status": "PENDING"
+      }
+    ]
+  }
+  ```
+
+### 7.9 신고 처리
+- **Endpoint**: `POST /admin/reports/{reportId}`
+- **Request Body**:
+  ```json
+  {
+    "action": "DELETE_CONTENT" // or "BAN_USER", "REJECT"
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.10 챌린지 생성
+- **Endpoint**: `POST /admin/challenges`
+- **Request Body**:
+  ```json
+  {
+    "name": "성실한 커미터",
+    "description": "커밋 100회 달성",
+    "condition": "#activity.totalCommits >= 100",
+    "tier": 1,
+    "imageUrl": "https://..."
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.11 챌린지 삭제
+- **Endpoint**: `DELETE /admin/challenges/{challengeId}`
+- **Response**: `204 No Content`
+
+### 7.12 사용자 정보 수정 (관리자)
+- **Endpoint**: `PUT /admin/users/{userId}`
+- **Request Body**:
+  ```json
+  {
+    "name": "홍길동",
+    "introduction": "관리자에 의한 수정",
+    "profileImageUrl": "https://..."
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.13 챌린지 수정
+- **Endpoint**: `PUT /admin/challenges/{challengeId}`
+- **Request Body**:
+  ```json
+  {
+    "name": "수정된 챌린지명",
+    "description": "수정된 설명",
+    "condition": "#activity.commits >= 50",
+    "tier": 2,
+    "imageUrl": "https://..."
+  }
+  ```
+- **Response**: `200 OK`
+
+### 7.14 공지사항 삭제
+- **Endpoint**: `DELETE /admin/notices/{noticeId}`
+- **Response**: `204 No Content`
+
+
+### 7.15 정책 목록 조회
+- **Endpoint**: `GET /admin/policies`
+- **Response**: `200 OK`
+  ```json
+  [
+    {
+      "name": "StudentPolicy",
+      "description": "학생 권한 정책"
+    }
+  ]
+  ```
+
+### 7.16 정책 생성
+- **Endpoint**: `POST /admin/policies`
+- **Request Body**:
+  ```json
+  {
+    "name": "NewPolicy",
+    "description": "새로운 정책"
+  }
+  ```
+- **Response**: `201 Created`
+
+### 7.17 통합 검색
+- **Endpoint**: `GET /admin/search`
+- **Query Parameters**:
+  - `keyword`: string (검색어)
+  - `type`: 'USER' | 'ARTICLE' | 'ALL'
+- **Response**: `200 OK`
+  ```json
+  {
+    "users": [...],
+    "articles": [...]
+  }
   ```
