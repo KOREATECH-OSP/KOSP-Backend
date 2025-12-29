@@ -26,6 +26,13 @@ public enum ExceptionMessage {
     SELF_REPORT_NOT_ALLOWED("본인의 게시글은 신고할 수 없습니다.", HttpStatus.BAD_REQUEST),
     SERVER_ERROR("서버 내부 오류가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     ROLE_NOT_FOUND("권한을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    GITHUB_USER_NOT_FOUND("연동된 깃허브 계정이 없습니다.", HttpStatus.NOT_FOUND),
+    EMAIL_SEND_FAILED("이메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    EMAIL_NOT_FOUND("이메일 인증 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_VERIFICATION_CODE("인증 코드가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
+    EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL_ADDRESS("유효하지 않는 이메일 주소입니다.", HttpStatus.BAD_REQUEST),
+
     ;
 
     private final String message;

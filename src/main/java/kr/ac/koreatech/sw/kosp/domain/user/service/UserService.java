@@ -29,9 +29,13 @@ public class UserService {
     private final GithubUserRepository githubUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService emailVerificationService;
 
     @Transactional
     public void signup(UserSignupRequest request) {
+        // 이메일 인증 확인 (인증 안된 경우 예외 발생)
+        emailVerificationService.completeSignupVerification(request.kutEmail());
+
         GithubUser githubUser = githubUserRepository.getByGithubId(request.githubId());
 
         // 기존 유저 확인 (탈퇴 회원 포함)
@@ -77,5 +81,16 @@ public class UserService {
     public void delete(Long userId) {
         User user = userRepository.getById(userId);
         user.delete();
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = userRepository.getById(userId);
+
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new GlobalException(ExceptionMessage.AUTHENTICATION);
+        }
+
+        user.changePassword(newPassword, passwordEncoder);
     }
 }

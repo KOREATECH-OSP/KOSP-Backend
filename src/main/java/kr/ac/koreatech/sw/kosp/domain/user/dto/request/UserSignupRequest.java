@@ -26,9 +26,10 @@ public record UserSignupRequest(
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     String kutEmail,
 
-    @Schema(description = "비밀번호 (SHA 256 해싱된 값)", example = "cd06f8c2b0dd065faf6...", requiredMode = REQUIRED)
+    @Schema(description = "비밀번호", example = "password123!", requiredMode = REQUIRED)
     @NotBlank(message = "비밀번호는 필수입니다.")
-    @Size(min = 64, max = 64, message = "비밀번호 해시값은 16진수 64자여야 합니다.")
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$", 
+             message = "비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.")
     String password,
 
     @Schema(description = "Github ID", example = "12345678", requiredMode = REQUIRED)
