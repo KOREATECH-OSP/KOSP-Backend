@@ -4,7 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,8 +38,10 @@ public class GithubProfile {
 
     private LocalDateTime updatedAt;
 
+    private Analysis analysis; // Added field
+
     @Builder
-    public GithubProfile(Long githubId, String bio, Integer tier, Integer followers, Integer following, List<String> achievements, Stats stats, Double score, Map<String, Object> extraData, Long totalAdditions, Long totalDeletions, Map<String, Long> languageStats) {
+    public GithubProfile(Long githubId, String bio, Integer tier, Integer followers, Integer following, List<String> achievements, Stats stats, Double score, Map<String, Object> extraData, Long totalAdditions, Long totalDeletions, Map<String, Long> languageStats, Analysis analysis) {
         this.githubId = githubId;
         this.bio = bio;
         this.tier = tier;
@@ -52,6 +54,7 @@ public class GithubProfile {
         this.totalAdditions = totalAdditions;
         this.totalDeletions = totalDeletions;
         this.languageStats = languageStats;
+        this.analysis = analysis;
         this.updatedAt = LocalDateTime.now();
     }
 
@@ -64,4 +67,39 @@ public class GithubProfile {
         private Long totalStars; // 받은 스타 수
         private Long totalRepos;
     }
+
+    @Getter
+    @Builder
+    public static class Analysis {
+        // Monthly Contribution (YYYY-MM -> count)
+        private Map<String, Integer> monthlyContributions;
+        
+        // Time of Day (0-23 -> count)
+        private Map<Integer, Integer> timeOfDayStats;
+        
+        // Day of Week (MONDAY, etc. -> count)
+        private Map<String, Integer> dayOfWeekStats;
+        
+        // Collaborators (Username -> count)
+        private Map<String, Integer> collaborators;
+
+        // Styles
+        private String workingStyle; // e.g. "Night Owl"
+        private String collaborationStyle; // e.g. "Independent"
+
+        private BestRepoSummary bestRepository;
+    }
+
+    @Getter
+    @Builder
+    public static class BestRepoSummary {
+        private String name;
+        private Long totalCommits;
+        private Long totalLines; // Additions + Deletions
+        private Long totalPrs;
+        private Long totalIssues;
+    }
+
+
+
 }
