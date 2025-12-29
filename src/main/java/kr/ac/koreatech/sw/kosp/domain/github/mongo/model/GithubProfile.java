@@ -29,12 +29,17 @@ public class GithubProfile {
 
     private Double score; // 랭킹용 기여도 점수
 
+    // Expanded Stats (Overall)
+    private Long totalAdditions;
+    private Long totalDeletions;
+    private Map<String, Long> languageStats; // Overall Language Usage (Bytes)
+
     private Map<String, Object> extraData; // 확장용 비정형 데이터
 
     private LocalDateTime updatedAt;
 
     @Builder
-    public GithubProfile(Long githubId, String bio, Integer tier, Integer followers, Integer following, List<String> achievements, Stats stats, Double score, Map<String, Object> extraData) {
+    public GithubProfile(Long githubId, String bio, Integer tier, Integer followers, Integer following, List<String> achievements, Stats stats, Double score, Map<String, Object> extraData, Long totalAdditions, Long totalDeletions, Map<String, Long> languageStats) {
         this.githubId = githubId;
         this.bio = bio;
         this.tier = tier;
@@ -44,6 +49,9 @@ public class GithubProfile {
         this.stats = stats;
         this.score = score;
         this.extraData = extraData;
+        this.totalAdditions = totalAdditions;
+        this.totalDeletions = totalDeletions;
+        this.languageStats = languageStats;
         this.updatedAt = LocalDateTime.now();
     }
 

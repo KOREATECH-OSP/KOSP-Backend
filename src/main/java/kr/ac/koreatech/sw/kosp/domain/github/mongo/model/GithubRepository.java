@@ -1,51 +1,61 @@
 package kr.ac.koreatech.sw.kosp.domain.github.mongo.model;
 
+import java.time.LocalDateTime;
+import java.util.Map;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Getter
+@Builder
 @Document(collection = "github_repositories")
 public class GithubRepository {
+
     @Id
-    private String id; // githubId + repoName (복합키 대신 String 조합 사용 권장)
+    private String id; // generated or compound
 
     @Indexed
-    private Long ownerGithubId; // 이 리포지토리 정보를 소유한 KOSP 유저의 GitHub ID
+    private Long ownerId; // GithubUser.githubId
 
-    private String name; // owner/repo_name
-    private String description;
-    private String language;
+    private String name;
     private String url;
+    private String description;
+    private String homepageUrl;
+    private boolean isFork;
 
-    private Integer stargazersCount;
-    private Integer forksCount;
+    private String primaryLanguage;
+    private Map<String, Long> languages; // Language Name -> Byte Size
 
-    private Integer myCommitCount; // 내가 기여한 커밋 수
-    private Boolean isOwner; // 내가 소유자인가?
+    private RepositoryStats stats;
+    private CodeVolume codeVolume;
+    private RepoDates dates;
 
-    private List<String> topics;
-    
-    private LocalDateTime lastCrawledAt;
-
+    @Getter
     @Builder
-    public GithubRepository(Long ownerGithubId, String name, String description, String language, String url, Integer stargazersCount, Integer forksCount, Integer myCommitCount, Boolean isOwner, List<String> topics) {
-        this.ownerGithubId = ownerGithubId;
-        this.name = name;
-        this.id = ownerGithubId + "_" + name.replace("/", "_");
-        this.description = description;
-        this.language = language;
-        this.url = url;
-        this.stargazersCount = stargazersCount;
-        this.forksCount = forksCount;
-        this.myCommitCount = myCommitCount;
-        this.isOwner = isOwner;
-        this.topics = topics;
-        this.lastCrawledAt = LocalDateTime.now();
+    public static class RepositoryStats {
+        private long diskUsage; // KB
+        private int stargazersCount;
+        private int forksCount;
+        private int watchersCount;
+        private int openIssuesCount;
+        private int openPrsCount;
+    }
+
+    @Getter
+    @Builder
+    public static class CodeVolume {
+        private int totalCommits;
+        private long totalAdditions;
+        private long totalDeletions;
+    }
+
+    @Getter
+    @Builder
+    public static class RepoDates {
+        private LocalDateTime createdAt;
+        private LocalDateTime updatedAt;
+        private LocalDateTime pushedAt;
     }
 }
