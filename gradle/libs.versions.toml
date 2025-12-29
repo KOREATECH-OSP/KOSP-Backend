@@ -3,6 +3,7 @@ spring-boot = "3.5.7"
 dependency-management = "1.1.7"
 jjwt = "0.12.3"
 webmvc-ui = "2.8.14"
+awssdk = "2.40.16"
 
 [libraries]
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
@@ -34,6 +35,11 @@ lombok = { module = "org.projectlombok:lombok" }
 
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+
+spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot-starter-thymeleaf" }
+thymeleaf-extras-springsecurity6 = { module = "org.thymeleaf.extras:thymeleaf-extras-springsecurity6" }
+
+awssdk-ses = { module = "software.amazon.awssdk:ses", version.ref = "awssdk" }
 
 flyway-mysql = { module = "org.flywaydb:flyway-mysql" }
 
