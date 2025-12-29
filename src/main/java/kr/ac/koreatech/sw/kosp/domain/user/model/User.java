@@ -112,12 +112,21 @@ public class User extends BaseEntity implements UserDetails {
         this.password = passwordEncoder.encode(password);
     }
 
+    public void changePassword(String rawPassword, PasswordEncoder passwordEncoder) {
+        this.password = passwordEncoder.encode(rawPassword);
+    }
+
     public void updateGithubUser(GithubUser githubUser) {
         this.githubUser = githubUser;
     }
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void reactivate() {
+        this.isDeleted = false;
+        this.roles.clear();
     }
 
     // UserDetails Implementation
