@@ -28,17 +28,10 @@ public class GithubService {
      * GitHub API를 통해 활동 데이터를 수집하고 저장합니다.
      * (현재는 Mock 데이터로 시뮬레이션 구현, 추후 GithubApiClient로 분리 예정)
      */
-    @Transactional
     public void updateActivity(Long userId) {
-        User user = findUserOrThrow(userId);
-        
-        if (hasNoGithubAccount(user)) {
-             log.warn("User {} has no linked GitHub account.", userId);
-             return;
-        }
-        
-        // MongoDB Update (Mock)
-        updateGithubProfile(user.getGithubUser().getGithubId());
+        // Deprecated: GitHub Activity Sync is now handled by Spring Batch (GithubSyncJob).
+        // This method remains for potential on-demand sync implementation in the future.
+        log.info("Manual update requested for user {}, but batch job handles syncing.", userId);
     }
 
     private User findUserOrThrow(Long userId) {

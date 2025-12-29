@@ -74,6 +74,12 @@
 ### 2.4 Import Rules
 *   **No Wildcards**: 와일드카드 import(`*`) 사용을 금지합니다.
 *   **Explicit Imports**: 클래스명은 명시적으로 import 하여 사용합니다. 동일한 클래스명이 존재할 경우에만 풀 패키지 경로를 사용합니다.
+
+### 2.5 Dependency Management
+*   **Use Version Catalog**: 모든 라이브러리 의존성은 `build.gradle.kts`에 직접 버전을 명시하지 않고, `gradle/libs.versions.toml` 파일에 정의하여 사용합니다.
+*   **Format**: `libs.versions.toml`의 `[libraries]` 섹션에 라이브러리를 추가하고, `build.gradle.kts`에서는 `libs.라이브러리명` 형태로 참조합니다.
+    *   *Bad*: `implementation("org.springframework.boot:spring-boot-starter-batch")`
+    *   *Good*: `implementation(libs.spring.boot.starter.batch)`
 ---
 
 ## 3. Documentation & API Security

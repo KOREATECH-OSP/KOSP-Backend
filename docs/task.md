@@ -27,7 +27,7 @@
 |:---:|:---:|:---:|:---:|:---|
 | **USR-001** | 비밀번호 | 비밀번호 변경 | ⏳ 대기 | 이메일 발송 선행 필요 |
 | **USR-002** | 탈퇴 | 회원 탈퇴 | ✅ 완료 | `UserController.delete` (Soft Delete) |
-| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ⚠️ 부분 | 스키마/엔티티 설계 완료 (API 연동 구현 전) |
+| **USR-003** | 활동 | 깃허브 활동 내역 조회 | ✅ 완료 | **Spring Batch** + **Nested GraphQL Query** (Full Data) 구현 완료 |
 | **USR-004** | 활동 | 작성한 글 조회 | ✅ 완료 | `UserActivityController` (빈 리스트 반환 확인) |
 | **USR-005** | 활동 | 작성한 댓글 조회 | ✅ 완료 | `UserActivityController` |
 | **USR-006** | 활동 | 즐겨찾기 조회 | ✅ 완료 | `UserActivityController` |
@@ -35,7 +35,7 @@
 ## 4. 챌린지 (CLG)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
 |:---:|:---:|:---:|:---:|:---|
-| **CLG-001** | 도전과제 | 깃허브 활동내역 조회/평가 | ✅ 완료 | **SpEL** 기반 평가 로직 구현 완료 (코드 분리 및 규칙 준수) |
+| **CLG-001** | 도전과제 | 깃허브 활동내역 조회/평가 | ✅ 완료 | **SpEL** 기반 평가 로직 구현 완료 |
 
 ## 5. 커뮤니티 (TAK)
 | 기능 ID | 소분류 | 기능명 | 상태 | 구현 상세 / 비고 |
@@ -81,26 +81,16 @@
 
 **Priority 3: Complex Logic (진행 중)**
 1.  **챌린지 데이터 초기화**: `ChallengeInitializer`를 통해 기본 티어(브론즈/실버/골드) 자동 생성.
-2.  **깃허브 연동 (USR-003)**: Mock 데이터를 실제 GitHub API로 교체.
-
 
 **Priority 4: Infrastructure / AI**
 1.  **신고 기능 고도화 (TAK-004)**: 중복 신고 방지 및 댓글 신고 기능 구현.
 2.  **정책 관리 (ADM-011)**: 관리자 정책 관리 기능 추가.
 3.  **검색 기능 (ADM-012)**: 통합 검색 API 구현.
-
-
+4.  **On-Demand Sync (n8n)**: 외부 시스템(n8n) 트리거를 통한 GitHub 활동 실시간 동기화.
 
 ## 🏗️ 미구현 컴포넌트 현황 (기능별 → Layer별)
 
-### 1. GitHub 활동 연동 (USR-003)
-| Layer | Component | Status | Note |
-|:---:|:---|:---:|:---|
-| **Client** | `GithubApiClient` | ❌ 미구현 | GitHub REST API 연동 (UserInfo, RepoInfo) |
-| **Client** | `GithubCrawlingClient` | ❌ 미구현 | Jsoup 활용 크롤링 (Contribution Chart) |
-| **Service** | `GithubDataSyncService` | ❌ 미구현 | Client 데이터를 DB 엔티티로 변환 및 적재 |
-
-### 2. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
+### 1. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
 | **Domain** | `EmailVerification` | ❌ 미구현 | 인증 코드 관리 (Redis 권장) |

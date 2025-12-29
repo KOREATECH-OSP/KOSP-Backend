@@ -33,6 +33,7 @@ dependencies {
     implementation(libs.spring.boot.starter.data.redis)
     implementation(libs.spring.boot.starter.data.mongodb)
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
+    implementation(libs.spring.boot.starter.batch)
     implementation(libs.mysql.connector.j)
 
     implementation(libs.jjwt.api)
