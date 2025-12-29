@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 @RequiredArgsConstructor
 public class SesMailSender {
 
-    private final SesClient sesClient = SesClient.create();
+    private final SesClient sesClient;
 
     @Retryable
     public void sendMail(SendEmailRequest request) {
