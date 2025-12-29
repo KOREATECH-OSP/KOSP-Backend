@@ -82,21 +82,11 @@
 
 ## Next Action Plan
 
-**Priority 3: Complex Logic (진행 중)**
-1.  **챌린지 데이터 초기화**: `ChallengeInitializer`를 통해 기본 티어(브론즈/실버/골드) 자동 생성.
-
-**Priority 4: Infrastructure / AI**
-1.  **신고 기능 고도화 (TAK-004)**: 중복 신고 방지 및 댓글 신고 기능 구현.
-2.  **On-Demand Sync (n8n)**: 외부 시스템(n8n) 트리거를 통한 GitHub 활동 실시간 동기화.
+1.  **챌린지 데이터 초기화**: `ChallengeInitializer`를 통해 기본 티어 자동 생성.
+2.  **신고 기능 고도화 (TAK-004)**: 중복 신고 방지 및 댓글 신고 기능 구현.
+3.  **On-Demand Sync (n8n)**: 외부 시스템(n8n) 트리거를 통한 GitHub 활동 실시간 동기화.
 
 ## 🏗️ 미구현 컴포넌트 현황 (기능별 → Layer별)
-
-### 1. 이메일 인증 & 비밀번호 (SGU-001, USR-001)
-| Layer | Component | Status | Note |
-|:---:|:---|:---:|:---|
-| **Domain** | `EmailVerification` | ✅ 완료 | Redis Hash 기반 인증 코드 관리 |
-| **Service** | `MailService` | ✅ 완료 | `EmailVerificationService`로 리팩토링 완료 (Redis Hash 사용) |
-| **Controller** | `UserController` | ✅ 완료 | 비밀번호 변경 API 구현 |
 
 ### 3. 시스템 초기화
 | Layer | Component | Status | Note |
