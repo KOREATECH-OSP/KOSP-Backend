@@ -5,9 +5,12 @@ import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleReque
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleLike;
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleBookmark;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
+import java.util.Optional;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
@@ -52,10 +55,40 @@ public class ArticleService {
 
     public ArticleListResponse getList(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoard(board, pageable);
+        return toResponse(page, user);
+    }
+    
+    private ArticleListResponse toResponse(Page<Article> page, User user) {
         List<ArticleResponse> posts = page.getContent().stream()
             .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
             .toList();
         return new ArticleListResponse(posts, PageMeta.from(page));
+    }
+
+    @Transactional
+    public boolean toggleLike(User user, Long id) {
+        Article article = articleRepository.getById(id);
+        Optional<ArticleLike> like = articleLikeRepository.findByUserAndArticle(user, article);
+        if (like.isPresent()) {
+            articleLikeRepository.delete(like.get());
+            article.decrementLikes();
+            return false;
+        }
+        articleLikeRepository.save(ArticleLike.builder().user(user).article(article).build());
+        article.incrementLikes();
+        return true;
+    }
+
+    @Transactional
+    public boolean toggleBookmark(User user, Long id) {
+        Article article = articleRepository.getById(id);
+        Optional<ArticleBookmark> bookmark = articleBookmarkRepository.findByUserAndArticle(user, article);
+        if (bookmark.isPresent()) {
+            articleBookmarkRepository.delete(bookmark.get());
+            return false;
+        }
+        articleBookmarkRepository.save(ArticleBookmark.builder().user(user).article(article).build());
+        return true;
     }
 
     @Transactional

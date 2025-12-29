@@ -18,9 +18,12 @@ public interface ArticleRepository extends Repository<Article, Long> {
     void delete(Article article);
 
     Page<Article> findByBoard(Board board, Pageable pageable);
+    java.util.List<Article> findByTitleContaining(String keyword);
 
     default Article getById(Long id) {
         return findById(id)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.ARTICLE_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
     }
+    
+    org.springframework.data.domain.Page<Article> findByAuthor(kr.ac.koreatech.sw.kosp.domain.user.model.User author, org.springframework.data.domain.Pageable pageable);
 }

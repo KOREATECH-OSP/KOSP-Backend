@@ -1,14 +1,15 @@
 CREATE TABLE users
 (
-    id         BIGINT AUTO_INCREMENT NOT NULL,
-    created_at TIMESTAMP          NOT NULL,
-    updated_at TIMESTAMP          NOT NULL,
-    name       VARCHAR(50)        NOT NULL,
-    kut_id     VARCHAR(255)       NOT NULL,
-    kut_email  VARCHAR(255)       NOT NULL,
-    password   VARCHAR(255)       NOT NULL,
-    is_deleted BIT(1)             NOT NULL,
-    github_id  BIGINT             NULL,
+    id           BIGINT AUTO_INCREMENT NOT NULL,
+    created_at   TIMESTAMP             NOT NULL,
+    updated_at   TIMESTAMP             NOT NULL,
+    name         VARCHAR(50)           NOT NULL,
+    kut_id       VARCHAR(255)          NOT NULL,
+    kut_email    VARCHAR(255)          NOT NULL,
+    password     VARCHAR(255)          NOT NULL,
+    introduction VARCHAR(255)          NULL,
+    github_id    BIGINT                NOT NULL,
+    is_deleted   BIT(1)                NOT NULL,
     CONSTRAINT pk_users PRIMARY KEY (id)
 );
 
@@ -61,6 +62,8 @@ CREATE TABLE article
     views          INT                   NOT NULL,
     likes          INT                   NOT NULL,
     comments_count INT                   NOT NULL,
+    is_deleted     BIT(1)                NOT NULL,
+    is_pinned      BIT(1)                NOT NULL,
     CONSTRAINT pk_article PRIMARY KEY (id)
 );
 
@@ -201,3 +204,136 @@ ALTER TABLE article_bookmark
 
 ALTER TABLE article_bookmark
     ADD CONSTRAINT fk_article_bookmark_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+CREATE TABLE comment
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    article_id BIGINT                NOT NULL,
+    author_id  BIGINT                NOT NULL,
+    content    TEXT                  NOT NULL,
+    likes      INT                   NOT NULL,
+    CONSTRAINT pk_comment PRIMARY KEY (id)
+);
+
+ALTER TABLE comment
+    ADD CONSTRAINT fk_comment_on_article FOREIGN KEY (article_id) REFERENCES article (id);
+
+ALTER TABLE comment
+    ADD CONSTRAINT fk_comment_on_author FOREIGN KEY (author_id) REFERENCES users (id);
+
+CREATE TABLE comment_like
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    comment_id BIGINT                NOT NULL,
+    CONSTRAINT pk_comment_like PRIMARY KEY (id)
+);
+
+ALTER TABLE comment_like
+    ADD CONSTRAINT fk_comment_like_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE comment_like
+    ADD CONSTRAINT fk_comment_like_on_comment FOREIGN KEY (comment_id) REFERENCES comment (id);
+
+CREATE TABLE team
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(50)           NOT NULL,
+    description VARCHAR(255)          NOT NULL,
+    image_url   VARCHAR(255)          NULL,
+    CONSTRAINT pk_team PRIMARY KEY (id)
+);
+
+CREATE TABLE team_member
+(
+    id         BIGINT AUTO_INCREMENT NOT NULL,
+    created_at TIMESTAMP             NOT NULL,
+    updated_at TIMESTAMP             NOT NULL,
+    team_id    BIGINT                NOT NULL,
+    user_id    BIGINT                NOT NULL,
+    role       VARCHAR(255)          NOT NULL,
+    CONSTRAINT pk_team_member PRIMARY KEY (id)
+);
+
+ALTER TABLE team_member
+    ADD CONSTRAINT fk_team_member_on_team FOREIGN KEY (team_id) REFERENCES team (id);
+
+ALTER TABLE team_member
+    ADD CONSTRAINT fk_team_member_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE recruit
+    ADD CONSTRAINT FK_RECRUIT_ON_TEAM FOREIGN KEY (team_id) REFERENCES team (id);
+
+CREATE TABLE challenge
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    name        VARCHAR(255)          NOT NULL,
+    description VARCHAR(255)          NOT NULL,
+    `condition` TEXT                  NOT NULL,
+    tier        INT                   NOT NULL,
+    image_url   VARCHAR(255)          NULL,
+    CONSTRAINT pk_challenge PRIMARY KEY (id)
+);
+
+CREATE TABLE challenge_history
+(
+    id           BIGINT AUTO_INCREMENT NOT NULL,
+    created_at   TIMESTAMP             NOT NULL,
+    updated_at   TIMESTAMP             NOT NULL,
+    user_id      BIGINT                NOT NULL,
+    challenge_id BIGINT                NOT NULL,
+    is_achieved  BIT(1)                NOT NULL,
+    achieved_at  TIMESTAMP             NULL,
+    CONSTRAINT pk_challenge_history PRIMARY KEY (id)
+);
+
+ALTER TABLE challenge_history
+    ADD CONSTRAINT fk_challenge_history_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+ALTER TABLE challenge_history
+    ADD CONSTRAINT fk_challenge_history_on_challenge FOREIGN KEY (challenge_id) REFERENCES challenge (id);
+
+CREATE TABLE recruit_apply
+(
+    id            BIGINT AUTO_INCREMENT NOT NULL,
+    created_at    TIMESTAMP             NOT NULL,
+    updated_at    TIMESTAMP             NOT NULL,
+    recruit_id    BIGINT                NOT NULL,
+    user_id       BIGINT                NOT NULL,
+    status        VARCHAR(255)          NOT NULL,
+    reason        VARCHAR(255)          NOT NULL,
+    portfolio_url VARCHAR(255)          NULL,
+    CONSTRAINT pk_recruit_apply PRIMARY KEY (id)
+);
+
+ALTER TABLE recruit_apply
+    ADD CONSTRAINT fk_recruit_apply_on_recruit FOREIGN KEY (recruit_id) REFERENCES recruit (id);
+
+ALTER TABLE recruit_apply
+    ADD CONSTRAINT fk_recruit_apply_on_user FOREIGN KEY (user_id) REFERENCES users (id);
+
+CREATE TABLE report
+(
+    id           BIGINT AUTO_INCREMENT NOT NULL,
+    created_at   TIMESTAMP             NOT NULL,
+    updated_at   TIMESTAMP             NOT NULL,
+    reporter_id  BIGINT                NOT NULL,
+    target_type  VARCHAR(255)          NOT NULL,
+    target_id    BIGINT                NOT NULL,
+    reason       VARCHAR(255)          NOT NULL,
+    description  TEXT                  NULL,
+    status       VARCHAR(255)          NOT NULL,
+    processed_at TIMESTAMP             NULL,
+    CONSTRAINT pk_report PRIMARY KEY (id)
+);
+
+ALTER TABLE report
+    ADD CONSTRAINT fk_report_on_reporter FOREIGN KEY (reporter_id) REFERENCES users (id);

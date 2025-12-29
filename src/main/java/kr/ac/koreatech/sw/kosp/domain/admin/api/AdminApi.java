@@ -5,9 +5,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.UserRoleUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,11 +19,35 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
+
+import kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest;
 
 @Tag(name = "Admin", description = "관리자 전용 API")
 @RequestMapping("/v1/admin")
 public interface AdminApi {
+
+    @Operation(summary = "사용자 삭제 (강제 탈퇴)", description = "관리자 권한으로 사용자를 강제 탈퇴(Soft Delete) 처리합니다.")
+    @DeleteMapping("/users/{userId}")
+    ResponseEntity<Void> deleteUser(@PathVariable Long userId);
+
+    @Operation(summary = "게시글 삭제", description = "관리자 권한으로 게시글을 삭제(Soft Delete)합니다.")
+    @DeleteMapping("/articles/{articleId}")
+    ResponseEntity<Void> deleteArticle(@PathVariable Long articleId);
+
+    @Operation(summary = "공지사항 삭제", description = "관리자 권한으로 공지사항을 삭제합니다. (게시글 삭제와 동일 로직)")
+    @DeleteMapping("/notices/{noticeId}")
+    ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId);
+
+    @Operation(summary = "공지사항 작성", description = "관리자 권한으로 공지사항을 작성합니다.")
+    @PostMapping("/notices")
+    ResponseEntity<Void> createNotice(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid NoticeCreateRequest request
+    );
 
     @Operation(summary = "모든 역할(Role) 조회")
     @ApiResponse(responseCode = "200", description = "성공")
@@ -46,5 +73,52 @@ public interface AdminApi {
     ResponseEntity<Void> updateUserRoles(
         @Parameter(description = "사용자 ID") @PathVariable Long userId,
         @RequestBody @Valid UserRoleUpdateRequest request
+    );
+    @Operation(summary = "챌린지 생성", description = "관리자 권한으로 새로운 챌린지를 생성합니다. (SpEL 조건식 검증 포함)")
+    @PostMapping("/challenges")
+    ResponseEntity<Void> createChallenge(@RequestBody @Valid ChallengeRequest request);
+
+    @Operation(summary = "챌린지 삭제", description = "관리자 권한으로 챌린지를 삭제합니다.")
+    @DeleteMapping("/challenges/{challengeId}")
+    ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId);
+
+    @Operation(summary = "사용자 정보 수정 (관리자)", description = "관리자 권한으로 사용자의 정보를 강제로 수정합니다.")
+    @PutMapping("/users/{userId}")
+    ResponseEntity<Void> updateUser(
+        @Parameter(description = "사용자 ID") @PathVariable Long userId,
+        @RequestBody @Valid AdminUserUpdateRequest request
+    );
+
+    @Operation(summary = "챌린지 수정", description = "관리자 권한으로 챌린지 정보를 수정합니다. SpEL 조건을 변경하는 경우 유효성을 검증합니다.")
+    @PutMapping("/challenges/{challengeId}")
+    ResponseEntity<Void> updateChallenge(
+        @Parameter(description = "챌린지 ID") @PathVariable Long challengeId,
+        @RequestBody @Valid ChallengeRequest request
+    );
+
+    @Operation(summary = "신고 목록 조회", description = "접수된 모든 신고 목록을 조회합니다.")
+    @GetMapping("/reports")
+    ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.ReportResponse>> getAllReports();
+
+    @Operation(summary = "신고 처리", description = "신고를 처리(삭제 또는 기각)합니다.")
+    @PostMapping("/reports/{reportId}")
+    ResponseEntity<Void> processReport(
+        @Parameter(description = "신고 ID") @PathVariable Long reportId,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.admin.dto.request.ReportProcessRequest request
+    );
+
+    @Operation(summary = "정책 목록 조회", description = "시스템에 등록된 모든 정책을 조회합니다.")
+    @GetMapping("/policies")
+    ResponseEntity<List<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.PolicyResponse>> getAllPolicies();
+
+    @Operation(summary = "정책 생성", description = "새로운 정책을 생성합니다.")
+    @PostMapping("/policies")
+    ResponseEntity<Void> createPolicy(@RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyCreateRequest request);
+
+    @Operation(summary = "통합 검색", description = "키워드로 사용자 및 게시글을 검색합니다.")
+    @GetMapping("/search")
+    ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.dto.response.AdminSearchResponse> search(
+        @Parameter(description = "검색어") @org.springframework.web.bind.annotation.RequestParam String keyword,
+        @Parameter(description = "검색 유형 (USER, ARTICLE, ALL)") @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "ALL") String type
     );
 }

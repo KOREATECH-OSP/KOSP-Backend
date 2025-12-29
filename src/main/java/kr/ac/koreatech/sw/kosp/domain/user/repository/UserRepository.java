@@ -4,15 +4,24 @@ import java.util.Optional;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.Repository;
 
-public interface UserRepository extends Repository<User, Long> {
+public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
     User save(User user);
+    
+    Page<User> findAll(Pageable pageable);
 
     Optional<User> findById(Long id);
 
     Optional<User> findByKutEmail(String kutEmail);
+    boolean existsByKutEmail(String kutEmail);
+    boolean existsByKutId(String kutId);
+
+    java.util.List<User> findByNameContaining(String keyword);
 
     Optional<User> findByGithubUser_GithubId(Long githubId);
 

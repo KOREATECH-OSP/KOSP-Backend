@@ -1,0 +1,53 @@
+query {
+  user(login: "%s") {
+    bio
+    company
+    followers { totalCount }
+    following { totalCount }
+    contributionsCollection {
+      contributionCalendar { totalContributions }
+      totalCommitContributions
+      totalIssueContributions
+      totalPullRequestContributions
+      totalRepositoryContributions
+    }
+    repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: PUSHED_AT, direction: DESC}) {
+      totalCount
+      nodes {
+        name
+        url
+        description
+        homepageUrl
+        isFork
+        primaryLanguage { name }
+        languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+          edges { size node { name } }
+        }
+        stargazers { totalCount }
+        forks { totalCount }
+        watchers { totalCount }
+        issues(states: OPEN) { totalCount }
+        pullRequests(states: OPEN) { totalCount }
+        diskUsage
+        createdAt
+        updatedAt
+        pushedAt
+        defaultBranchRef {
+          target {
+            ... on Commit {
+              history(first: 100) {
+                totalCount
+                edges {
+                  node {
+                    additions
+                    deletions
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
