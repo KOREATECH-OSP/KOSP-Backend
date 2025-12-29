@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.comment.dto.response.CommentListResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.GithubActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
@@ -36,6 +37,13 @@ public interface UserActivityApi {
     @Operation(summary = "사용자 작성 댓글 목록", description = "사용자가 작성한 댓글 목록을 조회합니다.")
     @GetMapping("/{userId}/comments")
     ResponseEntity<CommentListResponse> getComments(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long userId,
+        @Parameter(hidden = true) Pageable pageable
+    );
+    @Operation(summary = "사용자 활동 조회 (GitHub)", description = "사용자의 GitHub 활동 내역(레포지토리 등)을 조회합니다.")
+    @GetMapping("/{userId}/activities/github")
+    ResponseEntity<GithubActivityResponse> getGithubActivities(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long userId,
         @Parameter(hidden = true) Pageable pageable

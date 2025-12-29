@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface GithubRepositoryRepository extends Repository<GithubRepository, String> {
     GithubRepository save(GithubRepository repository);
-    List<GithubRepository> findByOwnerGithubIdOrderByMyCommitCountDesc(Long ownerGithubId);
+    List<GithubRepository> findByOwnerIdOrderByCodeVolumeTotalCommitsDesc(Long ownerId);
 }

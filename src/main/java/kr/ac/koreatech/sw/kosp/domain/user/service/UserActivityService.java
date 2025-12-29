@@ -21,6 +21,13 @@ import kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentReposi
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import lombok.RequiredArgsConstructor;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubRepositoryRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.GithubActivityResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import java.util.Collections;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +39,8 @@ public class UserActivityService {
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final GithubRepositoryRepository githubRepositoryRepository;
+    private final UserRepository userRepository;
 
     public ArticleListResponse getPosts(Long userId, Pageable pageable, User user) {
         User author = User.builder().id(userId).build();
@@ -48,6 +57,39 @@ public class UserActivityService {
     public CommentListResponse getComments(Long userId, Pageable pageable, User user) {
         Page<Comment> page = commentRepository.findByAuthorId(userId, pageable);
         return toCommentResponse(page, user);
+    }
+
+    public GithubActivityResponse getGithubActivities(Long userId) {
+        User targetUser = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+
+        if (targetUser.getGithubUser() == null) {
+            return new GithubActivityResponse(Collections.emptyList());
+        }
+
+        Long githubId = targetUser.getGithubUser().getGithubId();
+        List<GithubRepository> repos = githubRepositoryRepository.findByOwnerIdOrderByCodeVolumeTotalCommitsDesc(githubId);
+
+        List<GithubActivityResponse.Activity> activities = repos.stream()
+            .map(this::mapToActivity)
+            .toList();
+
+        return new GithubActivityResponse(activities);
+    }
+
+    private GithubActivityResponse.Activity mapToActivity(GithubRepository repo) {
+        String date = repo.getDates() != null && repo.getDates().getPushedAt() != null 
+            ? repo.getDates().getPushedAt().toString() 
+            : null;
+            
+        return new GithubActivityResponse.Activity(
+            repo.getId(),
+            "REPOSITORY",
+            repo.getName(),
+            repo.getDescription(),
+            date,
+            repo.getUrl()
+        );
     }
 
     private ArticleListResponse toArticleResponse(Page<Article> page, User user) {
