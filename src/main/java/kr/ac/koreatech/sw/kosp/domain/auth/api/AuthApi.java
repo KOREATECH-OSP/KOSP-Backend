@@ -59,7 +59,10 @@ public interface AuthApi {
 
     @Operation(summary = "비밀번호 재설정 메일 발송", description = "비밀번호 재설정을 위해 이메일로 링크를 발송합니다.")
     @PostMapping("/password/reset")
-    ResponseEntity<Void> sendPasswordResetMail(@Parameter(description = "이메일 정보") @RequestBody @Valid EmailRequest request);
+    ResponseEntity<Void> sendPasswordResetMail(
+        @Parameter(description = "이메일 정보") @RequestBody @Valid EmailRequest request,
+        @Parameter(hidden = true) String serverUrl
+    );
 
     @Operation(summary = "비밀번호 재설정", description = "발송된 링크의 토큰을 사용하여 비밀번호를 재설정합니다.")
     @PostMapping("/password/reset/confirm")

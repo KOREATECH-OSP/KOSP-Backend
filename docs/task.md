@@ -95,7 +95,7 @@
 | Layer | Component | Status | Note |
 |:---:|:---|:---:|:---|
 | **Domain** | `EmailVerification` | ✅ 완료 | Redis Hash 기반 인증 코드 관리 |
-| **Service** | `MailService` | ✅ 완료 | `JavaMailSender` 사용 (AWS SES 호환) |
+| **Service** | `MailService` | ✅ 완료 | `EmailVerificationService`로 리팩토링 완료 (Redis Hash 사용) |
 | **Controller** | `UserController` | ✅ 완료 | 비밀번호 변경 API 구현 |
 
 ### 3. 시스템 초기화

@@ -8,7 +8,6 @@ import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,11 +24,8 @@ public class UserPasswordService {
     private final ApplicationEventPublisher eventPublisher;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${server.url:http://localhost:3000}") // Default to frontend URL
-    private String serverUrl;
-
     @Transactional
-    public void sendPasswordResetMail(String email) {
+    public void sendPasswordResetMail(String email, String serverUrl) {
         User user = userRepository.findByKutEmail(email)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
