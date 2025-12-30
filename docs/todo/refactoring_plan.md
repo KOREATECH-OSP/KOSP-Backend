@@ -39,3 +39,7 @@ Ensure strict adherence to project conventions across the entire codebase.
 ### 3. API Documentation & Validation
 - **Swagger**: Apply Swagger annotations (`@Operation`, `@Parameter`, etc.) to all Controller endpoints and DTOs.
 - **Validation**: Use `@Valid` and validation annotations (`@NotNull`, `@Size`, etc.) on DTOs and Controller parameters.
+
+## Package Structure Refactoring
+Rename base package to match domain.
+- `kr.ac.koreatech.sw.kosp` -> `io.swkoreatech.kosp`
