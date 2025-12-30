@@ -9,11 +9,26 @@
 *   **Permissions**: `USER`
 
 ### Response
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "COMMENT_NOT_FOUND",
+  "message": "댓글을 찾을 수 없습니다."
+}
+```
+
 *   **200 OK**
 ```json
 {
-  "liked": true,
-  "count": 5
+  "isLiked": true
 }
 ```
 

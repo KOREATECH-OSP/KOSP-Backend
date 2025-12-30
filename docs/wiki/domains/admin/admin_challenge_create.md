@@ -24,10 +24,37 @@
 // No Content
 ```
 
+*   **400 Bad Request**
+```json
+{
+  "code": "INVALID_CHALLENGE_CONDITION",
+  "message": "챌린지 조건식(SpEL) 형식이 올바르지 않습니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **403 Forbidden**
+```json
+{
+  "code": "FORBIDDEN",
+  "message": "접근 권한이 없습니다 (관리자 권한 필요)."
+}
+```
+
 ---
 
 ## 🛠️ Implementation Details
 *   **Controller**: `AdminController.createChallenge`
+*   **Service**: `ChallengeService.createChallenge`
 *   **Flow**:
-1. SpEL 조건식 문법 유효성 검증.
-2. `Challenge` 엔티티 생성 및 저장.
+1. 관리자 권한(`ADMIN`) 검증.
+2. `SpelExpressionParser`를 사용하여 `condition` 문자열 파싱 검증.
+3. 파싱 실패 시 `INVALID_CHALLENGE_CONDITION` 예외 발생.
+4. `Challenge` 엔티티 생성 및 DB 저장.

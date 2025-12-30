@@ -14,12 +14,10 @@
   "id": 1,
   "name": "KOSP 개발팀",
   "description": "오픈소스 플랫폼 개발 프로젝트",
-  "techStacks": ["Spring", "React"],
-  "leader": { "id": 10, "nickname": "홍길동" },
+  "imageUrl": "https://...",
   "members": [
     { "id": 11, "nickname": "김철수", "role": "MEMBER" }
-  ],
-  "createdAt": "2024-12-01T09:00:00"
+  ]
 }
 ```
 
@@ -35,6 +33,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `TeamController.getTeam`
+*   **Service**: `TeamService.getTeam`
 *   **Flow**:
-1. `TeamRepository`에서 팀 조회 (Fetch Join으로 멤버, 기술스택 로드 권장).
-2. `TeamDetailResponse` DTO 매핑 및 반환.
+1. `TeamRepository.getById(id)` 호출.
+2. 존재하지 않을 경우 `TEAM_NOT_FOUND` 예외 발생 (404).
+3. `TeamDetailResponse` 변환 및 반환.(Fetch Join으로 멤버, 기술스택 로드 권장).

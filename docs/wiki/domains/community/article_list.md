@@ -17,19 +17,39 @@
 *   **200 OK**
 ```json
 {
-  "content": [
+  "posts": [
     {
-      "id": 10,
-      "title": "Spring Boot 질문있습니다",
-      "author": { "id": 1, "nickname": "홍길동" },
-      "views": 15,
-      "likes": 3,
-      "createdAt": "2024-12-30T10:00:00"
+      "id": 1,
+      "title": "KOSP 프로젝트 소개",
+      "author": { "nickname": "관리자" },
+      "views": 120,
+      "likes": 15,
+      "comments": 3,
+      "createdAt": "2024-12-01T10:00:00"
     }
   ],
-  "pageable": { ... },
-  "totalElements": 100,
-  "totalPages": 10
+  "pagination": {
+    "page": 1,
+    "size": 10,
+    "totalCount": 25,
+    "totalPages": 3
+  }
+}
+```
+
+*   **400 Bad Request**
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "요청 파라미터가 올바르지 않습니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "BOARD_NOT_FOUND",
+  "message": "게시판을 찾을 수 없습니다."
 }
 ```
 
@@ -37,6 +57,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `ArticleController.getList`
+*   **Service**: `ArticleService.getList`
 *   **Flow**:
-1. `BoardService`에서 `boardId` 확인.
-2. `QueryDSL`을 사용하여 조건(Board, Keyword)에 맞는 게시글 페이징 조회.
+1. `BoardService`를 통해 `boardId`로 게시판 조회 (없을 시 404).
+2. `ArticleRepository`에서 해당 게시판의 글 목록 조회 (Pagination 적용).
+3. 각 게시글에 대해 로그인한 사용자의 `isLiked`, `isBookmarked` 여부 확인 후 응답 구성.

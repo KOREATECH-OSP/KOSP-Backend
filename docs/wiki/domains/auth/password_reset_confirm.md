@@ -24,7 +24,15 @@
 *   **400 Bad Request**
 ```json
 {
-  "code": "INVALID_TOKEN",
+  "code": "VALIDATION_ERROR",
+  "message": "비밀번호 형식이 올바르지 않습니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "TOKEN_NOT_FOUND",
   "message": "유효하지 않거나 만료된 토큰입니다."
 }
 ```
@@ -33,8 +41,10 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `AuthController.resetPassword`
+*   **Service**: `UserPasswordService.resetPassword`
 *   **Flow**:
-1. 토큰 유효성 검증 (서명 및 만료 시간 확인).
-2. 토큰 내 사용자 정보(Email/ID) 추출.
-3. 해당 사용자의 비밀번호를 새 비밀번호(Hash)로 업데이트.
-4. (선택) 기존 세션 만료 처리.
+1. Request Body로 `token`과 `newPassword` 수신.
+2. Redis에서 토큰 조회 (없을 시 404).
+3. 해당 토큰에 매핑된 `userId`로 유저 조회.
+4. 비밀번호 암호화 및 변경.
+5. Redis 토큰 삭제.

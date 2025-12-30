@@ -24,7 +24,7 @@
 ```json
 {
   "code": "USER_NOT_FOUND",
-  "message": "해당 이메일로 가입된 사용자가 없습니다."
+  "message": "가입되지 않은 이메일입니다."
 }
 ```
 
@@ -32,7 +32,9 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `AuthController.sendPasswordResetMail`
+*   **Service**: `UserPasswordService.sendPasswordResetMail`
 *   **Flow**:
-1. 이메일로 사용자 존재 여부 확인.
-2. 존재 시 재설정 토큰(JWT or Random String) 생성.
-3. 이메일 템플릿에 토큰을 포함한 링크(`FRONTEND_URL/reset-password?token=...`)를 담아 발송.
+1. `UserRepository`에서 이메일로 사용자 조회 (없을 시 404).
+2. 비밀번호 재설정 토큰 생성 (UUID).
+3. Redis에 토큰 저장 (`password:reset:{token}`, TTL 30분).
+4. 재설정 링크가 포함된 메일 발송 (`ServerURL` + `/reset-password?token={token}`).

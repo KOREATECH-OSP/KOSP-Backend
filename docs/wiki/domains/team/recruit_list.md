@@ -17,17 +17,24 @@
 *   **200 OK**
 ```json
 {
-  "content": [
+  "recruits": [
     {
       "id": 5,
       "team": { "name": "KOSP팀" },
       "title": "백엔드 개발자 구인",
       "status": "OPEN",
-      "deadline": "2025-01-31T23:59:59"
+      "endDate": "2025-01-31T23:59:59"
     }
   ],
-  "pageable": { ... },
-  "totalElements": 20
+  "pagination": { ... }
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "BOARD_NOT_FOUND",
+  "message": "게시판을 찾을 수 없습니다."
 }
 ```
 
@@ -35,6 +42,9 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `RecruitController.getList`
+*   **Service**: `RecruitService.getList`
 *   **Flow**:
-1. QueryDSL을 사용하여 조건에 맞는 공고 조회.
-2. 마감된 공고는 필터링 조건에 따라 포함 여부 결정.
+1. `BoardService`를 통해 `boardId`로 게시판 조회 (없을 시 404).
+2. `RecruitRepository.findByBoard`로 공고 목록 페이징 조회.
+3. 각 공고의 `isLiked`/`isBookmarked` 상태 확인.
+4. `RecruitListResponse` (목록 + Pagination) 반환.

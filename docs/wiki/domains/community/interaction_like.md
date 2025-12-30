@@ -11,8 +11,7 @@
 *   **200 OK**
 ```json
 {
-  "liked": true,
-  "count": 16
+  "isLiked": true
 }
 ```
 
@@ -20,7 +19,15 @@
 ```json
 {
   "code": "UNAUTHORIZED",
-  "message": "로그인이 필요합니다."
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
 }
 ```
 

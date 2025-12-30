@@ -20,10 +20,36 @@
 // No Content
 ```
 
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **403 Forbidden**
+```json
+{
+  "code": "FORBIDDEN",
+  "message": "권한이 없습니다 (본인 작성 공고만 상태 변경 가능)."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "RECRUIT_NOT_FOUND",
+  "message": "모집 공고를 찾을 수 없습니다."
+}
+```
+
 ---
 
 ## 🛠️ Implementation Details
 *   **Controller**: `RecruitController.updateStatus`
+*   **Service**: `RecruitService.updateStatus`
 *   **Flow**:
-1. Path ID로 공고 조회.
-2. 상태값 변경 (`OPEN` <-> `CLOSED`).
+1. `RecruitRepository`에서 ID로 공고 조회 (없을 시 404).
+2. `validateOwner()`: 작성자 본인 확인 (아닐 경우 403).
+3. 상태 변경 (`RecruitStatus`: OPEN -> CLOSED 등).

@@ -10,7 +10,6 @@
 ### Request
 ```json
 {
-  "parentId": null,
   "content": "Fetch Join을 사용해보세요."
 }
 ```
@@ -30,12 +29,29 @@
 }
 ```
 
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
+}
+```
+
 ---
 
 ## 🛠️ Implementation Details
 *   **Controller**: `CommentController.create`
+*   **Service**: `CommentService.create`
 *   **Flow**:
-1. `ArticleRepository`에서 게시글 존재 여부 확인.
-2. `parentId` 존재 시 부모 댓글 확인 (대댓글).
-3. `Comment` 엔티티 생성 및 저장.
+1. `ArticleRepository`에서 게시글 조회 (없을 시 404).
+2. `Comment` 엔티티 생성 (Author, Content 설정).
+3. `CommentRepository.save()` 호출.
 4. `Location` 헤더 설정 및 반환.

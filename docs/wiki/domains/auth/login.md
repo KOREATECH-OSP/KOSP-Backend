@@ -3,7 +3,7 @@
 ## 📡 API Specification
 **`POST /v1/auth/login`**
 
-*   **Description**: 자체 회원가입한 사용자의 이메일과 비밀번호(SHA-256 Hashed)로 로그인하여 세션을 생성합니다.
+*   **Description**: 자체 회원가입한 사용자의 이메일과 비밀번호로 로그인하여 세션을 생성합니다.
 *   **Permission Name**: `auth:login`
 *   **Permissions**: `ANONYMOUS`
 
@@ -11,7 +11,7 @@
 ```json
 {
   "email": "user@koreatech.ac.kr",
-  "password": "cd06f8c2b0dd065faf6ef910c7f1234567890abcdef1234567890abcdef12345" // SHA-256 Hashed
+  "password": "password123!"
 }
 ```
 

@@ -23,11 +23,35 @@
 // No Content
 ```
 
+*   **400 Bad Request**
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "제목은 필수입니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
 *   **403 Forbidden**
 ```json
 {
   "code": "FORBIDDEN",
-  "message": "본인의 게시글만 수정할 수 있습니다."
+  "message": "권한이 없습니다 (본인 글만 수정 가능)."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
 }
 ```
 
@@ -35,7 +59,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `ArticleController.update`
+*   **Service**: `ArticleService.update`
 *   **Flow**:
-1. Path ID로 게시글 조회.
-2. 작성자와 현재 로그인 유저 일치 여부 확인.
-3. 제목, 내용, 태그 등 업데이트.
+1. `ArticleRepository`에서 ID로 게시글 조회 (없을 시 404).
+2. `validateOwner()`: 요청한 사가 작성자인지 확인 (아닐 경우 403 Forbidden).
+3. `article.updateArticle()` 호출하여 엔티티 수정.

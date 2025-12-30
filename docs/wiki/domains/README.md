@@ -71,9 +71,12 @@
 | :---: | :--- | :---: | :--- |
 | **ADM-001** | [**사용자 통합 검색**](admin/admin_search.md) | `GET` | `/v1/admin/search` |
 | **ADM-001** | [**사용자 정보 수정 (관리자)**](admin/admin_user_update.md) | `PUT` | `/v1/admin/users/{userId}` |
+| **ADM-001** | [**사용자 역할 변경**](admin/admin_user_update_role.md) | `PUT` | `/v1/admin/users/{userId}/roles` |
 | **ADM-002** | [**사용자 정지/삭제**](admin/admin_user_delete.md) | `DELETE` | `/v1/admin/users/{userId}` |
 | **ADM-003** | [**공지사항 작성**](admin/admin_notice_create.md) | `POST` | `/v1/admin/notices` |
 | **ADM-003** | [**공지사항 삭제**](admin/admin_notice_delete.md) | `DELETE` | `/v1/admin/notices/{noticeId}` |
 | **ADM-009** | [**신고 접수 목록**](admin/admin_report_list.md) | `GET` | `/v1/admin/reports` |
 | **ADM-009** | [**신고 처리**](admin/admin_report_process.md) | `POST` | `/v1/admin/reports/{reportId}` |
 | **ADM-0XX** | [**챌린지 생성**](admin/admin_challenge_create.md) | `POST` | `/v1/admin/challenges` |
+| **ADM-0XX** | [**챌린지 수정**](admin/admin_challenge_update.md) | `PUT` | `/v1/admin/challenges/{challengeId}` |
+| **ADM-0XX** | [**챌린지 삭제**](admin/admin_challenge_delete.md) | `DELETE` | `/v1/admin/challenges/{challengeId}` |

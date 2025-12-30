@@ -16,8 +16,9 @@
   "title": "백엔드 개발자 구인",
   "content": "상세 내용...",
   "status": "OPEN",
-  "deadline": "2025-01-31T23:59:59",
-  "createdAt": "2025-01-01T10:00:00"
+  "id": 1,
+  "title": "Backend Dev Wanted",
+  ...
 }
 ```
 
@@ -33,6 +34,9 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `RecruitController.getOne`
+*   **Service**: `RecruitService.getOne`
 *   **Flow**:
-1. `RecruitRepository`에서 ID로 조회.
-2. `RecruitResponse` DTO 변환 및 반환.
+1. `RecruitRepository`에서 ID로 공고 조회 (없을 시 Exception).
+2. 조회수 증가.
+3. `isLiked`, `isBookmarked` 여부 로드.
+4. `RecruitResponse` DTO 변환 및 반환.
