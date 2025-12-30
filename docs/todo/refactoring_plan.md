@@ -48,3 +48,11 @@ Rename base package to match domain.
 
 ## Documentation Updates
 - [ ] **Architecture Diagrams**: Replace temporary AI-generated schematic images (`auth_security_flow.png`, `general_app_flow.png`) with clean, professional diagrams (e.g., using Figma or Lucidchart).
+
+## Feature Enhancements
+- [ ] **Global Search Integration**: Implement a unified search endpoint for general users (`/v1/search`) to search across articles, recruits, teams, and challenges (excluding Admin-only data).
+- [ ] **Admin Role/Policy Management**: Implement Update and Delete APIs for Roles and Policies in the Admin domain to support full RBAC management.
+- [ ] **Email Verification Logic**: Update `sendCertificationMail` to verify duplicates. 
+    - If email exists AND `is_deleted = false`: Do NOT send mail (throw UserAlreadyExists).
+    - If email exists AND `is_deleted = true`: Allow sending mail (for reactivation context).
+    - If email does not exist: Allow sending mail.
