@@ -1,18 +1,28 @@
 # 💾 데이터베이스 스키마 (Database Schema)
-
-프로젝트의 ERD는 **[dbdiagram.io](https://dbdiagram.io/)**를 통해 관리됩니다.
-아래의 [DBML 소스 코드](#dbml-source-code)를 사용하여 ERD를 수정하거나 최신화할 수 있습니다.
+프로젝트의 데이터베이스는 RDBMS(MySQL)와 NoSQL(MongoDB)을 혼용하는구조입니다.
+ERD 관리는 **[dbdiagram.io](https://dbdiagram.io/)**를 권장합니다.
 
 ## 1. ERD
-<iframe width="100%" height="600" src="https://dbdiagram.io/e/6953276e39fa3db27bc581d4/6953277e39fa3db27bc58220" frameborder="0" allowfullscreen></iframe>
+
+### MySQL - Main Schema
+[![Main ERD](../imgs/mysql_kosp_erd.svg)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)
+
+**[🔗 [Main Schema] 인터랙티브 ERD 보기 (View Interactive Diagram)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)**
+
+### MySQL - Batch Schema
+[![Batch ERD](../imgs/mysql_kosp_batch_erd.svg)](https://dbdiagram.io/d/69532e1539fa3db27bc5c2e8)
+
+**[🔗 [Batch Schema] 인터랙티브 ERD 보기 (View Interactive Diagram)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)**
 
 ---
 
-## 2. DBML Source Code
-dbdiagram.io에 복사/붙여넣기하여 사용할 수 있는 소스 코드입니다.
+## 2. 상세 스키마 (Detailed Schema)
+
+### 2.1. MySQL - Main Schema (`kosp`)
+비즈니스 로직을 담당하는 메인 RDBMS입니다.
 
 <details>
-<summary>📂 <strong>Click to view DBML Code</strong></summary>
+<summary>📂 <strong>Click to view DBML Code (kosp)</strong></summary>
 
 ```dbml
 // ==========================================
@@ -75,7 +85,6 @@ Table policy_permission {
   permission_id bigint [pk, ref: > permission.id]
 }
 
-// Community Domain
 Table board {
   id bigint [pk, increment]
   name varchar
@@ -128,7 +137,6 @@ Table comment_like {
   comment_id bigint [ref: > comment.id]
 }
 
-// Team & Recruit
 Table team {
   id bigint [pk, increment]
   name varchar
@@ -160,7 +168,6 @@ Table recruit_apply {
   portfolio_url varchar
 }
 
-// Challenge & Report
 Table challenge {
   id bigint [pk, increment]
   name varchar
@@ -188,7 +195,16 @@ Table report {
   status varchar
   processed_at timestamp
 }
+```
+</details>
 
+### 2.2. MySQL - Batch Schema (`kosp_batch`)
+Spring Batch 메타데이터를 저장하는 별도 스키마입니다.
+
+<details>
+<summary>📂 <strong>Click to view DBML Code (kosp_batch)</strong></summary>
+
+```dbml
 // ==========================================
 // 2. MySQL - Batch Schema (kosp_batch)
 // ==========================================
@@ -236,45 +252,78 @@ Table BATCH_STEP_EXECUTION {
   ROLLBACK_COUNT bigint
   EXIT_CODE varchar
 }
-
-// ==========================================
-// 3. MongoDB (Document Store)
-// ==========================================
-TableGroup MongoDB {
-  // Not strictly relational, but represented for visualization
-  GithubProfile
-  GithubRepository
-  GithubTrend
-}
-
-Table GithubProfile {
-  _id ObjectId [pk]
-  githubId Long
-  username String
-  bio String
-  tier Integer
-  followers Integer
-  following Integer
-  score Double
-}
-
-Table GithubRepository {
-  _id String [pk]
-  ownerId Long [note: 'Refers to GithubProfile.githubId']
-  name String
-  url String
-  language String
-  stars Integer
-  forks Integer
-}
-
-Table GithubTrend {
-  _id String [pk]
-  githubId Long
-  period String
-  commits Integer
-  pullRequests Integer
-  issues Integer
-}
 ```
 </details>
+
+### 2.3. MongoDB - Document Store (`kosp`)
+Github 크롤링 데이터와 같이 **비정형/반정형 데이터**를 저장합니다.
+Table이 아닌 **Collection(JSON Documents)** 형태로 관리됩니다.
+
+#### `github_profiles`
+사용자의 상세 GitHub 프로필 정보와 분석 결과입니다.
+
+```json
+{
+  "_id": "ObjectId",
+  "githubId": 12345678,         // MySQL github_user 테이블과 연관
+  "username": "octocat",
+  "bio": "Coding machine",
+  "tier": 5,                    // 계산된 티어
+  "followers": 150,
+  "following": 50,
+  "score": 4500.5,              // 기여도 점수
+  "languageStats": {
+    "Java": 500000,
+    "Python": 300000
+  },
+  "analysis": {
+    "workingStyle": "Night Owl",
+    "collaborationStyle": "Independent",
+    "bestRepository": {
+      "name": "algo-101",
+      "totalCommits": 500
+    }
+  }
+}
+```
+
+#### `github_repositories`
+사용자가 소유한 리포지토리의 상세 메타데이터입니다.
+
+```json
+{
+  "_id": "repo_full_name",
+  "ownerId": 12345678,          // github_profiles 참조
+  "name": "awesome-project",
+  "url": "https://github.com/...",
+  "primaryLanguage": "Java",
+  "languages": {
+    "Java": 90,
+    "Shell": 10
+  },
+  "stats": {
+    "diskUsage": 10240,
+    "stargazersCount": 55,
+    "forksCount": 12
+  },
+  "dates": {
+    "createdAt": "2024-01-01T00:00:00",
+    "pushedAt": "2024-12-30T10:00:00"
+  }
+}
+```
+
+#### `github_trends`
+일별/월별 활동 내역입니다.
+
+```json
+{
+  "_id": "12345678_2024-12",     // Compound Key (ID + Period)
+  "githubId": 12345678,
+  "period": "2024-12",
+  "commits": 45,
+  "pullRequests": 12,
+  "issues": 3,
+  "starsEarned": 5
+}
+```

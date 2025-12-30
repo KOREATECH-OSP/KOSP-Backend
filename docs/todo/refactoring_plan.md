@@ -39,7 +39,12 @@ Ensure strict adherence to project conventions across the entire codebase.
 ### 3. API Documentation & Validation
 - **Swagger**: Apply Swagger annotations (`@Operation`, `@Parameter`, etc.) to all Controller endpoints and DTOs.
 - **Validation**: Use `@Valid` and validation annotations (`@NotNull`, `@Size`, etc.) on DTOs and Controller parameters.
+- **Security Permissions**:
+    - [ ] Assign explicit `name` attributes to all `@Permit` annotations (e.g., `@Permit(name = "auth:login", ...)`) to standardize permission management. Currently many are missing names.
 
 ## Package Structure Refactoring
 Rename base package to match domain.
 - `kr.ac.koreatech.sw.kosp` -> `io.swkoreatech.kosp`
+
+## Documentation Updates
+- [ ] **Architecture Diagrams**: Replace temporary AI-generated schematic images (`auth_security_flow.png`, `general_app_flow.png`) with clean, professional diagrams (e.g., using Figma or Lucidchart).
