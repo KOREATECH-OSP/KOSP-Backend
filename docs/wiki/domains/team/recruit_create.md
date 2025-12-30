@@ -10,10 +10,13 @@
 ### Request
 ```json
 {
+  "boardId": 3,
   "teamId": 1,
   "title": "[모집] 백엔드 개발자 구합니다",
   "content": "API 설계 및 구현 담당...",
-  "deadline": "2025-01-31T23:59:59"
+  "tags": ["Spring", "Backend"],
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2025-01-31T23:59:59"
 }
 ```
 
@@ -29,6 +32,22 @@
 {
   "code": "VALIDATION_ERROR",
   "message": "마감일은 현재 시간보다 미래여야 합니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "TEAM_NOT_FOUND",
+  "message": "팀을 찾을 수 없습니다."
 }
 ```
 

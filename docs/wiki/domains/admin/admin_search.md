@@ -23,11 +23,19 @@
 }
 ```
 
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
 *   **403 Forbidden**
 ```json
 {
   "code": "FORBIDDEN",
-  "message": "접근 권한이 없습니다."
+  "message": "접근 권한이 없습니다 (관리자 권한 필요)."
 }
 ```
 
@@ -35,6 +43,11 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `AdminController.search`
+*   **Service**: `AdminSearchService.search`
 *   **Flow**:
-1. 권한 검사 (`Role=ADMIN`).
-2. `AdminSearchService`에서 타입별 검색 쿼리 실행.
+1. 관리자 권한(`ADMIN`) 검증.
+2. `keyword` 유효성 검사 (Null check -> Empty List 반환).
+3. `type` 파라미터(`USER`, `ARTICLE`, `ALL`)에 따라 분기 처리.
+    *   `USER`: `UserRepository.findByNameContaining`
+    *   `ARTICLE`: `ArticleRepository.findByTitleContaining`
+4. 검색 결과를 `AdminSearchResponse`로 래핑하여 반환.

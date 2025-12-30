@@ -24,8 +24,24 @@
 *   **400 Bad Request**
 ```json
 {
-  "code": "ALREADY_REPORTED",
-  "message": "이미 신고한 게시글입니다."
+  "code": "VALIDATION_ERROR",
+  "message": "신고 사유는 필수입니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
 }
 ```
 
@@ -33,8 +49,10 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `ReportController.reportArticle`
+*   **Service**: `ReportService.reportArticle`
 *   **Flow**:
-1. `ArticleRepository` 게시글 확인.
+1. `ArticleRepository`에서 게시글 존재 여부 확인 (없을 시 404).
 2. `ReportRepository` 중복 신고 여부 확인 (User-Article).
-3. `Report` 엔티티 생성 및 저장.
-4. 일정 횟수 이상 누적 시 자동 Blind 처리 로직 (Optional).
+3. `Report` 엔티티 생성 (TargetType=ARTICLE, Status=PENDING).
+4. `ReportRepository.save()` 호출.
+5. 일정 횟수 이상 누적 시 자동 Blind 처리 로직 (Optional).

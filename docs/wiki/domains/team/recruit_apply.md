@@ -21,6 +21,22 @@
 // No Content
 ```
 
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "RECRUIT_NOT_FOUND",
+  "message": "모집 공고를 찾을 수 없습니다."
+}
+```
+
 *   **409 Conflict**
 ```json
 {
@@ -32,9 +48,9 @@
 ---
 
 ## 🛠️ Implementation Details
-*   **Controller**: `RecruitController.applyRecruit`
+*   **Controller**: `RecruitController.apply`
 *   **Flow**:
-1. `RecruitRepository` 공고 조회.
-2. 중복 지원/가입 여부 검증 (DB 조회).
-3. `RecruitApply` 엔티티 생성.
-4. 팀 리더에게 알림 발송 (Event).
+1. `RecruitRepository`에서 공고 ID로 조회.
+2. 이미 지원했는지 여부 확인 (Optional).
+3. `RecruitApply` 엔티티 생성 및 저장.
+4. 팀 리더에게 알림 전송 (Optional).

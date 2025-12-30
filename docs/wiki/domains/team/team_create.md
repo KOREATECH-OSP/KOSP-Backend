@@ -12,7 +12,6 @@
 {
   "name": "KOSP 개발팀",
   "description": "오픈소스 플랫폼 개발 프로젝트",
-  "techStacks": ["Spring", "React"],
   "imageUrl": "https://..."
 }
 ```
@@ -29,6 +28,14 @@
 {
   "code": "VALIDATION_ERROR",
   "message": "팀 이름은 필수입니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
 }
 ```
 

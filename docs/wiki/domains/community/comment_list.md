@@ -11,17 +11,28 @@
 *   **200 OK**
 ```json
 {
-  "content": [
+  "comments": [
     {
       "id": 100,
       "content": "좋은 글이네요.",
       "author": { "nickname": "김철수" },
-      "createdAt": "2024-12-30T10:05:00",
-      "children": []
+      "createdAt": "2024-12-30T10:05:00"
     }
   ],
-  "pageable": { ... },
-  "totalElements": 5
+  "meta": {
+    "page": 1,
+    "size": 10,
+    "totalCount": 5,
+    "totalPages": 1
+  }
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
 }
 ```
 
@@ -29,7 +40,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `CommentController.getList`
+*   **Service**: `CommentService.getList`
 *   **Flow**:
-1. `ArticleRepository` 게시글 존재 확인.
-2. `CommentRepository`에서 해당 게시글 댓글 페이징 조회.
-3. `hibernate.default_batch_fetch_size` 설정을 통해 N+1 문제 최적화.
+1. `ArticleRepository`에서 게시글 존재 여부 확인 (Optional, Repository 레벨에서 처리 가능).
+2. `CommentRepository.findByArticleId`로 댓글 목록 조회.
+3. 각 댓글에 대해 `isLiked`, `isMine` 여부 확인하여 응답 구성.

@@ -25,7 +25,15 @@
 ```json
 {
   "code": "INVALID_CODE",
-  "message": "인증코드가 일치하지 않거나 만료되었습니다."
+  "message": "인증코드가 일치하지 않습니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "CODE_EXPIRED",
+  "message": "인증 코드가 만료되었거나 존재하지 않습니다."
 }
 ```
 

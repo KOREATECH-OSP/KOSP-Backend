@@ -21,11 +21,35 @@
 // No Content
 ```
 
+*   **400 Bad Request**
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "이름은 필수입니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
 *   **403 Forbidden**
 ```json
 {
   "code": "FORBIDDEN",
-  "message": "본인의 프로필만 수정할 수 있습니다."
+  "message": "권한이 없습니다 (본인 정보만 수정 가능)."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "USER_NOT_FOUND",
+  "message": "사용자를 찾을 수 없습니다."
 }
 ```
 
@@ -33,8 +57,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `UserController.update`
+*   **Service**: `UserService.update`
 *   **Flow**:
-1. PathVariable `userId`와 현재 로그인 사용자 ID 비교.
-2. 불일치 시 `GlobalException(FORBIDDEN)` 발생.
-3. 닉네임 중복 검사 (변경 시).
-4. `User` 엔티티 업데이트.
+1. 요청한 유저(`AuthUser`)와 대상 유저 ID 일치 여부 확인 (Controller Level).
+2. 불일치 시 `FORBIDDEN` 예외 발생.
+3. `UserRepository` 조회 후 정보(`name`, `introduction`) 업데이트.

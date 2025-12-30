@@ -11,7 +11,23 @@
 *   **200 OK**
 ```json
 {
-  "bookmarked": true
+  "isBookmarked": true
+}
+```
+
+*   **401 Unauthorized** (비로그인)
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "ARTICLE_NOT_FOUND",
+  "message": "게시글을 찾을 수 없습니다."
 }
 ```
 

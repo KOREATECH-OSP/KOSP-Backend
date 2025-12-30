@@ -36,7 +36,9 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `ArticleController.getOne`
+*   **Service**: `ArticleService.getOne`
 *   **Flow**:
-1. `ArticleRepository`에서 ID로 게시글 조회 (Fetch Join으로 작성자 정보 함께 로드 권장).
-2. 조회수 증가 로직 수행 (중복 방지: Cookie or Redis).
-3. `ArticleResponse` DTO 변환 및 반환.
+1. `ArticleRepository`에서 ID로 게시글 조회 (없을 시 404).
+2. 조회수 증가 (`article.increaseViews()`).
+3. 로그인한 사용자의 `isLiked`, `isBookmarked` 상태 확인.
+4. 응답 DTO 반환.

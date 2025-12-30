@@ -16,17 +16,20 @@
 *   **200 OK**
 ```json
 {
-  "content": [
+  "teams": [
     {
       "id": 1,
       "name": "KOSP 개발팀",
       "memberCount": 4,
-      "leader": "홍길동",
       "imageUrl": "..."
     }
   ],
-  "pageable": { ... },
-  "totalElements": 5
+  "meta": {
+    "page": 1,
+    "size": 10,
+    "totalCount": 5,
+    "totalPages": 1
+  }
 }
 ```
 
@@ -34,6 +37,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `TeamController.getList`
+*   **Service**: `TeamService.getList`
 *   **Flow**:
-1. `QueryDSL`을 사용하여 팀 목록 조회.
-2. `memberCount`는 서브쿼리나 배치 조회로 최적화.
+1. `TeamRepository` 조회 (검색어 `search` 포함).
+2. `getLeaderName()`: 각 팀의 리더 이름 추출 (Stream Filter).
+3. `TeamListResponse` (목록 + Meta) 반환.

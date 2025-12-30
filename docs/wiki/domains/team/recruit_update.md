@@ -10,9 +10,13 @@
 ### Request
 ```json
 {
+  "boardId": 3,
+  "teamId": 1,
   "title": "수정된 제목",
   "content": "수정된 내용",
-  "deadline": "2025-02-15T23:59:59"
+  "tags": ["Spring"],
+  "startDate": "2025-01-01T00:00:00",
+  "endDate": "2025-02-15T23:59:59"
 }
 ```
 
@@ -22,11 +26,35 @@
 // No Content
 ```
 
+*   **400 Bad Request**
+```json
+{
+  "code": "VALIDATION_ERROR",
+  "message": "제목은 필수입니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "UNAUTHORIZED",
+  "message": "인증되지 않은 사용자입니다."
+}
+```
+
 *   **403 Forbidden**
 ```json
 {
   "code": "FORBIDDEN",
-  "message": "작성자(팀 리더)만 수정할 수 있습니다."
+  "message": "권한이 없습니다 (본인 작성 공고만 수정 가능)."
+}
+```
+
+*   **404 Not Found**
+```json
+{
+  "code": "RECRUIT_NOT_FOUND",
+  "message": "모집 공고를 찾을 수 없습니다."
 }
 ```
 
@@ -34,7 +62,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `RecruitController.update`
+*   **Service**: `RecruitService.update`
 *   **Flow**:
-1. Path ID로 공고 조회.
-2. 현재 유저가 해당 공고의 팀 리더인지 검증.
-3. 제목, 내용, 마감일 수정.
+1. `RecruitRepository`에서 ID로 공고 조회 (없을 시 404).
+2. `validateOwner()`: 작성자 본인 확인 (아닐 경우 403).
+3. `Recruit` 정보 업데이트 (제목, 내용, 태그, 팀, 기간 등).

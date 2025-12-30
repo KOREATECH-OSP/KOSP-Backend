@@ -24,7 +24,15 @@
 *   **400 Bad Request**
 ```json
 {
-  "code": "PASSWORD_MISMATCH",
+  "code": "VALIDATION_ERROR",
+  "message": "새 비밀번호 형식이 올바르지 않습니다."
+}
+```
+
+*   **401 Unauthorized**
+```json
+{
+  "code": "AUTHENTICATION_FAILED",
   "message": "현재 비밀번호가 일치하지 않습니다."
 }
 ```
@@ -33,7 +41,8 @@
 
 ## 🛠️ Implementation Details
 *   **Controller**: `UserController.updatePassword`
+*   **Service**: `UserService.changePassword`
 *   **Flow**:
-1. `currentPassword`와 DB 저장된 해시값(`BCrypt`) 비교.
-2. `newPassword` 형식(정규식) 검증.
-3. 새 비밀번호 해싱 후 `User` 엔티티 업데이트.
+1. 현재 비밀번호 검증 (`PasswordEncoder.matches`). 불일치 시 예외.
+2. 새 비밀번호 유효성 검증.
+3. 비밀번호 인코딩 후 저장.
