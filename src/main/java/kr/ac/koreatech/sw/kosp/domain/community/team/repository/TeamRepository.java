@@ -13,6 +13,7 @@ public interface TeamRepository extends Repository<Team, Long> {
     Team save(Team team);
     Optional<Team> findById(Long id);
     Page<Team> findByNameContaining(String name, Pageable pageable);
+    java.util.List<Team> findByNameContaining(String name);
 
     default Team getById(Long id) {
         return findById(id).orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));

@@ -46,6 +46,7 @@ dependencies {
     implementation(libs.thymeleaf.extras.springsecurity6)
 
     implementation(libs.awssdk.ses)
+    implementation(libs.awssdk.s3)
 
     runtimeOnly(libs.jjwt.impl)
     runtimeOnly(libs.jjwt.jackson)

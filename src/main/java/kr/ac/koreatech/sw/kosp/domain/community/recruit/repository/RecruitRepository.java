@@ -18,6 +18,8 @@ public interface RecruitRepository extends Repository<Recruit, Long> {
     void delete(Recruit recruit);
 
     Page<Recruit> findByBoard(Board board, Pageable pageable);
+    
+    java.util.List<Recruit> findByTitleContainingAndIsDeletedFalse(String title);
 
     default Recruit getById(Long id) {
         return findById(id)
