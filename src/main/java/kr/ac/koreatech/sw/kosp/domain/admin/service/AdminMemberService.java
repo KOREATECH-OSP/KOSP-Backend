@@ -2,7 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.PermissionAdminService;

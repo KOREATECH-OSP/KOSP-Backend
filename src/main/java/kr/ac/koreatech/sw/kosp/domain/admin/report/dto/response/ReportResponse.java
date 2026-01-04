@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.dto.response;
+package kr.ac.koreatech.sw.kosp.domain.admin.report.dto.response;
 
 import java.time.LocalDateTime;
 import kr.ac.koreatech.sw.kosp.domain.report.model.Report;

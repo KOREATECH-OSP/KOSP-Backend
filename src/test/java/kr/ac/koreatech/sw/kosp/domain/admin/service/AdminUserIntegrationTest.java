@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import kr.ac.koreatech.sw.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
@@ -80,7 +81,7 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     @Test
     @DisplayName("관리자 - 사용자 정보 강제 변경")
     void updateUser_success() throws Exception {
-        kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest req = new kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest("ChangedByAdmin", "ForcedUpdate", null);
+        AdminUserUpdateRequest req = new AdminUserUpdateRequest("ChangedByAdmin", "ForcedUpdate", null);
 
         mockMvc.perform(put("/v1/admin/users/" + normalUser.getId())
                 .header("Authorization", bearerToken(adminAccessToken))
