@@ -17,7 +17,9 @@ public class SignupTokenProvider extends JwtAuthTokenProvider {
     @Value("${jwt.expiration-time.signup-token}")
     private long signupExpiration;
 
-    public SignupTokenProvider(@Value("${jwt.secret}") String secret) {
+    public SignupTokenProvider(
+        @Value("${jwt.secret-key}") String secret
+    ) {
         super(secret);
     }
 
