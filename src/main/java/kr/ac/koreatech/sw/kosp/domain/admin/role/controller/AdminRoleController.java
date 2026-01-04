@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.role.controller;
 
 import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.api.AdminRoleApi;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
@@ -54,6 +55,13 @@ public class AdminRoleController implements AdminRoleApi {
     public ResponseEntity<Void> createPolicy(PolicyCreateRequest request) {
         policyAdminService.createPolicy(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Override
+    @Permit(name = "admin:policies:assign-permission", description = "정책에 권한 할당")
+    public ResponseEntity<Void> assignPermissionToPolicy(String policyName, PermissionAssignRequest request) {
+        policyAdminService.assignPermission(policyName, request.permissionName());
+        return ResponseEntity.ok().build();
     }
 
     @Override

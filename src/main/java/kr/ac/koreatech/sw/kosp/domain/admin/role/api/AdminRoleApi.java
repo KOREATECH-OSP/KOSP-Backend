@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
@@ -50,6 +51,14 @@ public interface AdminRoleApi {
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @PostMapping("/policies")
     ResponseEntity<Void> createPolicy(@RequestBody @Valid PolicyCreateRequest request);
+
+    @Operation(summary = "정책에 권한(Permission) 할당", description = "특정 정책에 권한을 할당합니다.")
+    @ApiResponse(responseCode = "200", description = "할당 성공")
+    @PostMapping("/policies/{policyName}/permissions")
+    ResponseEntity<Void> assignPermissionToPolicy(
+        @Parameter(description = "정책 이름") @PathVariable String policyName,
+        @RequestBody @Valid PermissionAssignRequest request
+    );
 
     @Operation(summary = "권한 목록 조회", description = "시스템에 등록된 모든 권한(Permission)을 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")

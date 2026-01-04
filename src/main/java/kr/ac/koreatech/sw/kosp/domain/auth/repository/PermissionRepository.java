@@ -9,4 +9,5 @@ import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
 public interface PermissionRepository extends Repository<Permission, Long> {
     Permission save(Permission permission);
     List<Permission> findAll();
+    java.util.Optional<Permission> findByName(String name);
 }
