@@ -16,6 +16,7 @@ public class EmailVerification {
     private String email;
 
     private String code;
+    private String signupToken;
 
     private boolean isVerified;
 

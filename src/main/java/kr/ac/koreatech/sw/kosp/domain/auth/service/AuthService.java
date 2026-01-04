@@ -1,21 +1,39 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.web.context.SecurityContextRepository;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.Claims;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
+import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2UserService;
+import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
+import kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.core.AuthToken;
+import kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory;
+import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
+import kr.ac.koreatech.sw.kosp.global.auth.provider.SignupTokenProvider;
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
+import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,108 +44,197 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
-    private final SecurityContextRepository securityContextRepository;
-    private final UserDetailsService userDetailsService;
-    private final kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService emailVerificationService;
+    private final LoginTokenProvider loginTokenProvider;
+    private final SignupTokenProvider signupTokenProvider;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final EmailVerificationService emailVerificationService;
+    private final OAuth2UserService oAuth2UserService;
+    private final UserRepository userRepository;
+    private final ClientRegistrationRepository clientRegistrationRepository;
+    private final TextEncryptor textEncryptor;
+    private final StringRedisTemplate redisTemplate;
 
     @Transactional
-    public void sendCertificationMail(String email) {
-        emailVerificationService.sendCertificationMail(email);
+    public void sendCertificationMail(String email, String signupToken) {
+        emailVerificationService.sendCertificationMail(email, signupToken);
     }
 
     @Transactional
-    public void verifyCode(String email, String code) {
-        emailVerificationService.verifyCode(email, code);
+    public String verifyCode(String email, String code) {
+        EmailVerification verification = emailVerificationService.verifyCode(email, code);
+
+        String signupToken = verification.getSignupToken();
+        if (signupToken == null) {
+            return null;
+        }
+
+        // Renew JWS with Email Verified Claim
+        AuthToken<Claims> oldToken = signupTokenProvider.parseSignupToken(signupToken);
+        if (!oldToken.validate()) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
+
+        Claims oldClaims = oldToken.getData();
+        String subject = oldClaims.getSubject();
+        
+        Map<String, Object> newClaims = new HashMap<>(oldClaims);
+        newClaims.put("kutEmail", email);
+        newClaims.put("emailVerified", true);
+
+        AuthToken<Claims> newToken = signupTokenProvider.createSignupToken(subject, newClaims);
+        return ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) newToken).getToken();
+    }
+
+    /**
+     * GitHub Access Token으로 회원가입 토큰 발급
+     */
+    @Transactional
+    public String exchangeGithubTokenForSignup(String githubAccessToken) {
+        OAuth2UserRequest userRequest = createOAuth2UserRequest(githubAccessToken);
+        OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
+        Map<String, Object> attributes = oAuth2User.getAttributes();
+
+        Long githubId = extractGithubId(attributes);
+
+        // 이미 가입된 사용자인지 확인
+        if (userRepository.findByGithubUser_GithubId(githubId).isPresent()) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_ALREADY_EXISTS);
+        }
+
+        // GitHub Access Token 암호화 (JWS에 저장)
+        String encryptedToken = textEncryptor.encrypt(githubAccessToken);
+
+        // JWS 발급
+        Map<String, Object> claims = new HashMap<>(attributes);
+        claims.put("encryptedGithubToken", encryptedToken);
+
+        AuthToken<Claims> token = signupTokenProvider.createSignupToken(
+            String.valueOf(githubId),
+            claims
+        );
+        
+        return ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) token).getToken();
     }
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
-    public void login(
-        String username,
-        String password,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
-    ) {
-        Authentication authentication = authenticate(username, password);
-        setAuthentication(authentication, servletRequest, servletResponse);
-    }
+    public AuthTokenResponse login(LoginRequest request) {
+        Authentication authentication = authenticate(request.email(), request.password());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-    public void login(
-        LoginRequest request,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
-    ) {
-        login(request.email(), request.password(), servletRequest, servletResponse);
+        User user = (User) authentication.getPrincipal();
+        return createTokenResponse(user);
     }
 
     /**
-     * 강제 로그인 (비밀번호 검증 없이 UserDetails를 신뢰하여 인증 컨텍스트 설정)
-     * OAuth2 인증 등 외부 인증 성공 후, 비밀번호 재검증 없이 SecurityContext에 인증 정보를 저장할 때 사용
-     */
-    public void login(
-        String username,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
-    ) {
-        // 1. UserDetails 로드
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        // 2. 인증 토큰 생성 (비밀번호는 null)
-        UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-        setAuthentication(token, servletRequest, servletResponse);
-    }
-
-    /**
-     * 로그아웃
+     * GitHub 로그인
      */
     @Transactional
-    public void logout(HttpServletRequest request) {
-        securityContextHolderStrategy.clearContext();
-        request.getSession().invalidate();
+    public AuthTokenResponse loginWithGithub(String githubAccessToken) {
+        OAuth2UserRequest userRequest = createOAuth2UserRequest(githubAccessToken);
+        OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
+        Long githubId = extractGithubId(oAuth2User.getAttributes());
+
+        User user = userRepository.findByGithubUser_GithubId(githubId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND));
+
+        return createTokenResponse(user);
     }
 
     /**
      * 사용자 정보 조회
      */
-    public AuthMeResponse getUserInfo() {
-        Authentication auth = securityContextHolderStrategy.getContext().getAuthentication();
-        Object principal = auth.getPrincipal();
+    public AuthMeResponse getUserInfo(User user) {
+        String profileImage = (user.getGithubUser() != null) ? user.getGithubUser().getGithubAvatarUrl() : null;
+        
+        return new AuthMeResponse(
+            user.getId(),
+            user.getKutEmail(),
+            user.getName(),
+            profileImage,
+            user.getIntroduction()
+        );
+    }
 
-        if (principal instanceof kr.ac.koreatech.sw.kosp.domain.user.model.User user) {
-            String profileImage = user.getGithubUser() != null ? user.getGithubUser().getGithubAvatarUrl() : null;
-            return new AuthMeResponse(
-                user.getId(),
-                user.getKutEmail(),
-                user.getName(),
-                profileImage,
-                user.getIntroduction()
-            );
+    /**
+     * User Entity 기반으로 토큰 생성
+     */
+    public AuthTokenResponse createTokensForUser(User user) {
+        return createTokenResponse(user);
+    }
+
+    /**
+     * 토큰 재발급
+     */
+    @Transactional
+    public AuthTokenResponse reissue(String refreshToken) {
+        // 1. Validate Refresh Token
+        AuthToken<Claims> authToken = loginTokenProvider.convertAuthToken(refreshToken);
+        if (!authToken.validate()) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
         }
 
-        return new AuthMeResponse(null, null, auth.getName(), null, null);
+        // 2. Validate Redis
+        Claims claims = authToken.getData();
+        String userId = claims.getSubject();
+        String savedToken = redisTemplate.opsForValue().get("refresh:" + userId);
+
+        if (savedToken == null || !savedToken.equals(refreshToken)) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
+
+        // 3. Issue New Access Token
+        UserDetails userDetails = userDetailsService.loadUser(userId, AuthTokenCategory.LOGIN);
+        User user = (User) userDetails;
+
+        AuthToken<Claims> newAccessToken = loginTokenProvider.reissueAccessToken(user);
+        String accessTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) newAccessToken).getToken();
+
+        return new AuthTokenResponse(accessTokenString, refreshToken);
     }
 
-    private SecurityContext setAuthentication(Authentication authentication) {
-        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
-        context.setAuthentication(authentication);
-        securityContextHolderStrategy.setContext(context);
-        return context;
-    }
-
-    private void setAuthentication(
-        Authentication authentication,
-        HttpServletRequest request,
-        HttpServletResponse response
-    ) {
-        SecurityContext context = setAuthentication(authentication);
-        securityContextRepository.saveContext(context, request, response);
+    @Transactional
+    public void logout(Long userId) {
+        loginTokenProvider.revokeRefreshToken(userId);
     }
 
     private Authentication authenticate(String username, String password) {
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(token);
+    }
+
+    private AuthTokenResponse createTokenResponse(User user) {
+        AuthToken<Claims> accessToken = loginTokenProvider.createAccessToken(user);
+        AuthToken<Claims> refreshToken = loginTokenProvider.createRefreshToken(user);
+
+        String accessTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) accessToken).getToken();
+        String refreshTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) refreshToken).getToken();
+
+        return new AuthTokenResponse(accessTokenString, refreshTokenString);
+    }
+
+    private Long extractGithubId(Map<String, Object> attributes) {
+        Object id = attributes.get("id");
+        if (id instanceof Number number) {
+            return number.longValue();
+        }
+        return Long.valueOf(String.valueOf(id));
+    }
+
+    private OAuth2UserRequest createOAuth2UserRequest(String githubAccessToken) {
+        ClientRegistration clientRegistration = clientRegistrationRepository.findByRegistrationId("github");
+        if (clientRegistration == null) {
+            throw new GlobalException(ExceptionMessage.GITHUB_CLIENT_REGISTRATION_ERROR);
+        }
+
+        OAuth2AccessToken accessToken = new OAuth2AccessToken(
+            OAuth2AccessToken.TokenType.BEARER,
+            githubAccessToken,
+            java.time.Instant.now(),
+            java.time.Instant.now().plusSeconds(60)
+        );
+
+        return new OAuth2UserRequest(clientRegistration, accessToken);
     }
 }

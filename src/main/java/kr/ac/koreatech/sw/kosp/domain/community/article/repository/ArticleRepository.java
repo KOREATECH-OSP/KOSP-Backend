@@ -25,5 +25,5 @@ public interface ArticleRepository extends Repository<Article, Long> {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
     }
     
-    org.springframework.data.domain.Page<Article> findByAuthor(kr.ac.koreatech.sw.kosp.domain.user.model.User author, org.springframework.data.domain.Pageable pageable);
+    Page<Article> findByAuthor(kr.ac.koreatech.sw.kosp.domain.user.model.User author, Pageable pageable);
 }
