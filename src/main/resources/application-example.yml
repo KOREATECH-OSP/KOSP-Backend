@@ -13,6 +13,10 @@ aws:
   ses:
     access-key: AAAAAAAAAAAAAAAAAAAA
     secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+  s3:
+    access-key: AAAAAAAAAAAAAAAAAAAA
+    secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    bucket: dev-kosp
   region: ap-northeast-2
 
 spring:
