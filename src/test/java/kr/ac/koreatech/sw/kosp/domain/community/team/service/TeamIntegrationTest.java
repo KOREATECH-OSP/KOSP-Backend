@@ -1,24 +1,24 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.service;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TeamIntegrationTest extends IntegrationTestSupport {
 
@@ -27,11 +27,10 @@ class TeamIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private TeamRepository teamRepository;
 
-    private MockHttpSession session;
+    private String accessToken;
 
     @BeforeEach
     void setup() throws Exception {
-        createRole("ROLE_STUDENT");
         createGithubUser(1001L);
 
         // Signup & Login
@@ -39,13 +38,7 @@ class TeamIntegrationTest extends IntegrationTestSupport {
         userService.signup(new UserSignupRequest(
             "teamLeader", "2020001001", "leader@koreatech.ac.kr", getValidPassword(), leaderToken
         ));
-        LoginRequest loginReq = new LoginRequest("leader@koreatech.ac.kr", getValidPassword());
-        MvcResult result = mockMvc.perform(post("/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginReq)))
-            .andExpect(status().isOk())
-            .andReturn();
-        session = (MockHttpSession) result.getRequest().getSession();
+        accessToken = loginAndGetToken("leader@koreatech.ac.kr", getValidPassword());
     }
 
     @Test
@@ -58,7 +51,7 @@ class TeamIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -78,7 +71,7 @@ class TeamIntegrationTest extends IntegrationTestSupport {
             "Test Team", "Test Description", "https://example.com/image.png"
         );
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -87,7 +80,7 @@ class TeamIntegrationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(get("/v1/teams/" + team.getId())
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("Test Team"))
@@ -105,19 +98,19 @@ class TeamIntegrationTest extends IntegrationTestSupport {
             "Team Beta", "Second Team", "https://example.com/beta.png"
         );
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req1)))
             .andExpect(status().isCreated());
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req2)))
             .andExpect(status().isCreated());
 
         // when & then
         mockMvc.perform(get("/v1/teams?search=Team")
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.teams").isArray())
@@ -135,19 +128,19 @@ class TeamIntegrationTest extends IntegrationTestSupport {
             "Other Team", "Different Team", "https://example.com/other.png"
         );
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req1)))
             .andExpect(status().isCreated());
         mockMvc.perform(post("/v1/teams")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req2)))
             .andExpect(status().isCreated());
 
         // when & then: KOSP 검색
         mockMvc.perform(get("/v1/teams?search=KOSP")
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.teams").isArray())
