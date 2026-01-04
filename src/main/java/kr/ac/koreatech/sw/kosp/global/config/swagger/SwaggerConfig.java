@@ -1,5 +1,8 @@
 package kr.ac.koreatech.sw.kosp.global.config.swagger;
 
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.servers.Server;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -25,7 +28,13 @@ import io.swagger.v3.oas.annotations.info.License;
 )
 public class SwaggerConfig {
 
-    @org.springframework.context.annotation.Bean
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+            .addServersItem(new Server().url("/").description("Current server (auto-detect HTTP/HTTPS)"));
+    }
+
+    @Bean
     public org.springdoc.core.models.GroupedOpenApi defaultApi() {
         return org.springdoc.core.models.GroupedOpenApi.builder()
             .group("default")
@@ -34,7 +43,7 @@ public class SwaggerConfig {
             .build();
     }
 
-    @org.springframework.context.annotation.Bean
+    @Bean
     public org.springdoc.core.models.GroupedOpenApi adminApi() {
         return org.springdoc.core.models.GroupedOpenApi.builder()
             .group("admin")
