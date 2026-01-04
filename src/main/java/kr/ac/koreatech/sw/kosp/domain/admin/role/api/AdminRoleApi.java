@@ -9,6 +9,7 @@ import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
 import org.springframework.http.ResponseEntity;
@@ -49,4 +50,9 @@ public interface AdminRoleApi {
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @PostMapping("/policies")
     ResponseEntity<Void> createPolicy(@RequestBody @Valid PolicyCreateRequest request);
+
+    @Operation(summary = "권한 목록 조회", description = "시스템에 등록된 모든 권한(Permission)을 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/permissions")
+    ResponseEntity<List<PermissionResponse>> getAllPermissions();
 }

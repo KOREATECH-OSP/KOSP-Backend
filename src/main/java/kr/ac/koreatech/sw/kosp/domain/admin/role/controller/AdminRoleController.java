@@ -5,6 +5,7 @@ import kr.ac.koreatech.sw.kosp.domain.admin.role.api.AdminRoleApi;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.service.PolicyAdminService;
@@ -53,5 +54,11 @@ public class AdminRoleController implements AdminRoleApi {
     public ResponseEntity<Void> createPolicy(PolicyCreateRequest request) {
         policyAdminService.createPolicy(request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @Override
+    @Permit(name = "admin:permissions:read", description = "권한 목록 조회")
+    public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
+        return ResponseEntity.ok(policyAdminService.getAllPermissions());
     }
 }
