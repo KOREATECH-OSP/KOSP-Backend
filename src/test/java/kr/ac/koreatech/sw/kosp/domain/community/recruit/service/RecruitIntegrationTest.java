@@ -1,26 +1,28 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.service;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
-import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
+import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class RecruitIntegrationTest extends IntegrationTestSupport {
 
@@ -33,42 +35,29 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository teamRepository;
 
-    private MockHttpSession session;
-    private MockHttpSession otherUserSession;
+    private String accessToken;
+    private String otherUserAccessToken;
     private kr.ac.koreatech.sw.kosp.domain.community.board.model.Board testBoard;
     private kr.ac.koreatech.sw.kosp.domain.community.team.model.Team testTeam;
 
     @BeforeEach
     void setup() throws Exception {
-        createRole("ROLE_STUDENT");
-        createGithubUser(999L); // used in signup
+        createGithubUser(999L);
+        createGithubUser(998L);
 
         // Signup & Login
         String recruiterToken = createSignupToken(999L, "recruit@koreatech.ac.kr");
         userService.signup(new UserSignupRequest(
             "recruiter", "2020136999", "recruit@koreatech.ac.kr", getValidPassword(), recruiterToken
         ));
-        LoginRequest loginReq = new LoginRequest("recruit@koreatech.ac.kr", getValidPassword());
-        MvcResult result = mockMvc.perform(post("/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(loginReq)))
-            .andExpect(status().isOk())
-            .andReturn();
-        session = (MockHttpSession) result.getRequest().getSession();
+        accessToken = loginAndGetToken("recruit@koreatech.ac.kr", getValidPassword());
 
         // Create another user for testing
-        createGithubUser(998L);
         String otherToken = createSignupToken(998L, "other@koreatech.ac.kr");
         userService.signup(new UserSignupRequest(
             "otherUser", "2020136998", "other@koreatech.ac.kr", getValidPassword(), otherToken
         ));
-        LoginRequest otherLogin = new LoginRequest("other@koreatech.ac.kr", getValidPassword());
-        MvcResult otherResult = mockMvc.perform(post("/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(otherLogin)))
-            .andExpect(status().isOk())
-            .andReturn();
-        otherUserSession = (MockHttpSession) otherResult.getRequest().getSession();
+        otherUserAccessToken = loginAndGetToken("other@koreatech.ac.kr", getValidPassword());
 
         // Create test board and team
         testBoard = kr.ac.koreatech.sw.kosp.domain.community.board.model.Board.builder()
@@ -99,7 +88,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -119,7 +108,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -128,7 +117,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(get("/v1/community/recruits/" + recruit.getId())
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.title").value("Recruit Title"))
@@ -148,19 +137,19 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req1)))
             .andExpect(status().isCreated());
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req2)))
             .andExpect(status().isCreated());
 
         // when & then
         mockMvc.perform(get("/v1/community/recruits?boardId=" + testBoard.getId())
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.recruits").isArray())
@@ -176,7 +165,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createReq)))
             .andExpect(status().isCreated());
@@ -189,7 +178,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(8)
         );
         mockMvc.perform(put("/v1/community/recruits/" + recruit.getId())
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateReq)))
             .andDo(print())
@@ -210,7 +199,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createReq)))
             .andExpect(status().isCreated());
@@ -223,7 +212,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(2), LocalDateTime.now().plusDays(8)
         );
         mockMvc.perform(put("/v1/community/recruits/" + recruit.getId())
-                .session(otherUserSession)
+                .header("Authorization", bearerToken(otherUserAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateReq)))
             .andDo(print())
@@ -239,7 +228,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createReq)))
             .andExpect(status().isCreated());
@@ -248,7 +237,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(delete("/v1/community/recruits/" + recruit.getId())
-                .session(session))
+                .header("Authorization", bearerToken(accessToken)))
             .andDo(print())
             .andExpect(status().isNoContent());
 
@@ -265,7 +254,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
             LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(7)
         );
         mockMvc.perform(post("/v1/community/recruits")
-                .session(session)
+                .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createReq)))
             .andExpect(status().isCreated());
@@ -274,7 +263,7 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
 
         // when & then: otherUser가 삭제 시도
         mockMvc.perform(delete("/v1/community/recruits/" + recruit.getId())
-                .session(otherUserSession))
+                .header("Authorization", bearerToken(otherUserAccessToken)))
             .andDo(print())
             .andExpect(status().isForbidden());
     }
