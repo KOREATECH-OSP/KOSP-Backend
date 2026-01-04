@@ -4,35 +4,45 @@ import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.EmailVerification
 import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
 import kr.ac.koreatech.sw.kosp.domain.mail.repository.EmailVerificationRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
 
 import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.*;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailVerificationService {
     private final EmailVerificationRepository emailVerificationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final long signupTokenTtl;
     
-    private static final long CODE_TTL = 300L; // 5 minutes
+    private static final long CODE_TTL = 300L; // 5 minutes (seconds)
 
-    private static final long SIGNUP_WINDOW_TTL = 1800L; // 30 minutes for signup completion
+    public EmailVerificationService(
+        EmailVerificationRepository emailVerificationRepository,
+        ApplicationEventPublisher eventPublisher,
+        @Value("${jwt.expiration-time.signup-token}") long signupTokenTtl
+    ) {
+        this.emailVerificationRepository = emailVerificationRepository;
+        this.eventPublisher = eventPublisher;
+        this.signupTokenTtl = signupTokenTtl;
+    }
 
     @Transactional
-    public void sendCertificationMail(String email) {
+    public void sendCertificationMail(String email, String signupToken) {
         String code = generateCode();
         
         // 1. Save to Redis
         EmailVerification verification = EmailVerification.builder()
                 .email(email)
                 .code(code)
+                .signupToken(signupToken)
                 .isVerified(false)
                 .ttl(CODE_TTL)
                 .build();
@@ -44,7 +54,7 @@ public class EmailVerificationService {
     }
 
     @Transactional
-    public boolean verifyCode(String email, String code) {
+    public EmailVerification verifyCode(String email, String code) {
         EmailVerification verification = emailVerificationRepository.findById(email)
                 .orElseThrow(() -> new GlobalException(EMAIL_NOT_FOUND));
 
@@ -53,9 +63,9 @@ public class EmailVerificationService {
         }
 
         verification.verify();
-        verification.updateTtl(SIGNUP_WINDOW_TTL); // Extend TTL for signup
+        verification.updateTtl(TimeUnit.MILLISECONDS.toSeconds(signupTokenTtl));
         emailVerificationRepository.save(verification);
-        return true;
+        return verification;
     }
     
     @Transactional

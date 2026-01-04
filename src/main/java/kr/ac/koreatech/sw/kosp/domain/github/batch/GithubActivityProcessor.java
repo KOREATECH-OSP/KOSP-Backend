@@ -169,7 +169,7 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         return 1;                   // Bronze
     }
 
-    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.Analysis calculateAnalysis(UserNode userNode, String myUsername) {
+    private GithubProfile.Analysis calculateAnalysis(UserNode userNode, String myUsername) {
         Map<String, Integer> monthlyContributions = calculateMonthlyContributions(userNode);
         
         CommitAnalysisResult commitAnalysis = analyzeCommitHistory(userNode, myUsername);
@@ -180,9 +180,9 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         String workingStyle = determineWorkingStyle(timeOfDayStats);
         String collaborationStyle = collaborators.isEmpty() ? "Independent" : "Team Player";
 
-        kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary bestRepo = findBestRepository(userNode);
+        GithubProfile.BestRepoSummary bestRepo = findBestRepository(userNode);
 
-        return kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.Analysis.builder()
+        return GithubProfile.Analysis.builder()
             .monthlyContributions(monthlyContributions)
             .timeOfDayStats(timeOfDayStats)
             .dayOfWeekStats(dayOfWeekStats)
@@ -260,7 +260,7 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         }
     }
 
-    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary findBestRepository(UserNode userNode) {
+    private GithubProfile.BestRepoSummary findBestRepository(UserNode userNode) {
         if (userNode.repositories() == null || userNode.repositories().nodes() == null) return null;
 
         RepositoryNode bestNode = null;
@@ -295,7 +295,7 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         return commits * 10 + lines;
     }
 
-    private kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary buildBestRepoSummary(RepositoryNode repo) {
+    private GithubProfile.BestRepoSummary buildBestRepoSummary(RepositoryNode repo) {
         long commits = 0;
         long lines = 0;
         // Re-calculate to populate fields (or reuse if performance is key, but here cleanliness is preferred)
@@ -313,7 +313,7 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
             }
         }
 
-        return kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile.BestRepoSummary.builder()
+        return GithubProfile.BestRepoSummary.builder()
             .name(repo.name())
             .totalCommits(commits)
             .totalLines(lines)

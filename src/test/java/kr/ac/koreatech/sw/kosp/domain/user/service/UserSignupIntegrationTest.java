@@ -65,12 +65,13 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
     @DisplayName("회원가입 API 성공 - 기본 권한 할당 확인")
     void signup_success_mockMvc() throws Exception {
         // given
+        String signupToken = createSignupToken(123456L, "test@koreatech.ac.kr");
         UserSignupRequest request = new UserSignupRequest(
             "testUser",
             "2020136000",
             "test@koreatech.ac.kr",
-            "a".repeat(64),
-            123456L
+            getValidPassword(),
+            signupToken
         );
 
         // when
@@ -85,7 +86,7 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
         
         assertAll(
             () -> assertThat(savedUser.getName()).isEqualTo("testUser"),
-            () -> assertThat(passwordEncoder.matches("a".repeat(64), savedUser.getPassword())).isTrue(),
+            () -> assertThat(passwordEncoder.matches(getValidPassword(), savedUser.getPassword())).isTrue(),
             () -> assertThat(savedUser.getRoles()).hasSize(1),
             () -> assertThat(savedUser.getRoles().iterator().next().getName()).isEqualTo("ROLE_STUDENT")
         );
@@ -95,8 +96,9 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
     @DisplayName("회원가입 API 실패 - 중복 이메일 (409 Conflict)")
     void signup_fail_duplicate_mockMvc() throws Exception {
         // given: Pre-exist user
+        String signupToken = createSignupToken(999L, "dup@koreatech.ac.kr");
         UserSignupRequest request = new UserSignupRequest(
-            "dupUser", "2020136999", "dup@koreatech.ac.kr", "a".repeat(64), 999L
+            "dupUser", "2020136999", "dup@koreatech.ac.kr", getValidPassword(), signupToken
         );
         // Create first user via MockMvc or Service
         mockMvc.perform(post("/v1/users/signup")
@@ -116,8 +118,9 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
     @DisplayName("회원가입 API - 탈퇴 계정 복구")
     void signup_reactivation_mockMvc() throws Exception {
         // given: Create and Delete a user (ADMIN role setup)
+        String signupToken = createSignupToken(888L, "admin@koreatech.ac.kr");
         UserSignupRequest adminReq = new UserSignupRequest(
-            "adminUser", "2020136888", "admin@koreatech.ac.kr", "a".repeat(64), 888L
+            "adminUser", "2020136888", "admin@koreatech.ac.kr", getValidPassword(), signupToken
         );
         mockMvc.perform(post("/v1/users/signup")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -130,8 +133,9 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
         userRepository.save(user);
 
         // when: Signup again
+        String signupToken2 = createSignupToken(888L, "admin@koreatech.ac.kr");
         UserSignupRequest newReq = new UserSignupRequest(
-            "newUser", "2020136888", "admin@koreatech.ac.kr", "b".repeat(64), 888L
+            "newUser", "2020136888", "admin@koreatech.ac.kr", getValidPassword(), signupToken2
         );
 
         mockMvc.perform(post("/v1/users/signup")
@@ -153,8 +157,9 @@ class UserSignupIntegrationTest extends IntegrationTestSupport {
     @DisplayName("회원가입 실패 - 유효성 검증 실패 (400)")
     void signup_fail_invalidInput() throws Exception {
         // given: Invalid Email & Empty Name
+        String signupToken = createSignupToken(123L, "invalid-email");
         UserSignupRequest request = new UserSignupRequest(
-            "", "2020", "invalid-email", "pw", 123L
+            "", "2020", "invalid-email", "pw", signupToken
         );
 
         // when & then

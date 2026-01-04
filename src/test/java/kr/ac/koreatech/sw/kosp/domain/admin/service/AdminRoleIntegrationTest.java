@@ -38,8 +38,9 @@ class AdminRoleIntegrationTest extends IntegrationTestSupport {
         createGithubUser(500L);
 
         // Create Admin
+        String signupToken = createSignupToken(500L, "admin.role@koreatech.ac.kr");
         UserSignupRequest adminReq = new UserSignupRequest(
-            "adminRole", "2020000500", "admin.role@koreatech.ac.kr", getValidPassword(), 500L
+            "adminRole", "2020000500", "admin.role@koreatech.ac.kr", getValidPassword(), signupToken
         );
         userService.signup(adminReq);
         User admin = userRepository.findByKutEmail("admin.role@koreatech.ac.kr").orElseThrow();

@@ -1,6 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MvcResult;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -25,14 +27,15 @@ class AuthIntegrationTest extends IntegrationTestSupport {
         createGithubUser(111L);
 
         // Create user for login testing
+        String signupToken = createSignupToken(111L, "login@koreatech.ac.kr");
         UserSignupRequest request = new UserSignupRequest(
-            "loginUser", "2020136111", "login@koreatech.ac.kr", getValidPassword(), 111L
+            "loginUser", "2020136111", "login@koreatech.ac.kr", getValidPassword(), signupToken
         );
         userService.signup(request);
     }
 
     @Test
-    @DisplayName("로그인 성공 - 200 OK 및 JSESSIONID 쿠키 발급")
+    @DisplayName("로그인 성공 - 200 OK 및 JWT 토큰 발급")
     void login_success() throws Exception {
         LoginRequest loginRequest = new LoginRequest("login@koreatech.ac.kr", getValidPassword());
 
@@ -40,7 +43,9 @@ class AuthIntegrationTest extends IntegrationTestSupport {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
             .andDo(print())
-            .andExpect(status().isOk());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.accessToken").exists())
+            .andExpect(jsonPath("$.refreshToken").exists());
     }
 
     @Test
@@ -72,16 +77,18 @@ class AuthIntegrationTest extends IntegrationTestSupport {
     void logout_success() throws Exception {
         // given: 로그인
         LoginRequest loginRequest = new LoginRequest("login@koreatech.ac.kr", getValidPassword());
-        org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(post("/v1/auth/login")
+        MvcResult result = mockMvc.perform(post("/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
-        org.springframework.mock.web.MockHttpSession session = (org.springframework.mock.web.MockHttpSession) result.getRequest().getSession();
+        
+        String response = result.getResponse().getContentAsString();
+        AuthTokenResponse tokens = objectMapper.readValue(response, AuthTokenResponse.class);
 
         // when & then: 로그아웃
         mockMvc.perform(post("/v1/auth/logout")
-                .session(session))
+                .header("Authorization", "Bearer " + tokens.accessToken()))
             .andDo(print())
             .andExpect(status().isOk());
     }
@@ -91,16 +98,18 @@ class AuthIntegrationTest extends IntegrationTestSupport {
     void getMyInfo_success() throws Exception {
         // given: 로그인
         LoginRequest loginRequest = new LoginRequest("login@koreatech.ac.kr", getValidPassword());
-        org.springframework.test.web.servlet.MvcResult result = mockMvc.perform(post("/v1/auth/login")
+        MvcResult result = mockMvc.perform(post("/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
-        org.springframework.mock.web.MockHttpSession session = (org.springframework.mock.web.MockHttpSession) result.getRequest().getSession();
+        
+        String response = result.getResponse().getContentAsString();
+        AuthTokenResponse tokens = objectMapper.readValue(response, AuthTokenResponse.class);
 
         // when & then: 내 정보 조회
         mockMvc.perform(get("/v1/auth/me")
-                .session(session))
+                .header("Authorization", "Bearer " + tokens.accessToken()))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.name").value("loginUser"));

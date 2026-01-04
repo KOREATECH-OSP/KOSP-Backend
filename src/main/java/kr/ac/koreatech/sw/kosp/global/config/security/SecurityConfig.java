@@ -9,21 +9,19 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.handler.OAuth2LoginSuccessHandler;
-import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2UserService;
+import kr.ac.koreatech.sw.kosp.domain.auth.service.UserDetailsServiceImpl;
+import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
+import kr.ac.koreatech.sw.kosp.global.security.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;
-
-import kr.ac.koreatech.sw.kosp.global.security.filter.ReloadAuthenticationFilter;
-import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -32,10 +30,8 @@ import org.springframework.security.web.servletapi.SecurityContextHolderAwareReq
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
-    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-    private final OAuth2UserService oAuth2UserService;
-    private final AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository;
-    private final ReloadAuthenticationFilter reloadAuthenticationFilter;
+    private final LoginTokenProvider loginTokenProvider;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,15 +39,12 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable)
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
             .cors(cors -> cors.configurationSource(corsConfigurationSource));
 
-        http.addFilterAfter(reloadAuthenticationFilter, SecurityContextHolderAwareRequestFilter.class);
-
-        http.oauth2Login(oauth2 -> oauth2
-            .authorizationEndpoint(
-                authEndpoint -> authEndpoint.authorizationRequestRepository(authorizationRequestRepository))
-            .userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService))
-            .successHandler(oAuth2LoginSuccessHandler));
+        http.addFilterBefore(new JwtFilter(loginTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(exception -> exception
             .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
@@ -81,11 +74,6 @@ public class SecurityConfig {
     public AuthenticationManager authenticationManager(
         AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
-    public HttpSessionSecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
     }
 
 }

@@ -44,8 +44,9 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
         createGithubUser(999L); // used in signup
 
         // Signup & Login
+        String recruiterToken = createSignupToken(999L, "recruit@koreatech.ac.kr");
         userService.signup(new UserSignupRequest(
-            "recruiter", "2020136999", "recruit@koreatech.ac.kr", getValidPassword(), 999L
+            "recruiter", "2020136999", "recruit@koreatech.ac.kr", getValidPassword(), recruiterToken
         ));
         LoginRequest loginReq = new LoginRequest("recruit@koreatech.ac.kr", getValidPassword());
         MvcResult result = mockMvc.perform(post("/v1/auth/login")
@@ -57,8 +58,9 @@ class RecruitIntegrationTest extends IntegrationTestSupport {
 
         // Create another user for testing
         createGithubUser(998L);
+        String otherToken = createSignupToken(998L, "other@koreatech.ac.kr");
         userService.signup(new UserSignupRequest(
-            "otherUser", "2020136998", "other@koreatech.ac.kr", getValidPassword(), 998L
+            "otherUser", "2020136998", "other@koreatech.ac.kr", getValidPassword(), otherToken
         ));
         LoginRequest otherLogin = new LoginRequest("other@koreatech.ac.kr", getValidPassword());
         MvcResult otherResult = mockMvc.perform(post("/v1/auth/login")

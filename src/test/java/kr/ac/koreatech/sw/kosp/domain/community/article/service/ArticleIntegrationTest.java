@@ -50,8 +50,9 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
         createGithubUser(888L);
 
         // 1. Signup & Login - Test User
+        String writerToken = createSignupToken(999L, "writer@koreatech.ac.kr");
         UserSignupRequest signupReq = new UserSignupRequest(
-            "writer", "2020136999", "writer@koreatech.ac.kr", getValidPassword(), 999L
+            "writer", "2020136999", "writer@koreatech.ac.kr", getValidPassword(), writerToken
         );
         userService.signup(signupReq);
         testUser = userRepository.findByKutEmail("writer@koreatech.ac.kr").orElseThrow();
@@ -65,8 +66,9 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
         session = (MockHttpSession) result.getRequest().getSession();
 
         // 2. Signup & Login - Other User
+        String otherToken = createSignupToken(888L, "other@koreatech.ac.kr");
         UserSignupRequest otherReq = new UserSignupRequest(
-            "otherWriter", "2020136888", "other@koreatech.ac.kr", getValidPassword(), 888L
+            "otherWriter", "2020136888", "other@koreatech.ac.kr", getValidPassword(), otherToken
         );
         userService.signup(otherReq);
         otherUser = userRepository.findByKutEmail("other@koreatech.ac.kr").orElseThrow();
