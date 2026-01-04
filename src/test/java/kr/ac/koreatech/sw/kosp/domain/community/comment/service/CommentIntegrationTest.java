@@ -1,6 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.community.comment.service;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
@@ -12,18 +19,11 @@ import kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentReposi
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -39,13 +39,12 @@ class CommentIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private CommentRepository commentRepository;
 
-    private MockHttpSession authorSession;
-    private MockHttpSession otherUserSession;
+    private String authorAccessToken;
+    private String otherUserAccessToken;
     private Article testArticle;
 
     @BeforeEach
     void setup() throws Exception {
-        createRole("ROLE_STUDENT");
         createGithubUser(1001L);
         createGithubUser(1002L);
 
@@ -55,14 +54,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
             "author", "2020001001", "author@koreatech.ac.kr", getValidPassword(), authorToken
         );
         userService.signup(authorReq);
-
-        LoginRequest authorLogin = new LoginRequest("author@koreatech.ac.kr", getValidPassword());
-        MvcResult authorResult = mockMvc.perform(post("/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(authorLogin)))
-            .andExpect(status().isOk())
-            .andReturn();
-        authorSession = (MockHttpSession) authorResult.getRequest().getSession();
+        authorAccessToken = loginAndGetToken("author@koreatech.ac.kr", getValidPassword());
 
         // 2. Create Other User (다른 사용자)
         String otherToken = createSignupToken(1002L, "other@koreatech.ac.kr");
@@ -70,14 +62,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
             "other", "2020001002", "other@koreatech.ac.kr", getValidPassword(), otherToken
         );
         userService.signup(otherReq);
-
-        LoginRequest otherLogin = new LoginRequest("other@koreatech.ac.kr", getValidPassword());
-        MvcResult otherResult = mockMvc.perform(post("/v1/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(otherLogin)))
-            .andExpect(status().isOk())
-            .andReturn();
-        otherUserSession = (MockHttpSession) otherResult.getRequest().getSession();
+        otherUserAccessToken = loginAndGetToken("other@koreatech.ac.kr", getValidPassword());
 
         // 3. Create Board
         Board board = Board.builder()
@@ -92,7 +77,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
             board.getId(), "Test Article", "Test Content", List.of("TEST")
         );
         mockMvc.perform(post("/v1/community/articles")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(articleReq)))
             .andExpect(status().isCreated());
@@ -108,7 +93,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -129,7 +114,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -144,7 +129,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(post("/v1/community/articles/99999/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -159,20 +144,20 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         CommentCreateRequest req2 = new CommentCreateRequest("두 번째 댓글");
 
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req1)))
             .andExpect(status().isCreated());
 
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(otherUserSession)
+                .header("Authorization", bearerToken(otherUserAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req2)))
             .andExpect(status().isCreated());
 
         // when & then
         mockMvc.perform(get("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession))
+                .header("Authorization", bearerToken(authorAccessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.comments").isArray())
@@ -187,7 +172,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         // given: 댓글 작성
         CommentCreateRequest req = new CommentCreateRequest("삭제할 댓글");
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -196,7 +181,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(delete("/v1/community/articles/" + testArticle.getId() + "/comments/" + comment.getId())
-                .session(authorSession))
+                .header("Authorization", bearerToken(authorAccessToken)))
             .andDo(print())
             .andExpect(status().isNoContent());
 
@@ -211,7 +196,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         // given: author가 댓글 작성
         CommentCreateRequest req = new CommentCreateRequest("author의 댓글");
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -220,7 +205,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when & then: otherUser가 삭제 시도
         mockMvc.perform(delete("/v1/community/articles/" + testArticle.getId() + "/comments/" + comment.getId())
-                .session(otherUserSession))
+                .header("Authorization", bearerToken(otherUserAccessToken)))
             .andDo(print())
             .andExpect(status().isForbidden());
     }
@@ -230,7 +215,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
     void deleteComment_fail_commentNotFound() throws Exception {
         // when & then
         mockMvc.perform(delete("/v1/community/articles/" + testArticle.getId() + "/comments/99999")
-                .session(authorSession))
+                .header("Authorization", bearerToken(authorAccessToken)))
             .andDo(print())
             .andExpect(status().isNotFound());
     }
@@ -241,7 +226,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         // given: 댓글 작성
         CommentCreateRequest req = new CommentCreateRequest("좋아요 테스트 댓글");
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -250,7 +235,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // when: 좋아요 On
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments/" + comment.getId() + "/likes")
-                .session(otherUserSession))
+                .header("Authorization", bearerToken(otherUserAccessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isLiked").value(true));
@@ -262,7 +247,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         // given: 댓글 작성 및 좋아요
         CommentCreateRequest req = new CommentCreateRequest("좋아요 취소 테스트");
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments")
-                .session(authorSession)
+                .header("Authorization", bearerToken(authorAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andExpect(status().isCreated());
@@ -271,12 +256,12 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // 좋아요 On
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments/" + comment.getId() + "/likes")
-                .session(otherUserSession))
+                .header("Authorization", bearerToken(otherUserAccessToken)))
             .andExpect(status().isOk());
 
         // when: 좋아요 Off
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments/" + comment.getId() + "/likes")
-                .session(otherUserSession))
+                .header("Authorization", bearerToken(otherUserAccessToken)))
             .andDo(print())
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.isLiked").value(false));
@@ -287,7 +272,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
     void toggleCommentLike_fail_commentNotFound() throws Exception {
         // when & then
         mockMvc.perform(post("/v1/community/articles/" + testArticle.getId() + "/comments/99999/likes")
-                .session(authorSession))
+                .header("Authorization", bearerToken(authorAccessToken)))
             .andDo(print())
             .andExpect(status().isNotFound());
     }

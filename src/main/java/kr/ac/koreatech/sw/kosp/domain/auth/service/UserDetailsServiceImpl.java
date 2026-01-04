@@ -18,6 +18,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.strategy.UserLoadStrategy;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -36,8 +37,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByKutEmail(username)
+        User user = userRepository.findByKutEmail(username)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
+        
+        user.setAuthorities(getAuthorities(user.getRoles()));
+        return user;
     }
 
     @Transactional(readOnly = true)
