@@ -30,6 +30,7 @@ public class ArticleService {
     private final ArticleRepository articleRepository;
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.upload.repository.AttachmentRepository attachmentRepository;
 
     @Transactional
     public Long create(User author, Board board, ArticleRequest req) {
@@ -40,7 +41,24 @@ public class ArticleService {
             .content(req.content())
             .tags(req.tags())
             .build();
-        return articleRepository.save(article).getId();
+        
+        Article savedArticle = articleRepository.save(article);
+        
+        // Link attachments if provided
+        if (req.attachmentIds() != null && !req.attachmentIds().isEmpty()) {
+            List<kr.ac.koreatech.sw.kosp.domain.upload.model.Attachment> attachments = 
+                attachmentRepository.findAllById(req.attachmentIds());
+            
+            // Verify uploader and link to article
+            attachments.forEach(attachment -> {
+                if (!attachment.getUploadedBy().equals(author)) {
+                    throw new GlobalException(ExceptionMessage.FORBIDDEN);
+                }
+                attachment.setArticle(savedArticle);
+            });
+        }
+        
+        return savedArticle.getId();
     }
 
     public ArticleResponse getOne(Long id, User user) {

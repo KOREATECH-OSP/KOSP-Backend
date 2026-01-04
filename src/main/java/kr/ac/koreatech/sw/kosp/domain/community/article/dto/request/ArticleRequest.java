@@ -14,6 +14,8 @@ public record ArticleRequest(
     @NotBlank(message = "내용은 필수입니다.")
     String content,
 
-    List<String> tags
+    List<String> tags,
+
+    List<Long> attachmentIds
 ) {
 }
