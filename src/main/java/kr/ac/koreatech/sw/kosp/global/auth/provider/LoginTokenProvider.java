@@ -25,7 +25,7 @@ public class LoginTokenProvider extends JwtAuthTokenProvider {
     private long refreshExpiration;
 
     public LoginTokenProvider(
-        @Value("${jwt.secret}") String secret,
+        @Value("${jwt.secret-key}") String secret,
         StringRedisTemplate redisTemplate
     ) {
         super(secret);

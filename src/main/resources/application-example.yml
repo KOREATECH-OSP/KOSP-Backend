@@ -2,6 +2,13 @@ encryption:
   password: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
   salt: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
+jwt:
+  secret-key: EXAMPLE7A3E4F37B3DAD9CD8KEY6AA4B1AF7123!@#
+  expiration-time:
+    access-token: 600000 # (ms) = 10 mins
+    refresh-token: 2592000000 # (ms) = 30 days
+    signup-token: 1800000 # (ms) = 30 mins
+
 aws:
   ses:
     access-key: AAAAAAAAAAAAAAAAAAAA
