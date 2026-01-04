@@ -16,7 +16,7 @@ public class JwtAuthTokenProvider implements AuthTokenProvider<JwtAuthToken> {
     private final SecretKey key;
 
     public JwtAuthTokenProvider(
-        @Value("${jwt.secret}") String secret
+        @Value("${jwt.secret-key}") String secret
     ) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
