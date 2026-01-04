@@ -1,7 +1,9 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
+import kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,7 @@ public class AdminContentService {
     }
 
     @Transactional
-    public void createNotice(kr.ac.koreatech.sw.kosp.domain.user.model.User user, kr.ac.koreatech.sw.kosp.domain.admin.dto.request.NoticeCreateRequest request) {
+    public void createNotice(User user, NoticeCreateRequest request) {
         // Find "NOTICE" board or "공지사항"
         var board = boardRepository.findAll().stream()
             .filter(b -> "공지사항".equals(b.getName()) || "NOTICE".equalsIgnoreCase(b.getName()))

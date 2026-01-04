@@ -1,8 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.PolicyCreateRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.PolicyResponse;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;

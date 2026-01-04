@@ -2,8 +2,8 @@ package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.List;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.RoleRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.RoleResponse;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
