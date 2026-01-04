@@ -1,27 +1,42 @@
 # Refactoring Plan
 
 ## Admin Domain Redesign
-Current admin domain is monolithic. We plan to restructure it by features.
+**Status**: ✅ **COMPLETED** (2026-01-04)  
+**Structure**: Feature-based sub-packages (member, content, challenge, report, role, search)  
+**Swagger Organization**: ✅ Completed - 6 feature groups
 
+### Completed Structure
 ```
 admin/
-├── member/           # ADM-001, ADM-002
-│   ├── controller/
-│   ├── service/
+├── member/           # User management (3 endpoints)
+│   ├── api/AdminMemberApi.java
+│   ├── controller/AdminMemberController.java
+│   └── dto/request/
+├── content/          # Article & Notice management (3 endpoints)
+│   ├── api/AdminContentApi.java
+│   ├── controller/AdminContentController.java
+│   └── dto/request/
+├── challenge/        # Challenge CRUD (3 endpoints)
+│   ├── api/AdminChallengeApi.java
+│   └── controller/AdminChallengeController.java
+├── report/           # Report handling (2 endpoints)
+│   ├── api/AdminReportApi.java
+│   ├── controller/AdminReportController.java
 │   └── dto/
-├── content/          # ADM-006, ADM-007, ADM-008
-│   ├── controller/
-│   ├── service/
+├── role/             # Role & Policy management (5 endpoints)
+│   ├── api/AdminRoleApi.java
+│   ├── controller/AdminRoleController.java
 │   └── dto/
-├── challenge/        # ADM-003, ADM-004, ADM-005
-│   ├── controller/
-│   ├── service/
-│   └── dto/
-└── report/           # ADM-009
-    ├── controller/
-    ├── service/
-    └── dto/
+└── search/           # Unified search (1 endpoint)
+    ├── api/AdminSearchApi.java
+    ├── controller/AdminSearchController.java
+    └── dto/response/
 ```
+
+**Results**:
+- 29 Java files across 6 feature packages
+- All tests passing
+- Compilation successful
 
 ## Global Code Convention Enforcement
 Ensure strict adherence to project conventions across the entire codebase.

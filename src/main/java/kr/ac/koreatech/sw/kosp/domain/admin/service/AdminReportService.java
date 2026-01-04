@@ -1,8 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.request.ReportProcessRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.ReportResponse;
+import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.request.ReportProcessRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.response.ReportResponse;
 import kr.ac.koreatech.sw.kosp.domain.report.model.Report;
 import kr.ac.koreatech.sw.kosp.domain.report.model.enums.ReportStatus;
 import kr.ac.koreatech.sw.kosp.domain.report.model.enums.ReportTargetType;

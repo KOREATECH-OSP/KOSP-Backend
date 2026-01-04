@@ -2,7 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.Collections;
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.admin.dto.response.AdminSearchResponse;
+import kr.ac.koreatech.sw.kosp.domain.admin.search.dto.response.AdminSearchResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;

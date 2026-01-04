@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.dto.request;
+package kr.ac.koreatech.sw.kosp.domain.admin.report.dto.request;
 
 import jakarta.validation.constraints.NotNull;
 
