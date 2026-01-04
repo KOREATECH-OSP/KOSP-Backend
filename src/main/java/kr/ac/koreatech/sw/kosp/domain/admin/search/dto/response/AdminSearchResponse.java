@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.dto.response;
+package kr.ac.koreatech.sw.kosp.domain.admin.search.dto.response;
 
 import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
