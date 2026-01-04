@@ -12,9 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
@@ -30,17 +29,13 @@ public interface UserApi {
         description = """
             새 사용자 정보를 전달받아 내부적으로 User 엔티티를 생성하고 저장한 뒤,
             인증 모듈(AuthService)을 통해 즉시 로그인 처리까지 수행함.
-            클라이언트는 이 API 한 번 호출로 회원가입과 세션/토큰 발급 과정을 한 번에 수행할 수 있음.
+            클라이언트는 이 API 한 번 호출로 회원가입과 Access/Refresh Token 발급 과정을 한 번에 수행할 수 있음.
             """
     )
     @PostMapping("/signup")
-    ResponseEntity<Void> signup(
-        @RequestBody @Valid UserSignupRequest request,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
+    ResponseEntity<AuthTokenResponse> signup(
+        @RequestBody @Valid UserSignupRequest request
     );
-
-
 
     @Operation(summary = "회원 탈퇴", description = "로그인한 사용자가 본인의 계정을 탈퇴(Soft Delete) 처리합니다.")
     @DeleteMapping("/{userId}")

@@ -3,11 +3,9 @@ package kr.ac.koreatech.sw.kosp.domain.github.model;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import kr.ac.koreatech.sw.kosp.global.converter.StringEncryptionConverter;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +30,6 @@ public class GithubUser extends BaseEntity {
     @Column(name = "github_avatar_url")
     private String githubAvatarUrl;
 
-    @Convert(converter = StringEncryptionConverter.class)
     @Column(name = "github_token", columnDefinition = "TEXT")
     private String githubToken; // Access Token
 

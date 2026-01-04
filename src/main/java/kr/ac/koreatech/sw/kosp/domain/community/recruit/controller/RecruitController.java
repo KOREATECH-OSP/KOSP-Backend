@@ -111,7 +111,7 @@ public class RecruitController implements RecruitApi {
     @Override
     @Permit(name = "community:recruits:apply", description = "공고 지원")
     public ResponseEntity<Void> applyRecruit(
-        kr.ac.koreatech.sw.kosp.domain.user.model.User user,
+        User user,
         Long recruitId,
         kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
     ) {

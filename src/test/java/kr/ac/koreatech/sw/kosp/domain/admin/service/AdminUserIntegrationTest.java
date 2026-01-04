@@ -1,29 +1,26 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
-import jakarta.servlet.http.HttpSession;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
-
-import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
-import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MvcResult;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
+import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
+import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class AdminUserIntegrationTest extends IntegrationTestSupport {
 
@@ -34,47 +31,39 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private RoleRepository roleRepository;
 
-    private MockHttpSession adminSession;
-    private MockHttpSession userSession;
+    private String adminAccessToken;
+    private String userAccessToken;
     private User normalUser;
 
     @BeforeEach
     void setup() throws Exception {
-        createRole("ROLE_ADMIN");
-        createRole("ROLE_STUDENT");
         createGithubUser(100L);
         createGithubUser(200L);
 
         // 1. Create Admin
+        String adminToken = createSignupToken(100L, "admin@koreatech.ac.kr");
         UserSignupRequest adminReq = new UserSignupRequest(
-            "admin", "2020000000", "admin@koreatech.ac.kr", getValidPassword(), 100L
+            "admin", "2020000000", "admin@koreatech.ac.kr", getValidPassword(), adminToken
         );
         userService.signup(adminReq);
         User admin = userRepository.findByKutEmail("admin@koreatech.ac.kr").orElseThrow();
-        kr.ac.koreatech.sw.kosp.domain.auth.model.Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
         admin.getRoles().add(adminRole);
         userRepository.save(admin);
 
         // Login Admin
-        LoginRequest loginAdmin = new LoginRequest("admin@koreatech.ac.kr", getValidPassword());
-        MvcResult adminResult = mockMvc.perform(post("/v1/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(loginAdmin))).andReturn();
-        adminSession = (MockHttpSession) adminResult.getRequest().getSession();
+        adminAccessToken = loginAndGetToken("admin@koreatech.ac.kr", getValidPassword());
 
         // 2. Create Normal User
+        String userToken = createSignupToken(200L, "user@koreatech.ac.kr");
         UserSignupRequest userReq = new UserSignupRequest(
-            "user", "2020111111", "user@koreatech.ac.kr", getValidPassword(), 200L
+            "user", "2020111111", "user@koreatech.ac.kr", getValidPassword(), userToken
         );
         userService.signup(userReq);
         normalUser = userRepository.findByKutEmail("user@koreatech.ac.kr").orElseThrow();
 
         // Login User
-        LoginRequest loginUser = new LoginRequest("user@koreatech.ac.kr", getValidPassword());
-        MvcResult userResult = mockMvc.perform(post("/v1/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(loginUser))).andReturn();
-        userSession = (MockHttpSession) userResult.getRequest().getSession();
+        userAccessToken = loginAndGetToken("user@koreatech.ac.kr", getValidPassword());
     }
 
     @Test
@@ -83,7 +72,7 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
         mockMvc.perform(get("/v1/admin/search")
                 .param("keyword", "user")
                 .param("type", "USER")
-                .session(adminSession))
+                .header("Authorization", bearerToken(adminAccessToken)))
             .andDo(print())
             .andExpect(status().isOk());
     }
@@ -91,10 +80,10 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     @Test
     @DisplayName("관리자 - 사용자 정보 강제 변경")
     void updateUser_success() throws Exception {
-        kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest req = new kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest("ChangedByAdmin", "Forced Update", null);
+        kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest req = new kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest("ChangedByAdmin", "ForcedUpdate", null);
 
         mockMvc.perform(put("/v1/admin/users/" + normalUser.getId())
-                .session(adminSession)
+                .header("Authorization", bearerToken(adminAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())
@@ -108,7 +97,7 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     @DisplayName("관리자 - 사용자 강제 탈퇴")
     void deleteUser_success() throws Exception {
         mockMvc.perform(delete("/v1/admin/users/" + normalUser.getId())
-                .session(adminSession))
+                .header("Authorization", bearerToken(adminAccessToken)))
             .andDo(print())
             .andExpect(status().isNoContent());
 
@@ -121,7 +110,7 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     void accessDenied_forNormalUser() throws Exception {
         mockMvc.perform(get("/v1/admin/search")
                 .param("keyword", "test")
-                .session(userSession))
+                .header("Authorization", bearerToken(userAccessToken)))
             .andExpect(status().isForbidden());
     }
 }

@@ -1,10 +1,15 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
-import jakarta.servlet.http.HttpSession;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
@@ -12,20 +17,11 @@ import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
-import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.List;
 
 class AdminChallengeIntegrationTest extends IntegrationTestSupport {
 
@@ -38,29 +34,25 @@ class AdminChallengeIntegrationTest extends IntegrationTestSupport {
     @Autowired
     private ChallengeRepository challengeRepository;
 
-    private MockHttpSession adminSession;
+    private String adminAccessToken;
 
     @BeforeEach
     void setup() throws Exception {
-        createRole("ROLE_ADMIN");
         createGithubUser(101L);
 
         // Create Admin
+        String signupToken = createSignupToken(101L, "admin.ch@koreatech.ac.kr");
         UserSignupRequest adminReq = new UserSignupRequest(
-            "adminCh", "2020000001", "admin.ch@koreatech.ac.kr", getValidPassword(), 101L
+            "adminCh", "2020000001", "admin.ch@koreatech.ac.kr", getValidPassword(), signupToken
         );
         userService.signup(adminReq);
         User admin = userRepository.findByKutEmail("admin.ch@koreatech.ac.kr").orElseThrow();
-        kr.ac.koreatech.sw.kosp.domain.auth.model.Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
         admin.getRoles().add(adminRole);
         userRepository.save(admin);
 
         // Login Admin
-        LoginRequest loginAdmin = new LoginRequest("admin.ch@koreatech.ac.kr", getValidPassword());
-        MvcResult result = mockMvc.perform(post("/v1/auth/login")
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(loginAdmin))).andReturn();
-        adminSession = (MockHttpSession) result.getRequest().getSession();
+        adminAccessToken = loginAndGetToken("admin.ch@koreatech.ac.kr", getValidPassword());
     }
 
     @Test
@@ -73,7 +65,7 @@ class AdminChallengeIntegrationTest extends IntegrationTestSupport {
 
         // when
         mockMvc.perform(post("/v1/admin/challenges")
-                .session(adminSession)
+                .header("Authorization", bearerToken(adminAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(req)))
             .andDo(print())

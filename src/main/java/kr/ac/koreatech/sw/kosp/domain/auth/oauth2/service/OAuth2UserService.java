@@ -59,21 +59,19 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         String token,
         Long githubId
     ) {
-        GithubUser githubUser = userOptional.map(User::getGithubUser)
-            .orElseGet(() -> githubUserRepository.findByGithubId(githubId)
-                .orElseGet(() -> GithubUser.builder().githubId(githubId).build()));
-
-        saveGithubUser(githubUser, oAuth2User, token);
-    }
-
-    private void saveGithubUser(GithubUser githubUser, OAuth2User oAuth2User, String token) {
-        githubUser.updateProfile(
-            oAuth2User.getAttribute("login"),
-            oAuth2User.getAttribute("name"),
-            oAuth2User.getAttribute("avatar_url"),
-            token
-        );
-        githubUserRepository.save(githubUser);
+        // Only update existing GithubUser - new users will be handled by UserService.signup()
+        Optional<GithubUser> existingGithubUser = userOptional.map(User::getGithubUser)
+            .or(() -> githubUserRepository.findByGithubId(githubId));
+        
+        existingGithubUser.ifPresent(githubUser -> {
+            githubUser.updateProfile(
+                oAuth2User.getAttribute("login"),
+                oAuth2User.getAttribute("name"),
+                oAuth2User.getAttribute("avatar_url"),
+                token
+            );
+            githubUserRepository.save(githubUser);
+        });
     }
 
     private Map<String, Object> buildAttributes(Map<String, Object> original, Optional<User> userOptional) {
