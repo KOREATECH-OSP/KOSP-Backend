@@ -81,6 +81,10 @@ public class Article extends BaseEntity {
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
+    @Builder.Default
+    @jakarta.persistence.OneToMany(mappedBy = "article")
+    private List<kr.ac.koreatech.sw.kosp.domain.upload.model.Attachment> attachments = new ArrayList<>();
+
     public static Article create(User author, Board board, String title, String content, List<String> tags) {
         return Article.builder()
             .author(author)

@@ -41,6 +41,7 @@ spring-boot-starter-thymeleaf = { module = "org.springframework.boot:spring-boot
 thymeleaf-extras-springsecurity6 = { module = "org.thymeleaf.extras:thymeleaf-extras-springsecurity6" }
 
 awssdk-ses = { module = "software.amazon.awssdk:ses", version.ref = "awssdk" }
+awssdk-s3 = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
 
 flyway-mysql = { module = "org.flywaydb:flyway-mysql" }
 
