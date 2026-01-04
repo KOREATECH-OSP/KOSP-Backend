@@ -20,7 +20,7 @@ public class S3StorageClient {
     @Value("${aws.s3.bucket:kosp-bucket}")
     private String bucketName;
 
-    @Value("${aws.s3.region:ap-northeast-2}")
+    @Value("${aws.region:ap-northeast-2}")
     private String region;
 
     public void upload(MultipartFile file, String storedFileName) {
