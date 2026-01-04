@@ -10,14 +10,11 @@ jwt:
     signup-token: 1800000 # (ms) = 30 mins
 
 aws:
-  ses:
-    access-key: AAAAAAAAAAAAAAAAAAAA
-    secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-  s3:
-    access-key: AAAAAAAAAAAAAAAAAAAA
-    secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-    bucket: dev-kosp
+  access-key: AAAAAAAAAAAAAAAAAAAA
+  secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
   region: ap-northeast-2
+  s3:
+    bucket: dev-kosp
 
 spring:
   profiles:
