@@ -32,8 +32,9 @@ class ChallengeIntegrationTest extends IntegrationTestSupport {
         createGithubUser(777L);
 
         // Signup & Login
+        String signupToken = createSignupToken(777L, "challenger@koreatech.ac.kr");
         UserSignupRequest signupReq = new UserSignupRequest(
-            "challenger", "2020136777", "challenger@koreatech.ac.kr", getValidPassword(), 777L
+            "challenger", "2020136777", "challenger@koreatech.ac.kr", getValidPassword(), signupToken
         );
         userService.signup(signupReq);
 

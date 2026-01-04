@@ -35,8 +35,9 @@ class TeamIntegrationTest extends IntegrationTestSupport {
         createGithubUser(1001L);
 
         // Signup & Login
+        String leaderToken = createSignupToken(1001L, "leader@koreatech.ac.kr");
         userService.signup(new UserSignupRequest(
-            "teamLeader", "2020001001", "leader@koreatech.ac.kr", getValidPassword(), 1001L
+            "teamLeader", "2020001001", "leader@koreatech.ac.kr", getValidPassword(), leaderToken
         ));
         LoginRequest loginReq = new LoginRequest("leader@koreatech.ac.kr", getValidPassword());
         MvcResult result = mockMvc.perform(post("/v1/auth/login")

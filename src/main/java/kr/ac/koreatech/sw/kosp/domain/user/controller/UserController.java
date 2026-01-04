@@ -8,17 +8,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
+
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.api.UserApi;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.service.UserPasswordService;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
@@ -32,20 +30,14 @@ import lombok.RequiredArgsConstructor;
 public class UserController implements UserApi {
 
     private final UserService userService;
-    private final AuthService authService;
 
     @Override
     @PostMapping("/signup")
     @Permit(permitAll = true, description = "회원가입")
-    public ResponseEntity<Void> signup(
-        @RequestBody @Valid UserSignupRequest request,
-        HttpServletRequest servletRequest,
-        HttpServletResponse servletResponse
+    public ResponseEntity<AuthTokenResponse> signup(
+        @RequestBody @Valid UserSignupRequest request
     ) {
-        userService.signup(request);
-        authService.login(request.kutEmail(), request.password(), servletRequest, servletResponse);
-
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request));
     }
 
     @Override

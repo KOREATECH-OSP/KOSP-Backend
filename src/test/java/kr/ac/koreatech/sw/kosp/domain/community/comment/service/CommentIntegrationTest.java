@@ -50,8 +50,9 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         createGithubUser(1002L);
 
         // 1. Create Author (게시글 & 댓글 작성자)
+        String authorToken = createSignupToken(1001L, "author@koreatech.ac.kr");
         UserSignupRequest authorReq = new UserSignupRequest(
-            "author", "2020001001", "author@koreatech.ac.kr", getValidPassword(), 1001L
+            "author", "2020001001", "author@koreatech.ac.kr", getValidPassword(), authorToken
         );
         userService.signup(authorReq);
 
@@ -64,8 +65,9 @@ class CommentIntegrationTest extends IntegrationTestSupport {
         authorSession = (MockHttpSession) authorResult.getRequest().getSession();
 
         // 2. Create Other User (다른 사용자)
+        String otherToken = createSignupToken(1002L, "other@koreatech.ac.kr");
         UserSignupRequest otherReq = new UserSignupRequest(
-            "other", "2020001002", "other@koreatech.ac.kr", getValidPassword(), 1002L
+            "other", "2020001002", "other@koreatech.ac.kr", getValidPassword(), otherToken
         );
         userService.signup(otherReq);
 

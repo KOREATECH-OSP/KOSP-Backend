@@ -29,3 +29,12 @@ logging:
     org.springframework.batch: DEBUG
 
 
+
+jwt:
+  secret: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
+
+# Test-specific configuration
+test:
+  github:
+    # TODO: REMOVE BEFORE COMMIT - Personal Access Token for integration testing
+    access-token:

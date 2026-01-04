@@ -46,12 +46,13 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
         createGithubUser(200L);
 
         // 1. Create Admin
+        String adminToken = createSignupToken(100L, "admin@koreatech.ac.kr");
         UserSignupRequest adminReq = new UserSignupRequest(
-            "admin", "2020000000", "admin@koreatech.ac.kr", getValidPassword(), 100L
+            "admin", "2020000000", "admin@koreatech.ac.kr", getValidPassword(), adminToken
         );
         userService.signup(adminReq);
         User admin = userRepository.findByKutEmail("admin@koreatech.ac.kr").orElseThrow();
-        kr.ac.koreatech.sw.kosp.domain.auth.model.Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
+        Role adminRole = roleRepository.findByName("ROLE_ADMIN").orElseThrow();
         admin.getRoles().add(adminRole);
         userRepository.save(admin);
 
@@ -63,8 +64,9 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
         adminSession = (MockHttpSession) adminResult.getRequest().getSession();
 
         // 2. Create Normal User
+        String userToken = createSignupToken(200L, "user@koreatech.ac.kr");
         UserSignupRequest userReq = new UserSignupRequest(
-            "user", "2020111111", "user@koreatech.ac.kr", getValidPassword(), 200L
+            "user", "2020111111", "user@koreatech.ac.kr", getValidPassword(), userToken
         );
         userService.signup(userReq);
         normalUser = userRepository.findByKutEmail("user@koreatech.ac.kr").orElseThrow();
@@ -91,7 +93,7 @@ class AdminUserIntegrationTest extends IntegrationTestSupport {
     @Test
     @DisplayName("관리자 - 사용자 정보 강제 변경")
     void updateUser_success() throws Exception {
-        kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest req = new kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest("ChangedByAdmin", "Forced Update", null);
+        kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest req = new kr.ac.koreatech.sw.kosp.domain.admin.dto.request.AdminUserUpdateRequest("ChangedByAdmin", "ForcedUpdate", null);
 
         mockMvc.perform(put("/v1/admin/users/" + normalUser.getId())
                 .session(adminSession)
