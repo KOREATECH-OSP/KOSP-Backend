@@ -1,7 +1,9 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.service;
 
 import java.util.List;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PermissionUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
@@ -29,6 +31,10 @@ public class PolicyAdminService {
             .toList();
     }
 
+    public PolicyResponse getPolicy(String name) {
+        return PolicyResponse.from(findPolicy(name));
+    }
+
     @Transactional
     public void createPolicy(PolicyCreateRequest request) {
         if (policyRepository.findByName(request.name()).isPresent()) {
@@ -44,14 +50,35 @@ public class PolicyAdminService {
     }
 
     @Transactional
+    public void updatePolicy(String name, PolicyUpdateRequest request) {
+        Policy policy = findPolicy(name);
+        policy.updateDescription(request.description());
+    }
+
+    @Transactional
+    public void deletePolicy(String name) {
+        Policy policy = findPolicy(name);
+        if (!policy.getRoles().isEmpty()) {
+            throw new GlobalException(ExceptionMessage.CONFLICT); // "Policy is in use by roles"
+        }
+        policyRepository.deleteByName(name);
+    }
+
+    @Transactional
     public void assignPermission(String policyName, String permissionName) {
-        Policy policy = policyRepository.findByName(policyName)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
-        
-        Permission permission = permissionRepository.findByName(permissionName)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        Policy policy = findPolicy(policyName);
+        Permission permission = findPermission(permissionName);
         
         policy.getPermissions().add(permission);
+        policyRepository.save(policy);
+    }
+
+    @Transactional
+    public void removePermission(String policyName, String permissionName) {
+        Policy policy = findPolicy(policyName);
+        Permission permission = findPermission(permissionName);
+        
+        policy.getPermissions().remove(permission);
         policyRepository.save(policy);
     }
 
@@ -60,5 +87,34 @@ public class PolicyAdminService {
             .stream()
             .map(PermissionResponse::from)
             .toList();
+    }
+
+    public PermissionResponse getPermission(String name) {
+        return PermissionResponse.from(findPermission(name));
+    }
+
+    @Transactional
+    public void updatePermission(String name, PermissionUpdateRequest request) {
+        Permission permission = findPermission(name);
+        permission.updateDescription(request.description());
+    }
+
+    @Transactional
+    public void deletePermission(String name) {
+        Permission permission = findPermission(name);
+        if (!permission.getPolicies().isEmpty()) {
+            throw new GlobalException(ExceptionMessage.CONFLICT); // "Permission is in use by policies"
+        }
+        permissionRepository.deleteByName(name);
+    }
+
+    private Policy findPolicy(String name) {
+        return policyRepository.findByName(name)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    }
+
+    private Permission findPermission(String name) {
+        return permissionRepository.findByName(name)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
     }
 }

@@ -10,4 +10,5 @@ public interface PermissionRepository extends Repository<Permission, Long> {
     Permission save(Permission permission);
     List<Permission> findAll();
     java.util.Optional<Permission> findByName(String name);
+    void deleteByName(String name);
 }
