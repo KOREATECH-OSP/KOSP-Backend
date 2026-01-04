@@ -4,6 +4,7 @@ import java.util.List;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
+import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PermissionRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
@@ -39,6 +40,18 @@ public class PolicyAdminService {
             .description(request.description())
             .build();
 
+        policyRepository.save(policy);
+    }
+
+    @Transactional
+    public void assignPermission(String policyName, String permissionName) {
+        Policy policy = policyRepository.findByName(policyName)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        
+        Permission permission = permissionRepository.findByName(permissionName)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        
+        policy.getPermissions().add(permission);
         policyRepository.save(policy);
     }
 
