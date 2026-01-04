@@ -19,6 +19,7 @@ public interface ArticleRepository extends Repository<Article, Long> {
 
     Page<Article> findByBoard(Board board, Pageable pageable);
     java.util.List<Article> findByTitleContaining(String keyword);
+    java.util.List<Article> findByTitleContainingAndIsDeletedFalse(String title);
 
     default Article getById(Long id) {
         return findById(id)

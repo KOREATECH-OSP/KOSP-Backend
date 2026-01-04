@@ -10,4 +10,5 @@ public interface ChallengeRepository extends Repository<Challenge, Long> {
     Challenge save(Challenge challenge);
     Optional<Challenge> findById(Long id);
     void delete(Challenge challenge);
+    List<Challenge> findByNameContaining(String name);
 }
