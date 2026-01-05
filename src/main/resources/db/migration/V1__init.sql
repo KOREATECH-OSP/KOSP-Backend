@@ -337,3 +337,127 @@ CREATE TABLE report
 
 ALTER TABLE report
     ADD CONSTRAINT fk_report_on_reporter FOREIGN KEY (reporter_id) REFERENCES users (id);
+
+-- V3: Attachment table (consolidated from V3__add_attachment_table.sql)
+CREATE TABLE attachment (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    original_file_name VARCHAR(255) NOT NULL,
+    stored_file_name VARCHAR(255) NOT NULL UNIQUE,
+    file_size BIGINT NOT NULL,
+    content_type VARCHAR(100),
+    url VARCHAR(500) NOT NULL,
+    article_id BIGINT,
+    uploaded_by BIGINT NOT NULL,
+    uploaded_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NOT NULL,
+    FOREIGN KEY (article_id) REFERENCES article(id) ON DELETE CASCADE,
+    FOREIGN KEY (uploaded_by) REFERENCES users(id)
+);
+
+CREATE INDEX idx_attachment_article ON attachment(article_id);
+CREATE INDEX idx_attachment_uploader ON attachment(uploaded_by);
+
+-- GitHub Statistics Tables
+CREATE TABLE github_user_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL UNIQUE,
+    
+    -- 기본 통계
+    total_commits INT NOT NULL DEFAULT 0,
+    total_lines INT NOT NULL DEFAULT 0,
+    total_additions INT NOT NULL DEFAULT 0,
+    total_deletions INT NOT NULL DEFAULT 0,
+    total_prs INT NOT NULL DEFAULT 0,
+    total_issues INT NOT NULL DEFAULT 0,
+    
+    -- 레포지토리 통계
+    owned_repos_count INT NOT NULL DEFAULT 0,
+    contributed_repos_count INT NOT NULL DEFAULT 0,
+    total_stars_received INT NOT NULL DEFAULT 0,
+    
+    -- 시간대 분석
+    night_commits INT NOT NULL DEFAULT 0,
+    day_commits INT NOT NULL DEFAULT 0,
+    
+    -- 점수
+    total_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    
+    -- 메타
+    calculated_at DATETIME NOT NULL,
+    data_period_start DATE,
+    data_period_end DATE,
+    
+    INDEX idx_github_id (github_id),
+    INDEX idx_total_score (total_score DESC),
+    INDEX idx_calculated_at (calculated_at)
+);
+
+CREATE TABLE github_monthly_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL,
+    year INT NOT NULL,
+    month INT NOT NULL,
+    
+    commits_count INT NOT NULL DEFAULT 0,
+    lines_count INT NOT NULL DEFAULT 0,
+    additions_count INT NOT NULL DEFAULT 0,
+    deletions_count INT NOT NULL DEFAULT 0,
+    prs_count INT NOT NULL DEFAULT 0,
+    issues_count INT NOT NULL DEFAULT 0,
+    created_repos_count INT NOT NULL DEFAULT 0,
+    contributed_repos_count INT NOT NULL DEFAULT 0,
+    
+    calculated_at DATETIME NOT NULL,
+    
+    UNIQUE KEY uk_user_month (github_id, year, month),
+    INDEX idx_github_id (github_id),
+    INDEX idx_year_month (year, month)
+);
+
+CREATE TABLE github_repository_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    repo_owner VARCHAR(100) NOT NULL,
+    repo_name VARCHAR(200) NOT NULL,
+    
+    stargazers_count INT NOT NULL DEFAULT 0,
+    forks_count INT NOT NULL DEFAULT 0,
+    watchers_count INT NOT NULL DEFAULT 0,
+    commits_count INT NOT NULL DEFAULT 0,
+    contributors_count INT NOT NULL DEFAULT 0,
+    
+    open_issues_count INT NOT NULL DEFAULT 0,
+    closed_issues_count INT NOT NULL DEFAULT 0,
+    open_prs_count INT NOT NULL DEFAULT 0,
+    closed_prs_count INT NOT NULL DEFAULT 0,
+    
+    primary_language VARCHAR(50),
+    license VARCHAR(100),
+    created_at DATETIME,
+    updated_at DATETIME,
+    
+    calculated_at DATETIME NOT NULL,
+    
+    UNIQUE KEY uk_repo (repo_owner, repo_name),
+    INDEX idx_owner (repo_owner),
+    INDEX idx_stars (stargazers_count DESC)
+);
+
+CREATE TABLE github_collection_metadata (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL UNIQUE,
+    
+    initial_collected BOOLEAN NOT NULL DEFAULT FALSE,
+    last_collected_at DATETIME,
+    last_commit_sha VARCHAR(40),
+    
+    total_api_calls INT NOT NULL DEFAULT 0,
+    last_error TEXT,
+    last_error_at DATETIME,
+    
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_github_id (github_id),
+    INDEX idx_initial_collected (initial_collected)
+);

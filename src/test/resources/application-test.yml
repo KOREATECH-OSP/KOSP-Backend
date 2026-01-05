@@ -21,6 +21,11 @@ spring:
     enabled: false
   main:
     allow-bean-definition-overriding: true
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: kosp_test
 
 logging:
   level:
@@ -28,10 +33,15 @@ logging:
     org.hibernate.SQL: DEBUG
     org.springframework.batch: DEBUG
 
-
-
 jwt:
   secret-key: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
+
+github:
+  api:
+    base-url: https://api.github.com
+    graphql-url: https://api.github.com/graphql
+    rate-limit:
+      threshold: 100
 
 # Test-specific configuration
 test:
