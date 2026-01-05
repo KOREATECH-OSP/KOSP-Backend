@@ -1,33 +1,36 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.role.controller;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.api.AdminRoleApi;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PolicyResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.service.PolicyAdminService;
-import kr.ac.koreatech.sw.kosp.domain.admin.service.RoleAdminService;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+
+import kr.ac.koreatech.sw.kosp.domain.admin.role.api.AdminRoleApi;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.service.RoleAdminService;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class AdminRoleController implements AdminRoleApi {
 
     private final RoleAdminService roleAdminService;
-    private final PolicyAdminService policyAdminService;
 
     @Override
     @Permit(name = "admin:roles:read", description = "역할 목록 조회")
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
         return ResponseEntity.ok(roleAdminService.getAllRoles());
+    }
+
+    @Override
+    @Permit(name = "admin:roles:read", description = "역할 단일 조회")
+    public ResponseEntity<RoleResponse> getRole(String roleName) {
+        return ResponseEntity.ok(roleAdminService.getRole(roleName));
     }
 
     @Override
@@ -38,6 +41,20 @@ public class AdminRoleController implements AdminRoleApi {
     }
 
     @Override
+    @Permit(name = "admin:roles:update", description = "역할 수정")
+    public ResponseEntity<Void> updateRole(String roleName, RoleUpdateRequest request) {
+        roleAdminService.updateRole(roleName, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "admin:roles:delete", description = "역할 삭제")
+    public ResponseEntity<Void> deleteRole(String roleName) {
+        roleAdminService.deleteRole(roleName);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     @Permit(name = "admin:roles:assign-policy", description = "역할에 정책 할당")
     public ResponseEntity<Void> assignPolicy(String roleName, PolicyAssignRequest request) {
         roleAdminService.assignPolicy(roleName, request.policyName());
@@ -45,28 +62,9 @@ public class AdminRoleController implements AdminRoleApi {
     }
 
     @Override
-    @Permit(name = "admin:policies:read", description = "정책 목록 조회")
-    public ResponseEntity<List<PolicyResponse>> getAllPolicies() {
-        return ResponseEntity.ok(policyAdminService.getAllPolicies());
-    }
-
-    @Override
-    @Permit(name = "admin:policies:create", description = "정책 생성")
-    public ResponseEntity<Void> createPolicy(PolicyCreateRequest request) {
-        policyAdminService.createPolicy(request);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
-    }
-
-    @Override
-    @Permit(name = "admin:policies:assign-permission", description = "정책에 권한 할당")
-    public ResponseEntity<Void> assignPermissionToPolicy(String policyName, PermissionAssignRequest request) {
-        policyAdminService.assignPermission(policyName, request.permissionName());
-        return ResponseEntity.ok().build();
-    }
-
-    @Override
-    @Permit(name = "admin:permissions:read", description = "권한 목록 조회")
-    public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
-        return ResponseEntity.ok(policyAdminService.getAllPermissions());
+    @Permit(name = "admin:roles:remove-policy", description = "역할에서 정책 제거")
+    public ResponseEntity<Void> removePolicy(String roleName, String policyName) {
+        roleAdminService.removePolicy(roleName, policyName);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,13 +1,15 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.search.service;
 
 import java.util.Collections;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.search.dto.response.AdminSearchResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

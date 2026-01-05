@@ -2,10 +2,8 @@ package kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record PolicyCreateRequest(
-    @NotBlank(message = "정책 이름은 필수입니다.")
-    String name,
-
+public record RoleUpdateRequest(
+    @NotBlank(message = "설명은 필수입니다")
     String description
 ) {
 }
