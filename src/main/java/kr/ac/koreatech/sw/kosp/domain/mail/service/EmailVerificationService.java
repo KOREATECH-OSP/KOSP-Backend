@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
-import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.*;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.EMAIL_NOT_FOUND;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.EMAIL_NOT_VERIFIED;
+import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.INVALID_VERIFICATION_CODE;
 
 @Slf4j
 @Service

@@ -7,7 +7,6 @@ import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.PagingAndSortingRepository;
-import org.springframework.data.repository.Repository;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
@@ -20,6 +19,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Optional<User> findByKutEmail(String kutEmail);
     boolean existsByKutEmail(String kutEmail);
     boolean existsByKutId(String kutId);
+    boolean existsByRoles_Name(String roleName);
 
     java.util.List<User> findByNameContaining(String keyword);
 

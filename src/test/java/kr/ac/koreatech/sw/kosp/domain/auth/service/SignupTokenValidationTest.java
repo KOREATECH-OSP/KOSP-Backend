@@ -6,14 +6,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
 
 class SignupTokenValidationTest extends IntegrationTestSupport {
-
-    @Autowired
-    private AuthService authService;
 
     @Test
     @DisplayName("유효한 회원가입 토큰 검증 성공")

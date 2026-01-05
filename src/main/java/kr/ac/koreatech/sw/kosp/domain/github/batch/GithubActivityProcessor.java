@@ -135,7 +135,6 @@ public class GithubActivityProcessor implements ItemProcessor<User, UserSyncResu
         long totalCommitContributions = userNode.contributionsCollection().totalCommitContributions();
         long totalIssueContributions = userNode.contributionsCollection().totalIssueContributions();
         long totalPrContributions = userNode.contributionsCollection().totalPullRequestContributions();
-        long totalRepoContributions = userNode.contributionsCollection().totalRepositoryContributions();
 
         int tier = calculateTier(totalStars, totalContributions);
 

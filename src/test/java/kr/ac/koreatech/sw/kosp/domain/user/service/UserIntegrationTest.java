@@ -1,6 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
-import jakarta.servlet.http.HttpSession;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
@@ -12,7 +12,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,8 +19,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class UserIntegrationTest extends IntegrationTestSupport {
 
