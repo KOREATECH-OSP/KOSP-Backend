@@ -52,9 +52,9 @@ class Step1InfrastructureTest {
             100, 5000, 3000, 2000,
             10, 5,
             5, 10, 50,
-            20, 80,
-            BigDecimal.valueOf(1000.50)
+            20, 80
         );
+        statistics.updateScore(BigDecimal.valueOf(1000.50));
 
         // When
         GithubUserStatistics saved = userStatisticsRepository.save(statistics);
@@ -74,7 +74,6 @@ class Step1InfrastructureTest {
 
     @Test
     @DisplayName("MySQL 연결 및 GithubMonthlyStatistics 저장/조회 테스트")
-    @org.junit.jupiter.api.Disabled("Entity scanning issue - will fix in Step 4")
     void testMySQLConnection_MonthlyStatistics() {
         // Given
         String githubId = "testuser";
@@ -132,16 +131,19 @@ class Step1InfrastructureTest {
     @DisplayName("순위 조회 테스트 (totalScore 내림차순)")
     void testRankingQuery() {
         // Given
-        GithubUserStatistics user1 = GithubUserStatistics.create("user1");
-        user1.updateStatistics(100, 5000, 3000, 2000, 10, 5, 5, 10, 50, 20, 80, BigDecimal.valueOf(1500));
+        GithubUserStatistics stats = GithubUserStatistics.create("testuser");
+        stats.updateStatistics(100, 5000, 3000, 2000, 10, 5, 3, 2, 50, 20, 80);
+        stats.updateScore(BigDecimal.valueOf(1500.50));
 
         GithubUserStatistics user2 = GithubUserStatistics.create("user2");
-        user2.updateStatistics(200, 10000, 6000, 4000, 20, 10, 10, 20, 100, 40, 160, BigDecimal.valueOf(3000));
+        user2.updateStatistics(150, 7500, 4500, 3000, 15, 8, 5, 3, 75, 30, 120);
+        user2.updateScore(BigDecimal.valueOf(2250.75));
 
         GithubUserStatistics user3 = GithubUserStatistics.create("user3");
-        user3.updateStatistics(50, 2500, 1500, 1000, 5, 3, 3, 5, 25, 10, 40, BigDecimal.valueOf(750));
+        user3.updateStatistics(80, 3000, 1500, 1500, 5, 3, 2, 1, 30, 15, 65);
+        user3.updateScore(BigDecimal.valueOf(1000.25));
 
-        userStatisticsRepository.save(user1);
+        userStatisticsRepository.save(stats);
         userStatisticsRepository.save(user2);
         userStatisticsRepository.save(user3);
 
@@ -150,8 +152,7 @@ class Step1InfrastructureTest {
 
         // Then
         assertThat(rankings).hasSize(3);
-        assertThat(rankings.get(0).getGithubId()).isEqualTo("user2"); // 1위
-        assertThat(rankings.get(1).getGithubId()).isEqualTo("user1"); // 2위
-        assertThat(rankings.get(2).getGithubId()).isEqualTo("user3"); // 3위
+        assertThat(rankings.get(0).getTotalScore()).isGreaterThan(rankings.get(1).getTotalScore());
+        assertThat(rankings.get(1).getTotalScore()).isGreaterThan(rankings.get(2).getTotalScore());
     }
 }

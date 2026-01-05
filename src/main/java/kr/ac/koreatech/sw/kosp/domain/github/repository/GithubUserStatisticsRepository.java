@@ -13,6 +13,8 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
 
     Optional<GithubUserStatistics> findByGithubId(String githubId);
 
+    List<GithubUserStatistics> findAll();
+
     List<GithubUserStatistics> findAllByOrderByTotalScoreDesc();
 
     boolean existsByGithubId(String githubId);

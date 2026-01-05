@@ -3,6 +3,7 @@ package kr.ac.koreatech.sw.kosp.domain.github.mongo.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.repository.Repository;
 
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCommitDetailRaw;
@@ -17,6 +18,7 @@ public interface GithubCommitDetailRawRepository extends Repository<GithubCommit
 
     boolean existsBySha(String sha);
 
+    @Query("{ 'author.login': ?0 }")
     List<GithubCommitDetailRaw> findByAuthorLogin(String login);
 
     List<GithubCommitDetailRaw> findByRepoOwnerAndRepoName(String repoOwner, String repoName);
