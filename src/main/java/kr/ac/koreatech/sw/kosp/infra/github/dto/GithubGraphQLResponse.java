@@ -1,7 +1,6 @@
 package kr.ac.koreatech.sw.kosp.infra.github.dto;
 
 import java.util.List;
-import java.util.Map;
 
 // Nested Records for GraphQL Response Mapping
 public record GithubGraphQLResponse(

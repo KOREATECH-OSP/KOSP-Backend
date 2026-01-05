@@ -11,4 +11,10 @@ public interface RoleRepository extends Repository<Role, Long> {
     Optional<Role> findByName(String name);
     boolean existsByName(String name);
     void deleteByName(String name);
+
+    default Role getByName(String name) {
+        return findByName(name)
+            .orElseThrow(() -> new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(
+                kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.NOT_FOUND));
+    }
 }

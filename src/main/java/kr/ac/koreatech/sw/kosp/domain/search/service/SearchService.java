@@ -1,13 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.search.service;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
+
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
-import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
+
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
-import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
+
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
