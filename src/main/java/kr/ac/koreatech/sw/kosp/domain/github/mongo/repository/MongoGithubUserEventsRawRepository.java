@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserEventsRaw;
 import reactor.core.publisher.Mono;
 
-public interface GithubUserEventsRawRepository 
+public interface MongoGithubUserEventsRawRepository 
     extends ReactiveMongoRepository<GithubUserEventsRaw, String> {
     
     Mono<GithubUserEventsRaw> findByGithubLogin(String githubLogin);

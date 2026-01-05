@@ -11,7 +11,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.client.rest.GithubRestApiClient;
 import kr.ac.koreatech.sw.kosp.domain.github.model.RateLimitInfo;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCollectionMetadata;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserBasicRaw;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCollectionMetadataRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.MongoGithubCollectionMetadataRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,7 +28,7 @@ public class GithubDataCollectionRetryService {
     private final GithubRateLimitChecker rateLimitChecker;
     private final GithubRestApiClient restApiClient;
     private final TextEncryptor textEncryptor;
-    private final GithubCollectionMetadataRepository metadataRepository;
+    private final MongoGithubCollectionMetadataRepository metadataRepository;
 
     /**
      * 데이터 수집 (Event Listener용)

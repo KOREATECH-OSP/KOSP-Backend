@@ -2,12 +2,8 @@ package kr.ac.koreatech.sw.kosp.global.config.mongo;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.config.EnableMongoAuditing;
-import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 @Configuration
-@EnableMongoRepositories(basePackages = "kr.ac.koreatech.sw.kosp.domain.github.mongo.repository")
-@EnableReactiveMongoRepositories(basePackages = "kr.ac.koreatech.sw.kosp.domain.github.mongo.repository")
 @EnableMongoAuditing
 public class MongoConfig {
     // MongoDB 설정
