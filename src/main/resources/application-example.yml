@@ -16,6 +16,10 @@ aws:
   s3:
     bucket: dev-kosp
 
+cors:
+  allowed-origins:
+    - "*"
+
 spring:
   profiles:
     active: local
@@ -94,9 +98,9 @@ logging:
           descriptor:
             sql: trace
 
-swagger:
-  server-url: http://localhost:8080
-
-cors:
-  allowed-origins:
-    - "*"
+github:
+  api:
+    base-url: https://api.github.com
+    graphql-url: https://api.github.com/graphql
+    rate-limit:
+      threshold: 100  # API 호출 여유분
