@@ -6,15 +6,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Component;
 
+import jakarta.persistence.EntityNotFoundException;
 import kr.ac.koreatech.sw.kosp.domain.github.client.graphql.GithubGraphQLClient;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCommitDetailRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitDetailRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubIssuesRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubPRsRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +32,8 @@ public class RepositoryStatisticsCalculator {
     private final GithubPRsRawRepository prsRawRepository;
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final GithubGraphQLClient graphQLClient;
+    private final GithubUserRepository githubUserRepository;
+    private final TextEncryptor textEncryptor;
 
     public List<GithubRepositoryStatistics> calculate(String githubId) {
         log.info("Calculating repository statistics for user: {}", githubId);
@@ -113,10 +119,18 @@ public class RepositoryStatisticsCalculator {
 
         // GitHub API로 저장소 정보 조회
         try {
+            // 1. GithubUser 조회
+            GithubUser githubUser = githubUserRepository.findByGithubLogin(githubId)
+                .orElseThrow(() -> new EntityNotFoundException("GitHub user not found: " + githubId));
+            
+            // 2. Token 복호화
+            String token = textEncryptor.decrypt(githubUser.getGithubToken());
+            
+            // 3. GraphQL 호출
             Map<String, Object> response = graphQLClient.getRepositoryInfo(
                 owner,
                 name,
-                "dummy-token", // TODO: Get actual token from user
+                token,
                 Map.class
             ).block();
 
