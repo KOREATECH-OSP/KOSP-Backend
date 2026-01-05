@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -10,15 +17,9 @@ import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateReque
 import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TeamIntegrationTest extends IntegrationTestSupport {
 
@@ -26,6 +27,8 @@ class TeamIntegrationTest extends IntegrationTestSupport {
     private UserService userService;
     @Autowired
     private TeamRepository teamRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     private String accessToken;
 
@@ -146,5 +149,45 @@ class TeamIntegrationTest extends IntegrationTestSupport {
             .andExpect(jsonPath("$.teams").isArray())
             .andExpect(jsonPath("$.teams.length()").value(org.hamcrest.Matchers.greaterThanOrEqualTo(1)))
             .andExpect(jsonPath("$.teams[?(@.name == 'KOSP Team')]").exists());
+    }
+
+    @Test
+    @DisplayName("내 팀 조회 성공")
+    void getMyTeam_success() throws Exception {
+        // given: 팀 생성
+        TeamCreateRequest req = new TeamCreateRequest(
+            "My Team", "My Team Description", "https://example.com/myteam.png"
+        );
+        mockMvc.perform(post("/v1/teams")
+                .header("Authorization", bearerToken(accessToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(req)))
+            .andExpect(status().isCreated());
+
+        // when & then
+        mockMvc.perform(get("/v1/teams/me")
+                .header("Authorization", bearerToken(accessToken)))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("My Team"))
+            .andExpect(jsonPath("$.description").value("My Team Description"));
+    }
+
+    @Test
+    @DisplayName("내 팀 조회 실패 - 소속 팀 없음")
+    void getMyTeam_notFound() throws Exception {
+        // given: 새로운 사용자 생성 (팀 없음)
+        createGithubUser(1002L);
+        String noTeamToken = createSignupToken(1002L, "noteam@koreatech.ac.kr");
+        userService.signup(new UserSignupRequest(
+            "noTeamUser", "2020001002", "noteam@koreatech.ac.kr", getValidPassword(), noTeamToken
+        ));
+        String noTeamAccessToken = loginAndGetToken("noteam@koreatech.ac.kr", getValidPassword());
+
+        // when & then
+        mockMvc.perform(get("/v1/teams/me")
+                .header("Authorization", bearerToken(noTeamAccessToken)))
+            .andDo(print())
+            .andExpect(status().isNotFound());
     }
 }

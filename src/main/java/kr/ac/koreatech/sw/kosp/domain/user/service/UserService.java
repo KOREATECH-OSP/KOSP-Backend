@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
+import java.util.Optional;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
@@ -7,17 +14,13 @@ import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,6 +34,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final kr.ac.koreatech.sw.kosp.global.auth.provider.SignupTokenProvider signupTokenProvider;
     private final kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService authService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse signup(UserSignupRequest request) {
@@ -105,6 +109,12 @@ public class UserService {
         user.getRoles().add(role);
 
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
+        
+        // 7. GitHub 데이터 수집 이벤트 발행
+        if (githubUser != null && githubUser.getGithubLogin() != null) {
+            eventPublisher.publishEvent(new UserSignupEvent(this, githubUser.getGithubLogin()));
+            log.info("Published UserSignupEvent for GitHub user: {}", githubUser.getGithubLogin());
+        }
         
         return authService.createTokensForUser(user);
     }

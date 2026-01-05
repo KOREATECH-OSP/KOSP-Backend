@@ -34,6 +34,7 @@ public enum ExceptionMessage {
     INVALID_VERIFICATION_CODE("인증 코드가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다.", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL_ADDRESS("유효하지 않는 이메일 주소입니다.", HttpStatus.BAD_REQUEST),
+    TEAM_NOT_FOUND("소속된 팀을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     ;
 

@@ -1,25 +1,27 @@
 package kr.ac.koreatech.sw.kosp.domain.challenge.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest;
+import kr.ac.koreatech.sw.kosp.domain.challenge.dto.response.ChallengeListResponse;
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
+import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
+import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import kr.ac.koreatech.sw.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -30,6 +32,21 @@ public class ChallengeService {
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final SpelExpressionParser parser = new SpelExpressionParser();
+
+    public AdminChallengeListResponse getAllChallenges() {
+        List<Challenge> challenges = challengeRepository.findAll();
+        List<AdminChallengeListResponse.ChallengeInfo> challengeInfos = challenges.stream()
+            .map(challenge -> new AdminChallengeListResponse.ChallengeInfo(
+                challenge.getId(),
+                challenge.getName(),
+                challenge.getDescription(),
+                challenge.getCondition(),
+                challenge.getTier(),
+                challenge.getImageUrl()
+            ))
+            .toList();
+        return new AdminChallengeListResponse(challengeInfos);
+    }
 
     @Transactional
     public void createChallenge(ChallengeRequest request) {
