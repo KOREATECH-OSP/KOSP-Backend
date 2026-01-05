@@ -21,8 +21,6 @@ import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleReposi
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.community.board.repository.BoardRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
 
@@ -34,14 +32,10 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     private ArticleRepository articleRepository;
     @Autowired
     private BoardRepository boardRepository;
-    @Autowired
-    private UserRepository userRepository;
 
     private String accessToken;
     private String otherUserAccessToken;
     private Board testBoard;
-    private User testUser;
-    private User otherUser;
 
     @BeforeEach
     void setup() throws Exception {
@@ -54,7 +48,6 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
             "writer", "2020136999", "writer@koreatech.ac.kr", getValidPassword(), writerToken
         );
         userService.signup(signupRequest);
-        testUser = userRepository.findByKutEmail("writer@koreatech.ac.kr").orElseThrow();
         
         accessToken = loginAndGetToken("writer@koreatech.ac.kr", getValidPassword());
 
@@ -64,7 +57,6 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
             "otherWriter", "2020136888", "other@koreatech.ac.kr", getValidPassword(), otherToken
         );
         userService.signup(otherRequest);
-        otherUser = userRepository.findByKutEmail("other@koreatech.ac.kr").orElseThrow();
         
         otherUserAccessToken = loginAndGetToken("other@koreatech.ac.kr", getValidPassword());
 

@@ -15,8 +15,9 @@ public record UserSignupRequest(
     @Pattern(regexp = "^(?:[가-힣]{2,5}(?: [가-힣]{2,5})?|[A-Za-z]+(?: [A-Za-z]+)*)$", message = "이름은 한글 2-5자 (띄어쓰기 1회 허용) 또는 영문 (띄어쓰기 허용)으로 입력해주세요.")
     String name,
 
-    @Schema(description = "학생 번호", example = "2023100514", requiredMode = REQUIRED)
-    @NotBlank(message = "학번은 필수입니다.")
+    @Schema(description = "학번 또는 사번", example = "2023100514", requiredMode = REQUIRED)
+    @NotBlank(message = "학번/사번은 필수입니다.")
+    @Pattern(regexp = "^(\\d{10}|\\d{6}|\\d{8})$", message = "학번은 10자리, 사번은 6자리 또는 8자리 숫자여야 합니다.")
     String kutId,
 
     @Schema(description = "이메일", example = "kosp@koreatech.ac.kr", requiredMode = REQUIRED)

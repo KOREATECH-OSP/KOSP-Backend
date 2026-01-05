@@ -1,6 +1,9 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service;
 
-import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.*;
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.IS_REGISTERED_ATTR;
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.IS_REREGISTRATION_ATTR;
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.NEEDS_ADDITIONAL_INFO_ATTR;
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.USER_ATTR;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

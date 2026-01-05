@@ -1,6 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.controller;
 
 import java.net.URI;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import kr.ac.koreatech.sw.kosp.domain.community.team.api.TeamApi;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamDetailResponse;
@@ -10,9 +15,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +40,13 @@ public class TeamController implements TeamApi {
     @Permit(permitAll = true, description = "팀 상세 조회")
     public ResponseEntity<TeamDetailResponse> getTeam(Long teamId) {
         TeamDetailResponse response = teamService.getTeam(teamId);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @Permit(name = "team:read", description = "내 팀 조회")
+    public ResponseEntity<TeamDetailResponse> getMyTeam(@AuthUser User user) {
+        TeamDetailResponse response = teamService.getMyTeam(user);
         return ResponseEntity.ok(response);
     }
 }

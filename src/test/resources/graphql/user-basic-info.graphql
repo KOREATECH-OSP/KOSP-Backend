@@ -1,0 +1,38 @@
+query GetUserBasicInfo($login: String!) {
+  user(login: $login) {
+    login
+    name
+    avatarUrl
+    bio
+    company
+    location
+    email
+    createdAt
+    followers {
+      totalCount
+    }
+    following {
+      totalCount
+    }
+    repositories(first: 100, ownerAffiliations: OWNER) {
+      totalCount
+      nodes {
+        name
+        description
+        stargazerCount
+        forkCount
+        primaryLanguage {
+          name
+        }
+        createdAt
+        updatedAt
+      }
+    }
+    contributionsCollection {
+      totalCommitContributions
+      totalIssueContributions
+      totalPullRequestContributions
+      totalPullRequestReviewContributions
+    }
+  }
+}

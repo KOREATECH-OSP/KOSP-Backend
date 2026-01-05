@@ -17,10 +17,6 @@
 ### 1.2 클래스 및 메서드 구조
 *   **Method Length <= 10 Lines**: 모든 메서드는 10줄 이내로 작성합니다.
     *   메서드가 길어지면 책임을 분리하여 하위 메서드나 다른 클래스로 추출해야 합니다.
-*   **Max 2 Instance Variables Per Class**: 클래스 당 인스턴스 변수(필드)는 최대 2개로 제한합니다.
-    *   3개 이상의 필드가 필요한 경우, 관련된 필드들을 묶어 별도의 객체(Value Object, Embedded)로 분리해야 합니다.
-    *   *예외*: **Repository** 필드는 확장성에 필요한 경우 제한 없이 허용합니다.
-    *   *예외*: JPA Entity의 경우 연관관계 매핑 등으로 인해 불가피할 수 있으나, 가능한 한 임베디드 타입(`@Embeddable`)을 활용하여 준수하도록 노력합니다.
 *   **Small Entities**: 엔티티는 가능한 작게 유지합니다.
 
 ### 1.3 데이터 구조 및 변수
@@ -47,6 +43,10 @@
 *   **Controller (`api`, `controller`)**: 요청 검증, 서비스 호출, 응답 반환. 비즈니스 로직 포함 금지.
 *   **Service (`service`)**: 비즈니스 로직 수행, 트랜잭션 관리 (`@Transactional`).
 *   **Repository (`repository`)**: 데이터베이스 접근. `JpaRepository` 대신 `Repository` 인터페이스를 상속받아 필요한 메서드만 노출하는 것을 권장합니다.
+    *   **getBy vs findBy**: `findBy`의 결과가 null일 경우 예외를 throw해야 한다면, Repository에 `default` 메서드로 `getBy`를 선언하여 사용합니다.
+        *   `findBy`: `Optional<T>` 반환, null 가능성 있음
+        *   `getBy`: `T` 반환, null일 경우 `GlobalException` throw (default 메서드로 구현)
+        *   *예시*: `UserRepository`의 `getById`, `getByKutEmail` 참조
 *   **Domain Model (`model`)**: 핵심 비즈니스 규칙과 상태를 가진 엔티티.
 
 ### 2.2 DTO (Data Transfer Object)

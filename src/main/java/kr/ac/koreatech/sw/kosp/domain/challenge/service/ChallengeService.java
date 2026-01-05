@@ -1,25 +1,27 @@
 package kr.ac.koreatech.sw.kosp.domain.challenge.service;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest;
+import kr.ac.koreatech.sw.kosp.domain.challenge.dto.response.ChallengeListResponse;
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
+import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
+import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import kr.ac.koreatech.sw.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
-import java.util.List;
-import java.util.stream.Collectors;
-import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
-import java.util.Map;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,6 +33,24 @@ public class ChallengeService {
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
+    public AdminChallengeListResponse getAllChallenges() {
+        List<Challenge> challenges = challengeRepository.findAll();
+        List<AdminChallengeListResponse.ChallengeInfo> challengeInfos = challenges.stream()
+            .map(challenge -> new AdminChallengeListResponse.ChallengeInfo(
+                challenge.getId(),
+                challenge.getName(),
+                challenge.getDescription(),
+                challenge.getCondition(),
+                challenge.getTier(),
+                challenge.getImageUrl(),
+                challenge.getPoint(),
+                challenge.getMaxProgress(),
+                challenge.getProgressField()
+            ))
+            .toList();
+        return new AdminChallengeListResponse(challengeInfos);
+    }
+
     @Transactional
     public void createChallenge(ChallengeRequest request) {
         validateSpelCondition(request.condition());
@@ -41,6 +61,9 @@ public class ChallengeService {
             .condition(request.condition())
             .tier(request.tier())
             .imageUrl(request.imageUrl())
+            .point(request.point())
+            .maxProgress(request.maxProgress())
+            .progressField(request.progressField())
             .build();
 
         challengeRepository.save(challenge);
@@ -72,7 +95,10 @@ public class ChallengeService {
             request.description(),
             request.condition(),
             request.tier(),
-            request.imageUrl()
+            request.imageUrl(),
+            request.point(),
+            request.maxProgress(),
+            request.progressField()
         );
         log.info("Updated challenge: {}", challengeId);
     }
@@ -86,8 +112,10 @@ public class ChallengeService {
         }
     }
 
-    public ChallengeListResponse getChallenges(User user) {
-        List<Challenge> challenges = challengeRepository.findAll();
+    public ChallengeListResponse getChallenges(User user, Integer tier) {
+        List<Challenge> challenges = (tier != null) 
+            ? challengeRepository.findByTier(tier)
+            : challengeRepository.findAll();
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
         
         Map<Long, ChallengeHistory> historyMap = histories.stream()
@@ -98,24 +126,25 @@ public class ChallengeService {
                 Optional<ChallengeHistory> historyOpt = Optional.ofNullable(historyMap.get(challenge.getId()));
                 boolean isCompleted = historyOpt.map(ChallengeHistory::isAchieved).orElse(false);
                 
-                // Note: 'current' and 'total' logic depends on SpEL or history tracking.
-                // For now, if completed 1/1, else 0/1. 
-                // Ideally SpEL evaluation result would provide partial progress if supported.
-                long current = isCompleted ? 1L : 0L; 
-                long total = 1L; 
+                int current = historyOpt
+                    .map(ChallengeHistory::getCurrentProgress)
+                    .orElse(0);
+                int total = historyOpt
+                    .map(ChallengeHistory::getTargetProgress)
+                    .orElse(challenge.getMaxProgress());
 
                 return new ChallengeListResponse.ChallengeResponse(
                     challenge.getId(),
                     challenge.getName(),
                     challenge.getDescription(),
-                    "general", // Category not in Entity yet
+                    "general",
                     current,
                     total,
                     isCompleted,
                     challenge.getImageUrl(),
-                    challenge.getTier()
-                );
-            })
+                    challenge.getTier(),
+                    challenge.getPoint()
+                );            })
             .toList();
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
@@ -123,10 +152,15 @@ public class ChallengeService {
         double overallProgress = totalChallenges > 0 
             ? (double) completedCount / totalChallenges * 100.0 
             : 0.0;
+        
+        int totalEarnedPoints = histories.stream()
+            .filter(ChallengeHistory::isAchieved)
+            .mapToInt(h -> h.getChallenge().getPoint())
+            .sum();
 
         return new ChallengeListResponse(
             challengeResponses,
-            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress)
+            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
         );
     }
 }

@@ -1,5 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.api;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,13 +17,6 @@ import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamDetailResp
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Tag(name = "Team", description = "팀 관리 API")
 public interface TeamApi {
@@ -38,5 +39,11 @@ public interface TeamApi {
     @GetMapping("/v1/teams/{teamId}")
     ResponseEntity<TeamDetailResponse> getTeam(
         @PathVariable Long teamId
+    );
+
+    @Operation(summary = "내 팀 조회", description = "인증된 사용자가 소속된 팀을 조회합니다.")
+    @GetMapping("/v1/teams/me")
+    ResponseEntity<TeamDetailResponse> getMyTeam(
+        @Parameter(hidden = true) @AuthUser User user
     );
 }
