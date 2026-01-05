@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
@@ -33,6 +34,11 @@ public class GithubRestApiClient {
             .baseUrl(baseUrl)
             .defaultHeader(HttpHeaders.ACCEPT, "application/vnd.github+json")
             .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+            .exchangeStrategies(ExchangeStrategies.builder()
+                .codecs(configurer -> configurer
+                    .defaultCodecs()
+                    .maxInMemorySize(10 * 1024 * 1024)) // 10MB
+                .build())
             .build();
         this.rateLimitManager = rateLimitManager;
     }

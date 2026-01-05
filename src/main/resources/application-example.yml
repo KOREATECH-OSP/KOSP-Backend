@@ -68,6 +68,7 @@ spring:
       host: localhost
       port: 27017
       database: kosp
+      auto-index-creation: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
