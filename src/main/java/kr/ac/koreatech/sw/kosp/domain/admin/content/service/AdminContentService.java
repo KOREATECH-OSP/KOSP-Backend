@@ -1,4 +1,7 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.content.service;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
@@ -7,8 +10,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor

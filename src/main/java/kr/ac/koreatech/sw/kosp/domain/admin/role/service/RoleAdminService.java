@@ -1,6 +1,9 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.role.service;
 
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
@@ -9,12 +12,9 @@ import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
