@@ -1,0 +1,43 @@
+query GetUserWithPaginatedRepos($login: String!, $cursor: String) {
+    user(login: $login) {
+        id
+        login
+        name
+        email
+        bio
+        company
+        location
+        avatarUrl
+        createdAt
+        followers {
+            totalCount
+        }
+        following {
+            totalCount
+        }
+        repositories(first: 100, after: $cursor, ownerAffiliations: [OWNER, COLLABORATOR, ORGANIZATION_MEMBER]) {
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            totalCount
+            nodes {
+                id
+                name
+                owner {
+                    login
+                }
+                description
+                url
+                createdAt
+                updatedAt
+                primaryLanguage {
+                    name
+                }
+                stargazerCount
+                forkCount
+                isPrivate
+            }
+        }
+    }
+}

@@ -42,7 +42,10 @@ public class ChallengeService {
                 challenge.getDescription(),
                 challenge.getCondition(),
                 challenge.getTier(),
-                challenge.getImageUrl()
+                challenge.getImageUrl(),
+                challenge.getPoint(),
+                challenge.getMaxProgress(),
+                challenge.getProgressField()
             ))
             .toList();
         return new AdminChallengeListResponse(challengeInfos);
@@ -58,6 +61,9 @@ public class ChallengeService {
             .condition(request.condition())
             .tier(request.tier())
             .imageUrl(request.imageUrl())
+            .point(request.point())
+            .maxProgress(request.maxProgress())
+            .progressField(request.progressField())
             .build();
 
         challengeRepository.save(challenge);
@@ -89,7 +95,10 @@ public class ChallengeService {
             request.description(),
             request.condition(),
             request.tier(),
-            request.imageUrl()
+            request.imageUrl(),
+            request.point(),
+            request.maxProgress(),
+            request.progressField()
         );
         log.info("Updated challenge: {}", challengeId);
     }
@@ -103,8 +112,10 @@ public class ChallengeService {
         }
     }
 
-    public ChallengeListResponse getChallenges(User user) {
-        List<Challenge> challenges = challengeRepository.findAll();
+    public ChallengeListResponse getChallenges(User user, Integer tier) {
+        List<Challenge> challenges = (tier != null) 
+            ? challengeRepository.findByTier(tier)
+            : challengeRepository.findAll();
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
         
         Map<Long, ChallengeHistory> historyMap = histories.stream()
@@ -115,24 +126,25 @@ public class ChallengeService {
                 Optional<ChallengeHistory> historyOpt = Optional.ofNullable(historyMap.get(challenge.getId()));
                 boolean isCompleted = historyOpt.map(ChallengeHistory::isAchieved).orElse(false);
                 
-                // Note: 'current' and 'total' logic depends on SpEL or history tracking.
-                // For now, if completed 1/1, else 0/1. 
-                // Ideally SpEL evaluation result would provide partial progress if supported.
-                long current = isCompleted ? 1L : 0L; 
-                long total = 1L; 
+                int current = historyOpt
+                    .map(ChallengeHistory::getCurrentProgress)
+                    .orElse(0);
+                int total = historyOpt
+                    .map(ChallengeHistory::getTargetProgress)
+                    .orElse(challenge.getMaxProgress());
 
                 return new ChallengeListResponse.ChallengeResponse(
                     challenge.getId(),
                     challenge.getName(),
                     challenge.getDescription(),
-                    "general", // Category not in Entity yet
+                    "general",
                     current,
                     total,
                     isCompleted,
                     challenge.getImageUrl(),
-                    challenge.getTier()
-                );
-            })
+                    challenge.getTier(),
+                    challenge.getPoint()
+                );            })
             .toList();
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
@@ -140,10 +152,15 @@ public class ChallengeService {
         double overallProgress = totalChallenges > 0 
             ? (double) completedCount / totalChallenges * 100.0 
             : 0.0;
+        
+        int totalEarnedPoints = histories.stream()
+            .filter(ChallengeHistory::isAchieved)
+            .mapToInt(h -> h.getChallenge().getPoint())
+            .sum();
 
         return new ChallengeListResponse(
             challengeResponses,
-            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress)
+            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
         );
     }
 }

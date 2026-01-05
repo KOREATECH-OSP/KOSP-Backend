@@ -42,12 +42,20 @@ public class ChallengeHistory extends BaseEntity {
     @Column(name = "achieved_at")
     private LocalDateTime achievedAt;
 
+    @Column(name = "current_progress")
+    private Integer currentProgress;
+
+    @Column(name = "target_progress")
+    private Integer targetProgress;
+
     @Builder
-    private ChallengeHistory(User user, Challenge challenge, boolean isAchieved, LocalDateTime achievedAt) {
+    private ChallengeHistory(User user, Challenge challenge, boolean isAchieved, LocalDateTime achievedAt, Integer currentProgress, Integer targetProgress) {
         this.user = user;
         this.challenge = challenge;
         this.isAchieved = isAchieved;
         this.achievedAt = achievedAt;
+        this.currentProgress = currentProgress;
+        this.targetProgress = targetProgress;
     }
 
     public void achieve() {

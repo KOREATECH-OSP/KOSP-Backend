@@ -11,16 +11,18 @@ public record ChallengeListResponse(
         String title,
         String description,
         String category,
-        Long current,
-        Long total,
+        Integer current,
+        Integer total,
         Boolean isCompleted,
         String imageUrl,
-        Integer tier
+        Integer tier,
+        Integer point
     ) {}
 
     public record ChallengeSummary(
         Long totalChallenges,
         Long completedCount,
-        Double overallProgress
+        Double overallProgress,
+        Integer totalEarnedPoints
     ) {}
 }

@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/api/admin/github/score-config")
+@RequestMapping("/v1/admin/github/score-config")
 @RequiredArgsConstructor
 @Slf4j
 public class GithubScoreConfigController {

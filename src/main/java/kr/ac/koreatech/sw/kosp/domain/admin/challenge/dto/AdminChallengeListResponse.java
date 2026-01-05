@@ -11,6 +11,9 @@ public record AdminChallengeListResponse(
         String description,
         String condition,
         Integer tier,
-        String imageUrl
+        String imageUrl,
+        Integer point,
+        Integer maxProgress,
+        String progressField
     ) {}
 }

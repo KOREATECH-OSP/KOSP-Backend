@@ -272,26 +272,31 @@ ALTER TABLE recruit
 
 CREATE TABLE challenge
 (
-    id          BIGINT AUTO_INCREMENT NOT NULL,
-    created_at  TIMESTAMP             NOT NULL,
-    updated_at  TIMESTAMP             NOT NULL,
-    name        VARCHAR(255)          NOT NULL,
-    description VARCHAR(255)          NOT NULL,
-    `condition` TEXT                  NOT NULL,
-    tier        INT                   NOT NULL,
-    image_url   VARCHAR(255)          NULL,
+    id             BIGINT AUTO_INCREMENT NOT NULL,
+    created_at     TIMESTAMP             NOT NULL,
+    updated_at     TIMESTAMP             NOT NULL,
+    name           VARCHAR(255)          NOT NULL,
+    description    VARCHAR(255)          NOT NULL,
+    `condition`    TEXT                  NOT NULL,
+    tier           INT                   NOT NULL,
+    image_url      VARCHAR(255)          NULL,
+    point          INT                   NOT NULL,
+    max_progress   INT                   NOT NULL,
+    progress_field VARCHAR(255)          NOT NULL,
     CONSTRAINT pk_challenge PRIMARY KEY (id)
 );
 
 CREATE TABLE challenge_history
 (
-    id           BIGINT AUTO_INCREMENT NOT NULL,
-    created_at   TIMESTAMP             NOT NULL,
-    updated_at   TIMESTAMP             NOT NULL,
-    user_id      BIGINT                NOT NULL,
-    challenge_id BIGINT                NOT NULL,
-    is_achieved  BIT(1)                NOT NULL,
-    achieved_at  TIMESTAMP             NULL,
+    id               BIGINT AUTO_INCREMENT NOT NULL,
+    created_at       TIMESTAMP             NOT NULL,
+    updated_at       TIMESTAMP             NOT NULL,
+    user_id          BIGINT                NOT NULL,
+    challenge_id     BIGINT                NOT NULL,
+    is_achieved      BIT(1)                NOT NULL,
+    achieved_at      TIMESTAMP             NULL,
+    current_progress INT                   NULL,
+    target_progress  INT                   NULL,
     CONSTRAINT pk_challenge_history PRIMARY KEY (id)
 );
 
