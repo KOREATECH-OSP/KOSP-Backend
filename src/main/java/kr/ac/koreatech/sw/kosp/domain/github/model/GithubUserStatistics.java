@@ -93,8 +93,7 @@ public class GithubUserStatistics {
         Integer contributedReposCount,
         Integer totalStarsReceived,
         Integer nightCommits,
-        Integer dayCommits,
-        BigDecimal totalScore
+        Integer dayCommits
     ) {
         this.totalCommits = totalCommits;
         this.totalLines = totalLines;
@@ -107,8 +106,11 @@ public class GithubUserStatistics {
         this.totalStarsReceived = totalStarsReceived;
         this.nightCommits = nightCommits;
         this.dayCommits = dayCommits;
-        this.totalScore = totalScore;
         this.calculatedAt = LocalDateTime.now();
+    }
+
+    public void updateScore(BigDecimal totalScore) {
+        this.totalScore = totalScore;
     }
 
     public void updateDataPeriod(LocalDate start, LocalDate end) {

@@ -1,0 +1,16 @@
+query getRepository($owner: String!, $name: String!) {
+  repository(owner: $owner, name: $name) {
+    name
+    description
+    stargazerCount
+    forkCount
+    watchers {
+      totalCount
+    }
+    primaryLanguage {
+      name
+    }
+    createdAt
+    updatedAt
+  }
+}

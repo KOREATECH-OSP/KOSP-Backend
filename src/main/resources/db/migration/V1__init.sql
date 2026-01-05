@@ -461,3 +461,77 @@ CREATE TABLE github_collection_metadata (
     INDEX idx_github_id (github_id),
     INDEX idx_initial_collected (initial_collected)
 );
+
+-- 저장소별 통계 테이블
+CREATE TABLE github_repository_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    repo_owner VARCHAR(100) NOT NULL,
+    repo_name VARCHAR(200) NOT NULL,
+    contributor_github_id VARCHAR(100) NOT NULL,
+
+    stargazers_count INT NOT NULL DEFAULT 0,
+    forks_count INT NOT NULL DEFAULT 0,
+    watchers_count INT NOT NULL DEFAULT 0,
+
+    total_commits_count INT NOT NULL DEFAULT 0,
+    total_prs_count INT NOT NULL DEFAULT 0,
+    total_issues_count INT NOT NULL DEFAULT 0,
+
+    user_commits_count INT NOT NULL DEFAULT 0,
+    user_prs_count INT NOT NULL DEFAULT 0,
+    user_issues_count INT NOT NULL DEFAULT 0,
+    last_commit_date DATETIME,
+
+    description VARCHAR(500),
+    primary_language VARCHAR(50),
+
+    calculated_at DATETIME NOT NULL,
+
+    UNIQUE KEY uk_repo_contributor (repo_owner, repo_name, contributor_github_id),
+    INDEX idx_contributor (contributor_github_id),
+    INDEX idx_last_commit (last_commit_date DESC),
+    INDEX idx_stars (stargazers_count DESC)
+);
+
+-- 점수 설정 테이블
+CREATE TABLE github_score_config (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    config_name VARCHAR(100) NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL DEFAULT FALSE,
+
+    activity_level_max_score DOUBLE NOT NULL DEFAULT 3.0,
+    commits_weight DOUBLE NOT NULL DEFAULT 0.01,
+    lines_weight DOUBLE NOT NULL DEFAULT 0.0001,
+
+    diversity_max_score DOUBLE NOT NULL DEFAULT 1.0,
+    diversity_repo_threshold INT NOT NULL DEFAULT 10,
+
+    impact_max_score DOUBLE NOT NULL DEFAULT 5.0,
+    stars_weight DOUBLE NOT NULL DEFAULT 0.01,
+    forks_weight DOUBLE NOT NULL DEFAULT 0.05,
+    contributors_weight DOUBLE NOT NULL DEFAULT 0.02,
+
+    night_owl_bonus DOUBLE NOT NULL DEFAULT 0.5,
+    early_adopter_bonus DOUBLE NOT NULL DEFAULT 0.3,
+
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME,
+    created_by VARCHAR(100),
+
+    INDEX idx_active (active)
+);
+
+-- 기본 설정 삽입
+INSERT INTO github_score_config (
+    config_name, active,
+    activity_level_max_score, commits_weight, lines_weight,
+    diversity_max_score, diversity_repo_threshold,
+    impact_max_score, stars_weight, forks_weight,
+    night_owl_bonus, created_by
+) VALUES (
+    'default', TRUE,
+    3.0, 0.01, 0.0001,
+    1.0, 10,
+    5.0, 0.01, 0.05,
+    0.5, 'system'
+);

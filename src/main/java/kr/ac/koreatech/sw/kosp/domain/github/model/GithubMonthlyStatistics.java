@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
     name = "github_monthly_statistics",
     uniqueConstraints = @UniqueConstraint(
         name = "uk_user_month",
-        columnNames = {"github_id", "year", "month"}
+        columnNames = {"github_id", "`year`", "`month`"}
     )
 )
 @Getter
@@ -32,10 +32,10 @@ public class GithubMonthlyStatistics {
     @Column(nullable = false, length = 100)
     private String githubId;
 
-    @Column(nullable = false)
+    @Column(name = "`year`", nullable = false)
     private Integer year;
 
-    @Column(nullable = false)
+    @Column(name = "`month`", nullable = false)
     private Integer month;
 
     @Column(nullable = false)

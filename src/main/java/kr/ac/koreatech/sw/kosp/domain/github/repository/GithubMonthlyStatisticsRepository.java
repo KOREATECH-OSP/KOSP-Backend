@@ -15,7 +15,11 @@ public interface GithubMonthlyStatisticsRepository extends Repository<GithubMont
 
     Optional<GithubMonthlyStatistics> findByGithubIdAndYearAndMonth(String githubId, Integer year, Integer month);
 
+    List<GithubMonthlyStatistics> findByGithubId(String githubId);
+
     List<GithubMonthlyStatistics> findByGithubIdOrderByYearDesc(String githubId);
+
+    List<GithubMonthlyStatistics> findByGithubIdOrderByYearDescMonthDesc(String githubId);
 
     List<GithubMonthlyStatistics> findByGithubIdAndYear(String githubId, Integer year);
 }

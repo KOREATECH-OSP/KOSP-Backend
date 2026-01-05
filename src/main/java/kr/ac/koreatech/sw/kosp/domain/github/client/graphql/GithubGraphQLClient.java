@@ -24,6 +24,7 @@ public class GithubGraphQLClient {
     
     private String userBasicInfoQuery;
     private String userContributionsQuery;
+    private String repositoryInfoQuery;
 
     public GithubGraphQLClient(
         @Value("${github.api.graphql-url}") String graphqlUrl,
@@ -41,6 +42,7 @@ public class GithubGraphQLClient {
         try {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
+            repositoryInfoQuery = loadQuery("classpath:graphql/repository-info.graphql");
             log.info("GraphQL queries loaded successfully");
         } catch (IOException e) {
             log.error("Failed to load GraphQL queries", e);
@@ -104,5 +106,21 @@ public class GithubGraphQLClient {
             "to", to
         );
         return query(userContributionsQuery, variables, token, responseType);
+    }
+
+    /**
+     * 저장소 정보 조회
+     */
+    public <T> Mono<T> getRepositoryInfo(
+        String owner,
+        String name,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = Map.of(
+            "owner", owner,
+            "name", name
+        );
+        return query(repositoryInfoQuery, variables, token, responseType);
     }
 }
