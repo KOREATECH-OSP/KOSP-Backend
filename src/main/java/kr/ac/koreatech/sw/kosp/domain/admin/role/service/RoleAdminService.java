@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class RoleAdminService {
 
+    private static final String SUPERUSER_ROLE = "ROLE_SUPERUSER";
+    
     private final RoleRepository roleRepository;
     private final PolicyRepository policyRepository;
     private final UserRepository userRepository;
@@ -51,12 +53,15 @@ public class RoleAdminService {
 
     @Transactional
     public void updateRole(String name, RoleUpdateRequest request) {
+        validateNotSuperuser(name);
         Role role = roleRepository.getByName(name);
         role.updateDescription(request.description());
     }
 
     @Transactional
     public void deleteRole(String name) {
+        validateNotSuperuser(name);
+        
         // Verify role exists before deletion
         roleRepository.getByName(name);
         
@@ -70,6 +75,8 @@ public class RoleAdminService {
 
     @Transactional
     public void assignPolicy(String roleName, String policyName) {
+        validateNotSuperuser(roleName);
+        
         Role role = roleRepository.getByName(roleName);
         Policy policy = policyRepository.getByName(policyName);
 
@@ -78,10 +85,18 @@ public class RoleAdminService {
 
     @Transactional
     public void removePolicy(String roleName, String policyName) {
+        validateNotSuperuser(roleName);
+        
         Role role = roleRepository.getByName(roleName);
         Policy policy = policyRepository.getByName(policyName);
         
         role.getPolicies().remove(policy);
+    }
+    
+    private void validateNotSuperuser(String roleName) {
+        if (SUPERUSER_ROLE.equals(roleName)) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
     }
 
 }

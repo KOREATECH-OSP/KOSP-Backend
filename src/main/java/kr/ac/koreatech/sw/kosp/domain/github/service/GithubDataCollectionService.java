@@ -17,7 +17,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitDetail
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubIssuesRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubPRsRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserBasicRawRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserEventsRawRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.MongoGithubUserEventsRawRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -34,7 +34,7 @@ public class GithubDataCollectionService {
     private final GithubUserBasicRawRepository userBasicRawRepository;
     private final GithubIssuesRawRepository issuesRawRepository;
     private final GithubPRsRawRepository prsRawRepository;
-    private final GithubUserEventsRawRepository eventsRawRepository;
+    private final MongoGithubUserEventsRawRepository eventsRawRepository;
 
     /**
      * 사용자 기본 정보 수집 (GraphQL Pagination)

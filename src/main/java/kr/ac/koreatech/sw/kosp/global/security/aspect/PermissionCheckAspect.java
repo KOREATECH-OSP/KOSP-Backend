@@ -1,8 +1,7 @@
 package kr.ac.koreatech.sw.kosp.global.security.aspect;
 
 import java.util.Collection;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
-import lombok.extern.slf4j.Slf4j;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -11,6 +10,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Aspect
@@ -31,6 +33,17 @@ public class PermissionCheckAspect {
         String requiredPermission = permit.name();
         if (!requiredPermission.isEmpty()) {
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            
+            // SUPERUSER 체크: "*" 권한이 있으면 모든 권한 보유
+            boolean isSuperuser = authorities.stream()
+                .anyMatch(authority -> "*".equals(authority.getAuthority()));
+            
+            if (isSuperuser) {
+                log.debug("SUPERUSER access granted for: {}", requiredPermission);
+                return;
+            }
+            
+            // 일반 권한 체크
             boolean hasPermission = authorities.stream()
                 .anyMatch(authority -> authority.getAuthority().equals(requiredPermission));
 

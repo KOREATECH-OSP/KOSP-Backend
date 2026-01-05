@@ -11,10 +11,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubCollectionMetadata;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubMonthlyStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUserStatistics;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubCollectionMetadataRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubMonthlyStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserStatisticsRepository;
 
@@ -30,16 +28,12 @@ class Step1InfrastructureTest {
     @Autowired(required = false)
     private GithubMonthlyStatisticsRepository monthlyStatisticsRepository;
 
-    @Autowired(required = false)
-    private GithubCollectionMetadataRepository collectionMetadataRepository;
-
     @Test
     @DisplayName("프로젝트 빌드 및 컨텍스트 로드 테스트")
     void contextLoads() {
         // Given & When & Then
         assertThat(userStatisticsRepository).isNotNull();
         assertThat(monthlyStatisticsRepository).isNotNull();
-        assertThat(collectionMetadataRepository).isNotNull();
     }
 
     @Test
@@ -101,31 +95,7 @@ class Step1InfrastructureTest {
         assertThat(found.getCommitsCount()).isEqualTo(50);
     }
 
-    @Test
-    @DisplayName("MySQL 연결 및 GithubCollectionMetadata 저장/조회 테스트")
-    void testMySQLConnection_CollectionMetadata() {
-        // Given
-        String githubId = "testuser";
-        GithubCollectionMetadata metadata = GithubCollectionMetadata.create(githubId);
-        metadata.markInitialCollected();
-        metadata.updateLastCollected("abc123def456");
-        metadata.incrementApiCalls(100);
-
-        // When
-        GithubCollectionMetadata saved = collectionMetadataRepository.save(metadata);
-
-        // Then
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getGithubId()).isEqualTo(githubId);
-        assertThat(saved.getInitialCollected()).isTrue();
-        assertThat(saved.getLastCommitSha()).isEqualTo("abc123def456");
-        assertThat(saved.getTotalApiCalls()).isEqualTo(100);
-
-        // 조회 테스트
-        GithubCollectionMetadata found = collectionMetadataRepository.findByGithubId(githubId).orElseThrow();
-        assertThat(found.getInitialCollected()).isTrue();
-        assertThat(found.getTotalApiCalls()).isEqualTo(100);
-    }
+    // GithubCollectionMetadata는 이제 MongoDB 전용이므로 MySQL 테스트에서 제거됨
 
     @Test
     @DisplayName("순위 조회 테스트 (totalScore 내림차순)")

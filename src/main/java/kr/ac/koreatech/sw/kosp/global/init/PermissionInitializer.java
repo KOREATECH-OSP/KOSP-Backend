@@ -7,6 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.springframework.aop.support.AopUtils;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RestController;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
@@ -16,12 +24,6 @@ import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.aop.support.AopUtils;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RestController;
 
 @Slf4j
 @Component
@@ -102,9 +104,25 @@ public class PermissionInitializer implements CommandLineRunner {
     }
 
     private void initRoles(Set<Permission> permissions) {
+        initSuperuserRole();
         initAdminRole(permissions);
         initStudentRole(permissions);
         initEmployeeRole(permissions);
+    }
+    
+    private void initSuperuserRole() {
+        if (roleRepository.existsByName("ROLE_SUPERUSER")) {
+            return;
+        }
+        
+        Role superuserRole = roleRepository.save(
+            Role.builder()
+                .name("ROLE_SUPERUSER")
+                .description("슈퍼유저 (모든 권한 보유, 수정 불가)")
+                .build()
+        );
+        
+        log.info("Initialized ROLE_SUPERUSER (immutable)");
     }
 
     private void initAdminRole(Set<Permission> permissions) {

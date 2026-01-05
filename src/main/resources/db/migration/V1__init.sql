@@ -420,53 +420,6 @@ CREATE TABLE github_monthly_statistics (
     INDEX idx_year_month (year, month)
 );
 
-CREATE TABLE github_repository_statistics (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    repo_owner VARCHAR(100) NOT NULL,
-    repo_name VARCHAR(200) NOT NULL,
-    
-    stargazers_count INT NOT NULL DEFAULT 0,
-    forks_count INT NOT NULL DEFAULT 0,
-    watchers_count INT NOT NULL DEFAULT 0,
-    commits_count INT NOT NULL DEFAULT 0,
-    contributors_count INT NOT NULL DEFAULT 0,
-    
-    open_issues_count INT NOT NULL DEFAULT 0,
-    closed_issues_count INT NOT NULL DEFAULT 0,
-    open_prs_count INT NOT NULL DEFAULT 0,
-    closed_prs_count INT NOT NULL DEFAULT 0,
-    
-    primary_language VARCHAR(50),
-    license VARCHAR(100),
-    created_at DATETIME,
-    updated_at DATETIME,
-    
-    calculated_at DATETIME NOT NULL,
-    
-    UNIQUE KEY uk_repo (repo_owner, repo_name),
-    INDEX idx_owner (repo_owner),
-    INDEX idx_stars (stargazers_count DESC)
-);
-
-CREATE TABLE github_collection_metadata (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    github_id VARCHAR(100) NOT NULL UNIQUE,
-    
-    initial_collected BOOLEAN NOT NULL DEFAULT FALSE,
-    last_collected_at DATETIME,
-    last_commit_sha VARCHAR(40),
-    
-    total_api_calls INT NOT NULL DEFAULT 0,
-    last_error TEXT,
-    last_error_at DATETIME,
-    
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_github_id (github_id),
-    INDEX idx_initial_collected (initial_collected)
-);
-
 -- 저장소별 통계 테이블
 CREATE TABLE github_repository_statistics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

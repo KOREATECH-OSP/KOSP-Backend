@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCollectionMetadata;
 import reactor.core.publisher.Mono;
 
-public interface GithubCollectionMetadataRepository 
+public interface MongoGithubCollectionMetadataRepository 
     extends ReactiveMongoRepository<GithubCollectionMetadata, String> {
     
     Mono<GithubCollectionMetadata> findByGithubLoginAndRepoOwnerAndRepoNameAndCollectionType(

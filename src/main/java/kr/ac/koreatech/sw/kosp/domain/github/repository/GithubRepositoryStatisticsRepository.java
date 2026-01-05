@@ -3,7 +3,9 @@ package kr.ac.koreatech.sw.kosp.domain.github.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
 
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 
@@ -31,5 +33,11 @@ public interface GithubRepositoryStatisticsRepository extends Repository<GithubR
         String repoOwner,
         String repoName,
         String contributorGithubId
+    );
+
+    @Query("SELECT r FROM GithubRepositoryStatistics r WHERE r.contributorGithubId = :githubId ORDER BY r.lastCommitDate DESC LIMIT :limit")
+    List<GithubRepositoryStatistics> findTopNByContributorGithubIdOrderByLastCommitDateDesc(
+        @Param("githubId") String githubId,
+        @Param("limit") Integer limit
     );
 }
