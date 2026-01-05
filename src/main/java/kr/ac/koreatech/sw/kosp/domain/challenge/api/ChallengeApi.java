@@ -3,6 +3,7 @@ package kr.ac.koreatech.sw.kosp.domain.challenge.api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -18,6 +19,7 @@ public interface ChallengeApi {
     @Operation(summary = "도전 과제 목록 및 진행도 조회", description = "모든 도전 과제와 사용자의 진행 상태를 조회합니다.")
     @GetMapping
     ResponseEntity<ChallengeListResponse> getChallenges(
-        @Parameter(hidden = true) @AuthUser User user
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestParam(required = false) Integer tier
     );
 }

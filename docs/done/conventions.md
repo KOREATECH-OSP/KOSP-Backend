@@ -50,6 +50,10 @@
 *   **Controller (`api`, `controller`)**: 요청 검증, 서비스 호출, 응답 반환. 비즈니스 로직 포함 금지.
 *   **Service (`service`)**: 비즈니스 로직 수행, 트랜잭션 관리 (`@Transactional`).
 *   **Repository (`repository`)**: 데이터베이스 접근. `JpaRepository` 대신 `Repository` 인터페이스를 상속받아 필요한 메서드만 노출하는 것을 권장합니다.
+    *   **getBy vs findBy**: `findBy`의 결과가 null일 경우 예외를 throw해야 한다면, Repository에 `default` 메서드로 `getBy`를 선언하여 사용합니다.
+        *   `findBy`: `Optional<T>` 반환, null 가능성 있음
+        *   `getBy`: `T` 반환, null일 경우 `GlobalException` throw (default 메서드로 구현)
+        *   *예시*: `UserRepository`의 `getById`, `getByKutEmail` 참조
 *   **Domain Model (`model`)**: 핵심 비즈니스 규칙과 상태를 가진 엔티티.
 
 ### 2.2 DTO (Data Transfer Object)

@@ -3,7 +3,6 @@ package kr.ac.koreatech.sw.kosp.domain.auth.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailVerificationRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.GithubTokenRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
@@ -15,7 +14,6 @@ import kr.ac.koreatech.sw.kosp.domain.mail.repository.EmailVerificationRepositor
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
 import kr.ac.koreatech.sw.kosp.global.auth.provider.SignupTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
@@ -476,14 +474,13 @@ class AuthProviderIntegrationTest {
             );
 
             // when & then
-            MvcResult result = mockMvc.perform(post("/v1/users/signup")
+            mockMvc.perform(post("/v1/users/signup")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(signupRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists())
-                .andReturn();
+                .andExpect(jsonPath("$.refreshToken").exists());
 
             // Verify user created
             User user = userRepository.findByKutEmail("signup@koreatech.ac.kr").orElseThrow();

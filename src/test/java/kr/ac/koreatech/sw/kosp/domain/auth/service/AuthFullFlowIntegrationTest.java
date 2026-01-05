@@ -25,31 +25,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -186,14 +173,13 @@ public class AuthFullFlowIntegrationTest {
                 verifiedSignupToken
             );
 
-            MvcResult signupResult = mockMvc.perform(post("/v1/users/signup")
+            mockMvc.perform(post("/v1/users/signup")
                     .contentType(MediaType.APPLICATION_JSON)
                     .content(objectMapper.writeValueAsString(signupRequest)))
                 .andDo(print())
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists())
-                .andReturn();
+                .andExpect(jsonPath("$.refreshToken").exists());
 
             // Verify user created
             User user = userRepository.findByKutEmail(TEST_KUT_EMAIL).orElseThrow();
@@ -205,9 +191,6 @@ public class AuthFullFlowIntegrationTest {
                 () -> assertThat(user.getRoles()).hasSize(1),
                 () -> assertThat(user.getRoles().iterator().next().getName()).isEqualTo("ROLE_STUDENT")
             );
-
-            String signupResponse = signupResult.getResponse().getContentAsString();
-            AuthTokenResponse signupTokens = objectMapper.readValue(signupResponse, AuthTokenResponse.class);
 
             // 5. Login with credentials
             LoginRequest loginRequest = new LoginRequest(TEST_KUT_EMAIL, VALID_PASSWORD);

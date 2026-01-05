@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.service;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamListResponse;
@@ -12,12 +19,6 @@ import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -65,5 +66,13 @@ public class TeamService {
             .findFirst()
             .map(member -> member.getUser().getName())
             .orElse("Unknown");
+    }
+
+    public TeamDetailResponse getMyTeam(User user) {
+        TeamMember membership = teamMemberRepository.findByUser(user)
+            .orElseThrow(() -> new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(
+                kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.TEAM_NOT_FOUND
+            ));
+        return TeamDetailResponse.from(membership.getTeam());
     }
 }

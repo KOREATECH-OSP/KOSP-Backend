@@ -12,6 +12,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +22,11 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class RoleAdminService {
 
+    private static final String SUPERUSER_ROLE = "ROLE_SUPERUSER";
+    
     private final RoleRepository roleRepository;
     private final PolicyRepository policyRepository;
-    // private final PermissionAdminService permissionAdminService; // Unused for now
+    private final UserRepository userRepository;
 
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream()
@@ -32,7 +35,7 @@ public class RoleAdminService {
     }
 
     public RoleResponse getRole(String name) {
-        return RoleResponse.from(findRole(name));
+        return RoleResponse.from(roleRepository.getByName(name));
     }
 
     @Transactional
@@ -50,42 +53,50 @@ public class RoleAdminService {
 
     @Transactional
     public void updateRole(String name, RoleUpdateRequest request) {
-        Role role = findRole(name);
+        validateNotSuperuser(name);
+        Role role = roleRepository.getByName(name);
         role.updateDescription(request.description());
     }
 
     @Transactional
     public void deleteRole(String name) {
-        Role role = findRole(name);
-        // Check if any users have this role via repository query
-        // For now, we'll skip this check as it requires UserRepository injection
-        // TODO: Add UserRepository and check if any users have this role
+        validateNotSuperuser(name);
+        
+        // Verify role exists before deletion
+        roleRepository.getByName(name);
+        
+        // Check if any users have this role
+        if (userRepository.existsByRoles_Name(name)) {
+            throw new GlobalException(ExceptionMessage.CONFLICT);
+        }
+        
         roleRepository.deleteByName(name);
     }
 
     @Transactional
     public void assignPolicy(String roleName, String policyName) {
-        Role role = findRole(roleName);
-        Policy policy = findPolicy(policyName);
+        validateNotSuperuser(roleName);
+        
+        Role role = roleRepository.getByName(roleName);
+        Policy policy = policyRepository.getByName(policyName);
 
         role.getPolicies().add(policy);
     }
 
     @Transactional
     public void removePolicy(String roleName, String policyName) {
-        Role role = findRole(roleName);
-        Policy policy = findPolicy(policyName);
+        validateNotSuperuser(roleName);
+        
+        Role role = roleRepository.getByName(roleName);
+        Policy policy = policyRepository.getByName(policyName);
         
         role.getPolicies().remove(policy);
     }
-
-    private Role findRole(String name) {
-        return roleRepository.findByName(name)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    
+    private void validateNotSuperuser(String roleName) {
+        if (SUPERUSER_ROLE.equals(roleName)) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
     }
 
-    private Policy findPolicy(String name) {
-        return policyRepository.findByName(name)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND)); // Need POLICY_NOT_FOUND
-    }
 }

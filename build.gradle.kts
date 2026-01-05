@@ -33,6 +33,8 @@ dependencies {
     implementation(libs.spring.boot.starter.data.redis)
     implementation(libs.spring.session.data.redis)
     implementation(libs.spring.boot.starter.data.mongodb)
+    implementation(libs.spring.boot.starter.data.mongodb.reactive)
+    implementation(libs.spring.boot.starter.webflux) // GitHub API Client
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
     implementation(libs.spring.boot.starter.batch)
     implementation(libs.mysql.connector.j)

@@ -11,4 +11,10 @@ public interface PermissionRepository extends Repository<Permission, Long> {
     List<Permission> findAll();
     java.util.Optional<Permission> findByName(String name);
     void deleteByName(String name);
+
+    default Permission getByName(String name) {
+        return findByName(name)
+            .orElseThrow(() -> new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(
+                kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.NOT_FOUND));
+    }
 }

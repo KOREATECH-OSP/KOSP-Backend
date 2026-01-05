@@ -9,4 +9,10 @@ public interface PolicyRepository extends Repository<Policy, Long> {
     Optional<Policy> findByName(String name);
     java.util.List<Policy> findAll();
     void deleteByName(String name);
+
+    default Policy getByName(String name) {
+        return findByName(name)
+            .orElseThrow(() -> new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(
+                kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.NOT_FOUND));
+    }
 }

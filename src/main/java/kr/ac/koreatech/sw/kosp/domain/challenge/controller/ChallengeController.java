@@ -19,7 +19,7 @@ public class ChallengeController implements ChallengeApi {
 
     @Override
     @Permit(permitAll = false, description = "도전 과제 목록 및 진행도 조회")
-    public ResponseEntity<ChallengeListResponse> getChallenges(@AuthUser User user) {
-        return ResponseEntity.ok(challengeService.getChallenges(user));
+    public ResponseEntity<ChallengeListResponse> getChallenges(@AuthUser User user, Integer tier) {
+        return ResponseEntity.ok(challengeService.getChallenges(user, tier));
     }
 }

@@ -1,10 +1,29 @@
 package kr.ac.koreatech.sw.kosp.global.config;
 
+import javax.sql.DataSource;
+
+import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-// @EnableBatchProcessing <- Spring Batch 5.x에서는 기본적으로 불필요하거나 별도로 설정, 여기서는 기본 설정 따름
+@EnableBatchProcessing
 public class BatchConfig {
-    // 필요한 경우 JobRepository, TransactionManager 등을 커스터마이징 가능
-    // Spring Boot Starter Batch가 자동으로 구성해주므로 우선 비워둠.
+    
+    @Bean(name = "batchDataSource")
+    @ConditionalOnProperty(prefix = "spring.batch.datasource", name = "url")
+    public DataSource batchDataSource(
+        @Value("${spring.batch.datasource.url}") String url,
+        @Value("${spring.batch.datasource.username}") String username,
+        @Value("${spring.batch.datasource.password}") String password
+    ) {
+        return DataSourceBuilder.create()
+            .url(url)
+            .username(username)
+            .password(password)
+            .build();
+    }
 }
