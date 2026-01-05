@@ -14,11 +14,16 @@ import org.springframework.batch.item.data.builder.RepositoryItemReaderBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import kr.ac.koreatech.sw.kosp.domain.github.exception.RateLimitExceededException;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
+import kr.ac.koreatech.sw.kosp.domain.github.model.RateLimitInfo;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.service.GithubDataCollectionRetryService;
+import kr.ac.koreatech.sw.kosp.domain.github.service.GithubRateLimitChecker;
+import kr.ac.koreatech.sw.kosp.domain.github.service.GithubStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,6 +36,12 @@ public class DataCollectionJobConfig {
     private final PlatformTransactionManager transactionManager;
     private final GithubDataCollectionRetryService dataCollectionRetryService;
     private final GithubUserRepository githubUserRepository;
+    private final GithubRateLimitChecker rateLimitChecker;
+    private final GithubStatisticsService statisticsService;
+    private final TextEncryptor textEncryptor;
+    
+    private static final int RATE_LIMIT_THRESHOLD = 100;
+    private static final long EXTRA_WAIT_MILLIS = 1000;
     
     @Bean
     public Job dataCollectionJob(Step collectDataStep) {
@@ -46,6 +57,12 @@ public class DataCollectionJobConfig {
             .reader(githubUserReader())
             .processor(dataCollectionProcessor())
             .writer(dataCollectionWriter())
+            .faultTolerant()
+            .retryLimit(3)
+            .retry(RateLimitExceededException.class)
+            .retry(RuntimeException.class)
+            .skipLimit(10)
+            .skip(Exception.class)
             .build();
     }
     
@@ -63,21 +80,35 @@ public class DataCollectionJobConfig {
     @Bean
     public ItemProcessor<GithubUser, GithubUser> dataCollectionProcessor() {
         return githubUser -> {
-            try {
-                log.info("Processing data collection for user: {}", githubUser.getGithubLogin());
-                
-                dataCollectionRetryService.collectWithRetry(
-                    githubUser.getGithubLogin(),
-                    githubUser.getGithubToken()
-                );
-                
-                return githubUser;
-            } catch (Exception exception) {
-                log.error("Failed to collect data for user: {}",
-                    githubUser.getGithubLogin(), exception);
-                return null;
-            }
+            log.info("Processing data collection for user: {}", githubUser.getGithubLogin());
+            
+            String token = textEncryptor.decrypt(githubUser.getGithubToken());
+            
+            // Rate limit 사전 체크
+            checkAndWaitIfNeeded(token, githubUser.getGithubLogin());
+            
+            // 데이터 수집 (Batch가 자동 retry)
+            dataCollectionRetryService.collectAllData(
+                githubUser.getGithubLogin(),
+                token
+            );
+            
+            // 통계 계산
+            statisticsService.calculateAndSaveAllStatistics(githubUser.getGithubLogin());
+            
+            return githubUser;
         };
+    }
+    
+    private void checkAndWaitIfNeeded(String token, String githubLogin) throws InterruptedException {
+        RateLimitInfo info = rateLimitChecker.checkRateLimit(token);
+        
+        if (info.remaining() < RATE_LIMIT_THRESHOLD) {
+            long waitTime = info.getWaitTimeMillis();
+            log.info("Rate limit low for user {}. Remaining: {}, Waiting {} ms",
+                githubLogin, info.remaining(), waitTime);
+            Thread.sleep(waitTime + EXTRA_WAIT_MILLIS);
+        }
     }
     
     @Bean

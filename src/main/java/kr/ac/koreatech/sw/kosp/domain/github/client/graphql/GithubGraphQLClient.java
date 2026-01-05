@@ -23,6 +23,7 @@ public class GithubGraphQLClient {
     private final ResourceLoader resourceLoader;
     
     private String userBasicInfoQuery;
+    private String userBasicInfoPaginatedQuery;
     private String userContributionsQuery;
     private String repositoryInfoQuery;
 
@@ -41,6 +42,7 @@ public class GithubGraphQLClient {
     private void loadQueries() {
         try {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
+            userBasicInfoPaginatedQuery = loadQuery("classpath:graphql/user-basic-info-paginated.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
             repositoryInfoQuery = loadQuery("classpath:graphql/repository-info.graphql");
             log.info("GraphQL queries loaded successfully");
@@ -122,5 +124,21 @@ public class GithubGraphQLClient {
             "name", name
         );
         return query(repositoryInfoQuery, variables, token, responseType);
+    }
+
+    /**
+     * 사용자 기본 정보 조회 (Pagination 지원)
+     */
+    public <T> Mono<T> getUserBasicInfoPaginated(
+        String login,
+        String cursor,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = cursor == null ?
+            Map.of("login", login) :
+            Map.of("login", login, "cursor", cursor);
+        
+        return query(userBasicInfoPaginatedQuery, variables, token, responseType);
     }
 }

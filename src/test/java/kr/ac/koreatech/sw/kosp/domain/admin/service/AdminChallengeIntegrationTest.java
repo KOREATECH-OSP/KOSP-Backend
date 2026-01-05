@@ -62,7 +62,7 @@ class AdminChallengeIntegrationTest extends IntegrationTestSupport {
     void createChallenge_success() throws Exception {
         // given
         kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest req = new kr.ac.koreatech.sw.kosp.domain.challenge.dto.request.ChallengeRequest(
-            "New Challenge", "Description", "evaluationLogic > 10", 100, "http://image.url"
+            "New Challenge", "Description", "evaluationLogic > 10", 100, "http://image.url", 50, 100, "activity.totalCommits"
         );
 
         // when
@@ -88,6 +88,9 @@ class AdminChallengeIntegrationTest extends IntegrationTestSupport {
             .condition("score > 100")
             .tier(1)
             .imageUrl("http://image1.url")
+            .point(100)
+            .maxProgress(100)
+            .progressField("activity.totalCommits")
             .build();
         Challenge challenge2 = Challenge.builder()
             .name("Challenge 2")
@@ -95,6 +98,9 @@ class AdminChallengeIntegrationTest extends IntegrationTestSupport {
             .condition("commits > 50")
             .tier(2)
             .imageUrl("http://image2.url")
+            .point(200)
+            .maxProgress(50)
+            .progressField("activity.commits")
             .build();
         challengeRepository.save(challenge1);
         challengeRepository.save(challenge2);

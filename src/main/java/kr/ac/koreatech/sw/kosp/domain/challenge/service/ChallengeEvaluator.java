@@ -78,11 +78,27 @@ public class ChallengeEvaluator {
 
     private void evaluateAndReward(User user, Challenge challenge, StandardEvaluationContext context) {
         try {
-            if (isConditionMet(challenge, context)) {
-                grantReward(user, challenge);
+            ProgressInfo progress = calculateProgress(challenge, context);
+            boolean isAchieved = isConditionMet(challenge, context);
+            
+            if (isAchieved) {
+                grantReward(user, challenge, progress);
             }
         } catch (Exception e) {
             handleEvaluationError(user, challenge, e);
+        }
+    }
+
+    private ProgressInfo calculateProgress(Challenge challenge, StandardEvaluationContext context) {
+        try {
+            Expression exp = parser.parseExpression(challenge.getProgressField());
+            Object value = exp.getValue(context);
+            int current = (value instanceof Number) ? ((Number) value).intValue() : 0;
+            int target = challenge.getMaxProgress();
+            return new ProgressInfo(current, target);
+        } catch (Exception e) {
+            log.warn("Failed to calculate progress for challenge {}: {}", challenge.getId(), e.getMessage());
+            return new ProgressInfo(0, challenge.getMaxProgress());
         }
     }
 
@@ -91,7 +107,7 @@ public class ChallengeEvaluator {
         return Boolean.TRUE.equals(exp.getValue(context, Boolean.class));
     }
 
-    private void grantReward(User user, Challenge challenge) {
+    private void grantReward(User user, Challenge challenge, ProgressInfo progress) {
         log.info("User {} achieved challenge: {}", user.getId(), challenge.getName());
         
         ChallengeHistory history = ChallengeHistory.builder()
@@ -99,6 +115,8 @@ public class ChallengeEvaluator {
             .challenge(challenge)
             .isAchieved(true)
             .achievedAt(java.time.LocalDateTime.now())
+            .currentProgress(progress.current())
+            .targetProgress(progress.target())
             .build();
             
         challengeHistoryRepository.save(history);
