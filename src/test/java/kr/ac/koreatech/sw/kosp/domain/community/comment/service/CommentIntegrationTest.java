@@ -1,5 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.community.comment.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +25,6 @@ import kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentReposi
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class CommentIntegrationTest extends IntegrationTestSupport {
 
@@ -74,7 +72,7 @@ class CommentIntegrationTest extends IntegrationTestSupport {
 
         // 4. Create Article
         ArticleRequest articleReq = new ArticleRequest(
-            board.getId(), "Test Article", "Test Content", List.of("TEST")
+            board.getId(), "Test Article", "Test Content", List.of("TEST"), null
         );
         mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(authorAccessToken))

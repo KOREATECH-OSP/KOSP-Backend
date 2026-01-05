@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -20,11 +21,11 @@ import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserPasswordService;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -53,6 +54,22 @@ public class AuthController implements AuthApi {
         CheckMemberIdRequest request
     ) {
         return ResponseEntity.ok(userService.checkMemberIdAvailability(request.id()));
+    }
+
+    @Override
+    @GetMapping("/verify/token/signup")
+    @Permit(permitAll = true, description = "회원가입 토큰 검증")
+    public ResponseEntity<Void> validateSignupToken(@RequestParam String token) {
+        authService.validateSignupToken(token);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @GetMapping("/verify/token/login")
+    @Permit(permitAll = true, description = "로그인 토큰 검증")
+    public ResponseEntity<Void> validateLoginToken(@RequestParam String token) {
+        authService.validateLoginToken(token);
+        return ResponseEntity.ok().build();
     }
 
     @Override

@@ -1,5 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,15 +25,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.common.IntegrationTestSupport;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ArticleIntegrationTest extends IntegrationTestSupport {
 
@@ -84,7 +81,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 작성 성공")
     void createArticle_success() throws Exception {
         // given
-        ArticleRequest req = new ArticleRequest(testBoard.getId(), "My Title", "My Content", List.of("FREE"));
+        ArticleRequest req = new ArticleRequest(testBoard.getId(), "My Title", "My Content", List.of("FREE"), null);
 
         // when
         mockMvc.perform(post("/v1/community/articles")
@@ -105,7 +102,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 조회 성공")
     void getArticle_success() throws Exception {
         // given: Create article via API
-        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Read Title", "Read Content", List.of("FREE"));
+        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Read Title", "Read Content", List.of("FREE"), null);
         mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -126,7 +123,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("좋아요 토글 (On)")
     void toggleLike_success() throws Exception {
         // given
-        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Like Title", "Like Content", List.of("FREE"));
+        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Like Title", "Like Content", List.of("FREE"), null);
         mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -145,7 +142,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("즐겨찾기 토글 (On)")
     void toggleBookmark_success() throws Exception {
         // given
-        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Book Title", "Content", List.of("FREE"));
+        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Book Title", "Content", List.of("FREE"), null);
         mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -164,7 +161,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 상세 조회 성공")
     void getArticleDetail_success() throws Exception {
         // given
-        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Detail Title", "Detail Content", List.of("TAG"));
+        ArticleRequest req = new ArticleRequest(testBoard.getId(), "Detail Title", "Detail Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -187,7 +184,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 수정 성공")
     void updateArticle_success() throws Exception {
         // given
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Original", "Original Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Original", "Original Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -198,7 +195,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
         Long articleId = Long.parseLong(location.substring(location.lastIndexOf("/") + 1));
 
         // when
-        ArticleRequest updateReq = new ArticleRequest(testBoard.getId(), "Updated", "Updated Content", List.of("NEW"));
+        ArticleRequest updateReq = new ArticleRequest(testBoard.getId(), "Updated", "Updated Content", List.of("NEW"), null);
         mockMvc.perform(put("/v1/community/articles/" + articleId)
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -216,7 +213,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 수정 실패 - 타인 게시글")
     void updateArticle_fail_notOwner() throws Exception {
         // given
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Original", "Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Original", "Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -227,7 +224,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
         Long articleId = Long.parseLong(location.substring(location.lastIndexOf("/") + 1));
 
         // when & then
-        ArticleRequest updateReq = new ArticleRequest(testBoard.getId(), "Hacked", "Hacked Content", List.of("HACK"));
+        ArticleRequest updateReq = new ArticleRequest(testBoard.getId(), "Hacked", "Hacked Content", List.of("HACK"), null);
         mockMvc.perform(put("/v1/community/articles/" + articleId)
                 .header("Authorization", bearerToken(otherUserAccessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -240,7 +237,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 삭제 성공")
     void deleteArticle_success() throws Exception {
         // given
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "To Delete", "Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "To Delete", "Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -264,7 +261,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 삭제 실패 - 타인 게시글")
     void deleteArticle_fail_notOwner() throws Exception {
         // given
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Protected", "Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Protected", "Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -285,7 +282,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 좋아요 토글 - Off")
     void toggleLike_off() throws Exception {
         // given: 좋아요 On
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Unlike Me", "Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Unlike Me", "Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -312,7 +309,7 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
     @DisplayName("게시글 북마크 토글 - Off")
     void toggleBookmark_off() throws Exception {
         // given: 북마크 On
-        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Unbookmark Me", "Content", List.of("TAG"));
+        ArticleRequest createReq = new ArticleRequest(testBoard.getId(), "Unbookmark Me", "Content", List.of("TAG"), null);
         MvcResult createResult = mockMvc.perform(post("/v1/community/articles")
                 .header("Authorization", bearerToken(accessToken))
                 .contentType(MediaType.APPLICATION_JSON)

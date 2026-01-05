@@ -1,14 +1,16 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.report.controller;
 
 import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.report.api.AdminReportApi;
 import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.request.ReportProcessRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.response.ReportResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminReportService;
+import kr.ac.koreatech.sw.kosp.domain.admin.report.service.AdminReportService;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor

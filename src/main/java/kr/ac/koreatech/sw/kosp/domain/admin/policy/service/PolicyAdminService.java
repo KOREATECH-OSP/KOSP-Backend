@@ -1,7 +1,10 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.policy.service;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PermissionUpdateRequest;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.PermissionResponse;
@@ -13,8 +16,6 @@ import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -91,21 +92,6 @@ public class PolicyAdminService {
 
     public PermissionResponse getPermission(String name) {
         return PermissionResponse.from(findPermission(name));
-    }
-
-    @Transactional
-    public void updatePermission(String name, PermissionUpdateRequest request) {
-        Permission permission = findPermission(name);
-        permission.updateDescription(request.description());
-    }
-
-    @Transactional
-    public void deletePermission(String name) {
-        Permission permission = findPermission(name);
-        if (!permission.getPolicies().isEmpty()) {
-            throw new GlobalException(ExceptionMessage.CONFLICT); // "Permission is in use by policies"
-        }
-        permissionRepository.deleteByName(name);
     }
 
     private Policy findPolicy(String name) {
