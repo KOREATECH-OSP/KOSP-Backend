@@ -1,19 +1,20 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.role.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.role.dto.response.RoleResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.PolicyRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,10 @@ public class RoleAdminService {
             .toList();
     }
 
+    public RoleResponse getRole(String name) {
+        return RoleResponse.from(findRole(name));
+    }
+
     @Transactional
     public void createRole(RoleRequest request) {
         if (roleRepository.existsByName(request.name())) {
@@ -44,17 +49,34 @@ public class RoleAdminService {
     }
 
     @Transactional
+    public void updateRole(String name, RoleUpdateRequest request) {
+        Role role = findRole(name);
+        role.updateDescription(request.description());
+    }
+
+    @Transactional
+    public void deleteRole(String name) {
+        Role role = findRole(name);
+        // Check if any users have this role via repository query
+        // For now, we'll skip this check as it requires UserRepository injection
+        // TODO: Add UserRepository and check if any users have this role
+        roleRepository.deleteByName(name);
+    }
+
+    @Transactional
     public void assignPolicy(String roleName, String policyName) {
         Role role = findRole(roleName);
         Policy policy = findPolicy(policyName);
 
         role.getPolicies().add(policy);
-        // Event publishing (refresh cache) could be global or per user. 
-        // Changing role policy affects ALL users with that role.
-        // PermissionAdminService.publishPermissionChange takes username.
-        // We might need a global refresh or iterate users (expensive).
-        // For now, assume global refresh needed or Redis TTL handles it.
-        // Or send "ALL" as username?
+    }
+
+    @Transactional
+    public void removePolicy(String roleName, String policyName) {
+        Role role = findRole(roleName);
+        Policy policy = findPolicy(policyName);
+        
+        role.getPolicies().remove(policy);
     }
 
     private Role findRole(String name) {

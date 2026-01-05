@@ -2,10 +2,10 @@ package kr.ac.koreatech.sw.kosp.domain.auth.api;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,7 +41,19 @@ public interface AuthApi {
     @Operation(summary = "학번/사번 중복 확인", description = "회원가입 시 학번 또는 사번의 중복 여부와 형식을 확인합니다. (학번: 10자리, 사번: 6/8자리)")
     @GetMapping("/verify/identity")
     ResponseEntity<CheckMemberIdResponse> checkMemberId(
-        @ModelAttribute @Valid CheckMemberIdRequest request
+        @Valid CheckMemberIdRequest request
+    );
+
+    @Operation(summary = "회원가입 토큰 검증", description = "회원가입 폼 진입 전 JWS 토큰의 유효성을 검증합니다. 위변조된 토큰은 접근을 차단합니다.")
+    @GetMapping("/verify/token/signup")
+    ResponseEntity<Void> validateSignupToken(
+        @Parameter(description = "회원가입 토큰 (JWS)", required = true) @RequestParam("token") String token
+    );
+
+    @Operation(summary = "로그인 토큰 검증", description = "Access Token의 유효성을 검증합니다. 만료되거나 위변조된 토큰은 차단합니다.")
+    @GetMapping("/verify/token/login")
+    ResponseEntity<Void> validateLoginToken(
+        @Parameter(description = "Access Token (JWS)", required = true) @RequestParam("token") String token
     );
 
     @Operation(summary = "이메일 인증 코드 발송", description = "회원가입을 위해 이메일로 인증 코드를 발송합니다.")

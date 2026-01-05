@@ -10,4 +10,5 @@ public interface RoleRepository extends Repository<Role, Long> {
     List<Role> findAll();
     Optional<Role> findByName(String name);
     boolean existsByName(String name);
+    void deleteByName(String name);
 }

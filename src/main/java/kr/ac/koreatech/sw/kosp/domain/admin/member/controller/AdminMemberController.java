@@ -1,13 +1,14 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.member.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.member.api.AdminMemberApi;
 import kr.ac.koreatech.sw.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.member.dto.request.UserRoleUpdateRequest;
-import kr.ac.koreatech.sw.kosp.domain.admin.service.AdminMemberService;
+import kr.ac.koreatech.sw.kosp.domain.admin.member.service.AdminMemberService;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor

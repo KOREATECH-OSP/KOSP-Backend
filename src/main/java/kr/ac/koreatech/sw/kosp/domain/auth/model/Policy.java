@@ -44,6 +44,14 @@ public class Policy extends BaseEntity {
     @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
 
+    @ManyToMany(mappedBy = "policies")
+    @Builder.Default
+    private Set<Role> roles = new HashSet<>();
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
+
     public void updatePermissions(Set<Permission> newPermissions) {
         this.permissions.clear();
         this.permissions.addAll(newPermissions);

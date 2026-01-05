@@ -26,7 +26,6 @@ import kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service.OAuth2UserService;
 import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
 import kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.auth.core.AuthToken;
 import kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory;
@@ -83,6 +82,40 @@ public class AuthService {
 
         AuthToken<Claims> newToken = signupTokenProvider.createSignupToken(subject, newClaims);
         return ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) newToken).getToken();
+    }
+
+    /**
+     * 회원가입 토큰 검증
+     * 프론트엔드에서 회원가입 폼 진입 전 토큰의 유효성을 확인
+     */
+    public void validateSignupToken(String token) {
+        AuthToken<Claims> authToken = signupTokenProvider.parseSignupToken(token);
+        if (!authToken.validate()) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
+
+        Claims claims = authToken.getData();
+        String category = claims.get("category", String.class);
+        if (!kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory.SIGNUP.getValue().equals(category)) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
+    }
+
+    /**
+     * 로그인 토큰 검증
+     * Access Token의 유효성을 확인
+     */
+    public void validateLoginToken(String token) {
+        AuthToken<Claims> authToken = loginTokenProvider.convertAuthToken(token);
+        if (!authToken.validate()) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
+
+        Claims claims = authToken.getData();
+        String category = claims.get("category", String.class);
+        if (!kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory.LOGIN.getValue().equals(category)) {
+            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
+        }
     }
 
     /**

@@ -43,4 +43,8 @@ public class Role extends BaseEntity {
     )
     @Builder.Default
     private Set<Policy> policies = new HashSet<>();
+
+    public void updateDescription(String description) {
+        this.description = description;
+    }
 }

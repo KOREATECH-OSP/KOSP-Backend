@@ -1,6 +1,10 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.service;
+package kr.ac.koreatech.sw.kosp.domain.admin.report.service;
 
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.request.ReportProcessRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.report.dto.response.ReportResponse;
 import kr.ac.koreatech.sw.kosp.domain.report.model.Report;
@@ -10,8 +14,6 @@ import kr.ac.koreatech.sw.kosp.domain.report.repository.ReportRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AdminReportService {
 
     private final ReportRepository reportRepository;
-    private final AdminContentService adminContentService;
+    private final kr.ac.koreatech.sw.kosp.domain.admin.content.service.AdminContentService adminContentService;
 
     public List<ReportResponse> getAllReports() {
         return reportRepository.findAll()
