@@ -1,5 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Permission;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Policy;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
@@ -8,8 +11,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -19,11 +20,11 @@ public class PermissionService {
     private final UserRepository userRepository;
 
     public boolean hasPermission(Long userId, String permissionName) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdWithRolesAndPermissions(userId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
 
         // Traverse: User -> Role -> Policy -> Permission
-        // Since we are in @Transactional, Lazy Loading is safe.
+        // All associations are eagerly fetched via JOIN FETCH
         for (Role role : user.getRoles()) {
             for (Policy policy : role.getPolicies()) {
                 for (Permission permission : policy.getPermissions()) {

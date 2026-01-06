@@ -1,10 +1,33 @@
+encryption:
+  password: testtesttesttesttesttesttesttesttesttesttest=
+  salt: 1234567890abcdef1234567890abcdef
+
+aws:
+  access-key: TESTKEY
+  secret-key: TESTSECRET
+  region: ap-northeast-2
+  s3:
+    bucket: test-kosp
+
+jwt:
+  secret-key: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
+  expiration-time:
+    access-token: 600000 # (ms) = 10 mins
+    refresh-token: 2592000000 # (ms) = 30 days
+    signup-token: 1800000 # (ms) = 30 mins
+
+cors:
+  allowed-origins:
+    - "*"
+
 spring:
-  datasource:
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+  web:
+    resources:
+      add-mappings: false
+  flyway:
+    enabled: false
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: create-drop
     properties:
@@ -12,36 +35,94 @@ spring:
         format_sql: true
         show_sql: true
         dialect: org.hibernate.dialect.H2Dialect
+  thymeleaf:
+    prefix: "classpath:/mail/"
+    suffix: ".html"
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   batch:
     jdbc:
       initialize-schema: embedded
+      table-prefix: kosp_batch.BATCH_
     job:
       enabled: false
-  flyway:
-    enabled: false
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-name: Github
+            authorization-grant-type: authorization_code
+            scope: read:user, user:email, repo
+            client-id: TESTCLIENTID
+            client-secret: TESTCLIENTSECRET
   main:
     allow-bean-definition-overriding: true
+
   data:
+    redis:
+      port: 6379
+      host: localhost
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: 2000ms
     mongodb:
       host: localhost
       port: 27017
       database: kosp_test
+      # No username/password for test environment
+      auto-index-creation: false
+      uuid-representation: standard
+
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+server:
+  tomcat:
+    max-http-form-post-size: 10MB
+  #  MockMvc이용하면 한글 깨지는 문제 해결하는 설정
+  servlet:
+    encoding:
+      force-response: true
 
 logging:
   level:
-    org.springframework.web: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.springframework.batch: DEBUG
-
-jwt:
-  secret-key: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
+    org:
+      springframework:
+        web: DEBUG
+        transaction: DEBUG  # 스프링 트랜잭션 관련 로그 출력
+        orm.jpa.JpaTransactionManager: DEBUG
+        security: DEBUG
+        batch: DEBUG
+      hibernate:
+        SQL: DEBUG
+        engine:
+          transaction:
+            internal: DEBUG  # Hibernate 트랜잭션 로그 상세 출력
+        type:
+          descriptor:
+            sql: trace
 
 github:
   api:
     base-url: https://api.github.com
     graphql-url: https://api.github.com/graphql
     rate-limit:
-      threshold: 100
+      threshold: 100  # API 호출 여유분
+  collection:
+    worker:
+      enabled: false  # Disable worker in tests
+      poll-interval: 1000  # Poll every 1 second
+      max-retry: 3  # Maximum retry attempts
+    batch-size: 100  # Documents per batch for MongoDB insert
 
 # Test-specific configuration
 test:
