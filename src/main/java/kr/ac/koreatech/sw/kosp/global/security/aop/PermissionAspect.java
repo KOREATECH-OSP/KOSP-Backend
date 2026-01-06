@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.global.security.aop;
 
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
+
 import kr.ac.koreatech.sw.kosp.domain.auth.service.PermissionService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -7,12 +14,6 @@ import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Aspect
@@ -38,6 +39,15 @@ public class PermissionAspect {
         if (!(principal instanceof User user)) {
             // Should not happen if authenticated properly with our User model
             throw new GlobalException(ExceptionMessage.AUTHENTICATION);
+        }
+
+        // SUPERUSER 체크: ROLE_SUPERUSER는 모든 권한 보유
+        boolean isSuperuser = user.getRoles().stream()
+            .anyMatch(role -> "ROLE_SUPERUSER".equals(role.getName()));
+        
+        if (isSuperuser) {
+            log.debug("SUPERUSER access granted for: {}", permit.name());
+            return;
         }
 
         if (permit.name().isEmpty()) {
