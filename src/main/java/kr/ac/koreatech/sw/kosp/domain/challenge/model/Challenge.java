@@ -28,7 +28,7 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(name = "`condition`", nullable = false, columnDefinition = "TEXT")
     private String condition; // SpEL expression
 
     @Column(nullable = false)
