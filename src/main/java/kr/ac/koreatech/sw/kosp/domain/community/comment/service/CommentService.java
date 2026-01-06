@@ -1,5 +1,13 @@
 package kr.ac.koreatech.sw.kosp.domain.community.comment.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.comment.dto.request.CommentCreateRequest;
@@ -14,13 +22,6 @@ import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +40,13 @@ public class CommentService {
             .article(article)
             .content(req.content())
             .build();
-        return commentRepository.save(comment).getId();
+        commentRepository.save(comment);
+        
+        // Increment article comment count
+        article.incrementCommentsCount();
+        articleRepository.save(article);
+        
+        return comment.getId();
     }
 
     @Transactional
@@ -48,6 +55,12 @@ public class CommentService {
         if (!comment.getAuthor().getId().equals(user.getId())) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
+        
+        // Decrement article comment count
+        Article article = comment.getArticle();
+        article.decrementCommentsCount();
+        articleRepository.save(article);
+        
         commentRepository.delete(comment);
     }
 

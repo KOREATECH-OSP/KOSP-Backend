@@ -37,22 +37,27 @@ public class GithubDataCollectionRetryService {
     @Async
     public void collectWithRetry(String githubLogin, String encryptedToken) {
         try {
-            // encryptedToken is actually plain text (decrypted by @Convert)
-            // Re-encrypt before storing in Redis
-            String reEncryptedToken = textEncryptor.encrypt(encryptedToken);
+            log.info("collectWithRetry called for user: {}", githubLogin);
             
-            // Enqueue user collection jobs with re-encrypted token
-            jobProducer.enqueueUserCollection(githubLogin, reEncryptedToken);
+            // Token from DB is already decrypted by @Convert (plain text)
+            // Encrypt it before storing in Redis for security
+            String plainToken = encryptedToken;
+            String encryptedForRedis = textEncryptor.encrypt(plainToken);
             
-            // Get repository list (use plain text token for API call)
-            List<Map<String, Object>> repositories = getRepositoryList(githubLogin, encryptedToken);
+            log.debug("Encrypted token for Redis storage (user: {})", githubLogin);
+            
+            // Enqueue user collection jobs with encrypted token
+            jobProducer.enqueueUserCollection(githubLogin, encryptedForRedis);
+            
+            // Get repository list (use plain text token for GitHub API call)
+            List<Map<String, Object>> repositories = getRepositoryList(githubLogin, plainToken);
             
             for (Map<String, Object> repository : repositories) {
                 String repoOwner = extractOwner(repository);
                 String repoName = extractName(repository);
                 
                 if (repoOwner != null && repoName != null) {
-                    jobProducer.enqueueRepositoryCollection(repoOwner, repoName, reEncryptedToken);
+                    jobProducer.enqueueRepositoryCollection(repoOwner, repoName, encryptedForRedis);
                 }
             }
             
