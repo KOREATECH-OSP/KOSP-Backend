@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.github.queue.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -99,9 +100,28 @@ public class CollectionCompletionTracker {
      */
     private void triggerStatisticsCalculation(String githubLogin) {
         try {
-            log.info("All collection jobs completed for user: {}, triggering statistics calculation", githubLogin);
+            log.info("========================================");
+            log.info("All collection jobs completed for user: {}", githubLogin);
+            
+            // Check for failed jobs
+            Long failedCount = jobRedisTemplate.opsForList().size("github:collection:failed");
+            if (failedCount != null && failedCount > 0) {
+                log.warn("Found {} failed jobs in failed queue", failedCount);
+                // Log failed jobs for this user
+                List<CollectionJob> failedJobs = jobRedisTemplate.opsForList()
+                    .range("github:collection:failed", 0, -1);
+                if (failedJobs != null) {
+                    failedJobs.stream()
+                        .filter(job -> githubLogin.equals(job.getGithubLogin()))
+                        .forEach(job -> log.warn("Failed job: {} - Type: {} - Error: {}", 
+                            job.getJobId(), job.getType(), job.getLastError()));
+                }
+            }
+            
+            log.info("Triggering statistics calculation for user: {}", githubLogin);
             statisticsService.calculateAndSaveAllStatistics(githubLogin);
-            log.info("Statistics calculation completed for user: {}", githubLogin);
+            log.info("Statistics calculation completed successfully for user: {}", githubLogin);
+            log.info("========================================");
         } catch (Exception e) {
             log.error("Failed to calculate statistics for user: {}", githubLogin, e);
         }
