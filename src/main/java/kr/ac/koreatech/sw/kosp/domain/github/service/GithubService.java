@@ -24,10 +24,9 @@ public class GithubService {
         log.info("Manual update requested for user {}, but batch job handles syncing.", userId);
     }
 
-    public kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse getAnalysis(String username) {
-        kr.ac.koreatech.sw.kosp.domain.user.model.User user = userRepository.findByGithubUser_GithubLogin(username)
-            .orElseThrow(() -> new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(
-                kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.USER_NOT_FOUND));
+    @Transactional(readOnly = true)
+    public kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse getAnalysis(Long userId) {
+        kr.ac.koreatech.sw.kosp.domain.user.model.User user = userRepository.getById(userId);
 
         if (user.getGithubUser() == null) {
             throw new kr.ac.koreatech.sw.kosp.global.exception.GlobalException(

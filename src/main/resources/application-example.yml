@@ -2,19 +2,19 @@ encryption:
   password: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
   salt: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
-jwt:
-  secret-key: EXAMPLE7A3E4F37B3DAD9CD8KEY6AA4B1AF7123!@#
-  expiration-time:
-    access-token: 600000 # (ms) = 10 mins
-    refresh-token: 2592000000 # (ms) = 30 days
-    signup-token: 1800000 # (ms) = 30 mins
-
 aws:
   access-key: AAAAAAAAAAAAAAAAAAAA
   secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
   region: ap-northeast-2
   s3:
     bucket: dev-kosp
+
+jwt:
+  secret-key: EXAMPLE7A3E4F37B3DAD9CD8KEY6AA4B1AF7123!@#
+  expiration-time:
+    access-token: 600000 # (ms) = 10 mins
+    refresh-token: 2592000000 # (ms) = 30 days
+    signup-token: 1800000 # (ms) = 30 mins
 
 cors:
   allowed-origins:
@@ -64,11 +64,18 @@ spring:
     redis:
       port: 6379
       host: localhost
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: 2000ms
     mongodb:
       host: localhost
       port: 27017
       database: kosp
       auto-index-creation: false
+      uuid-representation: standard
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -105,3 +112,9 @@ github:
     graphql-url: https://api.github.com/graphql
     rate-limit:
       threshold: 100  # API 호출 여유분
+  collection:
+    worker:
+      enabled: true
+      poll-interval: 1000  # Poll every 1 second
+      max-retry: 3  # Maximum retry attempts
+    batch-size: 100  # Documents per batch for MongoDB insert
