@@ -49,6 +49,7 @@ public class LoginTokenProvider extends JwtAuthTokenProvider {
      * Refresh Token 생성 및 Redis 저장 (JWS)
      */
     public AuthToken<Claims> createRefreshToken(User user) {
+        log.info("🔄 Creating RefreshToken for user ID: {}", user.getId());
         Map<String, Object> claims = Map.of(
             "category", AuthTokenCategory.LOGIN.getValue()
         );

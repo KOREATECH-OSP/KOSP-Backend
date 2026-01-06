@@ -86,7 +86,8 @@ public class GithubCollectionWorker {
         try {
             log.info("Processing job: {} (type: {})", job.getJobId(), job.getType());
             
-            // Token from Redis is encrypted - decrypt it for GitHub API calls
+            // Token from Redis is 1x encrypted (from DB's 2x → 1x after @Convert)
+            // Decrypt it to get plain text for GitHub API calls
             String encryptedToken = job.getEncryptedToken();
             
             if (encryptedToken == null || encryptedToken.isEmpty()) {
