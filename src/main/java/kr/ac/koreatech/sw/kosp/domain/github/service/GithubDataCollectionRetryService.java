@@ -29,22 +29,36 @@ public class GithubDataCollectionRetryService {
     private final GithubRestApiClient restApiClient;
     private final TextEncryptor textEncryptor;
     private final MongoGithubCollectionMetadataRepository metadataRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.github.queue.service.CollectionJobProducer jobProducer;
 
     /**
-     * 데이터 수집 (Event Listener용)
-     * Batch에서는 DataCollectionJobConfig의 retry 설정을 사용
+     * 데이터 수집 (Event Listener용) - Redis Queue 사용
      */
     @Async
     public void collectWithRetry(String githubLogin, String encryptedToken) {
-        String token = textEncryptor.decrypt(encryptedToken);
-        
         try {
-            waitIfRateLimitLow(githubLogin, token);
-            collectAllData(githubLogin, token);
-            statisticsService.calculateAndSaveAllStatistics(githubLogin);
-            log.info("Successfully collected data for user: {}", githubLogin);
+            // encryptedToken is actually plain text (decrypted by @Convert)
+            // Re-encrypt before storing in Redis
+            String reEncryptedToken = textEncryptor.encrypt(encryptedToken);
+            
+            // Enqueue user collection jobs with re-encrypted token
+            jobProducer.enqueueUserCollection(githubLogin, reEncryptedToken);
+            
+            // Get repository list (use plain text token for API call)
+            List<Map<String, Object>> repositories = getRepositoryList(githubLogin, encryptedToken);
+            
+            for (Map<String, Object> repository : repositories) {
+                String repoOwner = extractOwner(repository);
+                String repoName = extractName(repository);
+                
+                if (repoOwner != null && repoName != null) {
+                    jobProducer.enqueueRepositoryCollection(repoOwner, repoName, reEncryptedToken);
+                }
+            }
+            
+            log.info("Enqueued collection jobs for user: {}", githubLogin);
         } catch (Exception exception) {
-            log.error("Failed to collect data for user: {}", githubLogin, exception);
+            log.error("Failed to enqueue collection jobs for user: {}", githubLogin, exception);
         }
     }
 
