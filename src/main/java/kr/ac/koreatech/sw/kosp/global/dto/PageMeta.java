@@ -8,6 +8,6 @@ public record PageMeta(
     Long totalItems
 ) {
     public static PageMeta from(Page<?> page) {
-        return new PageMeta(page.getNumber() + 1, page.getTotalPages(), page.getTotalElements());
+        return new PageMeta(page.getNumber(), page.getTotalPages(), page.getTotalElements());
     }
 }
