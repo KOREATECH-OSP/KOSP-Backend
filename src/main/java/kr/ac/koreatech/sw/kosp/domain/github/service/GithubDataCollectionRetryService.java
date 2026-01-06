@@ -37,31 +37,38 @@ public class GithubDataCollectionRetryService {
     @Async
     public void collectWithRetry(String githubLogin, String encryptedToken) {
         try {
-            log.info("collectWithRetry called for user: {}", githubLogin);
+            log.info("📥 collectWithRetry called for user: {}", githubLogin);
             
-            // Token from DB is already decrypted by @Convert (plain text)
-            // Encrypt it before storing in Redis for security
-            String plainToken = encryptedToken;
-            String encryptedForRedis = textEncryptor.encrypt(plainToken);
+            // Token from DB is 1x encrypted (DB's 2x → @Convert decrypts once → 1x)
+            // Store it as-is in Redis (still 1x encrypted)
+            // Worker will decrypt it before GitHub API call
             
-            log.debug("Encrypted token for Redis storage (user: {})", githubLogin);
+            // Enqueue user collection jobs with 1x encrypted token
+            jobProducer.enqueueUserCollection(githubLogin, encryptedToken);
             
-            // Enqueue user collection jobs with encrypted token
-            jobProducer.enqueueUserCollection(githubLogin, encryptedForRedis);
+            // For GitHub API call here, we need to decrypt first
+            String plainToken = textEncryptor.decrypt(encryptedToken);
             
             // Get repository list (use plain text token for GitHub API call)
-            List<Map<String, Object>> repositories = getRepositoryList(githubLogin, plainToken);
-            
-            for (Map<String, Object> repository : repositories) {
-                String repoOwner = extractOwner(repository);
-                String repoName = extractName(repository);
+            // Wrap in try-catch to prevent failure from stopping the entire process
+            try {
+                List<Map<String, Object>> repositories = getRepositoryList(githubLogin, plainToken);
                 
-                if (repoOwner != null && repoName != null) {
-                    jobProducer.enqueueRepositoryCollection(repoOwner, repoName, encryptedForRedis);
+                for (Map<String, Object> repository : repositories) {
+                    String repoOwner = extractOwner(repository);
+                    String repoName = extractName(repository);
+                    
+                    if (repoOwner != null && repoName != null) {
+                        jobProducer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
+                    }
                 }
+            } catch (Exception e) {
+                log.error("Failed to get repository list for user: {}, but user collection jobs are already enqueued", 
+                    githubLogin, e);
+                // Continue - user basic info and events will still be collected
             }
             
-            log.info("Enqueued collection jobs for user: {}", githubLogin);
+            log.info("✅ Enqueued collection jobs for user: {}", githubLogin);
         } catch (Exception exception) {
             log.error("Failed to enqueue collection jobs for user: {}", githubLogin, exception);
         }
