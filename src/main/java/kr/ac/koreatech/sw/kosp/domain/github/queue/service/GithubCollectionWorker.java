@@ -176,6 +176,12 @@ public class GithubCollectionWorker {
             log.error("Job {} failed permanently after {} retries: {}", 
                 job.getJobId(), job.getRetryCount(), e.getMessage());
             redisTemplate.opsForList().rightPush(FAILED_KEY, job);
+            
+            // Notify completion tracker even for failed jobs
+            // This ensures statistics calculation is triggered when all jobs complete
+            if (job.getGithubLogin() != null) {
+                completionTracker.decrementJobCount(job.getGithubLogin());
+            }
         }
     }
 }
