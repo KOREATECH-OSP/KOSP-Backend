@@ -1,12 +1,16 @@
 package kr.ac.koreatech.sw.kosp.domain.user.repository;
 
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.query.Param;
+
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.PagingAndSortingRepository;
 
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 
@@ -15,6 +19,13 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Page<User> findAll(Pageable pageable);
 
     Optional<User> findById(Long id);
+
+    @Query("SELECT DISTINCT u FROM User u " +
+           "LEFT JOIN FETCH u.roles r " +
+           "LEFT JOIN FETCH r.policies p " +
+           "LEFT JOIN FETCH p.permissions " +
+           "WHERE u.id = :userId")
+    Optional<User> findByIdWithRolesAndPermissions(@Param("userId") Long userId);
 
     Optional<User> findByKutEmail(String kutEmail);
     boolean existsByKutEmail(String kutEmail);

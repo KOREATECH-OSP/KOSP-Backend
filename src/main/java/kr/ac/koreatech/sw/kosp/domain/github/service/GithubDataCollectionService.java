@@ -9,8 +9,6 @@ import org.springframework.stereotype.Service;
 import kr.ac.koreatech.sw.kosp.domain.github.client.graphql.GithubGraphQLClient;
 import kr.ac.koreatech.sw.kosp.domain.github.client.rest.GithubRestApiClient;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCommitDetailRaw;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubIssuesRaw;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubPRsRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserBasicRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserEventsRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitDetailRawRepository;
@@ -35,6 +33,11 @@ public class GithubDataCollectionService {
     private final GithubIssuesRawRepository issuesRawRepository;
     private final GithubPRsRawRepository prsRawRepository;
     private final MongoGithubUserEventsRawRepository eventsRawRepository;
+    
+    // New individual document repositories
+    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubIssueRawRepository issueRawRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubPRRawRepository prRawRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitRawRepository commitRawRepository;
 
     /**
      * 사용자 기본 정보 수집 (GraphQL Pagination)
@@ -157,9 +160,9 @@ public class GithubDataCollectionService {
     }
 
     /**
-     * 레포지토리 이슈 수집 (REST API Pagination)
+     * 레포지토리 이슈 수집 (개별 문서 저장)
      */
-    public Mono<GithubIssuesRaw> collectIssues(
+    public Mono<Long> collectIssues(
         String repoOwner,
         String repoName,
         String token
@@ -167,28 +170,33 @@ public class GithubDataCollectionService {
         String uri = String.format("/repos/%s/%s/issues?state=all", repoOwner, repoName);
         
         return restApiClient.getAllWithPagination(uri, token, Map.class)
-            .map(rawIssues -> {
+            .flatMapMany(rawIssues -> {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> issues = (List<Map<String, Object>>) (List<?>) rawIssues;
                 
-                GithubIssuesRaw raw = GithubIssuesRaw.create(
-                    repoOwner,
-                    repoName,
-                    issues
-                );
-                
-                return issuesRawRepository.save(raw);
+                return reactor.core.publisher.Flux.fromIterable(issues)
+                    .map(issueData -> {
+                        Integer issueNumber = (Integer) issueData.get("number");
+                        return kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubIssueRaw.create(
+                            repoOwner,
+                            repoName,
+                            issueNumber,
+                            issueData
+                        );
+                    });
             })
-            .doOnSuccess(saved -> log.info("Collected {} issues for {}/{}", 
-                saved.getIssues().size(), repoOwner, repoName))
+            .buffer(100) // Batch save 100 at a time
+            .flatMap(batch -> issueRawRepository.saveAll(batch).collectList())
+            .count()
+            .doOnSuccess(count -> log.info("Collected {} issues for {}/{}", count, repoOwner, repoName))
             .doOnError(error -> log.error("Failed to collect issues for {}/{}: {}", 
                 repoOwner, repoName, error.getMessage()));
     }
 
     /**
-     * 레포지토리 PR 수집 (REST API Pagination)
+     * 레포지토리 PR 수집 (개별 문서 저장)
      */
-    public Mono<GithubPRsRaw> collectPullRequests(
+    public Mono<Long> collectPullRequests(
         String repoOwner,
         String repoName,
         String token
@@ -196,20 +204,25 @@ public class GithubDataCollectionService {
         String uri = String.format("/repos/%s/%s/pulls?state=all", repoOwner, repoName);
         
         return restApiClient.getAllWithPagination(uri, token, Map.class)
-            .map(rawPrs -> {
+            .flatMapMany(rawPrs -> {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> prs = (List<Map<String, Object>>) (List<?>) rawPrs;
                 
-                GithubPRsRaw raw = GithubPRsRaw.create(
-                    repoOwner,
-                    repoName,
-                    prs
-                );
-                
-                return prsRawRepository.save(raw);
+                return reactor.core.publisher.Flux.fromIterable(prs)
+                    .map(prData -> {
+                        Integer prNumber = (Integer) prData.get("number");
+                        return kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubPRRaw.create(
+                            repoOwner,
+                            repoName,
+                            prNumber,
+                            prData
+                        );
+                    });
             })
-            .doOnSuccess(saved -> log.info("Collected {} PRs for {}/{}", 
-                saved.getPullRequests().size(), repoOwner, repoName))
+            .buffer(100) // Batch save 100 at a time
+            .flatMap(batch -> prRawRepository.saveAll(batch).collectList())
+            .count()
+            .doOnSuccess(count -> log.info("Collected {} PRs for {}/{}", count, repoOwner, repoName))
             .doOnError(error -> log.error("Failed to collect PRs for {}/{}: {}", 
                 repoOwner, repoName, error.getMessage()));
     }
