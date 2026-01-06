@@ -89,6 +89,7 @@ public class UserService {
             user.reactivate(); 
             user.changePassword(request.password(), passwordEncoder);
             user.updateGithubUser(githubUser);
+            userRepository.save(user); // 복구 상태 저장 ✅
         } else {
             // 신규 생성
             user = User.builder()

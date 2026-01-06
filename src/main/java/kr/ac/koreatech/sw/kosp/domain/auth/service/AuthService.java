@@ -153,10 +153,12 @@ public class AuthService {
      * 일반 로그인 (이메일 + 비밀번호)
      */
     public AuthTokenResponse login(LoginRequest request) {
+        log.info("🔐 Login attempt for email: {}", request.email());
         Authentication authentication = authenticate(request.email(), request.password());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = (User) authentication.getPrincipal();
+        log.info("✅ Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 
@@ -194,6 +196,7 @@ public class AuthService {
      * User Entity 기반으로 토큰 생성
      */
     public AuthTokenResponse createTokensForUser(User user) {
+        log.info("🎫 Creating tokens for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 
