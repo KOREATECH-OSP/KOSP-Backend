@@ -1,9 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.oauth2.service;
 
-import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.IS_REGISTERED_ATTR;
-import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.IS_REREGISTRATION_ATTR;
-import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.NEEDS_ADDITIONAL_INFO_ATTR;
-import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.USER_ATTR;
+import static kr.ac.koreatech.sw.kosp.global.constants.AuthConstants.*;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -22,6 +19,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -87,7 +85,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private Map<String, Object> buildExistingUserAttributes(Map<String, Object> attributes, User user) {
         if (user.isDeleted()) {
-            return buildReregistrationAttributes(attributes, user);
+            throw new OAuth2AuthenticationException(ExceptionMessage.AUTHENTICATION.getMessage());
         }
         return buildLoginAttributes(attributes, user);
     }

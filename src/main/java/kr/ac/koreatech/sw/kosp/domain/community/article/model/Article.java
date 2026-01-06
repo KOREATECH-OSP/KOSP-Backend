@@ -122,4 +122,14 @@ public class Article extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
     }
+
+    public void incrementCommentsCount() {
+        this.commentsCount++;
+    }
+
+    public void decrementCommentsCount() {
+        if (this.commentsCount > 0) {
+            this.commentsCount--;
+        }
+    }
 }
