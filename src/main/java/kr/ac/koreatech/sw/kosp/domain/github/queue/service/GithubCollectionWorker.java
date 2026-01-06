@@ -86,18 +86,23 @@ public class GithubCollectionWorker {
         try {
             log.info("Processing job: {} (type: {})", job.getJobId(), job.getType());
             
-            // Decrypt token from Redis (was re-encrypted before storing)
-            String token = textEncryptor.decrypt(job.getEncryptedToken());
+            // Token from Redis is encrypted - decrypt it for GitHub API calls
+            String encryptedToken = job.getEncryptedToken();
             
-            log.debug("Decrypted token for job: {}", job.getJobId());
+            if (encryptedToken == null || encryptedToken.isEmpty()) {
+                log.error("Encrypted token is null or empty for job: {}", job.getJobId());
+                throw new IllegalStateException("GitHub token is required");
+            }
             
-            // Debug: Check token format
-            if (token != null) {
-                log.debug("Token length: {}, starts with: {}", 
-                    token.length(), 
-                    token.length() > 10 ? token.substring(0, 10) + "..." : token);
-            } else {
-                log.error("Token is null for job: {}", job.getJobId());
+            String token = textEncryptor.decrypt(encryptedToken);
+            
+            log.debug("Decrypted token for job: {} (length: {})", 
+                job.getJobId(), 
+                token != null ? token.length() : 0);
+            
+            if (token == null || token.isEmpty()) {
+                log.error("Decrypted token is null or empty for job: {}", job.getJobId());
+                throw new IllegalStateException("Failed to decrypt GitHub token");
             }
             
             switch (job.getType()) {

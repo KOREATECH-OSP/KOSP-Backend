@@ -40,6 +40,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByKutEmail(username)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
         
+        // 탈퇴한 계정 체크
+        if (user.isDeleted()) {
+            throw new GlobalException(ExceptionMessage.AUTHENTICATION);
+        }
+        
         user.setAuthorities(getAuthorities(user.getRoles()));
         return user;
     }
