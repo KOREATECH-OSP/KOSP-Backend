@@ -51,6 +51,24 @@ public class ChallengeService {
         return new AdminChallengeListResponse(challengeInfos);
     }
 
+    public kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeResponse getChallenge(Long challengeId) {
+        Challenge challenge = challengeRepository.findById(challengeId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        
+        return new kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeResponse(
+            challenge.getId(),
+            challenge.getName(),
+            challenge.getDescription(),
+            challenge.getCondition(),
+            challenge.getTier(),
+            challenge.getImageUrl(),
+            challenge.getPoint(),
+            challenge.getMaxProgress(),
+            challenge.getProgressField()
+        );
+    }
+
+
     @Transactional
     public void createChallenge(ChallengeRequest request) {
         validateSpelCondition(request.condition());

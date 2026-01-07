@@ -25,6 +25,14 @@ public class AdminChallengeController implements AdminChallengeApi {
     }
 
     @Override
+    @Permit(name = "admin:challenges:read", description = "챌린지 단일 조회")
+    public ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeResponse> getChallenge(Long challengeId) {
+        kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeResponse response = challengeService.getChallenge(challengeId);
+        return ResponseEntity.ok(response);
+    }
+
+
+    @Override
     @Permit(name = "admin:challenges:create", description = "챌린지 생성")
     public ResponseEntity<Void> createChallenge(ChallengeRequest request) {
         challengeService.createChallenge(request);

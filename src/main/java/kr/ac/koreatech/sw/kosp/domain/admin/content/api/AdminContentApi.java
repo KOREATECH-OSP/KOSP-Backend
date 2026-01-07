@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.content.api;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,12 +15,6 @@ import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 @Tag(name = "Admin - Content", description = "관리자 전용 콘텐츠 관리 API")
 @RequestMapping("/v1/admin")
@@ -36,4 +37,14 @@ public interface AdminContentApi {
         @Parameter(hidden = true) @AuthUser User user,
         @RequestBody @Valid NoticeCreateRequest request
     );
+
+    @Operation(summary = "공지사항 수정", description = "관리자 권한으로 공지사항을 수정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "공지사항을 찾을 수 없음")
+    @org.springframework.web.bind.annotation.PutMapping("/notices/{noticeId}")
+    ResponseEntity<Void> updateNotice(
+        @Parameter(description = "공지사항 ID") @PathVariable Long noticeId,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeUpdateRequest request
+    );
+
 }
