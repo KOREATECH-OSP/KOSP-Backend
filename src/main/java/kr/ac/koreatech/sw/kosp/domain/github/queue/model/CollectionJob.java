@@ -33,10 +33,45 @@ public class CollectionJob {
     
     // Timestamps
     private LocalDateTime createdAt;
-    private LocalDateTime scheduledAt;
+    private long scheduledAt;       // Unix timestamp in milliseconds (for priority queue)
     private LocalDateTime startedAt;
     private LocalDateTime completedAt;
     
     // Error tracking
     private String lastError;
+    
+    /**
+     * 지연 실행 스케줄링
+     */
+    public void scheduleAfter(long delayMillis) {
+        this.scheduledAt = System.currentTimeMillis() + delayMillis;
+    }
+    
+    /**
+     * 즉시 실행 스케줄링
+     */
+    public void scheduleNow() {
+        this.scheduledAt = System.currentTimeMillis();
+    }
+    
+    /**
+     * 특정 시간에 실행 스케줄링
+     */
+    public void scheduleAt(long timestamp) {
+        this.scheduledAt = timestamp;
+    }
+    
+    /**
+     * 실행 가능 여부 확인
+     */
+    public boolean isReadyToExecute() {
+        return System.currentTimeMillis() >= scheduledAt;
+    }
+    
+    /**
+     * 재시도 횟수 증가
+     */
+    public void incrementRetryCount() {
+        this.retryCount++;
+    }
 }
