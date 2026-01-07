@@ -32,7 +32,7 @@ class RedisQueueIntegrationTest {
     @Autowired
     private RedisTemplate<String, CollectionJob> redisTemplate;
     
-    private static final String QUEUE_KEY = "github:collection:queue";
+    private static final String PRIORITY_QUEUE_KEY = "github:collection:priority_queue";
     private static final String PROCESSING_KEY = "github:collection:processing";
     private static final String FAILED_KEY = "github:collection:failed";
     private static final String COMPLETED_KEY = "github:collection:completed";
@@ -40,7 +40,7 @@ class RedisQueueIntegrationTest {
     @BeforeEach
     void setUp() {
         // Clear all queues before each test
-        redisTemplate.delete(QUEUE_KEY);
+        redisTemplate.delete(PRIORITY_QUEUE_KEY);
         redisTemplate.delete(PROCESSING_KEY);
         redisTemplate.delete(FAILED_KEY);
         redisTemplate.delete(COMPLETED_KEY);
@@ -49,7 +49,7 @@ class RedisQueueIntegrationTest {
     @AfterEach
     void tearDown() {
         // Clean up after tests
-        redisTemplate.delete(QUEUE_KEY);
+        redisTemplate.delete(PRIORITY_QUEUE_KEY);
         redisTemplate.delete(PROCESSING_KEY);
         redisTemplate.delete(FAILED_KEY);
         redisTemplate.delete(COMPLETED_KEY);

@@ -60,4 +60,14 @@ public class AdminContentService {
 
         articleRepository.save(notice);
     }
+
+    @Transactional
+    public void updateNotice(Long noticeId, kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeUpdateRequest request) {
+        Article notice = articleRepository.findById(noticeId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.ARTICLE_NOT_FOUND));
+        
+        notice.updateArticle(request.title(), request.content(), request.isPinned(), request.tags());
+    }
+
+
 }
