@@ -19,7 +19,6 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -85,7 +84,8 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private Map<String, Object> buildExistingUserAttributes(Map<String, Object> attributes, User user) {
         if (user.isDeleted()) {
-            throw new OAuth2AuthenticationException(ExceptionMessage.AUTHENTICATION.getMessage());
+            // 탈퇴한 사용자는 재가입 가능하도록 새 사용자로 취급
+            return buildReregistrationAttributes(attributes, user);
         }
         return buildLoginAttributes(attributes, user);
     }
