@@ -30,11 +30,14 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Optional<User> findByKutEmail(String kutEmail);
     boolean existsByKutEmail(String kutEmail);
     boolean existsByKutId(String kutId);
+    boolean existsByKutIdAndIsDeletedFalse(String kutId);
     boolean existsByRoles_Name(String roleName);
 
     java.util.List<User> findByNameContaining(String keyword);
 
     Optional<User> findByGithubUser_GithubId(Long githubId);
+
+    Optional<User> findByGithubUser_GithubIdAndIsDeletedFalse(Long githubId);
     Optional<User> findByGithubUser_GithubLogin(String githubLogin);
 
     void deleteById(Long id);
