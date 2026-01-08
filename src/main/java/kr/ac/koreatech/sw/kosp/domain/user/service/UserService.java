@@ -148,8 +148,8 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public kr.ac.koreatech.sw.kosp.domain.auth.dto.response.CheckMemberIdResponse checkMemberIdAvailability(String memberId) {
-        // 1. 중복 확인
-        boolean exists = userRepository.existsByKutId(memberId);
+        // 중복 확인 (탈퇴한 사용자 제외)
+        boolean exists = userRepository.existsByKutIdAndIsDeletedFalse(memberId);
         
         // 10자리는 학번(STUDENT), 그 외는 사번(STAFF)으로 간주 (이미 DTO에서 포맷 검증됨)
         String label = (memberId.length() == 10) ? "학번" : "사번";

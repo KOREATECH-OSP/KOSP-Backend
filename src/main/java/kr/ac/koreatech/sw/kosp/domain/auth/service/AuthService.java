@@ -129,8 +129,8 @@ public class AuthService {
 
         Long githubId = extractGithubId(attributes);
 
-        // 이미 가입된 사용자인지 확인
-        if (userRepository.findByGithubUser_GithubId(githubId).isPresent()) {
+        // 이미 가입된 사용자인지 확인 (탈퇴한 사용자 제외)
+        if (userRepository.findByGithubUser_GithubIdAndIsDeletedFalse(githubId).isPresent()) {
             throw new GlobalException(ExceptionMessage.GITHUB_USER_ALREADY_EXISTS);
         }
 
