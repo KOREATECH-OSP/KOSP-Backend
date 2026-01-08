@@ -21,8 +21,8 @@ public class GithubWorkerConfig {
     @Bean(name = "githubWorkerExecutor")
     public Executor githubWorkerExecutor() {
         int processors = Runtime.getRuntime().availableProcessors();
-        int corePoolSize = Math.max(2, processors / 2);  // 최소 2개, 최대 CPU/2
-        int maxPoolSize = Math.max(4, processors);       // 최소 4개, 최대 CPU 코어 수
+        int corePoolSize = Math.max(1, processors / 2);  // 최소 1개, CPU/2 (1 core → 1 worker)
+        int maxPoolSize = Math.max(2, processors);       // 최소 2개, 최대 CPU 코어 수
         
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         executor.setCorePoolSize(corePoolSize);
