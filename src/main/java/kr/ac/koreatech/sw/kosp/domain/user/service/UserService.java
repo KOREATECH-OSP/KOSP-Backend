@@ -17,6 +17,8 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -32,41 +34,29 @@ public class UserService {
     private final GithubUserRepository githubUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
-    private final kr.ac.koreatech.sw.kosp.global.auth.provider.SignupTokenProvider signupTokenProvider;
     private final kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService authService;
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse signup(UserSignupRequest request) {
-        // 1. JWS 토큰 파싱 및 검증
-        kr.ac.koreatech.sw.kosp.global.auth.core.AuthToken<io.jsonwebtoken.Claims> authToken = signupTokenProvider.parseSignupToken(request.signupToken());
-        if (!authToken.validate()) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN); 
-        }
-
-        // 2. Claims 추출
-        io.jsonwebtoken.Claims claims = authToken.getData();
-        String category = claims.get("category", String.class);
-        if (!kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory.SIGNUP.getValue().equals(category)) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
+        // 1. SignupToken 파싱 및 검증
+        SignupToken token = JwtToken.from(SignupToken.class, request.signupToken());
         
-        // 3. Email Verified 확인
-        Boolean emailVerified = claims.get("emailVerified", Boolean.class);
-        if (emailVerified == null || !emailVerified) {
+        // 2. Email Verified 확인
+        if (!token.isEmailVerified()) {
             throw new GlobalException(ExceptionMessage.EMAIL_NOT_VERIFIED);
         }
 
-        String kutEmail = claims.get("kutEmail", String.class);
-        Long githubId = Long.valueOf(claims.getSubject());
-        String encryptedGithubToken = claims.get("encryptedGithubToken", String.class);
+        String kutEmail = token.getKutEmail();
+        Long githubId = Long.valueOf(token.getGithubId());
+        String encryptedGithubToken = token.getEncryptedGithubToken();
 
-        // 4. GitHub 정보 추출
-        String githubLogin = claims.get("login", String.class);
-        String githubName = claims.get("name", String.class);
-        String githubAvatarUrl = claims.get("avatar_url", String.class);
+        // 3. GitHub 정보 추출
+        String githubLogin = token.getLogin();
+        String githubName = token.getName();
+        String githubAvatarUrl = token.getAvatarUrl();
 
-        // 5. GithubUser 조회 또는 생성
+        // 4. GithubUser 조회 또는 생성
         GithubUser githubUser = githubUserRepository.findByGithubId(githubId)
             .orElseGet(() -> GithubUser.builder()
                 .githubId(githubId)
@@ -76,20 +66,18 @@ public class UserService {
         githubUser.updateProfile(githubLogin, githubName, githubAvatarUrl, encryptedGithubToken);
         githubUserRepository.save(githubUser);
 
-        // 6. 기존 유저 확인
+        // 5. 기존 유저 확인
         Optional<User> existingUser = userRepository.findByKutEmail(kutEmail);
+
+        if (existingUser.isPresent() && !existingUser.get().isDeleted()) {
+            throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
+        }
 
         User user;
         if (existingUser.isPresent()) {
             user = existingUser.get();
-            if (!user.isDeleted()) {
-                throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
-            }
-            // 탈퇴 계정 복구
             user.reactivate(); 
             user.changePassword(request.password(), passwordEncoder);
-            user.updateGithubUser(githubUser);
-            userRepository.save(user); // 복구 상태 저장 ✅
         } else {
             // 신규 생성
             user = User.builder()
@@ -100,9 +88,10 @@ public class UserService {
                 .build();
                 
             user.encodePassword(passwordEncoder);
-            user.updateGithubUser(githubUser);
-            userRepository.save(user); 
         }
+
+        user.updateGithubUser(githubUser);
+        userRepository.save(user);
 
         // 6. 기본 권한 할당
         Role role = roleRepository.findByName("ROLE_STUDENT")
@@ -112,7 +101,7 @@ public class UserService {
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
         
         // 7. GitHub 데이터 수집 이벤트 발행
-        if (githubUser != null && githubUser.getGithubLogin() != null) {
+        if (githubUser.getGithubLogin() != null) {
             eventPublisher.publishEvent(new UserSignupEvent(this, githubUser.getGithubLogin()));
             log.info("Published UserSignupEvent for GitHub user: {}", githubUser.getGithubLogin());
         }
