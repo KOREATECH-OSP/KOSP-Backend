@@ -1,14 +1,14 @@
 package kr.ac.koreatech.sw.kosp.domain.github.mongo.model;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Document(collection = "github_profiles")
@@ -38,7 +38,7 @@ public class GithubProfile {
 
     private LocalDateTime updatedAt;
 
-    private Analysis analysis; // Added field
+    private Analysis analysis; // Added value
 
     @Builder
     public GithubProfile(Long githubId, String bio, Integer tier, Integer followers, Integer following, List<String> achievements, Stats stats, Double score, Map<String, Object> extraData, Long totalAdditions, Long totalDeletions, Map<String, Long> languageStats, Analysis analysis) {
