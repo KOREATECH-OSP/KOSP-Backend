@@ -15,7 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CollectionJobMonitoringService {
     
-    private static final String QUEUE_KEY = "github:collection:queue";
+    private static final String PRIORITY_QUEUE_KEY = "github:collection:priority_queue";
     private static final String PROCESSING_KEY = "github:collection:processing";
     private static final String FAILED_KEY = "github:collection:failed";
     private static final String COMPLETED_KEY = "github:collection:completed";
@@ -32,7 +32,7 @@ public class CollectionJobMonitoringService {
      * 큐 통계 조회
      */
     public QueueStatsResponse getQueueStats() {
-        Long queueLength = redisTemplate.opsForList().size(QUEUE_KEY);
+        Long queueLength = redisTemplate.opsForZSet().zCard(PRIORITY_QUEUE_KEY);  // Sorted Set size
         Long processingCount = (long) redisTemplate.opsForHash().size(PROCESSING_KEY);
         Long failedCount = redisTemplate.opsForList().size(FAILED_KEY);
         Long completedCount = (long) redisTemplate.opsForHash().size(COMPLETED_KEY);
@@ -82,8 +82,9 @@ public class CollectionJobMonitoringService {
                 job.setRetryCount(0);
                 job.setLastError(null);
                 
-                // Re-queue
-                redisTemplate.opsForList().rightPush(QUEUE_KEY, job);
+                // Re-queue with immediate execution
+                job.scheduleNow();
+                redisTemplate.opsForZSet().add(PRIORITY_QUEUE_KEY, job, job.getScheduledAt());
                 
                 log.info("Retrying job: {}", jobId);
                 return;
@@ -107,8 +108,9 @@ public class CollectionJobMonitoringService {
             job.setRetryCount(0);
             job.setLastError(null);
             
-            // Re-queue
-            redisTemplate.opsForList().rightPush(QUEUE_KEY, job);
+            // Re-queue with immediate execution
+            job.scheduleNow();
+            redisTemplate.opsForZSet().add(PRIORITY_QUEUE_KEY, job, job.getScheduledAt());
         }
         
         log.info("Retrying {} failed jobs", failedJobs.size());

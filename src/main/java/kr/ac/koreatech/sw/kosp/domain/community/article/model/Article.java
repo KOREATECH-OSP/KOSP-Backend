@@ -105,6 +105,14 @@ public class Article extends BaseEntity {
         this.tags = tags;
     }
 
+    public void updateArticle(String title, String content, Boolean isPinned, List<String> tags) {
+        this.title = title;
+        this.content = content;
+        this.isPinned = isPinned;
+        this.tags = tags;
+    }
+
+
     public void increaseViews() {
         this.views++;
     }

@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserStatisticsRepo
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)  // Reset DB after each test
 @DisplayName("Step 1: 기반 구조 설정 테스트")
 class Step1InfrastructureTest {
 

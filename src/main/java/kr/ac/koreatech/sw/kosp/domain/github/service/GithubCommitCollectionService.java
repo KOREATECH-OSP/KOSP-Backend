@@ -19,6 +19,7 @@ public class GithubCommitCollectionService {
     private final GithubRestApiClient restApiClient;
     private final GithubDataCollectionService dataCollectionService;
     private final MongoGithubCollectionMetadataRepository metadataRepository;
+    private final FailureAnalyzer failureAnalyzer;
     
     /**
      * 레포지토리의 모든 커밋 수집 (개별 문서 저장)
@@ -28,19 +29,34 @@ public class GithubCommitCollectionService {
         String repoName,
         String token
     ) {
+        String context = String.format("%s/%s/commits", repoOwner, repoName);
+        
         return getCommitShaList(repoOwner, repoName, token)
             .flatMapMany(reactor.core.publisher.Flux::fromIterable)
             .flatMap(sha -> 
                 dataCollectionService.collectCommitDetail(repoOwner, repoName, sha, token)
+                    .map(commit -> 1)  // 새로 수집된 커밋
+                    .defaultIfEmpty(1)  // 이미 수집된 커밋도 카운트
                     .onErrorResume(e -> {
-                        log.warn("Failed to collect commit {}: {}", sha, e.getMessage());
-                        return Mono.empty();
-                    })
+                        // 실패 분석 및 기록
+                        var failureType = failureAnalyzer.classifyFailure((Exception) e);
+                        failureAnalyzer.recordFailure(context, failureType, (Exception) e);
+                        return Mono.just(0);  // 실패한 커밋은 카운트하지 않음
+                    }),
+                15  // 최대 15개 동시 처리 (GitHub secondary rate limit 회피)
             )
-            .count()
-            .doOnSuccess(count -> log.info("Collected {} commits for {}/{}", count, repoOwner, repoName))
-            .doOnError(error -> log.error("Failed to collect commits for {}/{}: {}", 
-                repoOwner, repoName, error.getMessage()));
+            .reduce(0L, (acc, val) -> acc + val)
+            .doOnSuccess(count -> {
+                log.info("Collected {} commits for {}/{}", count, repoOwner, repoName);
+                // 실패 통계 로깅
+                failureAnalyzer.logFailureStatistics(context);
+            })
+            .doOnError(error -> {
+                log.error("Failed to collect commits for {}/{}: {}", 
+                    repoOwner, repoName, error.getMessage());
+                var failureType = failureAnalyzer.classifyFailure((Exception) error);
+                failureAnalyzer.recordFailure(context, failureType, (Exception) error);
+            });
     }
     
     /**

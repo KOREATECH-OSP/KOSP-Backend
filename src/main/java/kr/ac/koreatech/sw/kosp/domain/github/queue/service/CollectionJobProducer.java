@@ -15,8 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class CollectionJobProducer {
     
-    private static final String QUEUE_KEY = "github:collection:queue";
-    private static final int DEFAULT_MAX_RETRIES = 3;
+    private static final String PRIORITY_QUEUE_KEY = "github:collection:priority_queue";
+    private static final int DEFAULT_MAX_RETRIES = 5;  // 3 → 5로 증가
     
     private final RedisTemplate<String, CollectionJob> redisTemplate;
     private final CollectionCompletionTracker completionTracker;
@@ -92,19 +92,64 @@ public class CollectionJobProducer {
             .maxRetries(DEFAULT_MAX_RETRIES)
             .build());
         
+        // Increment job count for this user (3 jobs per repository)
+        completionTracker.incrementJobCount(repoOwner, 3);
+        
         log.info("Enqueued repository collection jobs for: {}/{}", repoOwner, repoName);
     }
     
     /**
-     * 작업을 큐에 추가
+     * 즉시 실행 작업 추가
      */
-    private void enqueue(CollectionJob job) {
+    public void enqueue(CollectionJob job) {
+        enqueueWithDelay(job, 0);
+    }
+    
+    /**
+     * 지연 실행 작업 추가
+     */
+    public void enqueueWithDelay(CollectionJob job, long delayMillis) {
         job.setJobId(UUID.randomUUID().toString());
         job.setCreatedAt(LocalDateTime.now());
-        job.setScheduledAt(LocalDateTime.now());
         job.setRetryCount(0);
+        job.scheduleAfter(delayMillis);
         
-        redisTemplate.opsForList().rightPush(QUEUE_KEY, job);
-        log.debug("Enqueued job: {} (type: {}, priority: {})", job.getJobId(), job.getType(), job.getPriority());
+        // Redis Sorted Set에 추가 (Score = scheduledAt timestamp)
+        redisTemplate.opsForZSet().add(
+            PRIORITY_QUEUE_KEY,
+            job,
+            job.getScheduledAt()
+        );
+        
+        if (delayMillis > 0) {
+            log.debug("Enqueued job {} to execute in {} ms (type: {}, priority: {})",
+                job.getJobId(), delayMillis, job.getType(), job.getPriority());
+        } else {
+            log.debug("Enqueued job: {} (type: {}, priority: {})",
+                job.getJobId(), job.getType(), job.getPriority());
+        }
+    }
+    
+    /**
+     * Rate limit 리셋 후 실행 작업 추가
+     */
+    public void enqueueAfterRateLimitReset(CollectionJob job, long resetTime) {
+        long delayMillis = resetTime - System.currentTimeMillis();
+        
+        if (delayMillis < 0) {
+            delayMillis = 0;  // 이미 리셋됨
+        }
+        
+        job.scheduleAt(resetTime);
+        
+        redisTemplate.opsForZSet().add(
+            PRIORITY_QUEUE_KEY,
+            job,
+            resetTime
+        );
+        
+        log.info("Job {} scheduled after rate limit reset in {} minutes",
+            job.getJobId(),
+            delayMillis / 60000);
     }
 }

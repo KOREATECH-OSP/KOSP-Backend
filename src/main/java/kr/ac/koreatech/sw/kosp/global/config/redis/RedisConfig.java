@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
@@ -31,6 +31,9 @@ public class RedisConfig {
     @Value("${spring.data.redis.password:}") // 비밀번호 설정이 없으면 기본값을 빈 문자열로
     private String redisPassword;
 
+    @Value("${spring.data.redis.database:0}")  // 기본값 0 (production)
+    private int redisDatabase;
+
     public static final String SECURITY_REFRESH_CHANNEL = "security-refresh";
 
     @Bean
@@ -38,6 +41,7 @@ public class RedisConfig {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
         redisConfig.setHostName(redisHost);
         redisConfig.setPort(redisPort);
+        redisConfig.setDatabase(redisDatabase);  // Database 설정 추가
         if (redisPassword != null && !redisPassword.isEmpty()) {
             redisConfig.setPassword(redisPassword);
         }

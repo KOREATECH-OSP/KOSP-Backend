@@ -26,6 +26,15 @@ public interface AdminChallengeApi {
     @GetMapping
     ResponseEntity<AdminChallengeListResponse> getChallenges();
 
+    @Operation(summary = "챌린지 단일 조회", description = "관리자 권한으로 특정 챌린지의 상세 정보를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음")
+    @GetMapping("/{challengeId}")
+    ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.challenge.dto.AdminChallengeResponse> getChallenge(
+        @Parameter(description = "챌린지 ID") @PathVariable Long challengeId
+    );
+
+
     @Operation(summary = "챌린지 생성", description = "관리자 권한으로 새로운 챌린지를 생성합니다. (SpEL 조건식 검증 포함)")
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @PostMapping

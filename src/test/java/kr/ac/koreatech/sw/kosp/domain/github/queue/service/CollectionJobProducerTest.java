@@ -3,8 +3,6 @@ package kr.ac.koreatech.sw.kosp.domain.github.queue.service;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.time.LocalDateTime;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ZSetOperations;
 
 import kr.ac.koreatech.sw.kosp.domain.github.queue.model.CollectionJob;
 import kr.ac.koreatech.sw.kosp.domain.github.queue.model.CollectionJobType;
@@ -29,14 +27,14 @@ class CollectionJobProducerTest {
     private CollectionCompletionTracker completionTracker;
     
     @Mock
-    private ListOperations<String, CollectionJob> listOperations;
+    private ZSetOperations<String, CollectionJob> zSetOperations;
     
     @InjectMocks
     private CollectionJobProducer producer;
     
     @BeforeEach
     void setUp() {
-        when(redisTemplate.opsForList()).thenReturn(listOperations);
+        when(redisTemplate.opsForZSet()).thenReturn(zSetOperations);
     }
     
     @Test
@@ -50,7 +48,7 @@ class CollectionJobProducerTest {
         producer.enqueueUserCollection(githubLogin, encryptedToken);
         
         // then
-        verify(listOperations, times(2)).rightPush(eq("github:collection:queue"), any(CollectionJob.class));
+        verify(zSetOperations, times(2)).add(eq("github:collection:priority_queue"), any(CollectionJob.class), anyDouble());
         verify(completionTracker).trackUserJobs(githubLogin, 2);
     }
     
@@ -66,7 +64,7 @@ class CollectionJobProducerTest {
         producer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
         
         // then
-        verify(listOperations, times(3)).rightPush(eq("github:collection:queue"), any(CollectionJob.class));
+        verify(zSetOperations, times(3)).add(eq("github:collection:priority_queue"), any(CollectionJob.class), anyDouble());
     }
     
     @Test
@@ -80,31 +78,29 @@ class CollectionJobProducerTest {
         producer.enqueueUserCollection(githubLogin, encryptedToken);
         
         // then
-        verify(listOperations, times(2)).rightPush(eq("github:collection:queue"), argThat(job -> 
+        verify(zSetOperations, times(2)).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getJobId() != null && !job.getJobId().isEmpty()
-        ));
+        ), anyDouble());
     }
     
     @Test
-    @DisplayName("작업에 타임스탬프가 설정된다")
-    void jobHasTimestamp() {
+    @DisplayName("작업에 스케줄 타임스탬프가 설정된다")
+    void jobHasScheduledTimestamp() {
         // given
         String githubLogin = "testuser";
         String encryptedToken = "encrypted_token";
-        LocalDateTime before = LocalDateTime.now();
+        long before = System.currentTimeMillis();
         
         // when
         producer.enqueueUserCollection(githubLogin, encryptedToken);
         
-        LocalDateTime after = LocalDateTime.now();
+        long after = System.currentTimeMillis();
         
         // then
-        verify(listOperations, times(2)).rightPush(eq("github:collection:queue"), argThat(job -> {
-            LocalDateTime createdAt = job.getCreatedAt();
-            return createdAt != null && 
-                   !createdAt.isBefore(before) && 
-                   !createdAt.isAfter(after);
-        }));
+        verify(zSetOperations, times(2)).add(eq("github:collection:priority_queue"), argThat(job -> {
+            long scheduledAt = job.getScheduledAt();
+            return scheduledAt >= before && scheduledAt <= after;
+        }), anyDouble());
     }
     
     @Test
@@ -118,12 +114,12 @@ class CollectionJobProducerTest {
         producer.enqueueUserCollection(githubLogin, encryptedToken);
         
         // then
-        verify(listOperations).rightPush(eq("github:collection:queue"), argThat(job -> 
+        verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getType() == CollectionJobType.USER_BASIC && job.getPriority() == 1
-        ));
-        verify(listOperations).rightPush(eq("github:collection:queue"), argThat(job -> 
+        ), anyDouble());
+        verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getType() == CollectionJobType.USER_EVENTS && job.getPriority() == 2
-        ));
+        ), anyDouble());
     }
     
     @Test
@@ -138,14 +134,14 @@ class CollectionJobProducerTest {
         producer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
         
         // then
-        verify(listOperations).rightPush(eq("github:collection:queue"), argThat(job -> 
+        verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getType() == CollectionJobType.REPO_ISSUES && job.getPriority() == 3
-        ));
-        verify(listOperations).rightPush(eq("github:collection:queue"), argThat(job -> 
+        ), anyDouble());
+        verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getType() == CollectionJobType.REPO_PRS && job.getPriority() == 3
-        ));
-        verify(listOperations).rightPush(eq("github:collection:queue"), argThat(job -> 
+        ), anyDouble());
+        verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 
             job.getType() == CollectionJobType.REPO_COMMITS && job.getPriority() == 4
-        ));
+        ), anyDouble());
     }
 }
