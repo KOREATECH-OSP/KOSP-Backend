@@ -92,6 +92,9 @@ public class CollectionJobProducer {
             .maxRetries(DEFAULT_MAX_RETRIES)
             .build());
         
+        // Increment job count for this user (3 jobs per repository)
+        completionTracker.incrementJobCount(repoOwner, 3);
+        
         log.info("Enqueued repository collection jobs for: {}/{}", repoOwner, repoName);
     }
     

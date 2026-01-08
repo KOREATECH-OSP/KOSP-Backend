@@ -35,14 +35,17 @@ public class GithubCommitCollectionService {
             .flatMapMany(reactor.core.publisher.Flux::fromIterable)
             .flatMap(sha -> 
                 dataCollectionService.collectCommitDetail(repoOwner, repoName, sha, token)
+                    .map(commit -> 1)  // 새로 수집된 커밋
+                    .defaultIfEmpty(1)  // 이미 수집된 커밋도 카운트
                     .onErrorResume(e -> {
                         // 실패 분석 및 기록
                         var failureType = failureAnalyzer.classifyFailure((Exception) e);
                         failureAnalyzer.recordFailure(context, failureType, (Exception) e);
-                        return Mono.empty();
-                    })
+                        return Mono.just(0);  // 실패한 커밋은 카운트하지 않음
+                    }),
+                15  // 최대 15개 동시 처리 (GitHub secondary rate limit 회피)
             )
-            .count()
+            .reduce(0L, (acc, val) -> acc + val)
             .doOnSuccess(count -> {
                 log.info("Collected {} commits for {}/{}", count, repoOwner, repoName);
                 // 실패 통계 로깅

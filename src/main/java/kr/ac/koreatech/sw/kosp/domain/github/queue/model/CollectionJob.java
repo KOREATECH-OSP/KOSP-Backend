@@ -43,6 +43,7 @@ public class CollectionJob {
     /**
      * 지연 실행 스케줄링
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public void scheduleAfter(long delayMillis) {
         this.scheduledAt = System.currentTimeMillis() + delayMillis;
     }
@@ -50,6 +51,7 @@ public class CollectionJob {
     /**
      * 즉시 실행 스케줄링
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public void scheduleNow() {
         this.scheduledAt = System.currentTimeMillis();
     }
@@ -57,6 +59,7 @@ public class CollectionJob {
     /**
      * 특정 시간에 실행 스케줄링
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public void scheduleAt(long timestamp) {
         this.scheduledAt = timestamp;
     }
@@ -64,6 +67,7 @@ public class CollectionJob {
     /**
      * 실행 가능 여부 확인
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public boolean isReadyToExecute() {
         return System.currentTimeMillis() >= scheduledAt;
     }
@@ -71,6 +75,7 @@ public class CollectionJob {
     /**
      * 재시도 횟수 증가
      */
+    @com.fasterxml.jackson.annotation.JsonIgnore
     public void incrementRetryCount() {
         this.retryCount++;
     }
