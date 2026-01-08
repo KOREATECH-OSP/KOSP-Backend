@@ -40,6 +40,25 @@ public class CollectionCompletionTracker {
     }
     
     /**
+     * 작업 카운트 증가 (레포지토리 작업 추가 시)
+     */
+    public void incrementJobCount(String githubLogin, int additionalJobs) {
+        String key = USER_JOBS_KEY + githubLogin;
+        String currentCount = stringRedisTemplate.opsForValue().get(key);
+        
+        if (currentCount != null) {
+            int newCount = Integer.parseInt(currentCount) + additionalJobs;
+            stringRedisTemplate.opsForValue().set(key, String.valueOf(newCount));
+            log.debug("Incremented job count for {}: +{} (total: {})", githubLogin, additionalJobs, newCount);
+        } else {
+            // 초기 추적이 없으면 새로 생성
+            stringRedisTemplate.opsForValue().set(key, String.valueOf(additionalJobs));
+            processingUsers.add(githubLogin);
+            log.debug("Started tracking {} jobs for user: {}", additionalJobs, githubLogin);
+        }
+    }
+    
+    /**
      * 작업 완료 시 카운트 감소
      */
     public void decrementJobCount(String githubLogin) {
@@ -77,22 +96,19 @@ public class CollectionCompletionTracker {
      * 사용자의 모든 수집 작업이 완료되었는지 확인
      */
     private boolean isUserCollectionComplete(String githubLogin) {
-        // Check if there are any pending or processing jobs for this user
-        Long queueSize = jobRedisTemplate.opsForList().size(QUEUE_KEY);
-        if (queueSize == null || queueSize == 0) {
+        // Redis에 저장된 작업 카운트 확인
+        String key = USER_JOBS_KEY + githubLogin;
+        String countStr = stringRedisTemplate.opsForValue().get(key);
+        
+        // 카운트가 없으면 완료된 것으로 간주
+        if (countStr == null) {
             return true;
         }
         
-        // Check processing jobs
-        Set<Object> processingJobs = jobRedisTemplate.opsForHash().keys(PROCESSING_KEY);
-        for (Object jobIdObj : processingJobs) {
-            CollectionJob job = (CollectionJob) jobRedisTemplate.opsForHash().get(PROCESSING_KEY, jobIdObj);
-            if (job != null && githubLogin.equals(job.getGithubLogin())) {
-                return false;
-            }
-        }
+        int remainingJobs = Integer.parseInt(countStr);
+        log.debug("User {} has {} remaining jobs", githubLogin, remainingJobs);
         
-        return true;
+        return remainingJobs <= 0;
     }
     
     /**

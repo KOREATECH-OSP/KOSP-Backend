@@ -23,6 +23,7 @@ import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
 import reactor.util.retry.Retry;
 
 @Slf4j
@@ -36,8 +37,18 @@ public class GithubRestApiClient {
         @Value("${github.api.base-url}") String baseUrl,
         RateLimitManager rateLimitManager
     ) {
-        // Configure HttpClient with extended timeouts for large repositories
-        HttpClient httpClient = HttpClient.create()
+        // Configure connection pool to prevent connection exhaustion and reuse connections
+        ConnectionProvider connectionProvider = ConnectionProvider.builder("github-pool")
+            .maxConnections(60)  // Maximum concurrent connections
+            .pendingAcquireMaxCount(500)  // Queue size for waiting requests
+            .pendingAcquireTimeout(Duration.ofSeconds(60))
+            .maxIdleTime(Duration.ofSeconds(30))  // Keep connections alive
+            .maxLifeTime(Duration.ofMinutes(5))   // Max connection lifetime
+            .evictInBackground(Duration.ofSeconds(120))  // Cleanup interval
+            .build();
+        
+        // Configure HttpClient with connection pool and extended timeouts
+        HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000) // 60 seconds
             .responseTimeout(Duration.ofMinutes(5)) // 5 minutes for large repos
             .doOnConnected(conn -> conn
@@ -49,6 +60,7 @@ public class GithubRestApiClient {
             .clientConnector(new ReactorClientHttpConnector(httpClient))
             .defaultHeader(HttpHeaders.ACCEPT, "application/vnd.github+json")
             .defaultHeader("X-GitHub-Api-Version", "2022-11-28")
+            .defaultHeader(HttpHeaders.CONNECTION, "keep-alive")  // Keep connections alive
             .exchangeStrategies(ExchangeStrategies.builder()
                 .codecs(configurer -> configurer
                     .defaultCodecs()
@@ -75,8 +87,16 @@ public class GithubRestApiClient {
                         })
                 )
                 .bodyToMono(responseType)
-                .retryWhen(Retry.backoff(3, Duration.ofSeconds(1))
-                    .filter(throwable -> throwable instanceof WebClientResponseException.TooManyRequests))
+                .retryWhen(Retry.backoff(5, Duration.ofSeconds(2))
+                    .maxBackoff(Duration.ofSeconds(30))
+                    .filter(throwable -> 
+                        throwable instanceof WebClientResponseException.TooManyRequests ||
+                        (throwable.getMessage() != null && (
+                            throwable.getMessage().contains("prematurely closed") ||
+                            throwable.getMessage().contains("Connection reset") ||
+                            throwable.getMessage().contains("Connection refused")
+                        ))
+                    ))
                 .doOnSuccess(response -> {
                     rateLimitManager.recordRequest();
                     log.debug("GET {} - Success", uri);

@@ -5,9 +5,10 @@ import java.time.LocalDateTime;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import kr.ac.koreatech.sw.kosp.domain.github.queue.model.CollectionJob;
 import kr.ac.koreatech.sw.kosp.domain.github.service.GithubCommitCollectionService;
@@ -15,7 +16,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.service.GithubDataCollectionService
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@Service
+@Component
 @ConditionalOnProperty(name = "github.collection.worker.enabled", havingValue = "true", matchIfMissing = true)
 public class GithubCollectionWorker {
     
@@ -53,7 +54,9 @@ public class GithubCollectionWorker {
     
     /**
      * 큐에서 작업을 가져와 처리
+     * @Async로 여러 Worker가 병렬로 실행됨 (CPU 코어 수만큼)
      */
+    @Async("githubWorkerExecutor")
     @Scheduled(fixedDelayString = "${github.collection.worker.poll-interval:1000}")
     public void processJobs() {
         try {
