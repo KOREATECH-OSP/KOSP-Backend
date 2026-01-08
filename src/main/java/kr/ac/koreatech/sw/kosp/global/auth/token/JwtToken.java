@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.stereotype.Component;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import kr.ac.koreatech.sw.kosp.global.auth.exception.InvalidTokenException;
@@ -22,7 +20,6 @@ import kr.ac.koreatech.sw.kosp.global.config.jwt.TokenPropertiesProvider;
  * JWT 토큰 추상 클래스
  * DTO처럼 필드만 선언하면 자동으로 JWT 변환
  */
-@Component
 public abstract class JwtToken {
 
     protected String value;
