@@ -37,4 +37,12 @@ public class AdminContentController implements AdminContentApi {
         adminContentService.createNotice(user, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @Override
+    @Permit(name = "admin:notices:update", description = "공지사항 수정")
+    public ResponseEntity<Void> updateNotice(Long noticeId, kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeUpdateRequest request) {
+        adminContentService.updateNotice(noticeId, request);
+        return ResponseEntity.ok().build();
+    }
+
 }

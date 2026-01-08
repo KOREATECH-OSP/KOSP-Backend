@@ -122,10 +122,80 @@ class CollectionJobTest {
             .build();
         
         // when
-        job.setRetryCount(job.getRetryCount() + 1);
-        job.setRetryCount(job.getRetryCount() + 1);
+        job.incrementRetryCount();
+        job.incrementRetryCount();
         
         // then
         assertThat(job.getRetryCount()).isEqualTo(2);
+    }
+    
+    @Test
+    @DisplayName("지연 실행 스케줄링을 설정할 수 있다")
+    void scheduleAfter() {
+        // given
+        CollectionJob job = CollectionJob.builder()
+            .jobId("job-delay")
+            .type(CollectionJobType.USER_BASIC)
+            .githubLogin("testuser")
+            .encryptedToken("token")
+            .build();
+        
+        long before = System.currentTimeMillis();
+        
+        // when
+        job.scheduleAfter(5000);  // 5초 후
+        
+        long after = System.currentTimeMillis();
+        
+        // then
+        assertThat(job.getScheduledAt()).isGreaterThanOrEqualTo(before + 5000);
+        assertThat(job.getScheduledAt()).isLessThanOrEqualTo(after + 5000);
+    }
+    
+    @Test
+    @DisplayName("즉시 실행 스케줄링을 설정할 수 있다")
+    void scheduleNow() {
+        // given
+        CollectionJob job = CollectionJob.builder()
+            .jobId("job-now")
+            .type(CollectionJobType.USER_BASIC)
+            .githubLogin("testuser")
+            .encryptedToken("token")
+            .build();
+        
+        long before = System.currentTimeMillis();
+        
+        // when
+        job.scheduleNow();
+        
+        long after = System.currentTimeMillis();
+        
+        // then
+        assertThat(job.getScheduledAt()).isGreaterThanOrEqualTo(before);
+        assertThat(job.getScheduledAt()).isLessThanOrEqualTo(after);
+    }
+    
+    @Test
+    @DisplayName("실행 가능 여부를 확인할 수 있다")
+    void isReadyToExecute() {
+        // given
+        CollectionJob job = CollectionJob.builder()
+            .jobId("job-ready")
+            .type(CollectionJobType.USER_BASIC)
+            .githubLogin("testuser")
+            .encryptedToken("token")
+            .build();
+        
+        // when - 과거 시간으로 스케줄
+        job.scheduleAt(System.currentTimeMillis() - 1000);
+        
+        // then
+        assertThat(job.isReadyToExecute()).isTrue();
+        
+        // when - 미래 시간으로 스케줄
+        job.scheduleAt(System.currentTimeMillis() + 10000);
+        
+        // then
+        assertThat(job.isReadyToExecute()).isFalse();
     }
 }
