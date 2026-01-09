@@ -16,8 +16,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
-import kr.ac.koreatech.sw.kosp.global.auth.token.LoginToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             
             if (!tokenString.isBlank()) {
                 // ✅ JwtToken.from()으로 검증
-                LoginToken token = JwtToken.from(LoginToken.class, tokenString);
+                AccessToken token = JwtToken.from(AccessToken.class, tokenString);
                 
                 // SecurityContext 설정
                 authenticateUser(token);
@@ -68,7 +68,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return "";
     }
     
-    private void authenticateUser(LoginToken token) {
+    private void authenticateUser(AccessToken token) {
         User user = userRepository.findById(token.getUserId())
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
         

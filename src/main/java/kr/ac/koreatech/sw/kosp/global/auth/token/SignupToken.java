@@ -1,14 +1,15 @@
 package kr.ac.koreatech.sw.kosp.global.auth.token;
 
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.TokenSpec;
 import lombok.Builder;
 import lombok.Getter;
 
 /**
  * 회원가입 토큰
- * Request Body로 전송
  */
 @Getter
 @Builder
+@TokenSpec(TokenType.SIGNUP)
 public class SignupToken extends JwtToken {
 
     // 필수 필드 (GitHub 인증 시)
@@ -21,11 +22,6 @@ public class SignupToken extends JwtToken {
     // 선택적 필드 (이메일 인증 후)
     private final String kutEmail;
     private final boolean emailVerified;
-
-    @Override
-    public TokenType getTokenType() {
-        return TokenType.SIGNUP;
-    }
 
     @Override
     public String getSubject() {

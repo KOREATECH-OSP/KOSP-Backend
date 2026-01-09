@@ -3,7 +3,12 @@ package kr.ac.koreatech.sw.kosp.global.auth.exception;
 /**
  * 토큰 검증 실패 예외
  */
-public class InvalidTokenException extends RuntimeException {
+import org.springframework.security.core.AuthenticationException;
+
+/**
+ * 토큰 검증 실패 예외
+ */
+public class InvalidTokenException extends AuthenticationException {
     
     public InvalidTokenException(String message) {
         super(message);

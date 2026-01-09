@@ -1,23 +1,19 @@
 package kr.ac.koreatech.sw.kosp.global.auth.token;
 
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.TokenSpec;
 import lombok.Builder;
 import lombok.Getter;
 
 /**
  * 리프레시 토큰
- * Request Body로 전송
  */
 @Getter
 @Builder
+@TokenSpec(TokenType.REFRESH)
 public class RefreshToken extends JwtToken {
 
     private final Long userId;
-
-    @Override
-    public TokenType getTokenType() {
-        return TokenType.REFRESH;
-    }
 
     @Override
     public String getSubject() {
