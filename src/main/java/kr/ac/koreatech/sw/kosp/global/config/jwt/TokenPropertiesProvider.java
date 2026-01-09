@@ -4,6 +4,8 @@ import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jsonwebtoken.security.Keys;
 import kr.ac.koreatech.sw.kosp.global.auth.token.TokenType;
 
@@ -11,17 +13,24 @@ import kr.ac.koreatech.sw.kosp.global.auth.token.TokenType;
 public class TokenPropertiesProvider {
 
     private static SecretKey secretKey;
+    private static ObjectMapper objectMapper;
 
     @SuppressWarnings("java:S3010")
     private TokenPropertiesProvider(
-        TokenProperties properties
+        TokenProperties properties,
+        ObjectMapper objectMapper
     ) {
-        secretKey = Keys.hmacShaKeyFor(properties.secretKey().getBytes());
+        TokenPropertiesProvider.secretKey = Keys.hmacShaKeyFor(properties.secretKey().getBytes());
+        TokenPropertiesProvider.objectMapper = objectMapper;
 
         properties.expiration().forEach(TokenType::setExpiration);
     }
 
     public static SecretKey secretKey() {
         return secretKey;
+    }
+
+    public static ObjectMapper objectMapper() {
+        return objectMapper;
     }
 }

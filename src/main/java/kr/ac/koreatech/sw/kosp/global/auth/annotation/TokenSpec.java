@@ -5,11 +5,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Controller 파라미터에서 토큰을 추출할 때 사용
- * 사용법: @Token AccessToken accessToken
- */
-@Target(ElementType.PARAMETER)
+import kr.ac.koreatech.sw.kosp.global.auth.token.TokenType;
+
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Token {
+public @interface TokenSpec {
+    TokenType value();
 }

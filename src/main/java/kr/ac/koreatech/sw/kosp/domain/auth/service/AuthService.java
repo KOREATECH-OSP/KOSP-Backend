@@ -24,8 +24,8 @@ import kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.auth.repository.RefreshTokenRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
-import kr.ac.koreatech.sw.kosp.global.auth.token.LoginToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -163,7 +163,7 @@ public class AuthService {
         User user = userRepository.findById(refreshToken.getUserId())
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
 
-        LoginToken newAccessToken = LoginToken.from(user);
+        AccessToken newAccessToken = AccessToken.from(user);
         RefreshToken newRefreshToken = RefreshToken.from(user);
 
         // Redis 업데이트
@@ -187,7 +187,7 @@ public class AuthService {
 
     private AuthTokenResponse createTokenResponse(User user) {
         // DTO 스타일 토큰 생성
-        LoginToken accessToken = LoginToken.from(user);
+        AccessToken accessToken = AccessToken.from(user);
         RefreshToken refreshToken = RefreshToken.from(user);
 
         // Redis에 RefreshToken 저장

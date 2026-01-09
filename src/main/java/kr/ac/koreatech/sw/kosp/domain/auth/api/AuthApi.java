@@ -22,7 +22,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
-import kr.ac.koreatech.sw.kosp.global.auth.token.LoginToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
@@ -55,7 +55,7 @@ public interface AuthApi {
     @Operation(summary = "로그인 토큰 검증", description = "Access Token의 유효성을 검증합니다. 만료되거나 위변조된 토큰은 차단합니다.")
     @GetMapping("/verify/token/login")
     ResponseEntity<Void> validateLoginToken(
-        @Parameter(description = "Access Token (JWS)", required = true) @Token LoginToken token
+        @Parameter(description = "Access Token (JWS)", required = true) @Token AccessToken token
     );
 
     @Operation(summary = "이메일 인증 코드 발송", description = "회원가입을 위해 이메일로 인증 코드를 발송합니다.")
@@ -90,7 +90,7 @@ public interface AuthApi {
     @Operation(summary = "토큰 재발급", description = "Refresh Token을 사용하여 새로운 Access Token을 발급합니다.")
     @PostMapping("/reissue")
     ResponseEntity<AuthTokenResponse> reissue(
-        @Parameter(description = "Refresh Token") @Token("refreshToken") RefreshToken token
+        @Parameter(description = "Refresh Token") @Token RefreshToken token
     );
 
     @GetMapping("/me")

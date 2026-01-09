@@ -23,7 +23,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
-import kr.ac.koreatech.sw.kosp.global.auth.token.LoginToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 
 @SpringBootTest
@@ -108,7 +108,7 @@ public abstract class IntegrationTestSupport {
      * User 객체로부터 직접 Access Token 생성 (테스트용)
      */
     protected String createAccessToken(User user) {
-        LoginToken token = LoginToken.from(user);
+        AccessToken token = AccessToken.from(user);
         return token.toString();
     }
 

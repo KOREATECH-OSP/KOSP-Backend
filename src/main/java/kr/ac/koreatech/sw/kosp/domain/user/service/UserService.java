@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
@@ -38,7 +39,7 @@ public class UserService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse signup(UserSignupRequest request) {
+    public AuthTokenResponse signup(UserSignupRequest request) {
         // 1. SignupToken 파싱 및 검증
         SignupToken token = JwtToken.from(SignupToken.class, request.signupToken());
         

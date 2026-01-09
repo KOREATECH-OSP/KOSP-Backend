@@ -31,15 +31,14 @@ class JwtTokenTest {
         user = userRepository.save(user);
         
         // when: 토큰 생성
-        LoginToken originalToken = LoginToken.from(user);
+        AccessToken originalToken = AccessToken.from(user);
         String jwtString = originalToken.toString();
         
         System.out.println("Generated JWT: " + jwtString);
-        assertThat(jwtString).isNotNull();
-        assertThat(jwtString).contains(".");
+        assertThat(jwtString).isNotNull().contains(".");
         
         // then: 토큰 파싱
-        LoginToken parsedToken = JwtToken.from(LoginToken.class, jwtString);
+        AccessToken parsedToken = JwtToken.from(AccessToken.class, jwtString);
         
         assertThat(parsedToken.getUserId()).isEqualTo(user.getId());
         assertThat(parsedToken.getKutEmail()).isEqualTo("test@koreatech.ac.kr");

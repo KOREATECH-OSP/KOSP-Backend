@@ -1,17 +1,15 @@
 package kr.ac.koreatech.sw.kosp.global.auth.token;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.TokenSpec;
 import kr.ac.koreatech.sw.kosp.global.auth.exception.InvalidTokenException;
 import kr.ac.koreatech.sw.kosp.global.auth.exception.TokenParseException;
 import kr.ac.koreatech.sw.kosp.global.config.jwt.TokenPropertiesProvider;
@@ -22,12 +20,19 @@ import kr.ac.koreatech.sw.kosp.global.config.jwt.TokenPropertiesProvider;
  */
 public abstract class JwtToken {
 
+    @JsonIgnore
     protected String value;
 
     /**
-     * 토큰 타입 (하위 클래스에서 구현)
+     * 토큰 타입
      */
-    public abstract TokenType getTokenType();
+    public TokenType getTokenType() {
+        TokenSpec spec = this.getClass().getAnnotation(TokenSpec.class);
+        if (spec == null) {
+            throw new IllegalStateException("Class " + this.getClass().getName() + " must have @TokenSpec annotation");
+        }
+        return spec.value();
+    }
 
     /**
      * Subject (하위 클래스에서 구현)
@@ -43,7 +48,7 @@ public abstract class JwtToken {
             return value;
         }
 
-        Map<String, Object> claims = fieldsToMap();
+        Map<String, Object> claims = TokenPropertiesProvider.objectMapper().convertValue(this, new TypeReference<>() {});
 
         value = Jwts.builder()
             .subject(getSubject())
@@ -71,38 +76,6 @@ public abstract class JwtToken {
         token.value = jwt;
 
         return token;
-    }
-
-    /**
-     * 필드 → Map 변환 (Reflection)
-     */
-    @SuppressWarnings("java:S3011")  // Reflection accessibility is required
-    private Map<String, Object> fieldsToMap() {
-        Map<String, Object> map = new HashMap<>();
-
-        for (Field field : getClass().getDeclaredFields()) {
-            if (shouldSkipField(field)) {
-                continue;
-            }
-
-            field.setAccessible(true);
-            try {
-                Object fieldValue = field.get(this);
-                if (fieldValue != null) {
-                    map.put(field.getName(), fieldValue);
-                }
-            } catch (IllegalAccessException e) {
-                throw new TokenParseException("Failed to serialize value: " + field.getName(), e);
-            }
-        }
-
-        return map;
-    }
-
-    private boolean shouldSkipField(Field field) {
-        return field.getName().equals("value") ||
-            Modifier.isStatic(field.getModifiers()) ||
-            Modifier.isTransient(field.getModifiers());
     }
 
     /**
@@ -142,60 +115,13 @@ public abstract class JwtToken {
     }
 
     /**
-     * Claims → 객체 생성 (Reflection)
+     * Claims → 객체 생성 (ObjectMapper)
      */
-    @SuppressWarnings("java:S3011")  // Reflection accessibility is required
     private static <T extends JwtToken> T createFromClaims(Class<T> tokenClass, Claims claims) {
         try {
-            // 필드 수집
-            List<Field> fields = Arrays.stream(tokenClass.getDeclaredFields())
-                .filter(f -> !f.getName().equals("value"))
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .filter(f -> !Modifier.isTransient(f.getModifiers()))
-                .toList();
-
-            // 생성자 찾기
-            Class<?>[] paramTypes = fields.stream()
-                .map(Field::getType)
-                .toArray(Class<?>[]::new);
-
-            Constructor<T> constructor = tokenClass.getDeclaredConstructor(paramTypes);
-            constructor.setAccessible(true);
-
-            // 파라미터 값 추출
-            Object[] args = fields.stream()
-                .map(f -> extractClaimValue(claims, f))
-                .toArray();
-
-            return constructor.newInstance(args);
-        } catch (Exception e) {
+            return TokenPropertiesProvider.objectMapper().convertValue(claims, tokenClass);
+        } catch (IllegalArgumentException e) {
             throw new TokenParseException("Failed to create token from claims", e);
         }
-    }
-
-    /**
-     * Claim 값 추출 (타입 변환)
-     */
-    private static Object extractClaimValue(Claims claims, Field field) {
-        String fieldName = field.getName();
-        Class<?> fieldType = field.getType();
-
-        Object value = claims.get(fieldName);
-
-        if (value == null) {
-            return null;
-        }
-
-        // Long 타입 특별 처리
-        if (fieldType == Long.class || fieldType == long.class) {
-            if (value instanceof Integer integer) {
-                return integer.longValue();
-            }
-            if (value instanceof String string) {
-                return Long.parseLong(string);
-            }
-        }
-
-        return claims.get(fieldName, fieldType);
     }
 }

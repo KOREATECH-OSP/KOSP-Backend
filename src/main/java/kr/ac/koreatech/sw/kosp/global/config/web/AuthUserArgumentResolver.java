@@ -11,8 +11,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import jakarta.servlet.http.HttpServletRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
-import kr.ac.koreatech.sw.kosp.global.auth.token.LoginToken;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +47,7 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         
         try {
             // Parse JWT and get user ID from subject
-            LoginToken loginToken = JwtToken.from(LoginToken.class, token);
+            AccessToken loginToken = JwtToken.from(AccessToken.class, token);
             Long userId = loginToken.getUserId();
             
             // Query User from DB by ID
