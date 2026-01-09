@@ -23,6 +23,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserPasswordService;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
 import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
@@ -62,14 +63,14 @@ public class AuthController implements AuthApi {
     @Override
     @GetMapping("/verify/token/signup")
     @Permit(permitAll = true, description = "회원가입 토큰 검증")
-    public ResponseEntity<Void> validateSignupToken(SignupToken token) {
+    public ResponseEntity<Void> validateSignupToken(@Token SignupToken token) {
         return ResponseEntity.ok().build();
     }
 
     @Override
     @GetMapping("/verify/token/login")
     @Permit(permitAll = true, description = "로그인 토큰 검증")
-    public ResponseEntity<Void> validateLoginToken(AccessToken token) {
+    public ResponseEntity<Void> validateLoginToken(@Token AccessToken token) {
         return ResponseEntity.ok().build();
     }
 
