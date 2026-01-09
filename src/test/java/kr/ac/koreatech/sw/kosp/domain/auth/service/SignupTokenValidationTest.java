@@ -20,7 +20,7 @@ class SignupTokenValidationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(get("/v1/auth/verify/token/signup")
-                .param("token", validToken))
+                .header("X-Signup-Token", validToken))
             .andDo(print())
             .andExpect(status().isOk());
     }
@@ -33,7 +33,7 @@ class SignupTokenValidationTest extends IntegrationTestSupport {
 
         // when & then
         mockMvc.perform(get("/v1/auth/verify/token/signup")
-                .param("token", tamperedToken))
+                .header("X-Signup-Token", tamperedToken))
             .andDo(print())
             .andExpect(status().isUnauthorized());
     }
@@ -43,7 +43,7 @@ class SignupTokenValidationTest extends IntegrationTestSupport {
     void validateSignupToken_emptyToken() throws Exception {
         // when & then
         mockMvc.perform(get("/v1/auth/verify/token/signup")
-                .param("token", ""))
+                .header("X-Signup-Token", ""))
             .andDo(print())
             .andExpect(status().isUnauthorized());
     }
