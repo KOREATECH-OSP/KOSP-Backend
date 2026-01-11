@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -24,6 +23,11 @@ import kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserPasswordService;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
+import kr.ac.koreatech.sw.kosp.global.host.ServerURL;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -59,16 +63,14 @@ public class AuthController implements AuthApi {
     @Override
     @GetMapping("/verify/token/signup")
     @Permit(permitAll = true, description = "회원가입 토큰 검증")
-    public ResponseEntity<Void> validateSignupToken(@RequestParam String token) {
-        authService.validateSignupToken(token);
+    public ResponseEntity<Void> validateSignupToken(@Token SignupToken token) {
         return ResponseEntity.ok().build();
     }
 
     @Override
     @GetMapping("/verify/token/login")
     @Permit(permitAll = true, description = "로그인 토큰 검증")
-    public ResponseEntity<Void> validateLoginToken(@RequestParam String token) {
-        authService.validateLoginToken(token);
+    public ResponseEntity<Void> validateLoginToken(@Token AccessToken token) {
         return ResponseEntity.ok().build();
     }
 
@@ -116,7 +118,7 @@ public class AuthController implements AuthApi {
     @Permit(permitAll = true, description = "비밀번호 재설정 메일 발송")
     public ResponseEntity<Void> sendPasswordResetMail(
         @RequestBody @Valid EmailRequest request,
-        @kr.ac.koreatech.sw.kosp.global.host.ServerURL String serverUrl
+        @ServerURL String serverUrl
     ) {
         userPasswordService.sendPasswordResetMail(request.email(), serverUrl);
         return ResponseEntity.ok().build();
@@ -143,8 +145,10 @@ public class AuthController implements AuthApi {
     @Override
     @PostMapping("/reissue")
     @Permit(permitAll = true, description = "토큰 재발급")
-    public ResponseEntity<AuthTokenResponse> reissue(@RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.auth.dto.request.ReissueRequest request) {
-        return ResponseEntity.ok(authService.reissue(request.refreshToken()));
+    public ResponseEntity<AuthTokenResponse> reissue(
+        RefreshToken token
+    ) {
+        return ResponseEntity.ok(authService.reissue(token));
     }
 
     @Override

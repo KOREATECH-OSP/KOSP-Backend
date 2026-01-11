@@ -1,11 +1,5 @@
 package kr.ac.koreatech.sw.kosp.global.config.web;
 
-import jakarta.servlet.http.HttpServletRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -14,15 +8,18 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import io.jsonwebtoken.Claims;
-import kr.ac.koreatech.sw.kosp.global.auth.core.AuthToken;
+import jakarta.servlet.http.HttpServletRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final LoginTokenProvider loginTokenProvider;
     private final UserRepository userRepository;
 
     @Override
@@ -50,16 +47,11 @@ public class AuthUserArgumentResolver implements HandlerMethodArgumentResolver {
         
         try {
             // Parse JWT and get user ID from subject
-            AuthToken<Claims> authToken = loginTokenProvider.convertAuthToken(token);
-            if (!authToken.validate()) {
-                return null;
-            }
-            
-            Claims claims = authToken.getData();
-            String userId = claims.getSubject();
+            AccessToken loginToken = JwtToken.from(AccessToken.class, token);
+            Long userId = loginToken.getUserId();
             
             // Query User from DB by ID
-            return userRepository.findById(Long.parseLong(userId))
+            return userRepository.findById(userId)
                 .orElse(null);
         } catch (Exception e) {
             return null;

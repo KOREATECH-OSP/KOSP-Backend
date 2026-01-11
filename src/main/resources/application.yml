@@ -1,28 +1,8 @@
-encryption:
-  password: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-  salt: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-
-aws:
-  access-key: AAAAAAAAAAAAAAAAAAAA
-  secret-key: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-  region: ap-northeast-2
-  s3:
-    bucket: dev-kosp
-
-jwt:
-  secret-key: EXAMPLE7A3E4F37B3DAD9CD8KEY6AA4B1AF7123!@#
-  expiration-time:
-    access-token: 600000 # (ms) = 10 mins
-    refresh-token: 2592000000 # (ms) = 30 days
-    signup-token: 1800000 # (ms) = 30 mins
-
-cors:
-  allowed-origins:
-    - "*"
-
 spring:
   profiles:
     active: local
+  config:
+    import: optional:file:.env[.properties]
   web:
     resources:
       add-mappings: false
@@ -47,8 +27,9 @@ spring:
       max-request-size: 10MB
   batch:
     jdbc:
-      initialize-schema: never
-      table-prefix: kosp_batch.BATCH_
+      initialize-schema: always
+    job:
+        enabled: false # 프로덕션에서만 true
   security:
     oauth2:
       client:
@@ -57,13 +38,20 @@ spring:
             client-name: Github
             authorization-grant-type: authorization_code
             scope: read:user, user:email, repo
-            client-id: AAAAAAAAAAAAAAAAAAAA
-            client-secret: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   data:
     redis:
-      port: 6379
-      host: localhost
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
       lettuce:
         pool:
           max-active: 20
@@ -71,17 +59,33 @@ spring:
           min-idle: 5
           max-wait: 2000ms
     mongodb:
-      host: localhost
-      port: 27017
-      database: kosp
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DATABASE}
       auto-index-creation: false
       uuid-representation: standard
 
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/kosp?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: "root"
-    password: ""
+encryption:
+  password: ${ENCRYPTION_PASSWORD}
+  salt: ${ENCRYPTION_SALT}
+
+aws:
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  region: ${AWS_REGION}
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY}
+  expiration:
+    access: ${JWT_EXPIRATION_ACCESS}
+    refresh: ${JWT_EXPIRATION_REFRESH}
+    signup: ${JWT_EXPIRATION_SIGNUP}
+
+cors:
+  allowed-origins:
+    - "*"
 
 server:
   tomcat:
@@ -116,5 +120,5 @@ github:
     worker:
       enabled: true
       poll-interval: 1000  # Poll every 1 second
-      max-retry: 3  # Maximum retry attempts
+      max-retry: 5  # Maximum retry attempts
     batch-size: 100  # Documents per batch for MongoDB insert

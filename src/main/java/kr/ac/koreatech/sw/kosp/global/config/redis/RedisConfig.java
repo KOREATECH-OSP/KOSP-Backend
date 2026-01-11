@@ -7,14 +7,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
-import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.service.RedisMessageSubscriber;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -33,8 +29,6 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.database:0}")  // 기본값 0 (production)
     private int redisDatabase;
-
-    public static final String SECURITY_REFRESH_CHANNEL = "security-refresh";
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
@@ -64,25 +58,4 @@ public class RedisConfig {
         return template;
     }
 
-    @Bean
-    public ChannelTopic securityRefreshTopic() {
-        return new ChannelTopic(SECURITY_REFRESH_CHANNEL);
-    }
-
-    @Bean
-    public MessageListenerAdapter messageListenerAdapter(RedisMessageSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber);
-    }
-
-    @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(
-        RedisConnectionFactory connectionFactory,
-        MessageListenerAdapter listenerAdapter,
-        ChannelTopic topic
-    ) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(connectionFactory);
-        container.addMessageListener(listenerAdapter, topic);
-        return container;
-    }
 }

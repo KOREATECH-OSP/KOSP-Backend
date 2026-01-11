@@ -1,14 +1,11 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -18,7 +15,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.jsonwebtoken.Claims;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthMeResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
@@ -27,10 +23,11 @@ import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
 import kr.ac.koreatech.sw.kosp.domain.mail.service.EmailVerificationService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.auth.core.AuthToken;
-import kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory;
-import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
-import kr.ac.koreatech.sw.kosp.global.auth.provider.SignupTokenProvider;
+import kr.ac.koreatech.sw.kosp.global.auth.repository.RefreshTokenRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -43,15 +40,12 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthService {
 
     private final AuthenticationManager authenticationManager;
-    private final LoginTokenProvider loginTokenProvider;
-    private final SignupTokenProvider signupTokenProvider;
-    private final UserDetailsServiceImpl userDetailsService;
     private final EmailVerificationService emailVerificationService;
     private final OAuth2UserService oAuth2UserService;
     private final UserRepository userRepository;
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final TextEncryptor textEncryptor;
-    private final StringRedisTemplate redisTemplate;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public void sendCertificationMail(String email, String signupToken) {
@@ -68,54 +62,9 @@ public class AuthService {
         }
 
         // Renew JWS with Email Verified Claim
-        AuthToken<Claims> oldToken = signupTokenProvider.parseSignupToken(signupToken);
-        if (!oldToken.validate()) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
-
-        Claims oldClaims = oldToken.getData();
-        String subject = oldClaims.getSubject();
-        
-        Map<String, Object> newClaims = new HashMap<>(oldClaims);
-        newClaims.put("kutEmail", email);
-        newClaims.put("emailVerified", true);
-
-        AuthToken<Claims> newToken = signupTokenProvider.createSignupToken(subject, newClaims);
-        return ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) newToken).getToken();
-    }
-
-    /**
-     * 회원가입 토큰 검증
-     * 프론트엔드에서 회원가입 폼 진입 전 토큰의 유효성을 확인
-     */
-    public void validateSignupToken(String token) {
-        AuthToken<Claims> authToken = signupTokenProvider.parseSignupToken(token);
-        if (!authToken.validate()) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
-
-        Claims claims = authToken.getData();
-        String category = claims.get("category", String.class);
-        if (!kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory.SIGNUP.getValue().equals(category)) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
-    }
-
-    /**
-     * 로그인 토큰 검증
-     * Access Token의 유효성을 확인
-     */
-    public void validateLoginToken(String token) {
-        AuthToken<Claims> authToken = loginTokenProvider.convertAuthToken(token);
-        if (!authToken.validate()) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
-
-        Claims claims = authToken.getData();
-        String category = claims.get("category", String.class);
-        if (!kr.ac.koreatech.sw.kosp.global.auth.model.AuthTokenCategory.LOGIN.getValue().equals(category)) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
+        SignupToken oldToken = JwtToken.from(SignupToken.class, signupToken);
+        JwtToken newToken = oldToken.withEmailVerified(email);
+        return newToken.toString();
     }
 
     /**
@@ -134,19 +83,19 @@ public class AuthService {
             throw new GlobalException(ExceptionMessage.GITHUB_USER_ALREADY_EXISTS);
         }
 
-        // GitHub Access Token 암호화 (JWS에 저장)
+        // GitHub Access Token 암호화
         String encryptedToken = textEncryptor.encrypt(githubAccessToken);
 
-        // JWS 발급
-        Map<String, Object> claims = new HashMap<>(attributes);
-        claims.put("encryptedGithubToken", encryptedToken);
-
-        AuthToken<Claims> token = signupTokenProvider.createSignupToken(
+        // SignupToken 생성
+        SignupToken token = SignupToken.fromGithub(
             String.valueOf(githubId),
-            claims
+            oAuth2User.getAttribute("login"),
+            oAuth2User.getAttribute("name"),
+            oAuth2User.getAttribute("avatar_url"),
+            encryptedToken
         );
-        
-        return ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) token).getToken();
+
+        return token.toString();
     }
 
     /**
@@ -157,7 +106,7 @@ public class AuthService {
         Authentication authentication = authenticate(request.email(), request.password());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        User user = (User) authentication.getPrincipal();
+        User user = (User)authentication.getPrincipal();
         log.info("✅ Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
@@ -182,7 +131,7 @@ public class AuthService {
      */
     public AuthMeResponse getUserInfo(User user) {
         String profileImage = (user.getGithubUser() != null) ? user.getGithubUser().getGithubAvatarUrl() : null;
-        
+
         return new AuthMeResponse(
             user.getId(),
             user.getKutEmail(),
@@ -204,35 +153,31 @@ public class AuthService {
      * 토큰 재발급
      */
     @Transactional
-    public AuthTokenResponse reissue(String refreshToken) {
-        // 1. Validate Refresh Token
-        AuthToken<Claims> authToken = loginTokenProvider.convertAuthToken(refreshToken);
-        if (!authToken.validate()) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
+    public AuthTokenResponse reissue(RefreshToken refreshToken) {
+        // ✅ JWT 검증은 이미 완료 (JwtToken.from()에서)
 
-        // 2. Validate Redis
-        Claims claims = authToken.getData();
-        String userId = claims.getSubject();
-        String savedToken = redisTemplate.opsForValue().get("refresh:" + userId);
+        // ✅ Level 3: Redis 검증 (비즈니스 로직)
+        refreshTokenRepository.verifyExists(refreshToken);
 
-        if (savedToken == null || !savedToken.equals(refreshToken)) {
-            throw new GlobalException(ExceptionMessage.INVALID_TOKEN);
-        }
+        // 새 토큰 생성
+        User user = userRepository.findById(refreshToken.getUserId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
 
-        // 3. Issue New Access Token
-        UserDetails userDetails = userDetailsService.loadUser(userId, AuthTokenCategory.LOGIN);
-        User user = (User) userDetails;
+        AccessToken newAccessToken = AccessToken.from(user);
+        RefreshToken newRefreshToken = RefreshToken.from(user);
 
-        AuthToken<Claims> newAccessToken = loginTokenProvider.reissueAccessToken(user);
-        String accessTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) newAccessToken).getToken();
+        // Redis 업데이트
+        refreshTokenRepository.save(newRefreshToken);
 
-        return new AuthTokenResponse(accessTokenString, refreshToken);
+        return new AuthTokenResponse(newAccessToken.toString(), newRefreshToken.toString());
     }
 
     @Transactional
     public void logout(Long userId) {
-        loginTokenProvider.revokeRefreshToken(userId);
+        RefreshToken token = RefreshToken.builder()
+            .userId(userId)
+            .build();
+        refreshTokenRepository.delete(token);
     }
 
     private Authentication authenticate(String username, String password) {
@@ -241,13 +186,14 @@ public class AuthService {
     }
 
     private AuthTokenResponse createTokenResponse(User user) {
-        AuthToken<Claims> accessToken = loginTokenProvider.createAccessToken(user);
-        AuthToken<Claims> refreshToken = loginTokenProvider.createRefreshToken(user);
+        // DTO 스타일 토큰 생성
+        AccessToken accessToken = AccessToken.from(user);
+        RefreshToken refreshToken = RefreshToken.from(user);
 
-        String accessTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) accessToken).getToken();
-        String refreshTokenString = ((kr.ac.koreatech.sw.kosp.global.auth.provider.JwtAuthToken) refreshToken).getToken();
+        // Redis에 RefreshToken 저장
+        refreshTokenRepository.save(refreshToken);
 
-        return new AuthTokenResponse(accessTokenString, refreshTokenString);
+        return new AuthTokenResponse(accessToken.toString(), refreshToken.toString());
     }
 
     private Long extractGithubId(Map<String, Object> attributes) {

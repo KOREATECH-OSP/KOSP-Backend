@@ -11,16 +11,18 @@ aws:
 
 jwt:
   secret-key: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
-  expiration-time:
-    access-token: 600000 # (ms) = 10 mins
-    refresh-token: 2592000000 # (ms) = 30 days
-    signup-token: 1800000 # (ms) = 30 mins
+  expiration:
+    access: 600000 # (ms) = 10 mins
+    refresh: 2592000000 # (ms) = 30 days
+    signup: 1800000 # (ms) = 30 mins
 
 cors:
   allowed-origins:
     - "*"
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   web:
     resources:
       add-mappings: false
@@ -44,8 +46,7 @@ spring:
       max-request-size: 10MB
   batch:
     jdbc:
-      initialize-schema: embedded
-      table-prefix: kosp_batch.BATCH_
+      initialize-schema: always
     job:
       enabled: false
   security:
@@ -65,6 +66,7 @@ spring:
     redis:
       port: 6379
       host: localhost
+      password: ""
       database: 1  # Use database 1 for tests (production uses 0)
       lettuce:
         pool:
@@ -129,4 +131,4 @@ github:
 test:
   github:
     # Personal Access Token for integration testing
-    access-token: ghp_abcd...
+    access-token: ${GITHUB_API_TOKEN}

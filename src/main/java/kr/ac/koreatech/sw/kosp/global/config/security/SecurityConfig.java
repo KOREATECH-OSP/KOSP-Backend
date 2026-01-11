@@ -17,9 +17,8 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import kr.ac.koreatech.sw.kosp.domain.auth.service.UserDetailsServiceImpl;
-import kr.ac.koreatech.sw.kosp.global.auth.provider.LoginTokenProvider;
-import kr.ac.koreatech.sw.kosp.global.security.filter.JwtFilter;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -29,8 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
-    private final LoginTokenProvider loginTokenProvider;
-    private final UserDetailsServiceImpl userDetailsService;
+    private final UserRepository userRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,7 +41,10 @@ public class SecurityConfig {
             )
             .cors(cors -> cors.configurationSource(corsConfigurationSource));
 
-        http.addFilterBefore(new JwtFilter(loginTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(
+            new JwtAuthenticationFilter(userRepository), 
+            UsernamePasswordAuthenticationFilter.class
+        );
 
         http.exceptionHandling(exception -> exception
             .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))

@@ -247,7 +247,11 @@ gradle-app.setting
 
 # End of https://www.toptal.com/developers/gitignore/api/gradle,windows,macos,linux,intellij+all,visualstudiocode,java,netbeans
 
-**/application.yml
+.env*
+**/.env*
+
+!.env.example
+!**/.env.example
 
 references/
 docs/coverage/
