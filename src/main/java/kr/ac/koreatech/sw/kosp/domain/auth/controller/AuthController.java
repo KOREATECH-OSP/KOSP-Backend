@@ -78,9 +78,10 @@ public class AuthController implements AuthApi {
     @PostMapping("/verify/email")
     @Permit(permitAll = true, description = "이메일 인증 코드 발송")
     public ResponseEntity<Void> sendCertificationMail(
-        @RequestBody @Valid EmailRequest request
+        @RequestBody @Valid EmailRequest request,
+        @Token SignupToken token
     ) {
-        authService.sendCertificationMail(request.email(), request.signupToken());
+        authService.sendCertificationMail(request.email(), token.toString());
         return ResponseEntity.ok().build();
     }
 
