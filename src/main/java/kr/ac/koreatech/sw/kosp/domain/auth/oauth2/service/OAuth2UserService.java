@@ -62,7 +62,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         // Only update existing GithubUser - new users will be handled by UserService.signup()
         Optional<GithubUser> existingGithubUser = userOptional.map(User::getGithubUser)
             .or(() -> githubUserRepository.findByGithubId(githubId));
-        
+
         existingGithubUser.ifPresent(githubUser -> {
             githubUser.updateProfile(
                 oAuth2User.getAttribute("login"),
@@ -97,9 +97,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private Map<String, Object> buildReregistrationAttributes(Map<String, Object> attributes, User user) {
+        // 탈퇴한 사용자는 완전히 새 사용자로 취급 (USER_ATTR 제거)
         attributes.put(IS_REGISTERED_ATTR, false);
-        attributes.put(IS_REREGISTRATION_ATTR, true);
-        attributes.put(USER_ATTR, user);
+        attributes.put(NEEDS_ADDITIONAL_INFO_ATTR, true);
         return attributes;
     }
 

@@ -6,7 +6,7 @@ public record UserResponse(
     Long id,
     String name, // Changed from email
     String email, // Changed from name
-    String kutId, // Added new field
+    String kutId, // Added new value
     String profileImage,
     String introduction // Changed from bio
 ) {

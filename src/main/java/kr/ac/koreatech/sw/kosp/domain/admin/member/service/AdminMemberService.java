@@ -9,7 +9,6 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.ac.koreatech.sw.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-import kr.ac.koreatech.sw.kosp.domain.auth.service.PermissionAdminService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -23,7 +22,6 @@ public class AdminMemberService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final PermissionAdminService permissionAdminService;
 
     @Transactional
     public void updateUserRoles(Long userId, Set<String> roleNames) {
@@ -37,7 +35,6 @@ public class AdminMemberService {
         user.getRoles().clear();
         user.getRoles().addAll(roles);
 
-        permissionAdminService.publishPermissionChange(user.getKutEmail());
     }
 
     @Transactional
