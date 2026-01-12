@@ -60,8 +60,17 @@ public class CollectionJobProducer {
     
     /**
      * 레포지토리 데이터 수집 작업을 큐에 추가
+     * @param githubLogin 실제 사용자의 GitHub login (commit author 필터링용)
+     * @param repoOwner 저장소 소유자 (organization 또는 개인)
+     * @param repoName 저장소 이름
+     * @param encryptedToken 암호화된 GitHub 토큰
      */
-    public void enqueueRepositoryCollection(String repoOwner, String repoName, String encryptedToken) {
+    public void enqueueRepositoryCollection(
+        String githubLogin,
+        String repoOwner, 
+        String repoName, 
+        String encryptedToken
+    ) {
         // Issues
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.REPO_ISSUES)
@@ -82,10 +91,10 @@ public class CollectionJobProducer {
             .maxRetries(DEFAULT_MAX_RETRIES)
             .build());
         
-        // Commits
+        // Commits - 실제 사용자의 githubLogin으로 필터링
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.REPO_COMMITS)
-            .githubLogin(repoOwner)  // ✅ 추가: Author 필터링용
+            .githubLogin(githubLogin)  // ✅ 수정: 실제 사용자 login 사용
             .repoOwner(repoOwner)
             .repoName(repoName)
             .encryptedToken(encryptedToken)
@@ -94,9 +103,10 @@ public class CollectionJobProducer {
             .build());
         
         // Increment job count for this user (3 jobs per repository)
-        completionTracker.incrementJobCount(repoOwner, 3);
+        completionTracker.incrementJobCount(githubLogin, 3);  // ✅ 수정: githubLogin 사용
         
-        log.info("Enqueued repository collection jobs for: {}/{}", repoOwner, repoName);
+        log.info("Enqueued repository collection jobs for: {}/{} (author: {})", 
+            repoOwner, repoName, githubLogin);
     }
     
     /**
