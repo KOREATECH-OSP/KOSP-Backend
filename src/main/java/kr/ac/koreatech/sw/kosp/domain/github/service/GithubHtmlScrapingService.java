@@ -47,7 +47,7 @@ public class GithubHtmlScrapingService {
             Map<String, Integer> result = new HashMap<>();
             
             try {
-                // PR 개수 스크래핑
+                // PR 개수 스크래핑 - Updated selectors
                 Document prDoc = Jsoup.connect(
                     String.format("%s/%s/%s/pulls", GITHUB_URL, repoOwner, repoName)
                 )
@@ -55,21 +55,24 @@ public class GithubHtmlScrapingService {
                 .timeout(30000)
                 .get();
                 
-                Element prParent = prDoc.selectFirst("a[data-ga-click*='Pull Requests']");
-                if (prParent != null) {
-                    prParent = prParent.parent();
-                    Elements prLinks = prParent.select("a");
-                    
-                    if (prLinks.size() >= 2) {
-                        int openPRs = parseCount(prLinks.get(0).text());
-                        int closedPRs = parseCount(prLinks.get(1).text());
-                        
-                        result.put("totalPRs", openPRs + closedPRs);
-                        result.put("openPRs", openPRs);
-                        result.put("closedPRs", closedPRs);
-                        
-                        log.debug("PR counts: {} open, {} closed", openPRs, closedPRs);
-                    }
+                // Open PRs: a[href*="is%3Aopen"][href*="is%3Apr"]
+                Element openPrLink = prDoc.selectFirst("a[href*='is%3Aopen'][href*='is%3Apr']");
+                if (openPrLink != null) {
+                    int openPRs = parseCount(openPrLink.text());
+                    result.put("openPRs", openPRs);
+                    log.debug("Open PRs: {}", openPRs);
+                }
+                
+                // Closed PRs: a[href*="is%3Aclosed"][href*="is%3Apr"]
+                Element closedPrLink = prDoc.selectFirst("a[href*='is%3Aclosed'][href*='is%3Apr']");
+                if (closedPrLink != null) {
+                    int closedPRs = parseCount(closedPrLink.text());
+                    result.put("closedPRs", closedPRs);
+                    log.debug("Closed PRs: {}", closedPRs);
+                }
+                
+                if (result.containsKey("openPRs") && result.containsKey("closedPRs")) {
+                    result.put("totalPRs", result.get("openPRs") + result.get("closedPRs"));
                 }
                 
             } catch (Exception e) {
@@ -77,7 +80,7 @@ public class GithubHtmlScrapingService {
             }
             
             try {
-                // Issue 개수 스크래핑
+                // Issue 개수 스크래핑 - Updated selectors
                 Document issueDoc = Jsoup.connect(
                     String.format("%s/%s/%s/issues", GITHUB_URL, repoOwner, repoName)
                 )
@@ -85,21 +88,35 @@ public class GithubHtmlScrapingService {
                 .timeout(30000)
                 .get();
                 
-                Element issueParent = issueDoc.selectFirst("a[data-ga-click*='Issues']");
-                if (issueParent != null) {
-                    issueParent = issueParent.parent();
-                    Elements issueLinks = issueParent.select("a");
+                // Open Issues: Find link containing "Open" text
+                Elements allLinks = issueDoc.select("a");
+                for (Element link : allLinks) {
+                    String text = link.text();
+                    String href = link.attr("href");
                     
-                    if (issueLinks.size() >= 2) {
-                        int openIssues = parseCount(issueLinks.get(0).text());
-                        int closedIssues = parseCount(issueLinks.get(1).text());
-                        
-                        result.put("totalIssues", openIssues + closedIssues);
-                        result.put("openIssues", openIssues);
-                        result.put("closedIssues", closedIssues);
-                        
-                        log.debug("Issue counts: {} open, {} closed", openIssues, closedIssues);
+                    // Open Issues
+                    if (text.contains("Open") && href.endsWith("/issues")) {
+                        Element span = link.selectFirst("span");
+                        if (span != null) {
+                            int openIssues = parseCount(span.text());
+                            result.put("openIssues", openIssues);
+                            log.debug("Open Issues: {}", openIssues);
+                        }
                     }
+                    
+                    // Closed Issues
+                    if (text.contains("Closed") && href.contains("state%3Aclosed")) {
+                        Element span = link.selectFirst("span");
+                        if (span != null) {
+                            int closedIssues = parseCount(span.text());
+                            result.put("closedIssues", closedIssues);
+                            log.debug("Closed Issues: {}", closedIssues);
+                        }
+                    }
+                }
+                
+                if (result.containsKey("openIssues") && result.containsKey("closedIssues")) {
+                    result.put("totalIssues", result.get("openIssues") + result.get("closedIssues"));
                 }
                 
             } catch (Exception e) {
@@ -136,13 +153,16 @@ public class GithubHtmlScrapingService {
             
             Map<String, Object> result = new HashMap<>();
             
-            // Commits count
+            // Commits count - Updated selector: a[href*="/commits/"] span
             try {
-                Element commitsElement = doc.selectFirst("div.Box-header strong");
-                if (commitsElement != null) {
-                    String text = commitsElement.text().replace(",", "");
-                    result.put("commitsCount", Integer.parseInt(text));
-                    log.debug("Commits count: {}", text);
+                Element commitsLink = doc.selectFirst("a[href*='/commits/']");
+                if (commitsLink != null) {
+                    Element span = commitsLink.selectFirst("span");
+                    if (span != null) {
+                        String text = span.text().replace(",", "").replace("Commits", "").trim();
+                        result.put("commitsCount", Integer.parseInt(text));
+                        log.debug("Commits count: {}", text);
+                    }
                 }
             } catch (Exception e) {
                 log.warn("Failed to parse commits count: {}", e.getMessage());
