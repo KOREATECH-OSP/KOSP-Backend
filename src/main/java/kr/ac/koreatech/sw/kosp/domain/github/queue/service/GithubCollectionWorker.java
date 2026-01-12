@@ -181,11 +181,28 @@ public class GithubCollectionWorker {
                     token
                 ).block();
                 
-                case REPO_COMMITS -> commitCollectionService.collectAllCommits(
-                    job.getRepoOwner(),
-                    job.getRepoName(),
-                    token
-                ).block();
+                
+                case REPO_COMMITS -> {
+                    // githubLogin 검증
+                    if (job.getGithubLogin() == null || job.getGithubLogin().isEmpty()) {
+                        log.error("❌ REPO_COMMITS job missing githubLogin: {}", job.getJobId());
+                        throw new IllegalArgumentException(
+                            "githubLogin is required for REPO_COMMITS collection"
+                        );
+                    }
+                    
+                    Long count = commitCollectionService.collectAllCommits(
+                        job.getRepoOwner(),
+                        job.getRepoName(),
+                        job.getGithubLogin(),  // ✅ 추가
+                        token
+                    ).block();
+                    
+                    log.info("✅ Collected {} commits for {} in {}/{}", 
+                        count, job.getGithubLogin(), job.getRepoOwner(), job.getRepoName());
+                    
+                    yield count;
+                }
             }
             
             log.info("Successfully processed job: {}", job.getJobId());

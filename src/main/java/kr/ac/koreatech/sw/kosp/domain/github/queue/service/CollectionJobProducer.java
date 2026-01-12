@@ -85,6 +85,7 @@ public class CollectionJobProducer {
         // Commits
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.REPO_COMMITS)
+            .githubLogin(repoOwner)  // ✅ 추가: Author 필터링용
             .repoOwner(repoOwner)
             .repoName(repoName)
             .encryptedToken(encryptedToken)

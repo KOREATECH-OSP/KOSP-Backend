@@ -27,11 +27,12 @@ public class GithubCommitCollectionService {
     public Mono<Long> collectAllCommits(
         String repoOwner,
         String repoName,
+        String githubLogin,  // ✅ 추가: Author 필터링용
         String token
     ) {
         String context = String.format("%s/%s/commits", repoOwner, repoName);
         
-        return getCommitShaList(repoOwner, repoName, token)
+        return getCommitShaList(repoOwner, repoName, githubLogin, token)
             .flatMapMany(reactor.core.publisher.Flux::fromIterable)
             .flatMap(sha -> 
                 dataCollectionService.collectCommitDetail(repoOwner, repoName, sha, token)
@@ -74,9 +75,22 @@ public class GithubCommitCollectionService {
     }
     
     /**
-     * 커밋 SHA 리스트 가져오기
+     * 커밋 SHA 리스트 가져오기 (Author 필터링 적용)
+     * 
+     * Reference: SKKU-OSP github.py Line 431-456
+     * 
+     * @param repoOwner 저장소 소유자
+     * @param repoName 저장소 이름
+     * @param githubLogin 필터링할 사용자의 GitHub 로그인 ID
+     * @param token GitHub API 토큰
+     * @return 필터링된 커밋 SHA 리스트
      */
-    private Mono<List<String>> getCommitShaList(String repoOwner, String repoName, String token) {
+    private Mono<List<String>> getCommitShaList(
+        String repoOwner, 
+        String repoName,
+        String githubLogin,
+        String token
+    ) {
         String uri = String.format("/repos/%s/%s/commits", repoOwner, repoName);
         
         return restApiClient.getAllWithPagination(uri, token, Map.class)
@@ -85,9 +99,46 @@ public class GithubCommitCollectionService {
                 List<Map<String, Object>> commits = (List<Map<String, Object>>) (List<?>) rawCommits;
                 
                 return commits.stream()
+                    // ✅ Author 필터링 추가
+                    .filter(commit -> {
+                        // Author 정보 추출
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> author = (Map<String, Object>) commit.get("author");
+                        
+                        // Author가 null이면 제외
+                        if (author == null) {
+                            log.debug("Commit {} has no author information", commit.get("sha"));
+                            return false;
+                        }
+                        
+                        // Author login 추출
+                        String login = (String) author.get("login");
+                        
+                        // Login이 null이면 제외
+                        if (login == null) {
+                            log.debug("Commit {} author has no login", commit.get("sha"));
+                            return false;
+                        }
+                        
+                        // githubLogin과 일치하는지 확인
+                        boolean matches = githubLogin.equals(login);
+                        
+                        if (matches) {
+                            log.debug("✅ Commit {} matches author {}", commit.get("sha"), githubLogin);
+                        } else {
+                            log.trace("❌ Commit {} author {} does not match {}", 
+                                commit.get("sha"), login, githubLogin);
+                        }
+                        
+                        return matches;
+                    })
                     .map(commit -> (String) commit.get("sha"))
                     .filter(sha -> sha != null)
                     .toList();
+            })
+            .doOnSuccess(shas -> {
+                log.info("✅ Filtered {} commits for author {} in {}/{}", 
+                    shas.size(), githubLogin, repoOwner, repoName);
             });
     }
 }
