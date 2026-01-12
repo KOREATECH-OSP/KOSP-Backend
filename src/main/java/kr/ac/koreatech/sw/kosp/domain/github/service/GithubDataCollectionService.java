@@ -42,10 +42,6 @@ public class GithubDataCollectionService {
     // Features 10-11 repositories
     private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserFollowingRepository userFollowingRepository;
     private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserStarredRepository userStarredRepository;
-    
-    // Feature 10-11 repositories
-    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserFollowingRepository userFollowingRepository;
-    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserStarredRepository userStarredRepository;
 
     /**
      * 사용자 기본 정보 수집 (GraphQL Pagination)
