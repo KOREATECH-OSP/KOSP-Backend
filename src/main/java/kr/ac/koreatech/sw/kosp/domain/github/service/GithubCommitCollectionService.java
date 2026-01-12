@@ -41,21 +41,35 @@ public class GithubCommitCollectionService {
                         // 실패 분석 및 기록
                         var failureType = failureAnalyzer.classifyFailure((Exception) e);
                         failureAnalyzer.recordFailure(context, failureType, (Exception) e);
-                        return Mono.just(0);  // 실패한 커밋은 카운트하지 않음
+                        
+                        // 재시도 가능한 에러는 예외를 전파하여 Worker가 재시도하도록 함
+                        if (failureAnalyzer.isRetryable(failureType)) {
+                            log.warn("Retryable error for commit {} in {}/{}: {} - {}", 
+                                sha, repoOwner, repoName, failureType, e.getMessage());
+                            return Mono.error(e);  // ✅ 에러 전파
+                        }
+                        
+                        // 재시도 불가능한 에러만 스킵 (404 등)
+                        log.debug("Skipping non-retryable error for commit {} in {}/{}: {} - {}", 
+                            sha, repoOwner, repoName, failureType, e.getMessage());
+                        return Mono.just(0);
                     }),
                 15  // 최대 15개 동시 처리 (GitHub secondary rate limit 회피)
             )
             .reduce(0L, (acc, val) -> acc + val)
             .doOnSuccess(count -> {
-                log.info("Collected {} commits for {}/{}", count, repoOwner, repoName);
+                log.info("✅ Collected {} commits for {}/{}", count, repoOwner, repoName);
                 // 실패 통계 로깅
                 failureAnalyzer.logFailureStatistics(context);
             })
             .doOnError(error -> {
-                log.error("Failed to collect commits for {}/{}: {}", 
+                // 전체 작업 실패 - 명확한 로깅
+                log.error("❌ CRITICAL: Failed to collect commits for {}/{}: {}", 
                     repoOwner, repoName, error.getMessage());
                 var failureType = failureAnalyzer.classifyFailure((Exception) error);
                 failureAnalyzer.recordFailure(context, failureType, (Exception) error);
+                failureAnalyzer.logFailureStatistics(context);
+                // ❌ onErrorResume 제거 - Worker가 재시도하도록 에러 전파
             });
     }
     

@@ -134,14 +134,7 @@ public class GithubCollectionWorker {
                 throw new IllegalStateException("Failed to decrypt GitHub token");
             }
             
-            // Rate limit 체크
-            var rateLimitInfo = rateLimitChecker.checkRateLimit(token);
-            if (!rateLimitInfo.hasEnoughRemaining(10)) {
-                log.warn("⚠️ Rate limit low for job {} (remaining: {}), rescheduling after reset",
-                    job.getJobId(), rateLimitInfo.remaining());
-                jobProducer.enqueueAfterRateLimitReset(job, rateLimitInfo.resetTime());
-                return;  // 즉시 반환, Thread.sleep 없음!
-            }
+            // ✅ Rate limit 체크 제거 - GithubRestApiClient가 응답 헤더로 자동 관리
             
             switch (job.getType()) {
                 case USER_BASIC -> dataCollectionService.collectUserBasicInfo(
