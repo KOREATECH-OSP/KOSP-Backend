@@ -77,4 +77,24 @@ public class RateLimitManager {
         resetWindowIfNeeded();
         return MAX_REQUESTS_PER_HOUR - requestCount.get();
     }
+
+    /**
+     * 응답 헤더에서 받은 rate limit 정보로 업데이트
+     * X-RateLimit-Remaining, X-RateLimit-Reset 헤더 사용
+     */
+    public void updateRateLimit(int remaining, long resetTime) {
+        // 실제 GitHub API의 remaining 값으로 업데이트
+        int used = MAX_REQUESTS_PER_HOUR - remaining;
+        requestCount.set(used);
+        
+        // Reset 시간 업데이트
+        LocalDateTime resetDateTime = LocalDateTime.ofInstant(
+            java.time.Instant.ofEpochMilli(resetTime),
+            java.time.ZoneId.systemDefault()
+        );
+        windowStart.set(resetDateTime.minusHours(1));
+        
+        log.debug("Rate limit updated from headers: remaining={}, reset={}", 
+            remaining, resetDateTime);
+    }
 }
