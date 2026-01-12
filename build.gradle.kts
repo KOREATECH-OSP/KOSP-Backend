@@ -50,6 +50,8 @@ dependencies {
     implementation(libs.awssdk.ses)
     implementation(libs.awssdk.s3)
 
+    implementation(libs.jsoup)  // HTML 파싱용
+
     runtimeOnly(libs.jjwt.impl)
     runtimeOnly(libs.jjwt.jackson)
 

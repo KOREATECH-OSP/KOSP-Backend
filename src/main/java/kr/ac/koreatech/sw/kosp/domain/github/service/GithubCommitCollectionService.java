@@ -74,10 +74,15 @@ public class GithubCommitCollectionService {
             });
     }
     
+    
     /**
      * 커밋 SHA 리스트 가져오기 (Author 필터링 적용)
      * 
      * Reference: SKKU-OSP github.py Line 431-456
+     * 
+     * CRITICAL: GitHub API의 'author' 쿼리 파라미터 사용
+     * - 서버 측에서 필터링하여 PrematureCloseException 방지
+     * - 대량의 커밋을 가져오지 않아 타임아웃 해결
      * 
      * @param repoOwner 저장소 소유자
      * @param repoName 저장소 이름
@@ -91,54 +96,29 @@ public class GithubCommitCollectionService {
         String githubLogin,
         String token
     ) {
-        String uri = String.format("/repos/%s/%s/commits", repoOwner, repoName);
+        // ✅ API 레벨 필터링: author 쿼리 파라미터 사용
+        String uri = String.format("/repos/%s/%s/commits?author=%s", repoOwner, repoName, githubLogin);
+        
+        log.info("Fetching commits for {}/{} authored by {}", repoOwner, repoName, githubLogin);
         
         return restApiClient.getAllWithPagination(uri, token, Map.class)
             .map(rawCommits -> {
                 @SuppressWarnings("unchecked")
                 List<Map<String, Object>> commits = (List<Map<String, Object>>) (List<?>) rawCommits;
                 
-                return commits.stream()
-                    // ✅ Author 필터링 추가
-                    .filter(commit -> {
-                        // Author 정보 추출
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> author = (Map<String, Object>) commit.get("author");
-                        
-                        // Author가 null이면 제외
-                        if (author == null) {
-                            log.debug("Commit {} has no author information", commit.get("sha"));
-                            return false;
-                        }
-                        
-                        // Author login 추출
-                        String login = (String) author.get("login");
-                        
-                        // Login이 null이면 제외
-                        if (login == null) {
-                            log.debug("Commit {} author has no login", commit.get("sha"));
-                            return false;
-                        }
-                        
-                        // githubLogin과 일치하는지 확인
-                        boolean matches = githubLogin.equals(login);
-                        
-                        if (matches) {
-                            log.debug("✅ Commit {} matches author {}", commit.get("sha"), githubLogin);
-                        } else {
-                            log.trace("❌ Commit {} author {} does not match {}", 
-                                commit.get("sha"), login, githubLogin);
-                        }
-                        
-                        return matches;
-                    })
+                List<String> shas = commits.stream()
                     .map(commit -> (String) commit.get("sha"))
                     .filter(sha -> sha != null)
                     .toList();
-            })
-            .doOnSuccess(shas -> {
-                log.info("✅ Filtered {} commits for author {} in {}/{}", 
+                
+                log.info("✅ Found {} commits for author {} in {}/{}", 
                     shas.size(), githubLogin, repoOwner, repoName);
+                
+                return shas;
+            })
+            .doOnError(error -> {
+                log.error("❌ Failed to fetch commits for {}/{} author {}: {}", 
+                    repoOwner, repoName, githubLogin, error.getMessage());
             });
     }
 }
