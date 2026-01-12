@@ -70,6 +70,19 @@ public class GithubCollectionWorker {
             processJob(job);
             markAsCompleted(job);
             
+        } catch (kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException e) {
+            // ✅ Rate Limit 도달 - 작업을 재스케줄 (스레드 블로킹 없음!)
+            if (job != null) {
+                long waitMillis = e.getWaitTime().toMillis();
+                log.warn("⚠️ Rate limit reached for job {}. Rescheduling after {} ms", 
+                    job.getJobId(), waitMillis);
+                
+                // Remove from processing and reschedule
+                redisTemplate.opsForHash().delete(PROCESSING_KEY, job.getJobId());
+                jobProducer.enqueueWithDelay(job, waitMillis);
+            }
+            // ❌ 예외를 다시 던지지 않음 - Worker는 즉시 다음 작업 처리
+            
         } catch (Exception e) {
             // ✅ 명확한 에러 로깅 추가
             if (job != null) {
@@ -176,17 +189,6 @@ public class GithubCollectionWorker {
             }
             
             log.info("Successfully processed job: {}", job.getJobId());
-            
-        } catch (kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException e) {
-            // ✅ Rate Limit 도달 - 작업을 재스케줄 (스레드 블로킹 없음!)
-            long waitMillis = e.getWaitTime().toMillis();
-            log.warn("⚠️ Rate limit reached for job {}. Rescheduling after {} ms", 
-                job.getJobId(), waitMillis);
-            
-            // Remove from processing and reschedule
-            redisTemplate.opsForHash().delete(PROCESSING_KEY, job.getJobId());
-            jobProducer.enqueueWithDelay(job, waitMillis);
-            // ❌ 예외를 다시 던지지 않음 - Worker는 즉시 다음 작업 처리
             
         } catch (Exception e) {
             handleFailure(job, e);
