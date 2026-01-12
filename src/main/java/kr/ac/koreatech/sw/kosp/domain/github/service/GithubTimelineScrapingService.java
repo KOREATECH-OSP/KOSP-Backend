@@ -341,4 +341,56 @@ public class GithubTimelineScrapingService {
             toDate.format(DATE_FORMATTER)
         );
     }
+    
+    /**
+     * Timeline 데이터에서 RepoContribute 추출
+     * 
+     * Feature 4: RepoContribute 관계 추출
+     * 
+     * @param timelineData Timeline 데이터
+     * @return RepoContribute 리스트
+     */
+    public List<kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubRepoContribute> extractRepoContributes(
+        GithubTimelineData timelineData
+    ) {
+        String githubId = timelineData.getGithubId();
+        
+        java.util.Set<String> repoKeys = new java.util.HashSet<>();
+        List<kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubRepoContribute> contributes = new ArrayList<>();
+        
+        // Issue에서 추출
+        if (timelineData.getIssues() != null) {
+            for (GithubTimelineIssue issue : timelineData.getIssues()) {
+                String key = issue.getOwnerId() + "/" + issue.getRepoName();
+                if (!repoKeys.contains(key)) {
+                    repoKeys.add(key);
+                    contributes.add(kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubRepoContribute.create(
+                        githubId,
+                        issue.getOwnerId(),
+                        issue.getRepoName(),
+                        issue.getIsOwnedRepo()
+                    ));
+                }
+            }
+        }
+        
+        // PR에서 추출
+        if (timelineData.getPrs() != null) {
+            for (GithubTimelinePR pr : timelineData.getPrs()) {
+                String key = pr.getOwnerId() + "/" + pr.getRepoName();
+                if (!repoKeys.contains(key)) {
+                    repoKeys.add(key);
+                    contributes.add(kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubRepoContribute.create(
+                        githubId,
+                        pr.getOwnerId(),
+                        pr.getRepoName(),
+                        pr.getIsOwnedRepo()
+                    ));
+                }
+            }
+        }
+        
+        log.info("Extracted {} repo contributes for {}", contributes.size(), githubId);
+        return contributes;
+    }
 }
