@@ -35,8 +35,13 @@ public class RateLimitManager {
 
             if (remaining <= threshold) {
                 Duration waitTime = calculateWaitTime();
-                log.warn("Rate limit threshold reached. Remaining: {}. Waiting for: {}", remaining, waitTime);
-                return Mono.delay(waitTime).then();
+                log.warn("⚠️ Rate limit threshold reached. Remaining: {}. Job will be rescheduled.", remaining);
+                // ❌ Mono.delay()로 블로킹하지 않음!
+                // ✅ 예외를 던져서 Worker가 작업을 재스케줄하도록 함
+                return Mono.error(new RateLimitException(
+                    "Rate limit threshold reached. Remaining: " + remaining,
+                    waitTime
+                ));
             }
 
             return Mono.empty();
