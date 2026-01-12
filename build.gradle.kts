@@ -64,6 +64,7 @@ dependencies {
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
+    testImplementation("io.projectreactor:reactor-test")
 	testRuntimeOnly(libs.junit.platform.launcher)
 }
 

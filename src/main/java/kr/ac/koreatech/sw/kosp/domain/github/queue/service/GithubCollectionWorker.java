@@ -201,7 +201,7 @@ public class GithubCollectionWorker {
                     log.info("✅ Collected {} commits for {} in {}/{}", 
                         count, job.getGithubLogin(), job.getRepoOwner(), job.getRepoName());
                     
-                    yield count;
+                    return;  // Fixed: changed from yield to return
                 }
             }
             
