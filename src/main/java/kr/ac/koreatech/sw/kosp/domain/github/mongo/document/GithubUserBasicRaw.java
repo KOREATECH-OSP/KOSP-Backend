@@ -37,6 +37,9 @@ public class GithubUserBasicRaw {
 
     // 기여 통계
     private Map<String, Object> contributionsCollection;
+    
+    // Feature 12: Total Stars (모든 저장소 스타 합계)
+    private Integer totalStars;
 
     // 메타데이터
     private LocalDateTime collectedAt;
@@ -54,7 +57,8 @@ public class GithubUserBasicRaw {
         Integer followingCount,
         Integer totalRepositories,
         List<Map<String, Object>> repositories,
-        Map<String, Object> contributionsCollection
+        Map<String, Object> contributionsCollection,
+        Integer totalStars  // Feature 12
     ) {
         return GithubUserBasicRaw.builder()
             .githubId(githubId)
@@ -70,6 +74,7 @@ public class GithubUserBasicRaw {
             .totalRepositories(totalRepositories)
             .repositories(repositories)
             .contributionsCollection(contributionsCollection)
+            .totalStars(totalStars)  // Feature 12
             .collectedAt(LocalDateTime.now())
             .build();
     }
