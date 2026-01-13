@@ -1,10 +1,10 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.dto.response;
 
 import java.util.List;
-import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
-import lombok.Builder;
 
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
+import lombok.Builder;
 
 @Builder
 public record ArticleResponse(
@@ -18,7 +18,8 @@ public record ArticleResponse(
     Integer comments,
     List<String> tags,
     Boolean isLiked,
-    Boolean isBookmarked
+    Boolean isBookmarked,
+    Boolean isPinned
 ) {
     public static ArticleResponse from(Article article, boolean isLiked, boolean isBookmarked) {
         return ArticleResponse.builder()
@@ -33,6 +34,7 @@ public record ArticleResponse(
             .tags(new java.util.ArrayList<>(article.getTags()))
             .isLiked(isLiked)
             .isBookmarked(isBookmarked)
+            .isPinned(article.isPinned())
             .build();
     }
 }

@@ -82,7 +82,7 @@ class RedisQueueIntegrationTest {
         String encryptedToken = "encrypted_token";
         
         // when
-        producer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
+        producer.enqueueRepositoryCollection("testuser", repoOwner, repoName, encryptedToken);
         
         // then
         await().atMost(Duration.ofSeconds(2))

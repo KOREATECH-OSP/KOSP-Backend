@@ -131,4 +131,5 @@ github:
 test:
   github:
     # Personal Access Token for integration testing
-    access-token: ${GITHUB_API_TOKEN}
+    # Set GITHUB_API_TOKEN environment variable to run GitHub integration tests
+    access-token: ${GITHUB_API_TOKEN:}

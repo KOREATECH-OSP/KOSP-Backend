@@ -150,19 +150,24 @@ public class RepositoryStatisticsCalculator {
                     Map<String, Object> primaryLanguage = (Map<String, Object>) repository.get("primaryLanguage");
                     String language = primaryLanguage != null ? (String) primaryLanguage.get("name") : null;
 
+                    // 저장소 생성일 추출
+                    String createdAtStr = (String) repository.get("createdAt");
+                    LocalDateTime createdAt = createdAtStr != null ? LocalDateTime.parse(createdAtStr) : null;
+
                     stat.updateRepositoryInfo(
                         stargazersCount != null ? stargazersCount : 0,
                         forksCount != null ? forksCount : 0,
                         watchersCount != null ? watchersCount : 0,
                         description,
-                        language
+                        language,
+                        createdAt
                     );
                 }
             }
         } catch (Exception e) {
             log.warn("Failed to fetch repository info for {}/{}: {}", owner, name, e.getMessage());
             // 실패 시 기본값 설정
-            stat.updateRepositoryInfo(0, 0, 0, null, null);
+            stat.updateRepositoryInfo(0, 0, 0, null, null, null);
         }
 
         return stat;

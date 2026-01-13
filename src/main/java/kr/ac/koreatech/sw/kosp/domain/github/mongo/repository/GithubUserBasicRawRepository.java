@@ -15,4 +15,8 @@ public interface GithubUserBasicRawRepository extends Repository<GithubUserBasic
     Optional<GithubUserBasicRaw> findByGithubId(String githubId);
 
     boolean existsByGithubId(String githubId);
+
+    void deleteAll();
+
+    long count();
 }

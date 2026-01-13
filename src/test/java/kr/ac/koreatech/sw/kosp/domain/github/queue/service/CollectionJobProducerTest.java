@@ -61,7 +61,7 @@ class CollectionJobProducerTest {
         String encryptedToken = "encrypted_token";
         
         // when
-        producer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
+        producer.enqueueRepositoryCollection("testuser", repoOwner, repoName, encryptedToken);
         
         // then
         verify(zSetOperations, times(3)).add(eq("github:collection:priority_queue"), any(CollectionJob.class), anyDouble());
@@ -131,7 +131,7 @@ class CollectionJobProducerTest {
         String encryptedToken = "encrypted_token";
         
         // when
-        producer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
+        producer.enqueueRepositoryCollection("testuser", repoOwner, repoName, encryptedToken);
         
         // then
         verify(zSetOperations).add(eq("github:collection:priority_queue"), argThat(job -> 

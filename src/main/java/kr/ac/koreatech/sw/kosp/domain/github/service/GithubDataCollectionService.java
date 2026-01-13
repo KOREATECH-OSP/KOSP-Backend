@@ -38,6 +38,10 @@ public class GithubDataCollectionService {
     private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubIssueRawRepository issueRawRepository;
     private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubPRRawRepository prRawRepository;
     private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitRawRepository commitRawRepository;
+    
+    // Features 10-11 repositories
+    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserFollowingRepository userFollowingRepository;
+    private final kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubUserStarredRepository userStarredRepository;
 
     /**
      * 사용자 기본 정보 수집 (GraphQL Pagination)
@@ -87,8 +91,23 @@ public class GithubDataCollectionService {
     ) {
         return graphQLClient.getUserBasicInfo(githubId, token, Map.class)
             .map(response -> {
+                @SuppressWarnings("unchecked")
                 Map<String, Object> data = (Map<String, Object>) response.get("data");
+                @SuppressWarnings("unchecked")
                 Map<String, Object> user = (Map<String, Object>) data.get("user");
+                
+                // Feature 12: Total Stars 계산 (외부 API 값 합산)
+                int totalStars = allRepos.stream()
+                    .mapToInt(repo -> {
+                        Object stargazers = repo.get("stargazerCount");
+                        if (stargazers instanceof Integer) {
+                            return (Integer) stargazers;
+                        }
+                        return 0;
+                    })
+                    .sum();
+                
+                log.info("Calculated total stars for {}: {}", githubId, totalStars);
                 
                 GithubUserBasicRaw raw = GithubUserBasicRaw.create(
                     (String) user.get("login"),
@@ -103,12 +122,14 @@ public class GithubDataCollectionService {
                     getCount(user, "following"),
                     allRepos.size(),
                     allRepos,
-                    (Map<String, Object>) user.get("contributionsCollection")
+                    (Map<String, Object>) user.get("contributionsCollection"),
+                    totalStars  // Feature 12
                 );
                 
                 return userBasicRawRepository.save(raw);
             })
-            .doOnSuccess(saved -> log.info("Collected user basic info with {} repositories: {}", allRepos.size(), githubId))
+            .doOnSuccess(saved -> log.info("Collected user basic info with {} repositories and {} stars: {}", 
+                allRepos.size(), saved.getTotalStars(), githubId))
             .doOnError(error -> log.error("Failed to collect user basic info for {}: {}", githubId, error.getMessage()));
     }
 
@@ -253,6 +274,148 @@ public class GithubDataCollectionService {
                 saved.getEvents().size(), githubLogin))
             .doOnError(error -> log.error("Failed to collect events for user: {}", 
                 githubLogin, error));
+    }
+    
+    // ========== Feature 7: Repository API Data ==========
+    
+    /**
+     * Contributors 수집 (Feature 7)
+     */
+    public Mono<List<String>> collectContributors(String owner, String repo, String token) {
+        String uri = String.format("/repos/%s/%s/contributors", owner, repo);
+        return restApiClient.getAllWithPagination(uri, token, Map.class)
+            .map(contributors -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> list = (List<Map<String, Object>>) (List<?>) contributors;
+                return list.stream()
+                    .map(c -> (String) c.get("login"))
+                    .filter(login -> login != null)
+                    .toList();
+            })
+            .doOnSuccess(logins -> log.info("Collected {} contributors for {}/{}", logins.size(), owner, repo))
+            .onErrorResume(e -> {
+                log.warn("Failed to collect contributors for {}/{}: {}", owner, repo, e.getMessage());
+                return Mono.just(List.of());
+            });
+    }
+    
+    /**
+     * Releases 수집 (Feature 7)
+     */
+    public Mono<Map<String, Object>> collectReleases(String owner, String repo, String token) {
+        String uri = String.format("/repos/%s/%s/releases", owner, repo);
+        return restApiClient.getAllWithPagination(uri, token, Map.class)
+            .map(releases -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> list = (List<Map<String, Object>>) (List<?>) releases;
+                Map<String, Object> result = new java.util.HashMap<>();
+                result.put("releaseCount", list.size());
+                if (!list.isEmpty()) {
+                    String latestName = (String) list.get(0).get("name");
+                    if (latestName != null && latestName.length() > 45) {
+                        latestName = latestName.substring(0, 45);
+                    }
+                    result.put("latestRelease", latestName);
+                }
+                return result;
+            })
+            .doOnSuccess(r -> log.info("Collected {} releases for {}/{}", r.get("releaseCount"), owner, repo))
+            .onErrorResume(e -> {
+                log.warn("Failed to collect releases for {}/{}: {}", owner, repo, e.getMessage());
+                return Mono.just(Map.of("releaseCount", 0));
+            });
+    }
+    
+    /**
+     * README 확인 (Feature 7)
+     */
+    public Mono<Integer> checkReadme(String owner, String repo, String token) {
+        String uri = String.format("/repos/%s/%s/contents", owner, repo);
+        return restApiClient.get(uri, token, List.class)
+            .map(contents -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> list = (List<Map<String, Object>>) contents;
+                return list.stream()
+                    .filter(file -> {
+                        String name = (String) file.get("name");
+                        return name != null && name.toLowerCase().contains("readme");
+                    })
+                    .findFirst()
+                    .map(file -> (Integer) file.get("size"))
+                    .orElse(0);
+            })
+            .onErrorResume(e -> {
+                log.warn("Failed to check README for {}/{}: {}", owner, repo, e.getMessage());
+                return Mono.just(0);
+            });
+    }
+    
+    // ========== Feature 10: User Following ==========
+    
+    /**
+     * Following 수집 (Feature 10)
+     */
+    public Mono<List<kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserFollowing>> collectFollowing(
+        String githubId, String token
+    ) {
+        String uri = String.format("/users/%s/following", githubId);
+        return restApiClient.getAllWithPagination(uri, token, Map.class)
+            .flatMapMany(following -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> list = (List<Map<String, Object>>) (List<?>) following;
+                return reactor.core.publisher.Flux.fromIterable(list)
+                    .map(user -> kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserFollowing
+                        .create(githubId, (String) user.get("login")))
+                    .filter(uf -> !userFollowingRepository.existsByGithubIdAndFollowingId(
+                        uf.getGithubId(), uf.getFollowingId()));
+            })
+            .collectList()
+            .flatMap(list -> {
+                if (list.isEmpty()) return Mono.just(list);
+                return Mono.fromCallable(() -> userFollowingRepository.saveAll(list))
+                    .map(saved -> list);
+            })
+            .doOnSuccess(list -> log.info("Collected {} following for {}", list.size(), githubId))
+            .onErrorResume(e -> {
+                log.warn("Failed to collect following for {}: {}", githubId, e.getMessage());
+                return Mono.just(List.of());
+            });
+    }
+    
+    // ========== Feature 11: User Starred ==========
+    
+    /**
+     * Starred 수집 (Feature 11)
+     */
+    public Mono<List<kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserStarred>> collectStarred(
+        String githubId, String token
+    ) {
+        String uri = String.format("/users/%s/starred", githubId);
+        return restApiClient.getAllWithPagination(uri, token, Map.class)
+            .flatMapMany(starred -> {
+                @SuppressWarnings("unchecked")
+                List<Map<String, Object>> list = (List<Map<String, Object>>) (List<?>) starred;
+                return reactor.core.publisher.Flux.fromIterable(list)
+                    .map(repo -> {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> owner = (Map<String, Object>) repo.get("owner");
+                        return kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubUserStarred
+                            .create(githubId, (String) owner.get("login"), (String) repo.get("name"));
+                    })
+                    .filter(us -> !userStarredRepository.existsByGithubIdAndStarredRepoOwnerAndStarredRepoName(
+                        us.getGithubId(), us.getStarredRepoOwner(), us.getStarredRepoName()));
+            })
+            .collectList()
+            .flatMap(list -> {
+                if (list.isEmpty()) return Mono.just(list);
+                return Mono.fromCallable(() -> userStarredRepository.saveAll(list))
+                    .map(saved -> list);
+            })
+            .doOnSuccess(list -> log.info("Collected {} starred repos for {}", list.size(), githubId))
+            .onErrorResume(e -> {
+                log.warn("Failed to collect starred for {}: {}", githubId, e.getMessage());
+                return Mono.just(List.of());
+            });
     }
 }
 

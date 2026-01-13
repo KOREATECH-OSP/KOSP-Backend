@@ -1,17 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.controller;
 
-import jakarta.validation.Valid;
 import java.net.URI;
-import kr.ac.koreatech.sw.kosp.domain.community.article.api.ArticleApi;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleLikeResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.service.ArticleService;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,9 +14,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.community.article.api.ArticleApi;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ToggleLikeResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.service.ArticleService;
+import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
+import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,13 +40,13 @@ public class ArticleController implements ArticleApi {
     @Override
     @GetMapping
     @Permit(permitAll = true, description = "게시글 목록 조회")
-    public ResponseEntity<ArticleListResponse> getList(
+    public ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
         Pageable pageable
     ) {
         Board board = boardService.getBoard(boardId);
-        ArticleListResponse response = articleService.getList(board, pageable, user);
+        ArticleListResponse<ArticleResponse> response = articleService.getList(board, pageable, user);
         return ResponseEntity.ok(response);
     }
 

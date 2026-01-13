@@ -9,10 +9,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ActivityTimelineResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionOverviewResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
 
 @Tag(name = "GitHub", description = "GitHub 관련 API")
 @RequestMapping("/v1/users/{userId}/github")
@@ -54,5 +60,57 @@ public interface GithubApi {
         @PathVariable Long userId,
         @Parameter(description = "조회할 저장소 개수", example = "10")
         @RequestParam(defaultValue = "10") Integer limit
+    );
+
+    @Operation(summary = "전체 기여 내역 요약 조회", description = "사용자의 전체 기여 내역 요약을 조회합니다.")
+    @GetMapping("/contribution-overview")
+    ResponseEntity<ContributionOverviewResponse> getContributionOverview(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "기여 성향 분석 조회", description = "사용자의 기여 성향(시간대, 프로젝트 패턴, 협업)을 분석합니다.")
+    @GetMapping("/contribution-pattern")
+    ResponseEntity<ContributionPatternResponse> getContributionPattern(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "연도별 분석 조회", description = "특정 연도의 GitHub 활동 분석을 조회합니다.")
+    @GetMapping("/yearly-analysis")
+    ResponseEntity<YearlyAnalysisResponse> getYearlyAnalysis(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId,
+        @Parameter(description = "조회할 연도", required = true, example = "2024")
+        @RequestParam int year
+    );
+
+    @Operation(summary = "저장소별 통계 조회", description = "사용자의 저장소별 기여 통계를 조회합니다.")
+    @GetMapping("/repository-stats")
+    ResponseEntity<RepositoryStatsResponse> getRepositoryStats(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId,
+        @Parameter(description = "조회할 저장소 개수", example = "10")
+        @RequestParam(defaultValue = "10") int limit,
+        @Parameter(description = "정렬 기준 (commits, stars, lines)", example = "commits")
+        @RequestParam(defaultValue = "commits") String sortBy
+    );
+
+    @Operation(summary = "언어 분포 조회", description = "사용자의 프로그래밍 언어 사용 분포를 조회합니다.")
+    @GetMapping("/language-distribution")
+    ResponseEntity<LanguageDistributionResponse> getLanguageDistribution(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "활동 타임라인 조회", description = "사용자의 최근 활동 타임라인을 조회합니다.")
+    @GetMapping("/activity-timeline")
+    ResponseEntity<ActivityTimelineResponse> getActivityTimeline(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId,
+        @Parameter(description = "조회할 활동 개수", example = "20")
+        @RequestParam(defaultValue = "20") int limit,
+        @Parameter(description = "조회 기간 (일)", example = "90")
+        @RequestParam(defaultValue = "90") int days
     );
 }

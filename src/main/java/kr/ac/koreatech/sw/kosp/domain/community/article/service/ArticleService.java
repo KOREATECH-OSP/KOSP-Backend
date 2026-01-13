@@ -1,26 +1,28 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.service;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
-import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleLike;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleBookmark;
+import kr.ac.koreatech.sw.kosp.domain.community.article.model.ArticleLike;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
-import java.util.Optional;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -63,6 +65,12 @@ public class ArticleService {
 
     public ArticleResponse getOne(Long id, User user) {
         Article article = articleRepository.getById(id);
+        
+        // Check if article is deleted - regular users cannot see deleted articles
+        if (article.isDeleted()) {
+            throw new GlobalException(ExceptionMessage.NOT_FOUND);
+        }
+        
         article.increaseViews();
 
         boolean isLiked = isLiked(user, article);
@@ -71,16 +79,40 @@ public class ArticleService {
         return ArticleResponse.from(article, isLiked, isBookmarked);
     }
 
-    public ArticleListResponse getList(Board board, Pageable pageable, User user) {
-        Page<Article> page = articleRepository.findByBoard(board, pageable);
+    public ArticleListResponse<ArticleResponse> getList(Board board, Pageable pageable, User user) {
+        // Regular users - exclude deleted articles
+        Page<Article> page = articleRepository.findByBoardAndIsDeletedFalse(board, pageable);
         return toResponse(page, user);
     }
     
-    private ArticleListResponse toResponse(Page<Article> page, User user) {
+    private ArticleListResponse<ArticleResponse> toResponse(Page<Article> page, User user) {
         List<ArticleResponse> posts = page.getContent().stream()
             .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
             .toList();
-        return new ArticleListResponse(posts, PageMeta.from(page));
+        return new ArticleListResponse<>(posts, PageMeta.from(page));
+    }
+    
+    // Admin methods - include deleted articles
+    public ArticleListResponse<kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse> getListForAdmin(Board board, Pageable pageable, User user) {
+        Page<Article> page = articleRepository.findByBoard(board, pageable);
+        return toAdminResponse(page, user);
+    }
+    
+    public kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse getOneForAdmin(Long id, User user) {
+        Article article = articleRepository.getById(id);
+        article.increaseViews();
+        
+        boolean isLiked = isLiked(user, article);
+        boolean isBookmarked = isBookmarked(user, article);
+        
+        return kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse.from(article, isLiked, isBookmarked);
+    }
+    
+    private ArticleListResponse<kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse> toAdminResponse(Page<Article> page, User user) {
+        List<kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse> posts = page.getContent().stream()
+            .map(article -> kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
+            .toList();
+        return new ArticleListResponse<>(posts, PageMeta.from(page));
     }
 
     @Transactional

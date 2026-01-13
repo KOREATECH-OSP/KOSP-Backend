@@ -59,8 +59,9 @@ public class GithubCollectionWorker {
     @Async("githubWorkerExecutor")
     @Scheduled(fixedDelayString = "${github.collection.worker.poll-interval:1000}")
     public void processJobs() {
+        CollectionJob job = null;
         try {
-            CollectionJob job = pollJob();
+            job = pollJob();
             if (job == null) {
                 return;
             }
@@ -69,8 +70,29 @@ public class GithubCollectionWorker {
             processJob(job);
             markAsCompleted(job);
             
+        } catch (kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException e) {
+            // ✅ Rate Limit 도달 - 작업을 재스케줄 (스레드 블로킹 없음!)
+            if (job != null) {
+                long waitMillis = e.getWaitTime().toMillis();
+                log.warn("⚠️ Rate limit reached for job {}. Rescheduling after {} ms", 
+                    job.getJobId(), waitMillis);
+                
+                // Remove from processing and reschedule
+                redisTemplate.opsForHash().delete(PROCESSING_KEY, job.getJobId());
+                jobProducer.enqueueWithDelay(job, waitMillis);
+            }
+            // ❌ 예외를 다시 던지지 않음 - Worker는 즉시 다음 작업 처리
+            
         } catch (Exception e) {
-            log.error("Error processing job", e);
+            // ✅ 명확한 에러 로깅 추가
+            if (job != null) {
+                log.error("❌ Worker failed to process job {}: {}", 
+                    job.getJobId(), e.getMessage(), e);
+            } else {
+                log.error("❌ Worker error: {}", e.getMessage(), e);
+            }
+            // Exception은 이미 processJob()의 handleFailure()에서 처리됨
+            // 여기서는 로깅만 하고 계속 진행
         }
     }
 
@@ -134,14 +156,7 @@ public class GithubCollectionWorker {
                 throw new IllegalStateException("Failed to decrypt GitHub token");
             }
             
-            // Rate limit 체크
-            var rateLimitInfo = rateLimitChecker.checkRateLimit(token);
-            if (!rateLimitInfo.hasEnoughRemaining(10)) {
-                log.warn("⚠️ Rate limit low for job {} (remaining: {}), rescheduling after reset",
-                    job.getJobId(), rateLimitInfo.remaining());
-                jobProducer.enqueueAfterRateLimitReset(job, rateLimitInfo.resetTime());
-                return;  // 즉시 반환, Thread.sleep 없음!
-            }
+            // ✅ Rate limit 체크 제거 - GithubRestApiClient가 응답 헤더로 자동 관리
             
             switch (job.getType()) {
                 case USER_BASIC -> dataCollectionService.collectUserBasicInfo(
@@ -166,11 +181,28 @@ public class GithubCollectionWorker {
                     token
                 ).block();
                 
-                case REPO_COMMITS -> commitCollectionService.collectAllCommits(
-                    job.getRepoOwner(),
-                    job.getRepoName(),
-                    token
-                ).block();
+                
+                case REPO_COMMITS -> {
+                    // githubLogin 검증
+                    if (job.getGithubLogin() == null || job.getGithubLogin().isEmpty()) {
+                        log.error("❌ REPO_COMMITS job missing githubLogin: {}", job.getJobId());
+                        throw new IllegalArgumentException(
+                            "githubLogin is required for REPO_COMMITS collection"
+                        );
+                    }
+                    
+                    Long count = commitCollectionService.collectAllCommits(
+                        job.getRepoOwner(),
+                        job.getRepoName(),
+                        job.getGithubLogin(),  // ✅ 추가
+                        token
+                    ).block();
+                    
+                    log.info("✅ Collected {} commits for {} in {}/{}", 
+                        count, job.getGithubLogin(), job.getRepoOwner(), job.getRepoName());
+                    
+                    return;  // Fixed: changed from yield to return
+                }
             }
             
             log.info("Successfully processed job: {}", job.getJobId());
@@ -206,7 +238,7 @@ public class GithubCollectionWorker {
         job.setLastError(e.getMessage());
         job.incrementRetryCount();
         
-        // Remove from processing
+        // ✅ Remove from processing FIRST (중요!)
         redisTemplate.opsForHash().delete(PROCESSING_KEY, job.getJobId());
         
         if (job.getRetryCount() < MAX_RETRY) {

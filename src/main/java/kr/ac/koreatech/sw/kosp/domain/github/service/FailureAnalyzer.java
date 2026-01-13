@@ -67,6 +67,26 @@ public class FailureAnalyzer {
     }
 
     /**
+     * 재시도 가능한 에러인지 판단
+     * 재시도 가능: 일시적 네트워크 문제, 타임아웃, Rate Limit 등
+     * 재시도 불가능: 404 (리소스 없음), 401/403 (권한 문제)
+     */
+    public boolean isRetryable(FailureType type) {
+        return switch (type) {
+            case CONNECTION_CLOSED,   // PrematureCloseException - 일시적 연결 문제
+                 TIMEOUT,              // TimeoutException - 일시적 지연
+                 RATE_LIMIT,           // 403 rate limit - 대기 후 재시도 가능
+                 SERVER_ERROR,         // 5xx - GitHub 서버 일시적 문제
+                 NETWORK_ERROR         // Connection issues - 네트워크 일시적 문제
+                -> true;
+            case NOT_FOUND,            // 404 - 리소스가 실제로 없음 (재시도 무의미)
+                 UNAUTHORIZED          // 401/403 - 권한 문제 (재시도 무의미)
+                -> false;
+            case UNKNOWN -> true;      // 안전하게 재시도 (예상치 못한 에러 복구 시도)
+        };
+    }
+
+    /**
      * 실패 기록 및 로깅
      */
     public void recordFailure(String context, FailureType type, Exception e) {

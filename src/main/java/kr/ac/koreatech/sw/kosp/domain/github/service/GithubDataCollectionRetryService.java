@@ -59,7 +59,8 @@ public class GithubDataCollectionRetryService {
                     String repoName = extractName(repository);
                     
                     if (repoOwner != null && repoName != null) {
-                        jobProducer.enqueueRepositoryCollection(repoOwner, repoName, encryptedToken);
+                        // ✅ 수정: githubLogin 전달 (실제 사용자 login)
+                        jobProducer.enqueueRepositoryCollection(githubLogin, repoOwner, repoName, encryptedToken);
                     }
                 }
             } catch (Exception e) {

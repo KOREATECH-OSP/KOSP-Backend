@@ -135,7 +135,8 @@ class Step3MongoDataTest {
             50,
             20,
             List.of(),
-            Map.of("totalCommitContributions", 500)
+            Map.of("totalCommitContributions", 500),
+            0
         );
 
         // When
