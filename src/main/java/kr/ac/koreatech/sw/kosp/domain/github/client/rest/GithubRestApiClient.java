@@ -86,7 +86,7 @@ public class GithubRestApiClient {
                                 .then(Mono.error(new RuntimeException("Rate limit exceeded")));
                         })
                 )
-                .bodyToMono(responseType)
+                .toEntity(responseType)  // ✅ bodyToMono → toEntity 변경
                 .retryWhen(Retry.backoff(5, Duration.ofSeconds(2))
                     .maxBackoff(Duration.ofSeconds(30))
                     .filter(throwable -> 
@@ -97,11 +97,29 @@ public class GithubRestApiClient {
                             throwable.getMessage().contains("Connection refused")
                         ))
                     ))
-                .doOnSuccess(response -> {
+                .doOnSuccess(entity -> {
+                    // ✅ 응답 헤더에서 rate limit 정보 추출
+                    if (entity != null) {
+                        HttpHeaders headers = entity.getHeaders();
+                        String remaining = headers.getFirst("X-RateLimit-Remaining");
+                        String reset = headers.getFirst("X-RateLimit-Reset");
+                        
+                        if (remaining != null && reset != null) {
+                            try {
+                                int remainingInt = Integer.parseInt(remaining);
+                                long resetLong = Long.parseLong(reset) * 1000; // seconds to milliseconds
+                                rateLimitManager.updateRateLimit(remainingInt, resetLong);
+                            } catch (NumberFormatException e) {
+                                log.warn("Failed to parse rate limit headers: remaining={}, reset={}", 
+                                    remaining, reset);
+                            }
+                        }
+                    }
                     rateLimitManager.recordRequest();
                     log.debug("GET {} - Success", uri);
                 })
                 .doOnError(error -> log.error("GET {} - Error: {}", uri, error.getMessage()))
+                .map(entity -> entity != null ? entity.getBody() : null)  // ✅ Body 추출
             );
     }
 

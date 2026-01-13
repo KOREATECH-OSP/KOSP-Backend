@@ -56,6 +56,9 @@ public class GithubUserStatistics {
     @Column(nullable = false)
     private Integer totalStarsReceived = 0;
 
+    @Column(nullable = false)
+    private Integer totalForksReceived = 0;
+
     // 시간대 분석
     @Column(nullable = false)
     private Integer nightCommits = 0;
@@ -63,7 +66,19 @@ public class GithubUserStatistics {
     @Column(nullable = false)
     private Integer dayCommits = 0;
 
-    // 점수
+    // 점수 세분화
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal mainRepoScore = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal otherRepoScore = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal prIssueScore = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal reputationScore = BigDecimal.ZERO;
+
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalScore = BigDecimal.ZERO;
 
@@ -92,6 +107,7 @@ public class GithubUserStatistics {
         Integer ownedReposCount,
         Integer contributedReposCount,
         Integer totalStarsReceived,
+        Integer totalForksReceived,
         Integer nightCommits,
         Integer dayCommits
     ) {
@@ -104,6 +120,7 @@ public class GithubUserStatistics {
         this.ownedReposCount = ownedReposCount;
         this.contributedReposCount = contributedReposCount;
         this.totalStarsReceived = totalStarsReceived;
+        this.totalForksReceived = totalForksReceived;
         this.nightCommits = nightCommits;
         this.dayCommits = dayCommits;
         this.calculatedAt = LocalDateTime.now();
@@ -111,6 +128,22 @@ public class GithubUserStatistics {
 
     public void updateScore(BigDecimal totalScore) {
         this.totalScore = totalScore;
+    }
+
+    public void updateDetailedScore(
+        BigDecimal mainRepoScore,
+        BigDecimal otherRepoScore,
+        BigDecimal prIssueScore,
+        BigDecimal reputationScore
+    ) {
+        this.mainRepoScore = mainRepoScore;
+        this.otherRepoScore = otherRepoScore;
+        this.prIssueScore = prIssueScore;
+        this.reputationScore = reputationScore;
+        this.totalScore = mainRepoScore
+            .add(otherRepoScore)
+            .add(prIssueScore)
+            .add(reputationScore);
     }
 
     public void updateDataPeriod(LocalDate start, LocalDate end) {
