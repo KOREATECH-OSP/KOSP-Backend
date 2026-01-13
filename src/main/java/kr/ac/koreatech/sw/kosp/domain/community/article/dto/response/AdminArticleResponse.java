@@ -7,7 +7,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
 import lombok.Builder;
 
 @Builder
-public record ArticleResponse(
+public record AdminArticleResponse(
     Long id,
     Long boardId,
     String title,
@@ -19,10 +19,11 @@ public record ArticleResponse(
     List<String> tags,
     Boolean isLiked,
     Boolean isBookmarked,
+    Boolean isDeleted,  // Admin-only field
     Boolean isPinned
 ) {
-    public static ArticleResponse from(Article article, boolean isLiked, boolean isBookmarked) {
-        return ArticleResponse.builder()
+    public static AdminArticleResponse from(Article article, boolean isLiked, boolean isBookmarked) {
+        return AdminArticleResponse.builder()
             .id(article.getId())
             .boardId(article.getBoardId())
             .title(article.getTitle())
@@ -34,6 +35,7 @@ public record ArticleResponse(
             .tags(new java.util.ArrayList<>(article.getTags()))
             .isLiked(isLiked)
             .isBookmarked(isBookmarked)
+            .isDeleted(article.isDeleted())
             .isPinned(article.isPinned())
             .build();
     }
