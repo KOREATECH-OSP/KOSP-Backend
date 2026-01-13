@@ -40,13 +40,13 @@ public class ArticleController implements ArticleApi {
     @Override
     @GetMapping
     @Permit(permitAll = true, description = "게시글 목록 조회")
-    public ResponseEntity<ArticleListResponse> getList(
+    public ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
         Pageable pageable
     ) {
         Board board = boardService.getBoard(boardId);
-        ArticleListResponse response = articleService.getList(board, pageable, user);
+        ArticleListResponse<ArticleResponse> response = articleService.getList(board, pageable, user);
         return ResponseEntity.ok(response);
     }
 

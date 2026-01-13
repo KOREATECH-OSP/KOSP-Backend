@@ -1,14 +1,5 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.api;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
-import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,12 +10,22 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.request.ArticleRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.ArticleResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
+
 @Tag(name = "Article", description = "게시글 관리 API")
 public interface ArticleApi {
 
     @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다.")
     @GetMapping
-    ResponseEntity<ArticleListResponse> getList(
+    ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestParam Long boardId,
         @Parameter(hidden = true) Pageable pageable

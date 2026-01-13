@@ -4,8 +4,8 @@ import java.util.List;
 
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 
-public record ArticleListResponse(
-    List<ArticleResponse> posts,
+public record ArticleListResponse<T>(
+    List<T> posts,
     PageMeta pagination
 ) {
     // Static factory removed. Service handles mapping with isLiked logic.
