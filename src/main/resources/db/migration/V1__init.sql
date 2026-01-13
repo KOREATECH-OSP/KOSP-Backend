@@ -380,12 +380,17 @@ CREATE TABLE github_user_statistics (
     owned_repos_count INT NOT NULL DEFAULT 0,
     contributed_repos_count INT NOT NULL DEFAULT 0,
     total_stars_received INT NOT NULL DEFAULT 0,
+    total_forks_received INT NOT NULL DEFAULT 0,
     
     -- 시간대 분석
     night_commits INT NOT NULL DEFAULT 0,
     day_commits INT NOT NULL DEFAULT 0,
     
-    -- 점수
+    -- 점수 세분화
+    main_repo_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    other_repo_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    pr_issue_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    reputation_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
     total_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
     
     -- 메타
@@ -401,8 +406,8 @@ CREATE TABLE github_user_statistics (
 CREATE TABLE github_monthly_statistics (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     github_id VARCHAR(100) NOT NULL,
-    year INT NOT NULL,
-    month INT NOT NULL,
+    `year` INT NOT NULL,
+    `month` INT NOT NULL,
     
     commits_count INT NOT NULL DEFAULT 0,
     lines_count INT NOT NULL DEFAULT 0,
@@ -415,9 +420,9 @@ CREATE TABLE github_monthly_statistics (
     
     calculated_at DATETIME NOT NULL,
     
-    UNIQUE KEY uk_user_month (github_id, year, month),
+    UNIQUE KEY uk_user_month (github_id, `year`, `month`),
     INDEX idx_github_id (github_id),
-    INDEX idx_year_month (year, month)
+    INDEX idx_year_month (`year`, `month`)
 );
 
 -- 저장소별 통계 테이블
@@ -451,45 +456,116 @@ CREATE TABLE github_repository_statistics (
     INDEX idx_stars (stargazers_count DESC)
 );
 
+-- 연도별 통계 테이블
+CREATE TABLE github_yearly_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL,
+    `year` INT NOT NULL,
+    
+    -- 연도별 통계
+    commits INT NOT NULL DEFAULT 0,
+    `lines` INT NOT NULL DEFAULT 0,
+    additions INT NOT NULL DEFAULT 0,
+    deletions INT NOT NULL DEFAULT 0,
+    prs INT NOT NULL DEFAULT 0,
+    issues INT NOT NULL DEFAULT 0,
+    
+    -- 연도별 점수
+    total_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    main_repo_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    other_repo_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    pr_issue_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    reputation_score DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    
+    -- 순위
+    `rank` INT,
+    percentile INT,
+    
+    -- 최고 저장소
+    best_repo_owner VARCHAR(100),
+    best_repo_name VARCHAR(200),
+    best_repo_commits INT,
+    
+    -- 메타
+    calculated_at DATETIME NOT NULL,
+    
+    UNIQUE KEY uk_github_id_year (github_id, `year`),
+    INDEX idx_github_id (github_id),
+    INDEX idx_year (`year`),
+    INDEX idx_total_score (total_score DESC)
+);
+
+-- 기여 패턴 테이블
+CREATE TABLE github_contribution_pattern (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL UNIQUE,
+    
+    -- 시간대 패턴
+    night_owl_score INT NOT NULL DEFAULT 0,
+    night_commits INT NOT NULL DEFAULT 0,
+    day_commits INT NOT NULL DEFAULT 0,
+    
+    -- 프로젝트 패턴
+    initiator_score INT NOT NULL DEFAULT 0,
+    early_contributions INT NOT NULL DEFAULT 0,
+    independent_score INT NOT NULL DEFAULT 0,
+    solo_projects INT NOT NULL DEFAULT 0,
+    total_projects INT NOT NULL DEFAULT 0,
+    
+    -- 협업 패턴
+    total_coworkers INT NOT NULL DEFAULT 0,
+    
+    -- 시간대별 분포 (JSON)
+    hourly_distribution TEXT,
+    
+    -- 메타
+    calculated_at DATETIME NOT NULL,
+    
+    INDEX idx_github_id (github_id)
+);
+
+-- 언어 통계 테이블
+CREATE TABLE github_language_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    github_id VARCHAR(100) NOT NULL,
+    `language` VARCHAR(50) NOT NULL,
+    
+    lines_of_code INT NOT NULL DEFAULT 0,
+    percentage DECIMAL(5, 2) NOT NULL DEFAULT 0,
+    repositories INT NOT NULL DEFAULT 0,
+    commits INT NOT NULL DEFAULT 0,
+    
+    -- 메타
+    calculated_at DATETIME NOT NULL,
+    
+    UNIQUE KEY uk_github_id_language (github_id, `language`),
+    INDEX idx_github_id (github_id),
+    INDEX idx_language (`language`),
+    INDEX idx_percentage (percentage DESC)
+);
+
 -- 점수 설정 테이블
 CREATE TABLE github_score_config (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    config_name VARCHAR(100) NOT NULL UNIQUE,
-    active BOOLEAN NOT NULL DEFAULT FALSE,
-
-    activity_level_max_score DOUBLE NOT NULL DEFAULT 3.0,
-    commits_weight DOUBLE NOT NULL DEFAULT 0.01,
-    lines_weight DOUBLE NOT NULL DEFAULT 0.0001,
-
-    diversity_max_score DOUBLE NOT NULL DEFAULT 1.0,
-    diversity_repo_threshold INT NOT NULL DEFAULT 10,
-
-    impact_max_score DOUBLE NOT NULL DEFAULT 5.0,
-    stars_weight DOUBLE NOT NULL DEFAULT 0.01,
-    forks_weight DOUBLE NOT NULL DEFAULT 0.05,
-    contributors_weight DOUBLE NOT NULL DEFAULT 0.02,
-
-    night_owl_bonus DOUBLE NOT NULL DEFAULT 0.5,
-    early_adopter_bonus DOUBLE NOT NULL DEFAULT 0.3,
-
+    config_key VARCHAR(100) NOT NULL UNIQUE,
+    config_value VARCHAR(255) NOT NULL,
+    description VARCHAR(500),
+    
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME,
-    created_by VARCHAR(100),
-
-    INDEX idx_active (active)
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    INDEX idx_config_key (config_key)
 );
 
 -- 기본 설정 삽입
-INSERT INTO github_score_config (
-    config_name, active,
-    activity_level_max_score, commits_weight, lines_weight,
-    diversity_max_score, diversity_repo_threshold,
-    impact_max_score, stars_weight, forks_weight,
-    night_owl_bonus, created_by
-) VALUES (
-    'default', TRUE,
-    3.0, 0.01, 0.0001,
-    1.0, 10,
-    5.0, 0.01, 0.05,
-    0.5, 'system'
-);
+INSERT INTO github_score_config (config_key, config_value, description) VALUES
+('commit_weight', '10.0', 'Weight for each commit'),
+('line_weight', '0.01', 'Weight per line of code'),
+('pr_weight', '50.0', 'Weight for each pull request'),
+('issue_weight', '25.0', 'Weight for each issue'),
+('star_weight', '5.0', 'Weight for each star received'),
+('fork_weight', '10.0', 'Weight for each fork received'),
+('main_repo_multiplier', '1.5', 'Multiplier for main repository contributions'),
+('night_commit_bonus', '1.2', 'Bonus multiplier for night commits'),
+('early_contributor_bonus', '100.0', 'Bonus for early project contributors'),
+('solo_project_penalty', '0.8', 'Penalty multiplier for solo projects');
