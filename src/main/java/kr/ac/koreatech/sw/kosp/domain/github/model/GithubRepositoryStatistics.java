@@ -77,6 +77,9 @@ public class GithubRepositoryStatistics {
     @Column(name = "primary_language", length = 50)
     private String primaryLanguage;
 
+    @Column(name = "repo_created_at")
+    private LocalDateTime repoCreatedAt;
+
     @Column(name = "calculated_at", nullable = false)
     private LocalDateTime calculatedAt;
 
@@ -98,13 +101,15 @@ public class GithubRepositoryStatistics {
         Integer forksCount,
         Integer watchersCount,
         String description,
-        String primaryLanguage
+        String primaryLanguage,
+        LocalDateTime repoCreatedAt
     ) {
         this.stargazersCount = stargazersCount;
         this.forksCount = forksCount;
         this.watchersCount = watchersCount;
         this.description = description;
         this.primaryLanguage = primaryLanguage;
+        this.repoCreatedAt = repoCreatedAt;
     }
 
     public void updateUserContributions(
