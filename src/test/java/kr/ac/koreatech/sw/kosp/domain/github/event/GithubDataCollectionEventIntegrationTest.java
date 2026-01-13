@@ -21,6 +21,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 @SpringBootTest
 @ActiveProfiles("test")
 @DisplayName("GitHub 데이터 수집 이벤트 통합 테스트")
+@SuppressWarnings("removal") // @MockBean deprecation warning suppression
 class GithubDataCollectionEventIntegrationTest {
 
     @Autowired

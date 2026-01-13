@@ -48,7 +48,7 @@ class Step1InfrastructureTest {
         statistics.updateStatistics(
             100, 5000, 3000, 2000,
             10, 5,
-            5, 10, 50,
+            5, 10, 50, 15,
             20, 80
         );
         statistics.updateScore(BigDecimal.valueOf(1000.50));
@@ -105,15 +105,15 @@ class Step1InfrastructureTest {
     void testRankingQuery() {
         // Given
         GithubUserStatistics stats = GithubUserStatistics.create("testuser");
-        stats.updateStatistics(100, 5000, 3000, 2000, 10, 5, 3, 2, 50, 20, 80);
+        stats.updateStatistics(100, 5000, 3000, 2000, 10, 5, 3, 2, 50, 15, 20, 80);
         stats.updateScore(BigDecimal.valueOf(1500.50));
 
         GithubUserStatistics user2 = GithubUserStatistics.create("user2");
-        user2.updateStatistics(150, 7500, 4500, 3000, 15, 8, 5, 3, 75, 30, 120);
+        user2.updateStatistics(150, 7500, 4500, 3000, 15, 8, 5, 3, 75, 25, 30, 120);
         user2.updateScore(BigDecimal.valueOf(2250.75));
 
         GithubUserStatistics user3 = GithubUserStatistics.create("user3");
-        user3.updateStatistics(80, 3000, 1500, 1500, 5, 3, 2, 1, 30, 15, 65);
+        user3.updateStatistics(80, 3000, 1500, 1500, 5, 3, 2, 1, 30, 10, 15, 65);
         user3.updateScore(BigDecimal.valueOf(1000.25));
 
         userStatisticsRepository.save(stats);
