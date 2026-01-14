@@ -61,6 +61,8 @@ public class UserService {
         GithubUser githubUser = githubUserRepository.findByGithubId(githubId)
             .orElseGet(() -> GithubUser.builder()
                 .githubId(githubId)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build());
         
         // GitHub 정보 업데이트 (암호화된 토큰 그대로 저장)
@@ -86,6 +88,8 @@ public class UserService {
                 .kutId(request.kutId())
                 .kutEmail(kutEmail)
                 .password(request.password())
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build();
                 
             user.encodePassword(passwordEncoder);

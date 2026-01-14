@@ -65,6 +65,8 @@ class ArticleIntegrationTest extends IntegrationTestSupport {
             .name("Free Board")
             .description("Free Talk")
             .isRecruitAllowed(false)
+            .createdAt(java.time.LocalDateTime.now())
+            .updatedAt(java.time.LocalDateTime.now())
             .build();
         boardRepository.save(testBoard);
     }

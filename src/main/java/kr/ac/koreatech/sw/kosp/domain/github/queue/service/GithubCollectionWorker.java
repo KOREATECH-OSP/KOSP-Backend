@@ -207,6 +207,10 @@ public class GithubCollectionWorker {
             
             log.info("Successfully processed job: {}", job.getJobId());
             
+        } catch (kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException e) {
+            // ✅ RateLimitException은 실패로 처리하지 않고 그대로 전파
+            // processJobs()에서 잡아서 긴 대기 시간으로 재스케줄링함
+            throw e;
         } catch (Exception e) {
             handleFailure(job, e);
             throw e;

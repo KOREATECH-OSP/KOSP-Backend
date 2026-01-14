@@ -38,6 +38,9 @@ public class GithubRepositoryStatistics {
     @Column(name = "contributor_github_id", nullable = false, length = 100)
     private String contributorGithubId;
 
+    @Column(name = "is_owned")
+    private Boolean isOwned = false;
+
     // 저장소 기본 정보
     @Column(name = "stargazers_count", nullable = false)
     private Integer stargazersCount = 0;
@@ -110,6 +113,10 @@ public class GithubRepositoryStatistics {
         this.description = description;
         this.primaryLanguage = primaryLanguage;
         this.repoCreatedAt = repoCreatedAt;
+    }
+
+    public void updateOwnership(Boolean isOwned) {
+        this.isOwned = isOwned;
     }
 
     public void updateUserContributions(

@@ -14,14 +14,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ActivityTimelineResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionOverviewResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
-import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+// import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubGlobalStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubContributionPattern;
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
+// import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubMonthlyStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUserStatistics;
@@ -29,8 +35,9 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubYearlyStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubTimelineData;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubTimelineDataRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubContributionPatternRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubLanguageStatisticsRepository;
+// import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubLanguageStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubMonthlyStatisticsRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubGlobalStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubYearlyStatisticsRepository;
@@ -49,7 +56,7 @@ public class GithubStatisticsService {
     private final RepositoryStatisticsCalculator repositoryStatisticsCalculator;
     private final ContributionPatternCalculator contributionPatternCalculator;
     private final YearlyStatisticsCalculator yearlyStatisticsCalculator;
-    private final LanguageStatisticsCalculator languageStatisticsCalculator;
+    // private final LanguageStatisticsCalculator languageStatisticsCalculator;
     private final GithubScoreCalculator scoreCalculator;
     
     private final UserRepository userRepository;
@@ -58,7 +65,8 @@ public class GithubStatisticsService {
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final GithubContributionPatternRepository contributionPatternRepository;
     private final GithubYearlyStatisticsRepository yearlyStatisticsRepository;
-    private final GithubLanguageStatisticsRepository languageStatisticsRepository;
+    private final GithubGlobalStatisticsRepository globalStatisticsRepository;
+    // private final GithubLanguageStatisticsRepository languageStatisticsRepository;
     private final GithubTimelineDataRepository timelineDataRepository;
     
     private final ObjectMapper objectMapper;
@@ -119,19 +127,45 @@ public class GithubStatisticsService {
         log.info("Calculating and saving monthly statistics for user: {}", githubId);
 
         // 월별 통계 계산
-        List<GithubMonthlyStatistics> monthlyStatistics = monthlyStatisticsCalculator.calculate(githubId);
+        List<GithubMonthlyStatistics> calculatedMonthlyStats = monthlyStatisticsCalculator.calculate(githubId);
 
-        // 기존 월별 통계 삭제 (재계산)
-        List<GithubMonthlyStatistics> existing = monthlyStatisticsRepository.findByGithubId(githubId);
-        existing.forEach(stat -> {
-            // 개별 삭제는 Repository에 delete 메서드가 필요하므로, 여기서는 업데이트로 처리
-            // 실제로는 deleteByGithubId 같은 메서드를 추가해야 함
-        });
+        // 기존 월별 통계 조회
+        List<GithubMonthlyStatistics> existingMonthlyStats = monthlyStatisticsRepository.findByGithubId(githubId);
+        
+        // Map으로 변환 (Year-Month -> MonthlyStatistics)
+        java.util.Map<String, GithubMonthlyStatistics> existingMap = existingMonthlyStats.stream()
+            .collect(Collectors.toMap(
+                stat -> stat.getYear() + "-" + stat.getMonth(),
+                stat -> stat
+            ));
 
-        // 새로운 월별 통계 저장
-        List<GithubMonthlyStatistics> saved = monthlyStatistics.stream()
-            .map(monthlyStatisticsRepository::save)
-            .toList();
+        List<GithubMonthlyStatistics> toSave = new java.util.ArrayList<>();
+
+        for (GithubMonthlyStatistics calculated : calculatedMonthlyStats) {
+            String key = calculated.getYear() + "-" + calculated.getMonth();
+            GithubMonthlyStatistics existing = existingMap.get(key);
+
+            if (existing != null) {
+                // Update existing
+                existing.updateStatistics(
+                    calculated.getCommitsCount(),
+                    calculated.getLinesCount(),
+                    calculated.getAdditionsCount(),
+                    calculated.getDeletionsCount(),
+                    calculated.getPrsCount(),
+                    calculated.getIssuesCount(),
+                    calculated.getCreatedReposCount(),
+                    calculated.getContributedReposCount()
+                );
+                toSave.add(existing);
+            } else {
+                // Insert new
+                toSave.add(calculated);
+            }
+        }
+
+        // 일괄 저장
+        List<GithubMonthlyStatistics> saved = monthlyStatisticsRepository.saveAll(toSave);
 
         log.info("Saved {} monthly statistics for user: {}", saved.size(), githubId);
         return saved;
@@ -159,23 +193,87 @@ public class GithubStatisticsService {
             calculateAndSaveRepositoryStatistics(githubId);
             
             // 4. 기여 패턴 분석
+            // 4. 기여 패턴 분석 (Deprecated: Not in Spec)
+            /*
             log.info("[4/7] Calculating contribution pattern...");
-            GithubContributionPattern pattern = contributionPatternCalculator.calculate(githubId);
-            contributionPatternRepository.save(pattern);
-            log.info("Contribution pattern saved: Night Owl={}, Initiator={}, Independent={}", 
-                pattern.getNightOwlScore(), pattern.getInitiatorScore(), pattern.getIndependentScore());
+            GithubContributionPattern calculatedPattern = contributionPatternCalculator.calculate(githubId);
             
-            // 5. 연도별 통계
+            GithubContributionPattern existingPattern = contributionPatternRepository.findByGithubId(githubId)
+                .orElse(null);
+                
+            if (existingPattern != null) {
+                existingPattern.updateTimePattern(
+                    calculatedPattern.getNightOwlScore(),
+                    calculatedPattern.getNightCommits(),
+                    calculatedPattern.getDayCommits(),
+                    calculatedPattern.getHourlyDistribution()
+                );
+                existingPattern.updateProjectPattern(
+                    calculatedPattern.getInitiatorScore(),
+                    calculatedPattern.getEarlyContributions(),
+                    calculatedPattern.getIndependentScore(),
+                    calculatedPattern.getSoloProjects(),
+                    calculatedPattern.getTotalProjects()
+                );
+                existingPattern.updateCollaborationPattern(calculatedPattern.getTotalCoworkers());
+                contributionPatternRepository.save(existingPattern);
+            } else {
+                contributionPatternRepository.save(calculatedPattern);
+            }
+            
+            log.info("Contribution pattern saved: Night Owl={}, Initiator={}, Independent={}", 
+                calculatedPattern.getNightOwlScore(), calculatedPattern.getInitiatorScore(), calculatedPattern.getIndependentScore());
+            */
+            
+            // 5. 연도별 통계 (Deprecated: Not in Spec)
+            /*
             log.info("[5/7] Calculating yearly statistics...");
-            List<GithubYearlyStatistics> yearlyStats = yearlyStatisticsCalculator.calculateAll(githubId);
-            yearlyStatisticsRepository.saveAll(yearlyStats);
-            log.info("Saved {} yearly statistics", yearlyStats.size());
+            List<GithubYearlyStatistics> calculatedYearlyStats = yearlyStatisticsCalculator.calculateAll(githubId);
+            
+            List<GithubYearlyStatistics> existingYearlyStats = yearlyStatisticsRepository.findByGithubIdOrderByYearDesc(githubId);
+            java.util.Map<Integer, GithubYearlyStatistics> existingYearlyMap = existingYearlyStats.stream()
+                .collect(Collectors.toMap(GithubYearlyStatistics::getYear, stat -> stat));
+            
+            List<GithubYearlyStatistics> yearlyToSave = new java.util.ArrayList<>();
+            
+            for (GithubYearlyStatistics calculated : calculatedYearlyStats) {
+                GithubYearlyStatistics existing = existingYearlyMap.get(calculated.getYear());
+                if (existing != null) {
+                    existing.updateStatistics(
+                        calculated.getCommits(),
+                        calculated.getLines(),
+                        calculated.getAdditions(),
+                        calculated.getDeletions(),
+                        calculated.getPrs(),
+                        calculated.getIssues()
+                    );
+                    existing.updateScores(
+                        calculated.getMainRepoScore(),
+                        calculated.getOtherRepoScore(),
+                        calculated.getPrIssueScore(),
+                        calculated.getReputationScore()
+                    );
+                    existing.updateRanking(calculated.getRank(), calculated.getPercentile());
+                    existing.updateBestRepository(
+                        calculated.getBestRepoOwner(),
+                        calculated.getBestRepoName(),
+                        calculated.getBestRepoCommits()
+                    );
+                    yearlyToSave.add(existing);
+                } else {
+                    yearlyToSave.add(calculated);
+                }
+            }
+            
+            yearlyStatisticsRepository.saveAll(yearlyToSave);
+            log.info("Saved {} yearly statistics", yearlyToSave.size());
+            */
             
             // 6. 언어 분포 통계
-            log.info("[6/7] Calculating language statistics...");
-            List<GithubLanguageStatistics> langStats = languageStatisticsCalculator.calculate(githubId);
-            languageStatisticsRepository.saveAll(langStats);
-            log.info("Saved {} language statistics", langStats.size());
+            log.info("[6/7] Skipping language statistics (Deprecated)...");
+            // List<GithubLanguageStatistics> langStats = languageStatisticsCalculator.calculate(githubId);
+            // languageStatisticsRepository.saveAll(langStats);
+            // log.info("Saved {} language statistics", langStats.size());
             
             // 7. 점수 계산 및 업데이트
             log.info("[7/7] Calculating and updating scores...");
@@ -448,23 +546,24 @@ public class GithubStatisticsService {
     }
 
     /**
-     * 언어 분포 조회
+     * 언어 분포 조회 (Deprecated)
      */
     @Transactional(readOnly = true)
-    public LanguageDistributionResponse getLanguageDistribution(Long userId) {
-        User user = findUserById(userId);
-        String githubId = user.getGithubUser().getGithubLogin();
+    public void getLanguageDistribution(Long userId) {
+        // User user = findUserById(userId);
+        // String githubId = user.getGithubUser().getGithubLogin();
 
-        List<GithubLanguageStatistics> languageStats = languageStatisticsRepository
-            .findByGithubIdOrderByLinesOfCodeDesc(githubId);
+        // List<GithubLanguageStatistics> languageStats = languageStatisticsRepository
+        //     .findByGithubIdOrderByLinesOfCodeDesc(githubId);
 
-        if (languageStats.isEmpty()) {
-            // 캐시 없으면 계산
-            languageStats = languageStatisticsCalculator.calculate(githubId);
-            languageStats = languageStatisticsRepository.saveAll(languageStats);
-        }
+        // if (languageStats.isEmpty()) {
+        //     // 캐시 없으면 계산
+        //     languageStats = languageStatisticsCalculator.calculate(githubId);
+        //     languageStats = languageStatisticsRepository.saveAll(languageStats);
+        // }
 
-        return LanguageDistributionResponse.from(languageStats);
+        // return LanguageDistributionResponse.from(languageStats);
+        throw new UnsupportedOperationException("Language statistics are deprecated.");
     }
 
     /**
@@ -491,5 +590,87 @@ public class GithubStatisticsService {
         }
         
         return response;
+    }
+
+    /**
+     * 1. 최근 기여활동 조회
+     */
+    @Transactional(readOnly = true)
+    public List<GithubRecentActivityResponse> getRecentActivityDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        List<GithubRepositoryStatistics> repoStats = repositoryStatisticsRepository
+            .findByContributorGithubId(githubId);
+
+        return repoStats.stream()
+            .sorted((a, b) -> b.getLastCommitDate().compareTo(a.getLastCommitDate()))
+            .limit(10) // Reasonable limit matching spec intent
+            .map(GithubRecentActivityResponse::from)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 2. 전체 기여 내역 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubOverallHistoryResponse getOverallHistoryDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        return GithubOverallHistoryResponse.from(userStats);
+    }
+
+    /**
+     * 3. 기여내역 비교 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubContributionComparisonResponse getComparisonDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        GithubGlobalStatistics globalStats = globalStatisticsRepository.findTopByOrderByCalculatedAtDesc()
+            .orElse(null);
+
+        return new GithubContributionComparisonResponse(
+            globalStats != null ? globalStats.getAvgCommitCount() : 0.0,
+            globalStats != null ? globalStats.getAvgStarCount() : 0.0,
+            globalStats != null ? globalStats.getAvgPrCount() : 0.0,
+            globalStats != null ? globalStats.getAvgIssueCount() : 0.0,
+            userStats.getTotalCommits(),
+            userStats.getTotalStarsReceived(),
+            userStats.getTotalPrs(),
+            userStats.getTotalIssues()
+        );
+    }
+
+    /**
+     * 4. GitHub 기여점수 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubContributionScoreResponse getScoreDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        return GithubContributionScoreResponse.from(userStats);
+    }
+
+    /**
+     * 전체 사용자 평균 통계 조회
+     */
+    @Transactional(readOnly = true)
+    public GlobalStatisticsResponse getGlobalStatistics() {
+        return globalStatisticsRepository.findTopByOrderByCalculatedAtDesc()
+            .map(GlobalStatisticsResponse::from)
+            .orElseGet(() -> GlobalStatisticsResponse.from(null));
     }
 }

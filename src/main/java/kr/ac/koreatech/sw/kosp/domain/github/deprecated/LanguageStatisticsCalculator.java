@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.github.service;
+package kr.ac.koreatech.sw.kosp.domain.github.deprecated;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
+import kr.ac.koreatech.sw.kosp.domain.github.deprecated.GithubLanguageStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCommitDetailRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitDetailRawRepository;

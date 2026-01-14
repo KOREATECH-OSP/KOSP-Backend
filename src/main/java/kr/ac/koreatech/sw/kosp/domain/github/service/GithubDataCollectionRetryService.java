@@ -59,8 +59,17 @@ public class GithubDataCollectionRetryService {
                     String repoName = extractName(repository);
                     
                     if (repoOwner != null && repoName != null) {
-                        // ✅ 수정: githubLogin 전달 (실제 사용자 login)
-                        jobProducer.enqueueRepositoryCollection(githubLogin, repoOwner, repoName, encryptedToken);
+                        // Check if recently collected to prevent duplicate loops
+                        GithubCollectionMetadata metadata = metadataRepository
+                            .findByRepoOwnerAndRepoNameAndCollectionType(repoOwner, repoName, "commits") // Check commits as proxy for all
+                            .block();
+
+                        if (metadata != null && metadata.getLastCollectedAt().isAfter(java.time.LocalDateTime.now().minusHours(1))) {
+                            log.debug("Skipping repository {}/{} as it was collected recently at {}", repoOwner, repoName, metadata.getLastCollectedAt());
+                        } else {
+                            // ✅ 수정: githubLogin 전달 (실제 사용자 login)
+                            jobProducer.enqueueRepositoryCollection(githubLogin, repoOwner, repoName, encryptedToken);
+                        }
                     }
                 }
             } catch (Exception e) {

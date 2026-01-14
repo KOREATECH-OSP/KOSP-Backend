@@ -23,7 +23,7 @@ public class GithubRateLimitChecker {
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> response = restApiClient
-                .get("/rate_limit", token, Map.class)
+                .getWithoutRateLimitCheck("/rate_limit", token, Map.class)
                 .block();
             
             if (response == null) {

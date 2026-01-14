@@ -41,6 +41,12 @@ public class GithubCommitCollectionService {
                     .onErrorResume(e -> {
                         // 실패 분석 및 기록
                         var failureType = failureAnalyzer.classifyFailure((Exception) e);
+                        
+                        // ✅ Rate Limit은 실패로 기록하지 않음 -> Worker가 재스케줄링
+                        if (failureType == kr.ac.koreatech.sw.kosp.domain.github.model.FailureType.RATE_LIMIT) {
+                            return Mono.error(e);
+                        }
+                        
                         failureAnalyzer.recordFailure(context, failureType, (Exception) e);
                         
                         // 재시도 가능한 에러는 예외를 전파하여 Worker가 재시도하도록 함
@@ -64,6 +70,11 @@ public class GithubCommitCollectionService {
                 failureAnalyzer.logFailureStatistics(context);
             })
             .doOnError(error -> {
+                // ✅ Rate Limit은 로그 스킵 (Worker가 처리)
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) {
+                    return;
+                }
+
                 // 전체 작업 실패 - 명확한 로깅
                 log.error("❌ CRITICAL: Failed to collect commits for {}/{}: {}", 
                     repoOwner, repoName, error.getMessage());

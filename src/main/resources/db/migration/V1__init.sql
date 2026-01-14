@@ -435,6 +435,7 @@ CREATE TABLE github_repository_statistics (
     stargazers_count INT NOT NULL DEFAULT 0,
     forks_count INT NOT NULL DEFAULT 0,
     watchers_count INT NOT NULL DEFAULT 0,
+    is_owned BIT(1) NOT NULL DEFAULT 0,
 
     total_commits_count INT NOT NULL DEFAULT 0,
     total_prs_count INT NOT NULL DEFAULT 0,
@@ -447,6 +448,7 @@ CREATE TABLE github_repository_statistics (
 
     description VARCHAR(500),
     primary_language VARCHAR(50),
+    repo_created_at DATETIME,
 
     calculated_at DATETIME NOT NULL,
 
@@ -547,25 +549,58 @@ CREATE TABLE github_language_statistics (
 -- 점수 설정 테이블
 CREATE TABLE github_score_config (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    config_key VARCHAR(100) NOT NULL UNIQUE,
-    config_value VARCHAR(255) NOT NULL,
-    description VARCHAR(500),
-    
+    config_name VARCHAR(100) NOT NULL UNIQUE,
+    active BOOLEAN NOT NULL DEFAULT FALSE,
+
+    activity_level_max_score DOUBLE NOT NULL DEFAULT 3.0,
+    commits_weight DOUBLE NOT NULL DEFAULT 0.01,
+    lines_weight DOUBLE NOT NULL DEFAULT 0.0001,
+
+    diversity_max_score DOUBLE NOT NULL DEFAULT 1.0,
+    diversity_repo_threshold INT NOT NULL DEFAULT 10,
+
+    impact_max_score DOUBLE NOT NULL DEFAULT 5.0,
+    stars_weight DOUBLE NOT NULL DEFAULT 0.01,
+    forks_weight DOUBLE NOT NULL DEFAULT 0.05,
+    contributors_weight DOUBLE NOT NULL DEFAULT 0.02,
+
+    night_owl_bonus DOUBLE NOT NULL DEFAULT 0.5,
+    early_adopter_bonus DOUBLE NOT NULL DEFAULT 0.3,
+
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    
-    INDEX idx_config_key (config_key)
+    updated_at DATETIME,
+    created_by VARCHAR(100),
+
+    INDEX idx_active (active)
 );
 
 -- 기본 설정 삽입
-INSERT INTO github_score_config (config_key, config_value, description) VALUES
-('commit_weight', '10.0', 'Weight for each commit'),
-('line_weight', '0.01', 'Weight per line of code'),
-('pr_weight', '50.0', 'Weight for each pull request'),
-('issue_weight', '25.0', 'Weight for each issue'),
-('star_weight', '5.0', 'Weight for each star received'),
-('fork_weight', '10.0', 'Weight for each fork received'),
-('main_repo_multiplier', '1.5', 'Multiplier for main repository contributions'),
-('night_commit_bonus', '1.2', 'Bonus multiplier for night commits'),
-('early_contributor_bonus', '100.0', 'Bonus for early project contributors'),
-('solo_project_penalty', '0.8', 'Penalty multiplier for solo projects');
+INSERT INTO github_score_config (
+    config_name, active,
+    activity_level_max_score, commits_weight, lines_weight,
+    diversity_max_score, diversity_repo_threshold,
+    impact_max_score, stars_weight, forks_weight, contributors_weight,
+    night_owl_bonus, early_adopter_bonus,
+    created_by
+) VALUES (
+    'default', TRUE,
+    3.0, 0.01, 0.0001,
+    1.0, 10,
+    5.0, 0.01, 0.05, 0.02,
+    0.5, 0.3,
+    'system'
+);
+
+-- 전체 통계 테이블 (GitHub Global Statistics)
+CREATE TABLE github_global_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    avg_commit_count DOUBLE NOT NULL DEFAULT 0,
+    avg_star_count DOUBLE NOT NULL DEFAULT 0,
+    avg_pr_count DOUBLE NOT NULL DEFAULT 0,
+    avg_issue_count DOUBLE NOT NULL DEFAULT 0,
+    
+    total_users INT NOT NULL DEFAULT 0,
+    calculated_at DATETIME NOT NULL,
+    
+    INDEX idx_calculated_at (calculated_at)
+);

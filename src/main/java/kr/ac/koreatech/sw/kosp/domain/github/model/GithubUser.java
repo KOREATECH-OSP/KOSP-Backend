@@ -10,12 +10,16 @@ import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
+
+import org.springframework.data.domain.Persistable;
 
 @Entity
 @Getter
 @Table(name = "github_user")
 @NoArgsConstructor
-public class GithubUser extends BaseEntity {
+@SuperBuilder
+public class GithubUser extends BaseEntity implements Persistable<Long> {
 
     @Id
     @Column(name = "github_id")
@@ -33,24 +37,9 @@ public class GithubUser extends BaseEntity {
     @Column(name = "github_token", columnDefinition = "TEXT")
     private String githubToken; // Access Token
 
+    @Builder.Default
     @Column(name = "last_crawling")
-    private LocalDateTime lastCrawling;
-
-    @Builder
-    private GithubUser(
-        Long githubId,
-        String githubLogin,
-        String githubName,
-        String githubAvatarUrl,
-        String githubToken
-    ) {
-        this.githubId = githubId;
-        this.githubLogin = githubLogin;
-        this.githubName = githubName;
-        this.githubAvatarUrl = githubAvatarUrl;
-        this.githubToken = githubToken;
-        updateLastCrawling();
-    }
+    private LocalDateTime lastCrawling = LocalDateTime.now();
 
     public void updateLastCrawling() {
         this.lastCrawling = LocalDateTime.now();
@@ -67,4 +56,13 @@ public class GithubUser extends BaseEntity {
         this.githubAvatarUrl = githubAvatarUrl;
     }
 
+    @Override
+    public Long getId() {
+        return githubId;
+    }
+
+    @Override
+    public boolean isNew() {
+        return getCreatedAt() == null;
+    }
 }

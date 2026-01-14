@@ -39,6 +39,7 @@ import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,6 +58,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Transactional
 @DisplayName("인증 통합 테스트 - Full Flow with Real GitHub Token")
 class AuthFullFlowIntegrationTest {
 
@@ -96,7 +98,10 @@ class AuthFullFlowIntegrationTest {
     void setUp() {
         // Create roles
         if (roleRepository.findByName("ROLE_STUDENT").isEmpty()) {
-            roleRepository.save(Role.builder().name("ROLE_STUDENT").build());
+            roleRepository.save(Role.builder().name("ROLE_STUDENT")
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
+                .build());
         }
     }
     
@@ -351,6 +356,8 @@ class AuthFullFlowIntegrationTest {
                 .githubName(githubName)
                 .githubAvatarUrl(githubAvatar)
                 .githubToken("encrypted_token")
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build());
 
             User user = User.builder()
@@ -358,6 +365,8 @@ class AuthFullFlowIntegrationTest {
                 .kutId("2020136999")
                 .kutEmail("existing@koreatech.ac.kr")
                 .password(VALID_PASSWORD)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build();
             user.encodePassword(passwordEncoder);
             user.updateGithubUser(githubUser);
@@ -401,6 +410,10 @@ class AuthFullFlowIntegrationTest {
                 .githubId(99999L)
                 .githubLogin("testuser")
                 .githubName("TestUser")
+                .githubToken("dummy_token")
+                .githubAvatarUrl("dummy_url")
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build());
 
             testUser = User.builder()
@@ -408,6 +421,8 @@ class AuthFullFlowIntegrationTest {
                 .kutId("2020136888")
                 .kutEmail("token@koreatech.ac.kr")
                 .password(VALID_PASSWORD)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build();
             testUser.encodePassword(passwordEncoder);
             testUser.updateGithubUser(githubUser);
@@ -434,10 +449,9 @@ class AuthFullFlowIntegrationTest {
             Thread.sleep(1000);
             
             // When: Reissue with refresh token
-            Map<String, String> reissueRequest = Map.of("refreshToken", tokens.refreshToken());
             MvcResult result = mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(reissueRequest)))
+                    .header("X-Refresh-Token", tokens.refreshToken())
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
@@ -449,7 +463,7 @@ class AuthFullFlowIntegrationTest {
             AuthTokenResponse newTokens = objectMapper.readValue(response, AuthTokenResponse.class);
             assertAll(
                 () -> assertThat(newTokens.accessToken()).isNotEqualTo(tokens.accessToken()),
-                () -> assertThat(newTokens.refreshToken()).isEqualTo(tokens.refreshToken())
+                () -> assertThat(newTokens.refreshToken()).isNotEqualTo(tokens.refreshToken())
             );
         }
 
@@ -467,10 +481,9 @@ class AuthFullFlowIntegrationTest {
             assertThat(redisTemplate.opsForValue().get(refreshKey)).isNull();
 
             // And: Reissue should fail
-            Map<String, String> reissueRequest = Map.of("refreshToken", tokens.refreshToken());
             mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(reissueRequest)))
+                    .header("X-Refresh-Token", tokens.refreshToken())
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         }
@@ -478,10 +491,9 @@ class AuthFullFlowIntegrationTest {
         @Test
         @DisplayName("실패: 잘못된 Refresh Token으로 재발급")
         void reissue_fail_invalidToken() throws Exception {
-            Map<String, String> request = Map.of("refreshToken", "invalid.token.here");
             mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+                    .header("X-Refresh-Token", "invalid.token.here")
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         }
