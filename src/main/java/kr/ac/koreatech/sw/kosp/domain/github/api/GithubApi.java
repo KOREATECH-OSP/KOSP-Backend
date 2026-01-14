@@ -16,7 +16,8 @@ import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
-import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+// import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
 
@@ -96,9 +97,10 @@ public interface GithubApi {
         @RequestParam(defaultValue = "commits") String sortBy
     );
 
-    @Operation(summary = "언어 분포 조회", description = "사용자의 프로그래밍 언어 사용 분포를 조회합니다.")
+
+    @Operation(summary = "언어 분포 조회 (Deprecated)", description = "이 기능은 더 이상 지원되지 않습니다.")
     @GetMapping("/language-distribution")
-    ResponseEntity<LanguageDistributionResponse> getLanguageDistribution(
+    ResponseEntity<Void> getLanguageDistribution(
         @Parameter(description = "사용자 ID", required = true)
         @PathVariable Long userId
     );
@@ -112,5 +114,12 @@ public interface GithubApi {
         @RequestParam(defaultValue = "20") int limit,
         @Parameter(description = "조회 기간 (일)", example = "90")
         @RequestParam(defaultValue = "90") int days
+    );
+
+    @Operation(summary = "전체 사용자 평균 통계 조회", description = "시스템 전체 사용자의 평균 기여 통계를 조회합니다.")
+    @GetMapping("/global-statistics")
+    ResponseEntity<GlobalStatisticsResponse> getGlobalStatistics(
+        @Parameter(description = "사용자 ID (Context)", required = true)
+        @PathVariable Long userId
     );
 }

@@ -1,9 +1,9 @@
-package kr.ac.koreatech.sw.kosp.domain.github.dto.response;
+package kr.ac.koreatech.sw.kosp.domain.github.deprecated;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
+import kr.ac.koreatech.sw.kosp.domain.github.deprecated.GithubLanguageStatistics;
 import lombok.Builder;
 
 public record LanguageDistributionResponse(

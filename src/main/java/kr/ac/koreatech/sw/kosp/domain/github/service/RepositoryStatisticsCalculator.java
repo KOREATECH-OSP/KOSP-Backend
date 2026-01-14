@@ -162,6 +162,10 @@ public class RepositoryStatisticsCalculator {
                         language,
                         createdAt
                     );
+                    
+                    // 소유권 확인 (레포지토리 Owner와 Github ID가 일치하는지)
+                    boolean isOwned = owner.equalsIgnoreCase(githubId);
+                    stat.updateOwnership(isOwned);
                 }
             }
         } catch (Exception e) {

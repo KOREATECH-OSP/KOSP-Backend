@@ -17,11 +17,12 @@ import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternRes
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
-import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+// import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubContributionPattern;
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
+// import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubMonthlyStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUserStatistics;
@@ -29,8 +30,9 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubYearlyStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubTimelineData;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubTimelineDataRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubContributionPatternRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubLanguageStatisticsRepository;
+// import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubLanguageStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubMonthlyStatisticsRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubGlobalStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubYearlyStatisticsRepository;
@@ -49,7 +51,7 @@ public class GithubStatisticsService {
     private final RepositoryStatisticsCalculator repositoryStatisticsCalculator;
     private final ContributionPatternCalculator contributionPatternCalculator;
     private final YearlyStatisticsCalculator yearlyStatisticsCalculator;
-    private final LanguageStatisticsCalculator languageStatisticsCalculator;
+    // private final LanguageStatisticsCalculator languageStatisticsCalculator;
     private final GithubScoreCalculator scoreCalculator;
     
     private final UserRepository userRepository;
@@ -58,7 +60,8 @@ public class GithubStatisticsService {
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final GithubContributionPatternRepository contributionPatternRepository;
     private final GithubYearlyStatisticsRepository yearlyStatisticsRepository;
-    private final GithubLanguageStatisticsRepository languageStatisticsRepository;
+    private final GithubGlobalStatisticsRepository globalStatisticsRepository;
+    // private final GithubLanguageStatisticsRepository languageStatisticsRepository;
     private final GithubTimelineDataRepository timelineDataRepository;
     
     private final ObjectMapper objectMapper;
@@ -172,10 +175,10 @@ public class GithubStatisticsService {
             log.info("Saved {} yearly statistics", yearlyStats.size());
             
             // 6. 언어 분포 통계
-            log.info("[6/7] Calculating language statistics...");
-            List<GithubLanguageStatistics> langStats = languageStatisticsCalculator.calculate(githubId);
-            languageStatisticsRepository.saveAll(langStats);
-            log.info("Saved {} language statistics", langStats.size());
+            log.info("[6/7] Skipping language statistics (Deprecated)...");
+            // List<GithubLanguageStatistics> langStats = languageStatisticsCalculator.calculate(githubId);
+            // languageStatisticsRepository.saveAll(langStats);
+            // log.info("Saved {} language statistics", langStats.size());
             
             // 7. 점수 계산 및 업데이트
             log.info("[7/7] Calculating and updating scores...");
@@ -448,23 +451,24 @@ public class GithubStatisticsService {
     }
 
     /**
-     * 언어 분포 조회
+     * 언어 분포 조회 (Deprecated)
      */
     @Transactional(readOnly = true)
-    public LanguageDistributionResponse getLanguageDistribution(Long userId) {
-        User user = findUserById(userId);
-        String githubId = user.getGithubUser().getGithubLogin();
+    public void getLanguageDistribution(Long userId) {
+        // User user = findUserById(userId);
+        // String githubId = user.getGithubUser().getGithubLogin();
 
-        List<GithubLanguageStatistics> languageStats = languageStatisticsRepository
-            .findByGithubIdOrderByLinesOfCodeDesc(githubId);
+        // List<GithubLanguageStatistics> languageStats = languageStatisticsRepository
+        //     .findByGithubIdOrderByLinesOfCodeDesc(githubId);
 
-        if (languageStats.isEmpty()) {
-            // 캐시 없으면 계산
-            languageStats = languageStatisticsCalculator.calculate(githubId);
-            languageStats = languageStatisticsRepository.saveAll(languageStats);
-        }
+        // if (languageStats.isEmpty()) {
+        //     // 캐시 없으면 계산
+        //     languageStats = languageStatisticsCalculator.calculate(githubId);
+        //     languageStats = languageStatisticsRepository.saveAll(languageStats);
+        // }
 
-        return LanguageDistributionResponse.from(languageStats);
+        // return LanguageDistributionResponse.from(languageStats);
+        throw new UnsupportedOperationException("Language statistics are deprecated.");
     }
 
     /**
@@ -491,5 +495,15 @@ public class GithubStatisticsService {
         }
         
         return response;
+    }
+
+    /**
+     * 전체 사용자 평균 통계 조회
+     */
+    @Transactional(readOnly = true)
+    public GlobalStatisticsResponse getGlobalStatistics() {
+        return globalStatisticsRepository.findTopByOrderByCalculatedAtDesc()
+            .map(GlobalStatisticsResponse::from)
+            .orElseGet(() -> GlobalStatisticsResponse.from(null));
     }
 }

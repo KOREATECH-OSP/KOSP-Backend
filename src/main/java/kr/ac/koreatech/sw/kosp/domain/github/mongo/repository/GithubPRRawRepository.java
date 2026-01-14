@@ -17,4 +17,7 @@ public interface GithubPRRawRepository extends ReactiveMongoRepository<GithubPRR
     );
     
     Mono<Void> deleteByRepoOwnerAndRepoName(String repoOwner, String repoName);
+
+    @org.springframework.data.mongodb.repository.Query("{ 'prData.user.login': ?0 }")
+    Flux<GithubPRRaw> findByAuthorLogin(String login);
 }
