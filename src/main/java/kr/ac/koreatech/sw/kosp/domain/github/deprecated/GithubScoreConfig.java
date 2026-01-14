@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.github.model;
+package kr.ac.koreatech.sw.kosp.domain.github.deprecated;
 
 import java.time.LocalDateTime;
 

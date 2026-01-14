@@ -25,6 +25,7 @@ public class CollectionCompletionTracker {
     private final RedisTemplate<String, CollectionJob> jobRedisTemplate;
     private final org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
     private final GithubStatisticsService statisticsService;
+    private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     
     // In-memory tracking of users being processed
     private final Set<String> processingUsers = ConcurrentHashMap.newKeySet();
@@ -136,6 +137,10 @@ public class CollectionCompletionTracker {
             
             log.info("Triggering statistics calculation for user: {}", githubLogin);
             statisticsService.calculateAndSaveAllStatistics(githubLogin);
+            
+            // Global Statistics Recalculation Trigger (Async Event)
+            eventPublisher.publishEvent(new kr.ac.koreatech.sw.kosp.domain.github.event.GlobalStatisticsCalculationRequestedEvent(this, "CollectionCompletionTracker"));
+            
             log.info("Statistics calculation completed successfully for user: {}", githubLogin);
             log.info("========================================");
         } catch (Exception e) {
