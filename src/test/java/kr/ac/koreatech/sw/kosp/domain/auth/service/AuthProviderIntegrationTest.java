@@ -1,23 +1,15 @@
 package kr.ac.koreatech.sw.kosp.domain.auth.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailVerificationRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.GithubTokenRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
-import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
-import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
-import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
-import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
-import kr.ac.koreatech.sw.kosp.domain.mail.repository.EmailVerificationRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
-import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
-import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Map;
+import java.util.Set;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,15 +27,22 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.EmailVerificationRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.request.LoginRequest;
+import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
+import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
+import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
+import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
+import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
+import kr.ac.koreatech.sw.kosp.domain.mail.repository.EmailVerificationRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -88,7 +87,10 @@ class AuthProviderIntegrationTest {
     void setUp() {
         // Create roles
         if (roleRepository.findByName("ROLE_STUDENT").isEmpty()) {
-            roleRepository.save(Role.builder().name("ROLE_STUDENT").build());
+            roleRepository.save(Role.builder().name("ROLE_STUDENT")
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
+                .build());
         }
 
         // Create test GitHub user
@@ -99,6 +101,8 @@ class AuthProviderIntegrationTest {
                 .githubName("Test User")
                 .githubAvatarUrl("https://avatar.url")
                 .githubToken("encrypted_token")
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build());
         }
 
@@ -109,6 +113,8 @@ class AuthProviderIntegrationTest {
                 .kutId("2020136000")
                 .kutEmail("test@koreatech.ac.kr")
                 .password(VALID_PASSWORD)
+                .createdAt(java.time.LocalDateTime.now())
+                .updatedAt(java.time.LocalDateTime.now())
                 .build();
             user.encodePassword(passwordEncoder);
             user.updateGithubUser(githubUserRepository.getByGithubId(TEST_GITHUB_ID));
@@ -239,11 +245,9 @@ class AuthProviderIntegrationTest {
             Thread.sleep(1000);
 
             // when & then: Refresh Token으로 재발급
-            Map<String, String> reissueRequest = Map.of("refreshToken", loginTokens.refreshToken());
-            
             MvcResult reissueResult = mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(reissueRequest)))
+                    .header("X-Refresh-Token", loginTokens.refreshToken())
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.accessToken").exists())
@@ -256,7 +260,7 @@ class AuthProviderIntegrationTest {
             assertAll(
                 () -> assertThat(newTokens.accessToken()).isNotEmpty(),
                 () -> assertThat(newTokens.accessToken()).isNotEqualTo(loginTokens.accessToken()),
-                () -> assertThat(newTokens.refreshToken()).isEqualTo(loginTokens.refreshToken())
+                () -> assertThat(newTokens.refreshToken()).isNotEqualTo(loginTokens.refreshToken())
             );
         }
 
@@ -267,12 +271,10 @@ class AuthProviderIntegrationTest {
             Assumptions.assumeTrue(isRedisAvailable(), "Redis not available - skipping test");
             
             // given
-            Map<String, String> request = Map.of("refreshToken", "invalid.token.here");
-
             // when & then
             mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+                    .header("X-Refresh-Token", "invalid.token.here")
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         }
@@ -299,11 +301,9 @@ class AuthProviderIntegrationTest {
             authService.logout(user.getId());
 
             // when & then: 삭제된 토큰으로 재발급 시도
-            Map<String, String> request = Map.of("refreshToken", tokens.refreshToken());
-            
             mockMvc.perform(post("/v1/auth/reissue")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(objectMapper.writeValueAsString(request)))
+                    .header("X-Refresh-Token", tokens.refreshToken())
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isUnauthorized());
         }
@@ -485,6 +485,8 @@ class AuthProviderIntegrationTest {
                 .githubId(newGithubId)
                 .githubLogin("signupuser")
                 .githubName("Signup User")
+                .githubAvatarUrl("https://dummy.url")
+                .githubToken("dummy_token")
                 .build());
 
             String verifiedSignupToken = SignupToken.builder()

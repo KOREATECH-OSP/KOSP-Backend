@@ -24,7 +24,7 @@ public class CollectionCompletionTracker {
     
     private final RedisTemplate<String, CollectionJob> jobRedisTemplate;
     private final org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
-    private final GithubStatisticsService statisticsService;
+    // GithubStatisticsService dependency removed
     private final org.springframework.context.ApplicationEventPublisher eventPublisher;
     
     // In-memory tracking of users being processed
@@ -135,16 +135,18 @@ public class CollectionCompletionTracker {
                 }
             }
             
-            log.info("Triggering statistics calculation for user: {}", githubLogin);
-            statisticsService.calculateAndSaveAllStatistics(githubLogin);
+            log.info("Triggering statistics calculation events for user: {}", githubLogin);
             
-            // Global Statistics Recalculation Trigger (Async Event)
+            // 1. User Statistics Calculation Trigger
+            eventPublisher.publishEvent(new kr.ac.koreatech.sw.kosp.domain.github.event.UserStatisticsCalculationRequestedEvent(this, githubLogin));
+
+            // 2. Global Statistics Recalculation Trigger
             eventPublisher.publishEvent(new kr.ac.koreatech.sw.kosp.domain.github.event.GlobalStatisticsCalculationRequestedEvent(this, "CollectionCompletionTracker"));
             
-            log.info("Statistics calculation completed successfully for user: {}", githubLogin);
+            log.info("Statistics calculation events published successfully for user: {}", githubLogin);
             log.info("========================================");
         } catch (Exception e) {
-            log.error("Failed to calculate statistics for user: {}", githubLogin, e);
+            log.error("Failed to trigger statistics calculation for user: {}", githubLogin, e);
         }
     }
 }

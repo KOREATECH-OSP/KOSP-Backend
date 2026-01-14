@@ -26,11 +26,15 @@ public class FailureAnalyzer {
     public FailureType classifyFailure(Exception e) {
         String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
         
-        // Connection prematurely closed
         if (e instanceof PrematureCloseException || 
             e.getCause() instanceof PrematureCloseException ||
             message.contains("prematurely closed")) {
             return FailureType.CONNECTION_CLOSED;
+        }
+
+        // Rate Limit (Custom Exception)
+        if (e instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) {
+            return FailureType.RATE_LIMIT;
         }
         
         // Timeout

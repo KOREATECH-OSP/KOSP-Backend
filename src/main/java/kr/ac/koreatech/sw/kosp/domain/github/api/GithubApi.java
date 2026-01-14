@@ -30,6 +30,7 @@ import java.util.List;
 @RequestMapping("/v1/users/{userId}/github")
 public interface GithubApi {
 
+/*
     @Operation(summary = "GitHub 활동 분석 조회", description = "사용자의 GitHub 활동 분석 결과(활동 시간대, 협업 성향 등)를 조회합니다.")
     @GetMapping("/analysis")
     ResponseEntity<GithubAnalysisResponse> getGithubAnalysis(
@@ -120,7 +121,7 @@ public interface GithubApi {
         @Parameter(description = "조회 기간 (일)", example = "90")
         @RequestParam(defaultValue = "90") int days
     );
-
+*/
     @Operation(summary = "1. 최근 기여활동 조회", description = "사용자의 최근 기여 활동(최대 6개 저장소)을 조회합니다.")
     @GetMapping("/recent-activity")
     ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(

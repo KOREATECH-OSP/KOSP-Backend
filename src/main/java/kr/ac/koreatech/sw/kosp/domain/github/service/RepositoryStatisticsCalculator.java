@@ -97,7 +97,13 @@ public class RepositoryStatisticsCalculator {
                 Map<String, Object> author = c.getAuthor();
                 if (author != null && author.containsKey("date")) {
                     String dateStr = author.get("date").toString();
-                    return LocalDateTime.parse(dateStr);
+                    try {
+                        return java.time.Instant.parse(dateStr)
+                            .atZone(java.time.ZoneId.of("UTC"))
+                            .toLocalDateTime();
+                    } catch (Exception e) {
+                        return null;
+                    }
                 }
                 return null;
             })
@@ -152,7 +158,16 @@ public class RepositoryStatisticsCalculator {
 
                     // 저장소 생성일 추출
                     String createdAtStr = (String) repository.get("createdAt");
-                    LocalDateTime createdAt = createdAtStr != null ? LocalDateTime.parse(createdAtStr) : null;
+                    LocalDateTime createdAt = null;
+                    if (createdAtStr != null) {
+                        try {
+                            createdAt = java.time.Instant.parse(createdAtStr)
+                                .atZone(java.time.ZoneId.of("UTC"))
+                                .toLocalDateTime();
+                        } catch (Exception e) {
+                            log.warn("Failed to parse createdAt for {}/{}: {}", owner, name, createdAtStr);
+                        }
+                    }
 
                     stat.updateRepositoryInfo(
                         stargazersCount != null ? stargazersCount : 0,

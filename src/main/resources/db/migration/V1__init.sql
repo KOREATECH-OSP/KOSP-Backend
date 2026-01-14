@@ -435,6 +435,7 @@ CREATE TABLE github_repository_statistics (
     stargazers_count INT NOT NULL DEFAULT 0,
     forks_count INT NOT NULL DEFAULT 0,
     watchers_count INT NOT NULL DEFAULT 0,
+    is_owned BIT(1) NOT NULL DEFAULT 0,
 
     total_commits_count INT NOT NULL DEFAULT 0,
     total_prs_count INT NOT NULL DEFAULT 0,
@@ -588,4 +589,18 @@ INSERT INTO github_score_config (
     5.0, 0.01, 0.05, 0.02,
     0.5, 0.3,
     'system'
+);
+
+-- 전체 통계 테이블 (GitHub Global Statistics)
+CREATE TABLE github_global_statistics (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    avg_commit_count DOUBLE NOT NULL DEFAULT 0,
+    avg_star_count DOUBLE NOT NULL DEFAULT 0,
+    avg_pr_count DOUBLE NOT NULL DEFAULT 0,
+    avg_issue_count DOUBLE NOT NULL DEFAULT 0,
+    
+    total_users INT NOT NULL DEFAULT 0,
+    calculated_at DATETIME NOT NULL,
+    
+    INDEX idx_calculated_at (calculated_at)
 );
