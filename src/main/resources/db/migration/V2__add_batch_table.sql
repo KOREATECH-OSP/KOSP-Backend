@@ -1,11 +1,4 @@
--- 1. 배치 전용 스키마 생성
-CREATE DATABASE kosp_batch DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
-
--- 2. 새 스키마 사용
-USE kosp_batch;
-
--- 3. Spring Batch 테이블 생성 (기존 V2__add_batch_table.sql 내용 실행)
--- (아래는 표준 스키마 예시이며, 프로젝트의 실제 DDL을 사용해도 됩니다)
+-- Spring Batch 테이블 생성
 CREATE TABLE BATCH_JOB_INSTANCE  (
     JOB_INSTANCE_ID BIGINT  NOT NULL PRIMARY KEY ,
     VERSION BIGINT ,

@@ -31,6 +31,7 @@ public class GithubController implements GithubApi {
     private final GithubService githubService;
     private final GithubStatisticsService githubStatisticsService;
 
+/*
     @Override
     public ResponseEntity<GithubAnalysisResponse> getGithubAnalysis(Long userId) {
         return ResponseEntity.ok(githubService.getAnalysis(userId));
@@ -92,7 +93,7 @@ public class GithubController implements GithubApi {
     public ResponseEntity<ActivityTimelineResponse> getActivityTimeline(Long userId, int limit, int days) {
         return ResponseEntity.ok(githubStatisticsService.getActivityTimeline(userId, limit, days));
     }
-
+*/
     @Override
     public ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(Long userId) {
         return ResponseEntity.ok(githubStatisticsService.getRecentActivityDetails(userId));

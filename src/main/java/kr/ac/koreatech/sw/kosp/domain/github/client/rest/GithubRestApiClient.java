@@ -51,9 +51,14 @@ public class GithubRestApiClient {
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000) // 60 seconds
             .responseTimeout(Duration.ofMinutes(5)) // 5 minutes for large repos
-            .doOnConnected(conn -> conn
-                .addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES))
-                .addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES)));
+            .doOnConnected(conn -> {
+                conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
+                conn.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+                // Set SSL Handshake Timeout explicitly if SslHandler exists
+                if (conn.channel().pipeline().get(io.netty.handler.ssl.SslHandler.class) != null) {
+                    conn.channel().pipeline().get(io.netty.handler.ssl.SslHandler.class).setHandshakeTimeoutMillis(60000);
+                }
+            });
         
         this.webClient = WebClient.builder()
             .baseUrl(baseUrl)
@@ -138,6 +143,49 @@ public class GithubRestApiClient {
                 })
                 .doOnError(error -> log.error("POST {} - Error: {}", uri, error.getMessage()))
             );
+    }
+
+    /**
+     * Rate Limit 체크 없이 요청을 보냅니다.
+     * 주로 /rate_limit 엔드포인트 호출 등 상태 동기화에 사용됩니다.
+     */
+    public <T> Mono<T> getWithoutRateLimitCheck(String uri, String token, Class<T> responseType) {
+        return webClient.get()
+            .uri(uri)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+            .accept(MediaType.APPLICATION_JSON)
+            .retrieve()
+            .onStatus(
+                status -> status.equals(HttpStatus.FORBIDDEN),
+                response -> response.bodyToMono(String.class)
+                    .flatMap(body -> {
+                        log.warn("Rate limit exceeded (Bypass mode). Waiting...");
+                        return rateLimitManager.handleRateLimitExceeded()
+                            .then(Mono.error(new RuntimeException("Rate limit exceeded")));
+                    })
+            )
+            .toEntity(responseType)
+            .retryWhen(Retry.backoff(3, Duration.ofSeconds(2)))
+            .doOnSuccess(entity -> {
+                // Rate limit 정보 업데이트
+                if (entity != null) {
+                    HttpHeaders headers = entity.getHeaders();
+                    String remaining = headers.getFirst("X-RateLimit-Remaining");
+                    String reset = headers.getFirst("X-RateLimit-Reset");
+                    
+                    if (remaining != null && reset != null) {
+                        try {
+                            int remainingInt = Integer.parseInt(remaining);
+                            long resetLong = Long.parseLong(reset) * 1000;
+                            rateLimitManager.updateRateLimit(remainingInt, resetLong);
+                        } catch (NumberFormatException e) {
+                            log.warn("Failed to parse rate limit headers", e);
+                        }
+                    }
+                }
+                rateLimitManager.recordRequest();
+            })
+            .map(entity -> entity != null ? entity.getBody() : null);
     }
 
     /**

@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUserStatistics;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubIssueRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubPRRaw;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubIssueRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubPRRawRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserStatisticsRepository;
@@ -24,6 +26,7 @@ public class GithubScoreCalculator {
     private final GithubUserStatisticsRepository userStatisticsRepository;
     private final GithubRepositoryStatisticsRepository repoStatisticsRepository;
     private final GithubPRRawRepository prRawRepository;
+    private final GithubIssueRawRepository issueRawRepository;
 
     public BigDecimal calculate(String githubId) {
         log.info("Calculating GitHub score for user: {}", githubId);
@@ -144,21 +147,22 @@ public class GithubScoreCalculator {
             impactScore += 1.5;
         }
 
-        // 3. 본인 PR로 해결된 이슈 10개 이상 (+1.0)
-        // TODO: Closing Issues 수집 로직 추가 후 구현
+    // 3. 본인 PR로 해결된 이슈 10개 이상 (+1.0)
+        // Note: 'closed_by' via REST API is used as a proxy for 'solved by PR'
+        if (hasSolvedIssues(githubId, repoStats)) {
+            impactScore += 1.0;
+        }
         
         // 4. 포크한 저장소에 원본 PR 병합 (+0.5)
-        // TODO: Fork 여부 확인 로직 정교화 후 구현
+        if (hasForkMerges(githubId)) {
+            impactScore += 0.5;
+        }
 
         return Math.min(impactScore, 5.0);
     }
 
     private boolean hasMergedPrToPopularExternalRepo(String githubId) {
         try {
-            // 이 유저가 작성한 모든 PR 조회
-            // 주의: 성능 이슈가 있을 수 있으므로 추후 최적화 필요 (Aggregation 등)
-            // 현재는 단순 구현: 모든 PR을 가져와서 필터링
-            // 실제로는 Repository 레벨에서 필터링 쿼리를 짜는 게 좋음
             List<GithubPRRaw> userPrs = prRawRepository.findByAuthorLogin(githubId)
                 .collectList()
                 .block();
@@ -166,18 +170,13 @@ public class GithubScoreCalculator {
             if (userPrs == null) return false;
             
             return userPrs.stream().anyMatch(pr -> {
-                // 1. Merged 상태인지 확인
                 Map<String, Object> prData = pr.getPrData();
                 if (prData == null) return false;
                 
-                String state = (String) prData.get("state");
-                boolean isMerged = "MERGED".equalsIgnoreCase(state) || 
-                                   (prData.get("merged") != null && (Boolean) prData.get("merged"));
-                
-                if (!isMerged) return false;
+                // Merged check
+                if (!isMerged(prData)) return false;
 
-                // 2. Base Repo의 스타 수가 1000개 이상인지 확인
-                // 구조: base -> repo -> stargazers_count
+                // External & Popular check
                 Map<String, Object> base = (Map<String, Object>) prData.get("base");
                 if (base == null) return false;
                 
@@ -186,7 +185,6 @@ public class GithubScoreCalculator {
                 
                 Integer stars = (Integer) repo.get("stargazers_count");
                 
-                // 3. 외부 저장소인지 확인 (내 소유가 아님)
                 Map<String, Object> owner = (Map<String, Object>) repo.get("owner");
                 String ownerLogin = (String) owner.get("login");
                 boolean isExternal = !githubId.equalsIgnoreCase(ownerLogin);
@@ -198,5 +196,82 @@ public class GithubScoreCalculator {
             log.error("Error calculating external repo impact for user: {}", githubId, e);
             return false;
         }
+    }
+
+    private boolean hasSolvedIssues(String githubId, List<GithubRepositoryStatistics> repoStats) {
+        try {
+            long solvedCount = repoStats.stream()
+                .mapToLong(repo -> {
+                     java.util.List<GithubIssueRaw> issues = issueRawRepository.findByRepoOwnerAndRepoName(repo.getRepoOwner(), repo.getRepoName())
+                         .collectList()
+                         .block();
+                     
+                     if (issues == null) return 0;
+
+                     return issues.stream()
+                         .filter(issue -> {
+                             Map<String, Object> data = issue.getIssueData();
+                             if (data == null) return false;
+                             
+                             String state = (String) data.get("state");
+                             Map<String, Object> closedBy = (Map<String, Object>) data.get("closed_by");
+                             
+                             return "closed".equalsIgnoreCase(state) && closedBy != null && 
+                                    githubId.equalsIgnoreCase((String) closedBy.get("login"));
+                         })
+                         .count();
+                })
+                .sum();
+            
+            return solvedCount >= 10;
+        } catch (Exception e) {
+            log.error("Error checking solved issues for user: {}", githubId, e);
+            return false;
+        }
+    }
+
+    private boolean hasForkMerges(String githubId) {
+        try {
+            List<GithubPRRaw> userPrs = prRawRepository.findByAuthorLogin(githubId)
+               .collectList()
+               .block();
+
+            if (userPrs == null) return false;
+
+            return userPrs.stream().anyMatch(pr -> {
+                 Map<String, Object> prData = pr.getPrData();
+                 if (prData == null) return false;
+
+                 if (!isMerged(prData)) return false;
+
+                 // Check if HEAD (source) is owned by user AND BASE (target) is NOT owned by user
+                 Map<String, Object> head = (Map<String, Object>) prData.get("head");
+                 Map<String, Object> base = (Map<String, Object>) prData.get("base");
+                 
+                 if (head == null || base == null) return false;
+                 
+                 Map<String, Object> headRepo = (Map<String, Object>) head.get("repo");
+                 Map<String, Object> baseRepo = (Map<String, Object>) base.get("repo");
+                 
+                 // If repo is deleted, it might be null
+                 if (headRepo == null || baseRepo == null) return false;
+
+                 Map<String, Object> headOwner = (Map<String, Object>) headRepo.get("owner");
+                 Map<String, Object> baseOwner = (Map<String, Object>) baseRepo.get("owner");
+                 
+                 String headOwnerLogin = (String) headOwner.get("login");
+                 String baseOwnerLogin = (String) baseOwner.get("login");
+
+                 return githubId.equalsIgnoreCase(headOwnerLogin) && !githubId.equalsIgnoreCase(baseOwnerLogin);
+            });
+        } catch (Exception e) {
+             log.error("Error checking fork merges for user: {}", githubId, e);
+             return false;
+        }
+    }
+
+    private boolean isMerged(Map<String, Object> prData) {
+        String state = (String) prData.get("state");
+        return "closed".equalsIgnoreCase(state) && prData.get("merged_at") != null;
     }
 }

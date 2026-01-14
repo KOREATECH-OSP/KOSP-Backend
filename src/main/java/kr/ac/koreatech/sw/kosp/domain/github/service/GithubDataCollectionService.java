@@ -130,7 +130,10 @@ public class GithubDataCollectionService {
             })
             .doOnSuccess(saved -> log.info("Collected user basic info with {} repositories and {} stars: {}", 
                 allRepos.size(), saved.getTotalStars(), githubId))
-            .doOnError(error -> log.error("Failed to collect user basic info for {}: {}", githubId, error.getMessage()));
+            .doOnError(error -> {
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) return;
+                log.error("Failed to collect user basic info for {}: {}", githubId, error.getMessage());
+            });
     }
 
     /**
@@ -160,6 +163,13 @@ public class GithubDataCollectionService {
                 Object files = response.get("files");
                 String message = (String) commit.get("message");
                 
+                // GitHub User Info (login) 병합
+                Map<String, Object> githubAuthor = (Map<String, Object>) response.get("author");
+                if (githubAuthor != null && author != null) {
+                    author = new java.util.HashMap<>(author);
+                    author.put("login", githubAuthor.get("login"));
+                }
+                
                 // Document 생성
                 GithubCommitDetailRaw raw = GithubCommitDetailRaw.create(
                     sha,
@@ -176,8 +186,11 @@ public class GithubDataCollectionService {
                 return commitDetailRawRepository.save(raw);
             })
             .doOnSuccess(saved -> log.debug("Collected commit detail: {}", sha))
-            .doOnError(error -> log.error("Failed to collect commit {} for {}/{}: {}", 
-                sha, repoOwner, repoName, error.getMessage()));
+            .doOnError(error -> {
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) return;
+                log.error("Failed to collect commit {} for {}/{}: {}", 
+                    sha, repoOwner, repoName, error.getMessage());
+            });
     }
 
     /**
@@ -210,8 +223,11 @@ public class GithubDataCollectionService {
             .flatMap(batch -> issueRawRepository.saveAll(batch).collectList())
             .count()
             .doOnSuccess(count -> log.info("Collected {} issues for {}/{}", count, repoOwner, repoName))
-            .doOnError(error -> log.error("Failed to collect issues for {}/{}: {}", 
-                repoOwner, repoName, error.getMessage()));
+            .doOnError(error -> {
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) return;
+                log.error("Failed to collect issues for {}/{}: {}", 
+                    repoOwner, repoName, error.getMessage());
+            });
     }
 
     /**
@@ -244,8 +260,11 @@ public class GithubDataCollectionService {
             .flatMap(batch -> prRawRepository.saveAll(batch).collectList())
             .count()
             .doOnSuccess(count -> log.info("Collected {} PRs for {}/{}", count, repoOwner, repoName))
-            .doOnError(error -> log.error("Failed to collect PRs for {}/{}: {}", 
-                repoOwner, repoName, error.getMessage()));
+            .doOnError(error -> {
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) return;
+                log.error("Failed to collect PRs for {}/{}: {}", 
+                    repoOwner, repoName, error.getMessage());
+            });
     }
 
     // Helper methods
@@ -272,8 +291,11 @@ public class GithubDataCollectionService {
             .flatMap(eventsRawRepository::save)
             .doOnSuccess(saved -> log.info("Collected {} events for user: {}", 
                 saved.getEvents().size(), githubLogin))
-            .doOnError(error -> log.error("Failed to collect events for user: {}", 
-                githubLogin, error));
+            .doOnError(error -> {
+                if (error instanceof kr.ac.koreatech.sw.kosp.domain.github.client.rest.RateLimitException) return;
+                log.error("Failed to collect events for user: {}", 
+                    githubLogin, error);
+            });
     }
     
     // ========== Feature 7: Repository API Data ==========

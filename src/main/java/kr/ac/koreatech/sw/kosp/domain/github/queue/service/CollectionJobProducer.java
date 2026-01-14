@@ -33,6 +33,9 @@ public class CollectionJobProducer {
      * 사용자 전체 데이터 수집 작업을 큐에 추가
      */
     public void enqueueUserCollection(String githubLogin, String encryptedToken) {
+        // Track 2 jobs for this user (basic + events) BEFORE enqueuing to avoid race condition
+        completionTracker.trackUserJobs(githubLogin, 2);
+
         // 1. User basic info (highest priority)
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.USER_BASIC)
@@ -51,10 +54,6 @@ public class CollectionJobProducer {
             .maxRetries(DEFAULT_MAX_RETRIES)
             .build());
         
-        // Track 2 jobs for this user (basic + events)
-        // Repository jobs will be tracked separately
-        completionTracker.trackUserJobs(githubLogin, 2);
-        
         log.info("Enqueued user collection jobs for: {}", githubLogin);
     }
     
@@ -71,9 +70,13 @@ public class CollectionJobProducer {
         String repoName, 
         String encryptedToken
     ) {
+        // Increment job count for this user (3 jobs per repository) BEFORE enqueuing to avoid race condition
+        completionTracker.incrementJobCount(githubLogin, 3);
+        
         // Issues
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.REPO_ISSUES)
+            .githubLogin(githubLogin)
             .repoOwner(repoOwner)
             .repoName(repoName)
             .encryptedToken(encryptedToken)
@@ -84,6 +87,7 @@ public class CollectionJobProducer {
         // PRs
         enqueue(CollectionJob.builder()
             .type(CollectionJobType.REPO_PRS)
+            .githubLogin(githubLogin)
             .repoOwner(repoOwner)
             .repoName(repoName)
             .encryptedToken(encryptedToken)
@@ -101,9 +105,6 @@ public class CollectionJobProducer {
             .priority(4)
             .maxRetries(DEFAULT_MAX_RETRIES)
             .build());
-        
-        // Increment job count for this user (3 jobs per repository)
-        completionTracker.incrementJobCount(githubLogin, 3);  // ✅ 수정: githubLogin 사용
         
         log.info("Enqueued repository collection jobs for: {}/{} (author: {})", 
             repoOwner, repoName, githubLogin);

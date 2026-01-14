@@ -127,19 +127,45 @@ public class GithubStatisticsService {
         log.info("Calculating and saving monthly statistics for user: {}", githubId);
 
         // 월별 통계 계산
-        List<GithubMonthlyStatistics> monthlyStatistics = monthlyStatisticsCalculator.calculate(githubId);
+        List<GithubMonthlyStatistics> calculatedMonthlyStats = monthlyStatisticsCalculator.calculate(githubId);
 
-        // 기존 월별 통계 삭제 (재계산)
-        List<GithubMonthlyStatistics> existing = monthlyStatisticsRepository.findByGithubId(githubId);
-        existing.forEach(stat -> {
-            // 개별 삭제는 Repository에 delete 메서드가 필요하므로, 여기서는 업데이트로 처리
-            // 실제로는 deleteByGithubId 같은 메서드를 추가해야 함
-        });
+        // 기존 월별 통계 조회
+        List<GithubMonthlyStatistics> existingMonthlyStats = monthlyStatisticsRepository.findByGithubId(githubId);
+        
+        // Map으로 변환 (Year-Month -> MonthlyStatistics)
+        java.util.Map<String, GithubMonthlyStatistics> existingMap = existingMonthlyStats.stream()
+            .collect(Collectors.toMap(
+                stat -> stat.getYear() + "-" + stat.getMonth(),
+                stat -> stat
+            ));
 
-        // 새로운 월별 통계 저장
-        List<GithubMonthlyStatistics> saved = monthlyStatistics.stream()
-            .map(monthlyStatisticsRepository::save)
-            .toList();
+        List<GithubMonthlyStatistics> toSave = new java.util.ArrayList<>();
+
+        for (GithubMonthlyStatistics calculated : calculatedMonthlyStats) {
+            String key = calculated.getYear() + "-" + calculated.getMonth();
+            GithubMonthlyStatistics existing = existingMap.get(key);
+
+            if (existing != null) {
+                // Update existing
+                existing.updateStatistics(
+                    calculated.getCommitsCount(),
+                    calculated.getLinesCount(),
+                    calculated.getAdditionsCount(),
+                    calculated.getDeletionsCount(),
+                    calculated.getPrsCount(),
+                    calculated.getIssuesCount(),
+                    calculated.getCreatedReposCount(),
+                    calculated.getContributedReposCount()
+                );
+                toSave.add(existing);
+            } else {
+                // Insert new
+                toSave.add(calculated);
+            }
+        }
+
+        // 일괄 저장
+        List<GithubMonthlyStatistics> saved = monthlyStatisticsRepository.saveAll(toSave);
 
         log.info("Saved {} monthly statistics for user: {}", saved.size(), githubId);
         return saved;
@@ -167,17 +193,81 @@ public class GithubStatisticsService {
             calculateAndSaveRepositoryStatistics(githubId);
             
             // 4. 기여 패턴 분석
+            // 4. 기여 패턴 분석 (Deprecated: Not in Spec)
+            /*
             log.info("[4/7] Calculating contribution pattern...");
-            GithubContributionPattern pattern = contributionPatternCalculator.calculate(githubId);
-            contributionPatternRepository.save(pattern);
-            log.info("Contribution pattern saved: Night Owl={}, Initiator={}, Independent={}", 
-                pattern.getNightOwlScore(), pattern.getInitiatorScore(), pattern.getIndependentScore());
+            GithubContributionPattern calculatedPattern = contributionPatternCalculator.calculate(githubId);
             
-            // 5. 연도별 통계
+            GithubContributionPattern existingPattern = contributionPatternRepository.findByGithubId(githubId)
+                .orElse(null);
+                
+            if (existingPattern != null) {
+                existingPattern.updateTimePattern(
+                    calculatedPattern.getNightOwlScore(),
+                    calculatedPattern.getNightCommits(),
+                    calculatedPattern.getDayCommits(),
+                    calculatedPattern.getHourlyDistribution()
+                );
+                existingPattern.updateProjectPattern(
+                    calculatedPattern.getInitiatorScore(),
+                    calculatedPattern.getEarlyContributions(),
+                    calculatedPattern.getIndependentScore(),
+                    calculatedPattern.getSoloProjects(),
+                    calculatedPattern.getTotalProjects()
+                );
+                existingPattern.updateCollaborationPattern(calculatedPattern.getTotalCoworkers());
+                contributionPatternRepository.save(existingPattern);
+            } else {
+                contributionPatternRepository.save(calculatedPattern);
+            }
+            
+            log.info("Contribution pattern saved: Night Owl={}, Initiator={}, Independent={}", 
+                calculatedPattern.getNightOwlScore(), calculatedPattern.getInitiatorScore(), calculatedPattern.getIndependentScore());
+            */
+            
+            // 5. 연도별 통계 (Deprecated: Not in Spec)
+            /*
             log.info("[5/7] Calculating yearly statistics...");
-            List<GithubYearlyStatistics> yearlyStats = yearlyStatisticsCalculator.calculateAll(githubId);
-            yearlyStatisticsRepository.saveAll(yearlyStats);
-            log.info("Saved {} yearly statistics", yearlyStats.size());
+            List<GithubYearlyStatistics> calculatedYearlyStats = yearlyStatisticsCalculator.calculateAll(githubId);
+            
+            List<GithubYearlyStatistics> existingYearlyStats = yearlyStatisticsRepository.findByGithubIdOrderByYearDesc(githubId);
+            java.util.Map<Integer, GithubYearlyStatistics> existingYearlyMap = existingYearlyStats.stream()
+                .collect(Collectors.toMap(GithubYearlyStatistics::getYear, stat -> stat));
+            
+            List<GithubYearlyStatistics> yearlyToSave = new java.util.ArrayList<>();
+            
+            for (GithubYearlyStatistics calculated : calculatedYearlyStats) {
+                GithubYearlyStatistics existing = existingYearlyMap.get(calculated.getYear());
+                if (existing != null) {
+                    existing.updateStatistics(
+                        calculated.getCommits(),
+                        calculated.getLines(),
+                        calculated.getAdditions(),
+                        calculated.getDeletions(),
+                        calculated.getPrs(),
+                        calculated.getIssues()
+                    );
+                    existing.updateScores(
+                        calculated.getMainRepoScore(),
+                        calculated.getOtherRepoScore(),
+                        calculated.getPrIssueScore(),
+                        calculated.getReputationScore()
+                    );
+                    existing.updateRanking(calculated.getRank(), calculated.getPercentile());
+                    existing.updateBestRepository(
+                        calculated.getBestRepoOwner(),
+                        calculated.getBestRepoName(),
+                        calculated.getBestRepoCommits()
+                    );
+                    yearlyToSave.add(existing);
+                } else {
+                    yearlyToSave.add(calculated);
+                }
+            }
+            
+            yearlyStatisticsRepository.saveAll(yearlyToSave);
+            log.info("Saved {} yearly statistics", yearlyToSave.size());
+            */
             
             // 6. 언어 분포 통계
             log.info("[6/7] Skipping language statistics (Deprecated)...");
