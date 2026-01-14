@@ -18,7 +18,6 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
-import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
@@ -39,11 +38,8 @@ public class UserService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public AuthTokenResponse signup(UserSignupRequest request) {
-        // 1. SignupToken 파싱 및 검증
-        SignupToken token = JwtToken.from(SignupToken.class, request.signupToken());
-        
-        // 2. Email Verified 확인
+    public AuthTokenResponse signup(UserSignupRequest request, SignupToken token) {
+        // 1. Email Verified 확인
         if (!token.isEmailVerified()) {
             throw new GlobalException(ExceptionMessage.EMAIL_NOT_VERIFIED);
         }
@@ -52,12 +48,12 @@ public class UserService {
         Long githubId = Long.valueOf(token.getGithubId());
         String encryptedGithubToken = token.getEncryptedGithubToken();
 
-        // 3. GitHub 정보 추출
+        // 2. GitHub 정보 추출
         String githubLogin = token.getLogin();
         String githubName = token.getName();
         String githubAvatarUrl = token.getAvatarUrl();
 
-        // 4. GithubUser 조회 또는 생성
+        // 3. GithubUser 조회 또는 생성
         GithubUser githubUser = githubUserRepository.findByGithubId(githubId)
             .orElseGet(() -> GithubUser.builder()
                 .githubId(githubId)
@@ -69,7 +65,7 @@ public class UserService {
         githubUser.updateProfile(githubLogin, githubName, githubAvatarUrl, encryptedGithubToken);
         githubUserRepository.save(githubUser);
 
-        // 5. 기존 유저 확인
+        // 4. 기존 유저 확인
         Optional<User> existingUser = userRepository.findByKutEmail(kutEmail);
 
         if (existingUser.isPresent() && !existingUser.get().isDeleted()) {
@@ -98,14 +94,14 @@ public class UserService {
         user.updateGithubUser(githubUser);
         userRepository.save(user);
 
-        // 6. 기본 권한 할당
+        // 5. 기본 권한 할당
         Role role = roleRepository.findByName("ROLE_STUDENT")
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ROLE_NOT_FOUND));
         user.getRoles().add(role);
 
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
         
-        // 7. GitHub 데이터 수집 이벤트 발행
+        // 6. GitHub 데이터 수집 이벤트 발행
         if (githubUser.getGithubLogin() != null) {
             eventPublisher.publishEvent(new UserSignupEvent(this, githubUser.getGithubLogin()));
             log.info("Published UserSignupEvent for GitHub user: {}", githubUser.getGithubLogin());

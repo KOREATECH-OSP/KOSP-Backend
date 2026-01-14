@@ -18,6 +18,8 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "User", description = "사용자 관리 API")
@@ -34,7 +36,8 @@ public interface UserApi {
     )
     @PostMapping("/signup")
     ResponseEntity<AuthTokenResponse> signup(
-        @RequestBody @Valid UserSignupRequest request
+        @RequestBody @Valid UserSignupRequest request,
+        @Parameter(description = "회원가입 토큰 (JWS)", required = true, hidden = true) @Token SignupToken token
     );
 
     @Operation(summary = "회원 탈퇴", description = "로그인한 사용자가 본인의 계정을 탈퇴(Soft Delete) 처리합니다.")
