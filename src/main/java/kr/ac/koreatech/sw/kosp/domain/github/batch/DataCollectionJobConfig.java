@@ -1,3 +1,4 @@
+
 package kr.ac.koreatech.sw.kosp.domain.github.batch;
 
 import java.util.Map;
@@ -61,6 +62,7 @@ public class DataCollectionJobConfig {
             .retryLimit(3)
             .retry(RateLimitExceededException.class)
             .retry(RuntimeException.class)
+            .backOffPolicy(new org.springframework.retry.backoff.ExponentialBackOffPolicy())
             .skipLimit(10)
             .skip(Exception.class)
             .build();

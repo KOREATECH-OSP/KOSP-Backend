@@ -18,4 +18,9 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
     List<GithubUserStatistics> findAllByOrderByTotalScoreDesc();
 
     boolean existsByGithubId(String githubId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT " +
+        "AVG(u.totalCommits), AVG(u.totalPrs), AVG(u.totalIssues), AVG(u.totalStarsReceived), COUNT(u) " +
+        "FROM GithubUserStatistics u")
+    Object[] getGlobalAverages();
 }

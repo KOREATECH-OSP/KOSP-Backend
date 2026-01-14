@@ -54,6 +54,17 @@ public class GithubTestController {
             githubLogin
         ));
     }
+
+    /**
+     * 테스트용: GitHub 통계 수동 계산 (강제 트리거)
+     */
+    @Operation(summary = "GitHub 통계 수동 계산 (강제 트리거)", description = "수집 완료 여부와 관계없이 즉시 통계 계산 이벤트를 발행합니다.")
+    @PostMapping("/calculate/statistics/{githubLogin}")
+    public ResponseEntity<String> calculateStatistics(@PathVariable String githubLogin) {
+        log.info("🧪 [TEST] Publishing statistics calculation event for: {}", githubLogin);
+        eventPublisher.publishEvent(new kr.ac.koreatech.sw.kosp.domain.github.event.UserStatisticsCalculationRequestedEvent(this, githubLogin));
+        return ResponseEntity.ok("✅ Statistics calculation event published for: " + githubLogin);
+    }
     
     /**
      * 테스트용: GitHub API Rate Limit 확인

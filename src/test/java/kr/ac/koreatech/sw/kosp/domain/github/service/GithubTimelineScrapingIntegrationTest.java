@@ -73,7 +73,6 @@ class GithubTimelineScrapingIntegrationTest {
         
         // Then - Should return null (skipped)
         StepVerifier.create(result)
-            .expectNext((GithubTimelineData) null)
             .verifyComplete();
     }
 }

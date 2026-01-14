@@ -92,6 +92,8 @@ public class Article extends BaseEntity {
             .title(title)
             .content(content)
             .tags(tags)
+            .createdAt(java.time.LocalDateTime.now())
+            .updatedAt(java.time.LocalDateTime.now())
             .build();
     }
 

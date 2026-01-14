@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.github.controller;
+package kr.ac.koreatech.sw.kosp.domain.github.deprecated;
 
 import java.util.List;
 
@@ -12,13 +12,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.persistence.EntityNotFoundException;
-import kr.ac.koreatech.sw.kosp.domain.github.model.GithubScoreConfig;
-import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubScoreConfigRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.deprecated.GithubScoreConfig;
+import kr.ac.koreatech.sw.kosp.domain.github.deprecated.GithubScoreConfigRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-@RestController
-@RequestMapping("/v1/admin/github/score-config")
+// @RestController
+// @RequestMapping("/v1/admin/github/score-config")
 @RequiredArgsConstructor
 @Slf4j
 public class GithubScoreConfigController {

@@ -8,15 +8,21 @@ import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ActivityTimelineRespon
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionOverviewResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
-import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+// import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.service.GithubService;
 import kr.ac.koreatech.sw.kosp.domain.github.service.GithubStatisticsService;
 import lombok.RequiredArgsConstructor;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,6 +31,7 @@ public class GithubController implements GithubApi {
     private final GithubService githubService;
     private final GithubStatisticsService githubStatisticsService;
 
+/*
     @Override
     public ResponseEntity<GithubAnalysisResponse> getGithubAnalysis(Long userId) {
         return ResponseEntity.ok(githubService.getAnalysis(userId));
@@ -77,12 +84,38 @@ public class GithubController implements GithubApi {
     }
 
     @Override
-    public ResponseEntity<LanguageDistributionResponse> getLanguageDistribution(Long userId) {
-        return ResponseEntity.ok(githubStatisticsService.getLanguageDistribution(userId));
+    public ResponseEntity<Void> getLanguageDistribution(Long userId) {
+        // return ResponseEntity.ok(githubStatisticsService.getLanguageDistribution(userId));
+        return ResponseEntity.notFound().build();
     }
 
     @Override
     public ResponseEntity<ActivityTimelineResponse> getActivityTimeline(Long userId, int limit, int days) {
         return ResponseEntity.ok(githubStatisticsService.getActivityTimeline(userId, limit, days));
+    }
+*/
+    @Override
+    public ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(Long userId) {
+        return ResponseEntity.ok(githubStatisticsService.getRecentActivityDetails(userId));
+    }
+
+    @Override
+    public ResponseEntity<GithubOverallHistoryResponse> getOverallHistory(Long userId) {
+        return ResponseEntity.ok(githubStatisticsService.getOverallHistoryDetails(userId));
+    }
+
+    @Override
+    public ResponseEntity<GithubContributionComparisonResponse> getComparison(Long userId) {
+        return ResponseEntity.ok(githubStatisticsService.getComparisonDetails(userId));
+    }
+
+    @Override
+    public ResponseEntity<GithubContributionScoreResponse> getScore(Long userId) {
+        return ResponseEntity.ok(githubStatisticsService.getScoreDetails(userId));
+    }
+
+    @Override
+    public ResponseEntity<GlobalStatisticsResponse> getGlobalStatistics(Long userId) {
+        return ResponseEntity.ok(githubStatisticsService.getGlobalStatistics());
     }
 }

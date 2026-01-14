@@ -42,95 +42,199 @@ public class GithubHtmlScrapingService {
      */
     public Mono<Map<String, Integer>> scrapePRIssueCounts(String repoOwner, String repoName) {
         return Mono.fromCallable(() -> {
-            log.info("Scraping PR/Issue counts for {}/{}", repoOwner, repoName);
+            String repoPath = repoOwner + "/" + repoName;
+            log.info("Scraping PR/Issue counts for {}", repoPath);
             
+            Document prDoc;
+            Document issueDoc;
             Map<String, Integer> result = new HashMap<>();
             
+            /*
+             * 1. Pull Requests Scraping
+             * URL: /{owner}/{repo}/pulls
+             * Selector: a[href*="is%3Aopen"][href*="is%3Apr"], a[href*="is%3Aclosed"][href*="is%3Apr"]
+             */
             try {
-                // PR 개수 스크래핑 - Updated selectors
-                Document prDoc = Jsoup.connect(
-                    String.format("%s/%s/%s/pulls", GITHUB_URL, repoOwner, repoName)
-                )
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                .timeout(30000)
-                .get();
+                prDoc = Jsoup.connect(GITHUB_URL + "/" + repoPath + "/pulls")
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                        .get();
                 
-                // Open PRs: a[href*="is%3Aopen"][href*="is%3Apr"]
+                // Open PRs
                 Element openPrLink = prDoc.selectFirst("a[href*='is%3Aopen'][href*='is%3Apr']");
-                if (openPrLink != null) {
-                    int openPRs = parseCount(openPrLink.text());
-                    result.put("openPRs", openPRs);
-                    log.debug("Open PRs: {}", openPRs);
-                }
+                int openPrs = openPrLink != null ? parseCount(openPrLink.text()) : 0;
                 
-                // Closed PRs: a[href*="is%3Aclosed"][href*="is%3Apr"]
+                // Closed PRs
                 Element closedPrLink = prDoc.selectFirst("a[href*='is%3Aclosed'][href*='is%3Apr']");
-                if (closedPrLink != null) {
-                    int closedPRs = parseCount(closedPrLink.text());
-                    result.put("closedPRs", closedPRs);
-                    log.debug("Closed PRs: {}", closedPRs);
-                }
+                int closedPrs = closedPrLink != null ? parseCount(closedPrLink.text()) : 0;
                 
-                if (result.containsKey("openPRs") && result.containsKey("closedPRs")) {
-                    result.put("totalPRs", result.get("openPRs") + result.get("closedPRs"));
-                }
+                result.put("openPRs", openPrs);
+                result.put("closedPRs", closedPrs);
+                result.put("totalPRs", openPrs + closedPrs);
                 
             } catch (Exception e) {
                 log.warn("Failed to scrape PR counts: {}", e.getMessage());
             }
             
+            /*
+             * 2. Issues Scraping
+             * Feature: Issues (Open/Closed)
+             * URL: /{owner}/{repo}/issues
+             * Strategy:
+             *   - Try scraping from the main issues page first (legacy UI selectors & new UI)
+             *   - Fallback: Fetch specific search queries for Open/Closed if not found
+             */
             try {
-                // Issue 개수 스크래핑 - Updated selectors
-                Document issueDoc = Jsoup.connect(
-                    String.format("%s/%s/%s/issues", GITHUB_URL, repoOwner, repoName)
-                )
-                .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-                .timeout(30000)
-                .get();
+                issueDoc = Jsoup.connect(GITHUB_URL + "/" + repoPath + "/issues")
+                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                        .header("Accept-Language", "en-US,en;q=0.9")
+                        .cookie("logged_in", "no")
+                        .get();
                 
-                // Open Issues: Find link containing "Open" text
-                Elements allLinks = issueDoc.select("a");
-                for (Element link : allLinks) {
-                    String text = link.text();
-                    String href = link.attr("href");
-                    
-                    // Open Issues
-                    if (text.contains("Open") && href.endsWith("/issues")) {
-                        Element span = link.selectFirst("span");
-                        if (span != null) {
-                            int openIssues = parseCount(span.text());
-                            result.put("openIssues", openIssues);
-                            log.debug("Open Issues: {}", openIssues);
-                        }
+                boolean foundOpen = false;
+                boolean foundClosed = false;
+                
+                // --- Strategy 1: New UI (React/Turbo) Selectors ---
+                // Open: a[href*="state%3Aopen"] span[data-variant="secondary"] or "issues-repo-tab-count"
+                Element openIssueLink = issueDoc.selectFirst("a[href*='state%3Aopen'] span[data-variant='secondary']");
+                if (openIssueLink != null) {
+                    result.put("openIssues", parseCount(openIssueLink.text()));
+                    foundOpen = true;
+                } else {
+                    // Try the repo tab counter
+                    Element tabCounter = issueDoc.selectFirst("#issues-repo-tab-count");
+                    if (tabCounter != null && tabCounter.hasAttr("title")) {
+                        result.put("openIssues", parseCount(tabCounter.attr("title")));
+                        foundOpen = true;
                     }
-                    
-                    // Closed Issues
-                    if (text.contains("Closed") && href.contains("state%3Aclosed")) {
-                        Element span = link.selectFirst("span");
-                        if (span != null) {
-                            int closedIssues = parseCount(span.text());
-                            result.put("closedIssues", closedIssues);
-                            log.debug("Closed Issues: {}", closedIssues);
+                }
+
+                // Closed: a[href*="state%3Aclosed"] span[data-variant="secondary"]
+                Element closedIssueLink = issueDoc.selectFirst("a[href*='state%3Aclosed'] span[data-variant='secondary']");
+                if (closedIssueLink != null) {
+                    result.put("closedIssues", parseCount(closedIssueLink.text()));
+                    foundClosed = true;
+                }
+
+                // --- Strategy 2: Fallback (Old UI / Text based) ---
+                if (!foundOpen) {
+                    Elements links = issueDoc.select("a");
+                    for (Element link : links) {
+                        // Look for "123 Open" or similar
+                        if (link.text().contains("Open") && link.attr("href").endsWith("/issues")) {
+                            int count = parseCount(link.text());
+                            if (count > 0) {
+                                result.put("openIssues", count);
+                                foundOpen = true;
+                                break;
+                            }
                         }
                     }
                 }
                 
-                if (result.containsKey("openIssues") && result.containsKey("closedIssues")) {
-                    result.put("totalIssues", result.get("openIssues") + result.get("closedIssues"));
+                if (!foundClosed) {
+                    Elements links = issueDoc.select("a");
+                    for (Element link : links) {
+                        // Look for "123 Closed" or similar
+                        if (link.text().contains("Closed") && link.attr("href").contains("state%3Aclosed")) {
+                            int count = parseCount(link.text());
+                            if (count > 0) {
+                                result.put("closedIssues", count);
+                                foundClosed = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // --- Strategy 3: Explicit Search Fallback (Robust against React/Hidden counts) ---
+                if (!foundOpen) {
+                    int openCount = fetchIssueCount(repoPath, "open");
+                    if (openCount >= 0) {
+                        result.put("openIssues", openCount);
+                        foundOpen = true;
+                        log.info("Recovered Open Issues via search query: {}", openCount);
+                    }
                 }
                 
+                if (!foundClosed) {
+                    int closedCount = fetchIssueCount(repoPath, "closed");
+                    if (closedCount >= 0) {
+                        result.put("closedIssues", closedCount);
+                        foundClosed = true;
+                        log.info("Recovered Closed Issues via search query: {}", closedCount);
+                    }
+                }
+
+                if (!foundOpen || !foundClosed) {
+                    log.error("Scraping Incomplete even after fallback. Open Found: {}, Closed Found: {}", foundOpen, foundClosed);
+                }
+                
+                // Calculate Total
+                int openIssues = result.getOrDefault("openIssues", 0);
+                int closedIssues = result.getOrDefault("closedIssues", 0);
+                result.put("totalIssues", openIssues + closedIssues);
+
             } catch (Exception e) {
                 log.warn("Failed to scrape Issue counts: {}", e.getMessage());
             }
             
-            log.info("✅ Scraped counts for {}/{}: {} PRs, {} Issues",
-                repoOwner, repoName, 
+            log.info("✅ Scraped counts for {}: {} PRs, {} Issues (Open: {}, Closed: {})",
+                repoPath, 
                 result.getOrDefault("totalPRs", 0),
-                result.getOrDefault("totalIssues", 0));
+                result.getOrDefault("totalIssues", 0),
+                result.getOrDefault("openIssues", 0),
+                result.getOrDefault("closedIssues", 0));
             
             return result;
             
         }).subscribeOn(Schedulers.boundedElastic());
+    }
+
+    private int fetchIssueCount(String repoPath, String state) {
+        try {
+            // state: "open" or "closed"
+            // Note: sort=created-desc helps to get a consistent fresh view
+            String searchUrl = GITHUB_URL + "/" + repoPath + "/issues?q=is%3Aissue+state%3A" + state + "&sort=created-desc";
+            Document doc = Jsoup.connect(searchUrl)
+                    .header("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                    .header("Accept-Language", "en-US,en;q=0.9")
+                    .cookie("logged_in", "no")
+                    .timeout(10000)
+                    .get();
+
+            // Strategy 1: Parse from React Embedded Data (JSON)
+            String html = doc.html();
+            // Look for "issueCount":1234
+            java.util.regex.Pattern jsonPattern = java.util.regex.Pattern.compile("\"issueCount\":(\\d+)");
+            java.util.regex.Matcher jsonMatcher = jsonPattern.matcher(html);
+            if (jsonMatcher.find()) {
+                return Integer.parseInt(jsonMatcher.group(1));
+            }
+
+            // Strategy 2: Parse from Legacy Search Header (e.g. "2,146 results")
+            Elements headings = doc.select("h3");
+            for (Element h : headings) {
+               if (h.text().contains("results") && h.text().matches(".*[0-9,].*")) {
+                   return parseCount(h.text());
+               }
+            }
+            
+            // Strategy 3: Look for state link count
+            String capitalizedState = state.substring(0, 1).toUpperCase() + state.substring(1);
+            Elements links = doc.select("a");
+            for (Element link : links) {
+                if (link.text().contains(capitalizedState) && link.text().matches(".*[0-9,]+.*")) {
+                    return parseCount(link.text());
+                }
+            }
+
+            log.warn("Could not find issue count for state '{}' in {}", state, repoPath);
+            return -1;
+
+        } catch (Exception e) {
+            log.error("Failed to fetch issue count fallback for {} state {}", repoPath, state, e);
+            return -1;
+        }
     }
     
     /**
@@ -347,10 +451,20 @@ public class GithubHtmlScrapingService {
     /**
      * 텍스트에서 숫자 추출: "123 Open" → 123
      */
+    /**
+     * 텍스트에서 숫자 추출: "123 Open" or "Open 123" → 123
+     */
     private int parseCount(String text) {
         try {
-            String[] parts = text.trim().replace(",", "").split(" ");
-            return Integer.parseInt(parts[0]);
+            // 숫자와 쉼표를 제외한 모든 문자 제거 (단, 단순 제거는 위험할 수 있음)
+            // Regex로 첫 번째 숫자 그룹 찾기
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("(\\d[\\d,]*)");
+            java.util.regex.Matcher matcher = pattern.matcher(text);
+            if (matcher.find()) {
+                String numberStr = matcher.group(1).replace(",", "");
+                return Integer.parseInt(numberStr);
+            }
+            return 0;
         } catch (Exception e) {
             log.warn("Failed to parse count from: {}", text);
             return 0;

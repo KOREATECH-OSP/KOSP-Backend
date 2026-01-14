@@ -87,7 +87,13 @@ public class GithubCommitDetailRaw {
         if (author == null) return null;
         Object date = author.get("date");
         if (date instanceof String) {
-            return LocalDateTime.parse((String) date);
+            try {
+                return java.time.Instant.parse((String) date)
+                    .atZone(java.time.ZoneId.of("UTC"))
+                    .toLocalDateTime();
+            } catch (Exception e) {
+                return null;
+            }
         }
         return null;
     }
