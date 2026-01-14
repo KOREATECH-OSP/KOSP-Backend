@@ -2,22 +2,22 @@ package kr.ac.koreatech.sw.kosp.domain.user.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
-
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.api.UserApi;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
-import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
+import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
+import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
@@ -35,9 +35,10 @@ public class UserController implements UserApi {
     @PostMapping("/signup")
     @Permit(permitAll = true, description = "회원가입")
     public ResponseEntity<AuthTokenResponse> signup(
-        @RequestBody @Valid UserSignupRequest request
+        @RequestBody @Valid UserSignupRequest request,
+        @Token SignupToken token
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request, token));
     }
 
     @Override
@@ -49,7 +50,6 @@ public class UserController implements UserApi {
         userService.update(userId, request);
         return ResponseEntity.ok().build();
     }
-
 
     @Override
     @Permit(description = "회원 탈퇴")
