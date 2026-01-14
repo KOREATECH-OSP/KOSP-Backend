@@ -13,13 +13,18 @@ import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ActivityTimelineRespon
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionOverviewResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 // import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
+import java.util.List;
 
 @Tag(name = "GitHub", description = "GitHub 관련 API")
 @RequestMapping("/v1/users/{userId}/github")
@@ -114,6 +119,34 @@ public interface GithubApi {
         @RequestParam(defaultValue = "20") int limit,
         @Parameter(description = "조회 기간 (일)", example = "90")
         @RequestParam(defaultValue = "90") int days
+    );
+
+    @Operation(summary = "1. 최근 기여활동 조회", description = "사용자의 최근 기여 활동(최대 6개 저장소)을 조회합니다.")
+    @GetMapping("/recent-activity")
+    ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "2. 전체 기여 내역 조회", description = "사용자의 전체 기여 내역을 조회합니다.")
+    @GetMapping("/overall-history")
+    ResponseEntity<GithubOverallHistoryResponse> getOverallHistory(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "3. 기여내역 비교 조회", description = "사용자와 전체 사용자 평균 기여 내역을 비교합니다.")
+    @GetMapping("/contribution-comparison")
+    ResponseEntity<GithubContributionComparisonResponse> getComparison(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
+    );
+
+    @Operation(summary = "4. GitHub 기여점수 조회", description = "사용자의 GitHub 활동, 다양성, 영향력 점수를 조회합니다.")
+    @GetMapping("/contribution-score")
+    ResponseEntity<GithubContributionScoreResponse> getScore(
+        @Parameter(description = "사용자 ID", required = true)
+        @PathVariable Long userId
     );
 
     @Operation(summary = "전체 사용자 평균 통계 조회", description = "시스템 전체 사용자의 평균 기여 통계를 조회합니다.")
