@@ -14,13 +14,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ActivityTimelineResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionOverviewResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.ContributionPatternResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubMonthlyActivityResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubRecentContributionsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubSummaryResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 // import kr.ac.koreatech.sw.kosp.domain.github.dto.response.LanguageDistributionResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.RepositoryStatsResponse;
 import kr.ac.koreatech.sw.kosp.domain.github.dto.response.YearlyAnalysisResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.model.GithubGlobalStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubContributionPattern;
 // import kr.ac.koreatech.sw.kosp.domain.github.model.GithubLanguageStatistics;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubMonthlyStatistics;
@@ -495,6 +500,78 @@ public class GithubStatisticsService {
         }
         
         return response;
+    }
+
+    /**
+     * 1. 최근 기여활동 조회
+     */
+    @Transactional(readOnly = true)
+    public List<GithubRecentActivityResponse> getRecentActivityDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        List<GithubRepositoryStatistics> repoStats = repositoryStatisticsRepository
+            .findByContributorGithubId(githubId);
+
+        return repoStats.stream()
+            .sorted((a, b) -> b.getLastCommitDate().compareTo(a.getLastCommitDate()))
+            .limit(10) // Reasonable limit matching spec intent
+            .map(GithubRecentActivityResponse::from)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 2. 전체 기여 내역 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubOverallHistoryResponse getOverallHistoryDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        return GithubOverallHistoryResponse.from(userStats);
+    }
+
+    /**
+     * 3. 기여내역 비교 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubContributionComparisonResponse getComparisonDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        GithubGlobalStatistics globalStats = globalStatisticsRepository.findTopByOrderByCalculatedAtDesc()
+            .orElse(null);
+
+        return new GithubContributionComparisonResponse(
+            globalStats != null ? globalStats.getAvgCommitCount() : 0.0,
+            globalStats != null ? globalStats.getAvgStarCount() : 0.0,
+            globalStats != null ? globalStats.getAvgPrCount() : 0.0,
+            globalStats != null ? globalStats.getAvgIssueCount() : 0.0,
+            userStats.getTotalCommits(),
+            userStats.getTotalStarsReceived(),
+            userStats.getTotalPrs(),
+            userStats.getTotalIssues()
+        );
+    }
+
+    /**
+     * 4. GitHub 기여점수 조회
+     */
+    @Transactional(readOnly = true)
+    public GithubContributionScoreResponse getScoreDetails(Long userId) {
+        User user = findUserById(userId);
+        String githubId = user.getGithubUser().getGithubLogin();
+
+        GithubUserStatistics userStats = userStatisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new IllegalArgumentException("GitHub 통계를 찾을 수 없습니다."));
+
+        return GithubContributionScoreResponse.from(userStats);
     }
 
     /**
