@@ -29,7 +29,7 @@ public class EmailEventListener {
 
     @TransactionalEventListener
     public void onResetPasswordSendEvent(ResetPasswordEvent event) {
-        EmailForm emailForm = new ResetPasswordForm(event.serverUrl(), event.resetToken());
+        EmailForm emailForm = new ResetPasswordForm(event.clientUrl(), event.resetToken());
         emailService.sendEmail(event.email(), emailForm);
     }
 
