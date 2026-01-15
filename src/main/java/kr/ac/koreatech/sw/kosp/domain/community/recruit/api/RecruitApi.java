@@ -1,23 +1,28 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.api;
 
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Recruit", description = "모집 공고 관리 API")
 public interface RecruitApi {
@@ -60,7 +65,7 @@ public interface RecruitApi {
     );
 
     @Operation(summary = "모집 상태 변경", description = "모집 공고의 상태를 변경합니다.")
-    @org.springframework.web.bind.annotation.PatchMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     ResponseEntity<Void> updateStatus(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long id,
@@ -74,4 +79,28 @@ public interface RecruitApi {
         @PathVariable Long recruitId,
         @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
     );
+
+    @Operation(summary = "지원자 목록 조회", description = "모집 공고에 대한 지원자 목록을 조회합니다. (팀장 전용)")
+    @GetMapping("/{recruitId}/applications")
+    ResponseEntity<RecruitApplyListResponse> getApplicants(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long recruitId,
+        @Parameter(hidden = true) Pageable pageable
+    );
+
+    @Operation(summary = "지원 상세 조회", description = "지원 상세 정보를 조회합니다. (팀장 전용)")
+    @GetMapping("/applications/{applicationId}")
+    ResponseEntity<RecruitApplyResponse> getApplication(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long applicationId
+    );
+
+    @Operation(summary = "지원 수락/거절", description = "지원을 수락하거나 거절합니다. (팀장 전용)")
+    @PatchMapping("/applications/{applicationId}")
+    ResponseEntity<Void> decideApplication(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long applicationId,
+        @RequestBody @Valid RecruitApplyDecisionRequest request
+    );
 }
+

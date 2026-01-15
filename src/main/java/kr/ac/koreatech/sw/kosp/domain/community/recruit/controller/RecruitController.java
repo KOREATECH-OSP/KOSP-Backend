@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,10 +20,14 @@ import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
 import kr.ac.koreatech.sw.kosp.domain.community.board.service.BoardService;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.api.RecruitApi;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitApplyService;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
@@ -35,7 +40,7 @@ import lombok.RequiredArgsConstructor;
 public class RecruitController implements RecruitApi {
 
     private final RecruitService recruitService;
-    private final kr.ac.koreatech.sw.kosp.domain.community.recruit.service.RecruitApplyService recruitApplyService;
+    private final RecruitApplyService recruitApplyService;
     private final BoardService boardService;
 
     @Override
@@ -98,6 +103,7 @@ public class RecruitController implements RecruitApi {
     }
 
     @Override
+    @PatchMapping("/{id}/status")
     @Permit(name = "recruit:status", description = "모집 상태 변경")
     public ResponseEntity<Void> updateStatus(
         @AuthUser User user,
@@ -109,13 +115,50 @@ public class RecruitController implements RecruitApi {
     }
 
     @Override
+    @PostMapping("/{recruitId}/apply")
     @Permit(name = "community:recruits:apply", description = "공고 지원")
     public ResponseEntity<Void> applyRecruit(
-        User user,
-        Long recruitId,
-        kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
+        @AuthUser User user,
+        @PathVariable Long recruitId,
+        @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
     ) {
         recruitApplyService.applyRecruit(recruitId, user, request);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @Override
+    @GetMapping("/{recruitId}/applications")
+    @Permit(name = "recruit:applications:list", description = "지원자 목록 조회")
+    public ResponseEntity<RecruitApplyListResponse> getApplicants(
+        @AuthUser User user,
+        @PathVariable Long recruitId,
+        Pageable pageable
+    ) {
+        RecruitApplyListResponse response = recruitApplyService.getApplicants(recruitId, user, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @GetMapping("/applications/{applicationId}")
+    @Permit(name = "recruit:applications:read", description = "지원 상세 조회")
+    public ResponseEntity<RecruitApplyResponse> getApplication(
+        @AuthUser User user,
+        @PathVariable Long applicationId
+    ) {
+        RecruitApplyResponse response = recruitApplyService.getApplication(applicationId, user);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @PatchMapping("/applications/{applicationId}")
+    @Permit(name = "recruit:applications:decide", description = "지원 수락/거절")
+    public ResponseEntity<Void> decideApplication(
+        @AuthUser User user,
+        @PathVariable Long applicationId,
+        @RequestBody @Valid RecruitApplyDecisionRequest request
+    ) {
+        recruitApplyService.decideApplication(applicationId, user, request);
+        return ResponseEntity.ok().build();
+    }
 }
+

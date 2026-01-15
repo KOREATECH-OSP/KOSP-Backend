@@ -38,6 +38,9 @@ public enum ExceptionMessage {
     TEAM_ALREADY_JOINED("이미 팀에 소속된 사용자입니다.", HttpStatus.CONFLICT),
     INVITATION_EXPIRED("만료된 초대입니다.", HttpStatus.BAD_REQUEST),
     LEADER_CANNOT_LEAVE("팀장은 탈퇴하거나 제명될 수 없습니다.", HttpStatus.BAD_REQUEST),
+    APPLICATION_NOT_FOUND("지원 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ALREADY_DECIDED("이미 처리된 지원입니다.", HttpStatus.CONFLICT),
+    RECRUIT_CLOSED("마감된 모집 공고입니다.", HttpStatus.BAD_REQUEST),
 
     ;
 
