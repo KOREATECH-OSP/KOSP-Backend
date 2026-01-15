@@ -35,6 +35,9 @@ public enum ExceptionMessage {
     EMAIL_NOT_VERIFIED("이메일 인증이 완료되지 않았습니다.", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL_ADDRESS("유효하지 않는 이메일 주소입니다.", HttpStatus.BAD_REQUEST),
     TEAM_NOT_FOUND("소속된 팀을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TEAM_ALREADY_JOINED("이미 팀에 소속된 사용자입니다.", HttpStatus.CONFLICT),
+    INVITATION_EXPIRED("만료된 초대입니다.", HttpStatus.BAD_REQUEST),
+    LEADER_CANNOT_LEAVE("팀장은 탈퇴하거나 제명될 수 없습니다.", HttpStatus.BAD_REQUEST),
 
     ;
 

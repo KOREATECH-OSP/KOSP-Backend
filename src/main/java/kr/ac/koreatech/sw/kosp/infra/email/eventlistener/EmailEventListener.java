@@ -6,9 +6,11 @@ import org.springframework.transaction.event.TransactionalEventListener;
 
 import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
 import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
+import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.TeamInviteSendEvent;
 import kr.ac.koreatech.sw.kosp.infra.email.form.EmailForm;
 import kr.ac.koreatech.sw.kosp.infra.email.form.EmailVerificationForm;
 import kr.ac.koreatech.sw.kosp.infra.email.form.ResetPasswordForm;
+import kr.ac.koreatech.sw.kosp.infra.email.form.TeamInviteForm;
 import kr.ac.koreatech.sw.kosp.infra.email.service.EmailService;
 import lombok.RequiredArgsConstructor;
 
@@ -22,12 +24,23 @@ public class EmailEventListener {
     @TransactionalEventListener
     public void onEmailVerificationSendEvent(EmailVerificationSendEvent event) {
         EmailForm emailForm = new EmailVerificationForm(event.verificationCode());
-        emailService.sendVerificationEmail(event.email(), emailForm);
+        emailService.sendEmail(event.email(), emailForm);
     }
 
     @TransactionalEventListener
     public void onResetPasswordSendEvent(ResetPasswordEvent event) {
-        EmailForm emailForm = new ResetPasswordForm(event.serverUrl(), event.resetToken());
-        emailService.sendVerificationEmail(event.email(), emailForm);
+        EmailForm emailForm = new ResetPasswordForm(event.clientUrl(), event.resetToken());
+        emailService.sendEmail(event.email(), emailForm);
+    }
+
+    @TransactionalEventListener
+    public void onTeamInviteSendEvent(TeamInviteSendEvent event) {
+        EmailForm emailForm = new TeamInviteForm(
+            event.teamName(),
+            event.inviterName(),
+            event.clientUrl(),
+            event.inviteId()
+        );
+        emailService.sendEmail(event.email(), emailForm);
     }
 }

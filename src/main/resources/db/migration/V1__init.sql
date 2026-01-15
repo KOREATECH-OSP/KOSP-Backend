@@ -604,3 +604,25 @@ CREATE TABLE github_global_statistics (
     
     INDEX idx_calculated_at (calculated_at)
 );
+
+CREATE TABLE team_invite
+(
+    id          BIGINT AUTO_INCREMENT NOT NULL,
+    created_at  TIMESTAMP             NOT NULL,
+    updated_at  TIMESTAMP             NOT NULL,
+    team_id     BIGINT                NOT NULL,
+    inviter_id  BIGINT                NOT NULL,
+    invitee_id  BIGINT                NOT NULL,
+    expires_at  TIMESTAMP             NOT NULL,
+    CONSTRAINT pk_team_invite PRIMARY KEY (id),
+    CONSTRAINT uk_team_invite_team_invitee UNIQUE (team_id, invitee_id)
+);
+
+ALTER TABLE team_invite
+    ADD CONSTRAINT fk_team_invite_on_team FOREIGN KEY (team_id) REFERENCES team (id);
+
+ALTER TABLE team_invite
+    ADD CONSTRAINT fk_team_invite_on_inviter FOREIGN KEY (inviter_id) REFERENCES users (id);
+
+ALTER TABLE team_invite
+    ADD CONSTRAINT fk_team_invite_on_invitee FOREIGN KEY (invitee_id) REFERENCES users (id);
