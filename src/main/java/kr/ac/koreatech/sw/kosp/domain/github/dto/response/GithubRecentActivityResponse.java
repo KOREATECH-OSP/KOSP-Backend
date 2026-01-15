@@ -7,6 +7,7 @@ import kr.ac.koreatech.sw.kosp.domain.github.model.GithubRepositoryStatistics;
 
 @Schema(description = "1. 최근 기여활동 항목")
 public record GithubRecentActivityResponse(
+    String repoOwner,
     String repositoryName,
     String description,
     Integer stargazersCount,
@@ -16,6 +17,7 @@ public record GithubRecentActivityResponse(
 ) {
     public static GithubRecentActivityResponse from(GithubRepositoryStatistics repo) {
         return new GithubRecentActivityResponse(
+            repo.getRepoOwner(),
             repo.getRepoName(),
             repo.getDescription(),
             repo.getStargazersCount(),
@@ -25,3 +27,4 @@ public record GithubRecentActivityResponse(
         );
     }
 }
+
