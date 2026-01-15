@@ -15,4 +15,5 @@ public interface TeamMemberRepository extends Repository<TeamMember, Long> {
     boolean existsByTeamAndUser(Team team, User user);
     Optional<TeamMember> findByTeamAndUser(Team team, User user);
     Optional<TeamMember> findByUser(User user);
+    java.util.List<TeamMember> findAllByUser(User user);
 }

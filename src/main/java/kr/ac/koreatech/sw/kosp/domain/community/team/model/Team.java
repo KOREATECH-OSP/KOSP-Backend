@@ -1,5 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,8 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.ArrayList;
-import java.util.List;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -39,6 +40,12 @@ public class Team extends BaseEntity {
 
     @Builder
     private Team(String name, String description, String imageUrl) {
+        this.name = name;
+        this.description = description;
+        this.imageUrl = imageUrl;
+    }
+
+    public void update(String name, String description, String imageUrl) {
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
