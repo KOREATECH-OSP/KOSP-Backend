@@ -62,6 +62,9 @@ spring:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
       database: ${MONGODB_DATABASE}
+      authentication-database: ${MONGODB_AUTHENTICATION_DATABASE}
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
       auto-index-creation: false
       uuid-representation: standard
 
