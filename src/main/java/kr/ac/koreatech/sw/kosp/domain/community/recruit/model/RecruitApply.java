@@ -58,4 +58,8 @@ public class RecruitApply extends BaseEntity {
         this.reason = reason;
         this.portfolioUrl = portfolioUrl;
     }
+
+    public void updateStatus(ApplyStatus status) {
+        this.status = status;
+    }
 }
