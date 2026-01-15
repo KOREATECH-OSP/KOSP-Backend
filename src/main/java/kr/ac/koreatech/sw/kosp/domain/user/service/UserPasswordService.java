@@ -1,5 +1,12 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
+import java.util.UUID;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import kr.ac.koreatech.sw.kosp.domain.user.model.PasswordResetToken;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.PasswordResetTokenRepository;
@@ -8,12 +15,6 @@ import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +26,7 @@ public class UserPasswordService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void sendPasswordResetMail(String email, String serverUrl) {
+    public void sendPasswordResetMail(String email, String clientUrl) {
         User user = userRepository.findByKutEmail(email)
                 .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
@@ -39,7 +40,7 @@ public class UserPasswordService {
         
         passwordResetTokenRepository.save(resetToken);
 
-        eventPublisher.publishEvent(new ResetPasswordEvent(email, serverUrl, token));
+        eventPublisher.publishEvent(new ResetPasswordEvent(email, clientUrl, token));
     }
 
     @Transactional

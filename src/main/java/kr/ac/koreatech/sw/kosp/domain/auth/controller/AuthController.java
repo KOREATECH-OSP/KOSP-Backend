@@ -25,10 +25,9 @@ import kr.ac.koreatech.sw.kosp.domain.user.service.UserPasswordService;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
 import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
 import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
-import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.RefreshToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
-import kr.ac.koreatech.sw.kosp.global.host.ServerURL;
+import kr.ac.koreatech.sw.kosp.global.host.ClientURL;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -120,9 +119,9 @@ public class AuthController implements AuthApi {
     @Permit(permitAll = true, description = "비밀번호 재설정 메일 발송")
     public ResponseEntity<Void> sendPasswordResetMail(
         @RequestBody @Valid EmailRequest request,
-        @ServerURL String serverUrl
+        @ClientURL String clientUrl
     ) {
-        userPasswordService.sendPasswordResetMail(request.email(), serverUrl);
+        userPasswordService.sendPasswordResetMail(request.email(), clientUrl);
         return ResponseEntity.ok().build();
     }
 

@@ -8,10 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.ac.koreatech.sw.kosp.domain.community.team.api.TeamApi;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamInviteRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.team.service.TeamService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.host.ClientURL;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +51,40 @@ public class TeamController implements TeamApi {
     public ResponseEntity<TeamDetailResponse> getMyTeam(@AuthUser User user) {
         TeamDetailResponse response = teamService.getMyTeam(user);
         return ResponseEntity.ok(response);
+    }
+
+    @Override
+    @Permit(name = "team:update", description = "팀 정보 수정")
+    public ResponseEntity<Void> update(@AuthUser User user, Long teamId, TeamUpdateRequest request) {
+        teamService.update(teamId, user, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "team:invite", description = "팀원 초대")
+    public ResponseEntity<Void> inviteMember(@AuthUser User user, Long teamId, TeamInviteRequest request, @ClientURL String clientUrl) {
+        teamService.inviteMember(teamId, user, request, clientUrl);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(permitAll = true, description = "초대 수락")
+    public ResponseEntity<Void> acceptInvite(@AuthUser User user, Long inviteId) {
+        teamService.acceptInvite(inviteId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(permitAll = true, description = "초대 거절")
+    public ResponseEntity<Void> rejectInvite(@AuthUser User user, Long inviteId) {
+        teamService.rejectInvite(inviteId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "team:kick", description = "팀원 제명")
+    public ResponseEntity<Void> removeMember(@AuthUser User user, Long teamId, Long userId) {
+        teamService.removeMember(teamId, user, userId);
+        return ResponseEntity.ok().build();
     }
 }
