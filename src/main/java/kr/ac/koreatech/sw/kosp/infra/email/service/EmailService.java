@@ -20,7 +20,7 @@ public class EmailService {
     private final SesMailSender sesMailSender;
     private final TemplateEngine templateEngine;
 
-    public void sendVerificationEmail(String targetEmail, EmailForm emailForm) {
+    public void sendEmail(String targetEmail, EmailForm emailForm) {
         SendEmailRequest request = createEmailRequest(targetEmail, emailForm);
         sesMailSender.sendMail(request);
     }

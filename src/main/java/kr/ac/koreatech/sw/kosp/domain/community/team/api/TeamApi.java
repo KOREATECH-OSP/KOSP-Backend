@@ -13,9 +13,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamCreateRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamInviteRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.team.dto.response.TeamListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
+import kr.ac.koreatech.sw.kosp.global.host.ClientURL;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Team", description = "팀 관리 API")
@@ -45,5 +48,44 @@ public interface TeamApi {
     @GetMapping("/v1/teams/me")
     ResponseEntity<TeamDetailResponse> getMyTeam(
         @Parameter(hidden = true) @AuthUser User user
+    );
+
+    @Operation(summary = "팀 정보 수정", description = "팀장이 팀 정보를 수정합니다.")
+    @org.springframework.web.bind.annotation.PutMapping("/v1/teams/{teamId}")
+    ResponseEntity<Void> update(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @RequestBody @Valid TeamUpdateRequest request
+    );
+
+    @Operation(summary = "팀원 초대", description = "팀장이 새로운 팀원을 이메일로 초대합니다.")
+    @PostMapping("/v1/teams/{teamId}/invites")
+    ResponseEntity<Void> inviteMember(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @RequestBody @Valid TeamInviteRequest request,
+        @Parameter(hidden = true) @ClientURL String clientUrl
+    );
+
+    @Operation(summary = "초대 수락", description = "초대받은 사용자가 초대를 수락합니다.")
+    @PostMapping("/v1/teams/invites/{inviteId}/accept")
+    ResponseEntity<Void> acceptInvite(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long inviteId
+    );
+
+    @Operation(summary = "초대 거절", description = "초대받은 사용자가 초대를 거절합니다.")
+    @PostMapping("/v1/teams/invites/{inviteId}/reject")
+    ResponseEntity<Void> rejectInvite(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long inviteId
+    );
+
+    @Operation(summary = "팀원 제명", description = "팀장이 팀원을 제명합니다.")
+    @org.springframework.web.bind.annotation.DeleteMapping("/v1/teams/{teamId}/members/{userId}")
+    ResponseEntity<Void> removeMember(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @PathVariable Long userId
     );
 }
