@@ -84,8 +84,12 @@ public class ArticleService {
     }
 
     public ArticleListResponse<ArticleResponse> getList(Board board, Pageable pageable, User user) {
-        // Regular users - exclude deleted articles
         Page<Article> page = articleRepository.findByBoardAndIsDeletedFalse(board, pageable);
+        return toResponse(page, user);
+    }
+
+    public ArticleListResponse<ArticleResponse> getPinnedList(Board board, Pageable pageable, User user) {
+        Page<Article> page = articleRepository.findByBoardAndIsPinnedTrueAndIsDeletedFalse(board, pageable);
         return toResponse(page, user);
     }
     

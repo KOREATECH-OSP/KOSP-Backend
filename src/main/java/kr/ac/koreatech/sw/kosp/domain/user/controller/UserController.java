@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.user.controller;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.api.UserApi;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
@@ -72,5 +74,11 @@ public class UserController implements UserApi {
     public ResponseEntity<Void> updatePassword(@AuthUser User user, @Valid UserPasswordChangeRequest request) {
         userService.changePassword(user.getId(), request.currentPassword(), request.newPassword());
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(description = "본인 지원 내역 조회")
+    public ResponseEntity<MyApplicationListResponse> getMyApplications(@AuthUser User user, Pageable pageable) {
+        return ResponseEntity.ok(userService.getMyApplications(user, pageable));
     }
 }

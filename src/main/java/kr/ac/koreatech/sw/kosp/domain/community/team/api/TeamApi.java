@@ -2,9 +2,11 @@ package kr.ac.koreatech.sw.kosp.domain.community.team.api;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -51,7 +53,7 @@ public interface TeamApi {
     );
 
     @Operation(summary = "팀 정보 수정", description = "팀장이 팀 정보를 수정합니다.")
-    @org.springframework.web.bind.annotation.PutMapping("/v1/teams/{teamId}")
+    @PutMapping("/v1/teams/{teamId}")
     ResponseEntity<Void> update(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long teamId,
@@ -82,7 +84,7 @@ public interface TeamApi {
     );
 
     @Operation(summary = "팀원 제명", description = "팀장이 팀원을 제명합니다.")
-    @org.springframework.web.bind.annotation.DeleteMapping("/v1/teams/{teamId}/members/{userId}")
+    @DeleteMapping("/v1/teams/{teamId}/members/{userId}")
     ResponseEntity<Void> removeMember(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long teamId,

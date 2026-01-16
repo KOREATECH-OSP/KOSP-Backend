@@ -3,6 +3,8 @@ package kr.ac.koreatech.sw.kosp.domain.user.service;
 import java.util.Optional;
 
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,15 +12,20 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitApply;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationListResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +39,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
+    private final RecruitApplyRepository recruitApplyRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService authService;
@@ -148,6 +156,14 @@ public class UserService {
             true, 
             !exists, 
             exists ? "이미 가입된 " + label + "입니다." : "사용 가능한 " + label + "입니다."
+        );
+    }
+
+    public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
+        Page<RecruitApply> page = recruitApplyRepository.findByUser(user, pageable);
+        return new MyApplicationListResponse(
+            page.getContent().stream().map(MyApplicationResponse::from).toList(),
+            PageMeta.from(page)
         );
     }
 }

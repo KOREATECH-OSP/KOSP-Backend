@@ -23,11 +23,12 @@ import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 @Tag(name = "Article", description = "게시글 관리 API")
 public interface ArticleApi {
 
-    @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다.")
+    @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다. pinned=true로 고정 게시글(배너)만 조회할 수 있습니다.")
     @GetMapping
     ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestParam Long boardId,
+        @RequestParam(required = false, defaultValue = "false") Boolean pinned,
         @Parameter(hidden = true) Pageable pageable
     );
 

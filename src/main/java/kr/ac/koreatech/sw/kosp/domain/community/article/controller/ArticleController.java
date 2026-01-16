@@ -43,11 +43,14 @@ public class ArticleController implements ArticleApi {
     public ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
+        @RequestParam(required = false, defaultValue = "false") Boolean pinned,
         Pageable pageable
     ) {
         Board board = boardService.getBoard(boardId);
-        ArticleListResponse<ArticleResponse> response = articleService.getList(board, pageable, user);
-        return ResponseEntity.ok(response);
+        if (Boolean.TRUE.equals(pinned)) {
+            return ResponseEntity.ok(articleService.getPinnedList(board, pageable, user));
+        }
+        return ResponseEntity.ok(articleService.getList(board, pageable, user));
     }
 
     @Override

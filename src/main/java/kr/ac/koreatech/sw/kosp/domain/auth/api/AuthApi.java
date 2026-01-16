@@ -59,7 +59,7 @@ public interface AuthApi {
     );
 
     @Operation(summary = "이메일 인증 코드 발송", description = "회원가입을 위해 이메일로 인증 코드를 발송합니다.")
-    @PostMapping("/verfiy/email")
+    @PostMapping("/verify/email")
     ResponseEntity<Void> sendCertificationMail(
         @Parameter(description = "이메일 정보")
         @RequestBody @Valid EmailRequest request,
