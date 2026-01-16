@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.resolver.TokenHeaderResolver;
 import kr.ac.koreatech.sw.kosp.global.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 
@@ -29,6 +30,7 @@ public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
     private final UserRepository userRepository;
+    private final TokenHeaderResolver tokenHeaderResolver;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,7 +44,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource));
 
         http.addFilterBefore(
-            new JwtAuthenticationFilter(userRepository), 
+            new JwtAuthenticationFilter(userRepository, tokenHeaderResolver),
             UsernamePasswordAuthenticationFilter.class
         );
 
