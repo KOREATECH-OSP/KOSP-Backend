@@ -8,7 +8,8 @@ public record BoardResponse(
     Long id,
     String name,
     String description,
-    Boolean isRecruitAllowed
+    Boolean isRecruitAllowed,
+    Boolean isNotice
 ) {
     public static BoardResponse from(Board board) {
         return BoardResponse.builder()
@@ -16,6 +17,7 @@ public record BoardResponse(
             .name(board.getName())
             .description(board.getDescription())
             .isRecruitAllowed(board.isRecruitAllowed())
+            .isNotice(board.isNotice())
             .build();
     }
 }
