@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.auth.resolver.TokenHeaderResolver;
 import kr.ac.koreatech.sw.kosp.global.auth.token.AccessToken;
 import kr.ac.koreatech.sw.kosp.global.auth.token.JwtToken;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
+    private final TokenHeaderResolver tokenHeaderResolver;
     
     @Override
     protected void doFilterInternal(
@@ -65,7 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7);
         }
-        return "";
+
+        return tokenHeaderResolver.resolveHeaderName(AccessToken.class);
     }
     
     private void authenticateUser(AccessToken token) {
