@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.community.article.dto.response;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
@@ -19,7 +20,9 @@ public record ArticleResponse(
     List<String> tags,
     Boolean isLiked,
     Boolean isBookmarked,
-    Boolean isPinned
+    Boolean isPinned,
+    LocalDateTime createdAt,
+    LocalDateTime updatedAt
 ) {
     public static ArticleResponse from(Article article, boolean isLiked, boolean isBookmarked) {
         return ArticleResponse.builder()
@@ -35,6 +38,8 @@ public record ArticleResponse(
             .isLiked(isLiked)
             .isBookmarked(isBookmarked)
             .isPinned(article.isPinned())
+            .createdAt(article.getCreatedAt())
+            .updatedAt(article.getUpdatedAt())
             .build();
     }
 }

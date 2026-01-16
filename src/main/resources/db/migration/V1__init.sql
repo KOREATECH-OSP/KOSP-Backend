@@ -40,12 +40,13 @@ ALTER TABLE users
 
 CREATE TABLE board
 (
-    id                     BIGINT AUTO_INCREMENT NOT NULL,
-    created_at             TIMESTAMP             NOT NULL,
-    updated_at             TIMESTAMP             NOT NULL,
-    name                   VARCHAR(30)           NOT NULL,
-    description            VARCHAR(255)          NOT NULL,
+    id                 BIGINT AUTO_INCREMENT NOT NULL,
+    created_at         TIMESTAMP             NOT NULL,
+    updated_at         TIMESTAMP             NOT NULL,
+    name               VARCHAR(30)           NOT NULL,
+    description        VARCHAR(255)          NOT NULL,
     is_recruit_allowed BIT(1)                NOT NULL,
+    is_notice          BIT(1)                NOT NULL,
     CONSTRAINT pk_board PRIMARY KEY (id)
 );
 

@@ -36,6 +36,10 @@ public class ArticleService {
 
     @Transactional
     public Long create(User author, Board board, ArticleRequest req) {
+        if (board.isNotice()) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+        
         Article article = Article.builder()
             .author(author)
             .board(board)
