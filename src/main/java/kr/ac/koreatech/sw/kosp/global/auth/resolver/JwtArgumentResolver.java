@@ -60,7 +60,7 @@ public class JwtArgumentResolver implements HandlerMethodArgumentResolver {
         // 3. 헤더에서 토큰 값 읽기
         String tokenString = request.getHeader(headerName);
 
-        if (tokenString.isBlank()) {
+        if (tokenString == null || tokenString.isBlank()) {
             throw new InvalidTokenException("Token header not found: " + headerName);
         }
 
