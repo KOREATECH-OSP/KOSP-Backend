@@ -31,4 +31,7 @@ public class Board extends BaseEntity {
 
     @Column(name = "is_recruit_allowed", nullable = false)
     private boolean isRecruitAllowed = false;
+
+    @Column(name = "is_notice", nullable = false)
+    private boolean isNotice = false;
 }
