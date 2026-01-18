@@ -35,7 +35,7 @@ public class ArticleService {
     private final kr.ac.koreatech.sw.kosp.domain.upload.repository.AttachmentRepository attachmentRepository;
 
     @Transactional
-    public Long create(User author, Board board, ArticleRequest req) {
+    public Long create(User author, Board board, ArticleRequest request) {
         if (board.isNotice()) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
@@ -43,17 +43,17 @@ public class ArticleService {
         Article article = Article.builder()
             .author(author)
             .board(board)
-            .title(req.title())
-            .content(req.content())
-            .tags(req.tags())
+            .title(request.title())
+            .content(request.content())
+            .tags(request.tags())
             .build();
         
         Article savedArticle = articleRepository.save(article);
         
         // Link attachments if provided
-        if (req.attachmentIds() != null && !req.attachmentIds().isEmpty()) {
+        if (request.attachmentIds() != null && !request.attachmentIds().isEmpty()) {
             List<kr.ac.koreatech.sw.kosp.domain.upload.model.Attachment> attachments = 
-                attachmentRepository.findAllById(req.attachmentIds());
+                attachmentRepository.findAllById(request.attachmentIds());
             
             // Verify uploader and link to article
             attachments.forEach(attachment -> {
@@ -150,10 +150,10 @@ public class ArticleService {
     }
 
     @Transactional
-    public void update(User author, Long id, ArticleRequest req) {
+    public void update(User author, Long id, ArticleRequest request) {
         Article article = articleRepository.getById(id);
         validateOwner(article, author.getId());
-        article.updateArticle(req.title(), req.content(), req.tags());
+        article.updateArticle(request.title(), request.content(), request.tags());
     }
 
     @Transactional

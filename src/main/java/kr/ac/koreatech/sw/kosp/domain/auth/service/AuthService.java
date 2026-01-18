@@ -130,7 +130,7 @@ public class AuthService {
      * 사용자 정보 조회
      */
     public AuthMeResponse getUserInfo(User user) {
-        String profileImage = (user.getGithubUser() != null) ? user.getGithubUser().getGithubAvatarUrl() : null;
+        String profileImage = extractProfileImage(user);
 
         return new AuthMeResponse(
             user.getId(),
@@ -139,6 +139,13 @@ public class AuthService {
             profileImage,
             user.getIntroduction()
         );
+    }
+
+    private String extractProfileImage(User user) {
+        if (user.getGithubUser() == null) {
+            return null;
+        }
+        return user.getGithubUser().getGithubAvatarUrl();
     }
 
     /**

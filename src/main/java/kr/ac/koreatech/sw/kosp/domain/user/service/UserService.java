@@ -80,24 +80,7 @@ public class UserService {
             throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
         }
 
-        User user;
-        if (existingUser.isPresent()) {
-            user = existingUser.get();
-            user.reactivate(); 
-            user.changePassword(request.password(), passwordEncoder);
-        } else {
-            // 신규 생성
-            user = User.builder()
-                .name(request.name())
-                .kutId(request.kutId())
-                .kutEmail(kutEmail)
-                .password(request.password())
-                .createdAt(java.time.LocalDateTime.now())
-                .updatedAt(java.time.LocalDateTime.now())
-                .build();
-                
-            user.encodePassword(passwordEncoder);
-        }
+        User user = createOrReactivateUser(existingUser, request, kutEmail);
 
         user.updateGithubUser(githubUser);
         userRepository.save(user);
@@ -119,9 +102,9 @@ public class UserService {
     }
 
     @Transactional
-    public void update(Long userId, UserUpdateRequest req) {
+    public void update(Long userId, UserUpdateRequest request) {
         User user = userRepository.getById(userId);
-        user.updateInfo(req.name(), req.introduction());
+        user.updateInfo(request.name(), request.introduction());
     }
 
     public UserProfileResponse getProfile(Long userId) {
@@ -146,17 +129,29 @@ public class UserService {
     }
     @Transactional(readOnly = true)
     public kr.ac.koreatech.sw.kosp.domain.auth.dto.response.CheckMemberIdResponse checkMemberIdAvailability(String memberId) {
-        // 중복 확인 (탈퇴한 사용자 제외)
         boolean exists = userRepository.existsByKutIdAndIsDeletedFalse(memberId);
-        
-        // 10자리는 학번(STUDENT), 그 외는 사번(STAFF)으로 간주 (이미 DTO에서 포맷 검증됨)
-        String label = (memberId.length() == 10) ? "학번" : "사번";
+        String label = extractMemberLabel(memberId);
+        String message = buildAvailabilityMessage(exists, label);
         
         return new kr.ac.koreatech.sw.kosp.domain.auth.dto.response.CheckMemberIdResponse(
             true, 
             !exists, 
-            exists ? "이미 가입된 " + label + "입니다." : "사용 가능한 " + label + "입니다."
+            message
         );
+    }
+
+    private String extractMemberLabel(String memberId) {
+        if (memberId.length() == 10) {
+            return "학번";
+        }
+        return "사번";
+    }
+
+    private String buildAvailabilityMessage(boolean exists, String label) {
+        if (exists) {
+            return "이미 가입된 " + label + "입니다.";
+        }
+        return "사용 가능한 " + label + "입니다.";
     }
 
     public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
@@ -165,5 +160,26 @@ public class UserService {
             page.getContent().stream().map(MyApplicationResponse::from).toList(),
             PageMeta.from(page)
         );
+    }
+
+    private User createOrReactivateUser(Optional<User> existingUser, UserSignupRequest request, String kutEmail) {
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.reactivate();
+            user.changePassword(request.password(), passwordEncoder);
+            return user;
+        }
+
+        User user = User.builder()
+            .name(request.name())
+            .kutId(request.kutId())
+            .kutEmail(kutEmail)
+            .password(request.password())
+            .createdAt(java.time.LocalDateTime.now())
+            .updatedAt(java.time.LocalDateTime.now())
+            .build();
+
+        user.encodePassword(passwordEncoder);
+        return user;
     }
 }

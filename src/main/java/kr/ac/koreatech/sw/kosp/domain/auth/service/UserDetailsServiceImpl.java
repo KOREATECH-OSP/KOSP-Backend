@@ -53,13 +53,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             .anyMatch(role -> "ROLE_SUPERUSER".equals(role.getName()));
 
         if (isSuperuser) {
-            authorities.add("*");  // 와일드카드 권한으로 모든 API 접근 허용
+            authorities.add("*");
             log.debug("SUPERUSER detected, granting wildcard authority");
-        } else {
-            // 일반 사용자는 기존 로직으로 권한 수집
-            for (Role role : roles) {
-                processRole(role, authorities);
-            }
+            return authorities.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
+        }
+
+        for (Role role : roles) {
+            processRole(role, authorities);
         }
 
         return authorities.stream()

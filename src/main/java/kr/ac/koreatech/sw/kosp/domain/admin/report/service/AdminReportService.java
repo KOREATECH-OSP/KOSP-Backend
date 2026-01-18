@@ -36,21 +36,27 @@ public class AdminReportService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
 
         if (report.getStatus() != ReportStatus.PENDING) {
-            throw new GlobalException(ExceptionMessage.BAD_REQUEST); // 이미 처리된 신고
+            throw new GlobalException(ExceptionMessage.BAD_REQUEST);
+        }
+
+        if (request.action() == ReportProcessRequest.Action.REJECT) {
+            report.process(ReportStatus.REJECTED);
+            return;
         }
 
         if (request.action() == ReportProcessRequest.Action.DELETE_CONTENT) {
             deleteContent(report);
             report.process(ReportStatus.ACCEPTED);
-        } else if (request.action() == ReportProcessRequest.Action.REJECT) {
-            report.process(ReportStatus.REJECTED);
         }
     }
 
     private void deleteContent(Report report) {
         if (report.getTargetType() == ReportTargetType.ARTICLE) {
             adminContentService.deleteArticle(report.getTargetId());
-        } else if (report.getTargetType() == ReportTargetType.COMMENT) {
+            return;
+        }
+
+        if (report.getTargetType() == ReportTargetType.COMMENT) {
             adminContentService.deleteComment(report.getTargetId());
         }
     }
