@@ -18,4 +18,6 @@ public interface RecruitApplyRepository extends JpaRepository<RecruitApply, Long
     Page<RecruitApply> findByRecruit(Recruit recruit, Pageable pageable);
 
     List<RecruitApply> findByRecruitAndStatus(Recruit recruit, ApplyStatus status);
+
+    Page<RecruitApply> findByUser(User user, Pageable pageable);
 }

@@ -1,26 +1,27 @@
 package kr.ac.koreatech.sw.kosp.domain.community.recruit.service;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
+import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.board.model.Board;
-import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitStatus;
-import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleBookmarkRepository;
-import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
-
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -33,17 +34,17 @@ public class RecruitService {
     private final TeamRepository teamRepository;
 
     @Transactional
-    public Long create(User author, Board board, RecruitRequest req) {
+    public Long create(User author, Board board, RecruitRequest request) {
         Recruit recruit = Recruit.builder()
             .author(author)
             .board(board)
-            .title(req.title())
-            .content(req.content())
-            .tags(req.tags())
-            .team(teamRepository.getById(req.teamId()))
+            .title(request.title())
+            .content(request.content())
+            .tags(request.tags())
+            .team(teamRepository.getById(request.teamId()))
             .status(RecruitStatus.OPEN)
-            .startDate(req.startDate())
-            .endDate(req.endDate())
+            .startDate(request.startDate())
+            .endDate(request.endDate())
             .build();
             
         return recruitRepository.save(recruit).getId();
@@ -75,17 +76,17 @@ public class RecruitService {
     }
 
     @Transactional
-    public void update(User author, Long id, RecruitRequest req) {
+    public void update(User author, Long id, RecruitRequest request) {
         Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, author.getId());
         
         recruit.updateRecruit(
-            req.title(), 
-            req.content(), 
-            req.tags(),
-            teamRepository.getById(req.teamId()),
-            req.startDate(),
-            req.endDate()
+            request.title(), 
+            request.content(), 
+            request.tags(),
+            teamRepository.getById(request.teamId()),
+            request.startDate(),
+            request.endDate()
         );
     }
 

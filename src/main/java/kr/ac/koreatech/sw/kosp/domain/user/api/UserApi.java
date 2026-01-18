@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.user.api;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +17,7 @@ import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.auth.annotation.Token;
@@ -66,5 +68,12 @@ public interface UserApi {
     ResponseEntity<Void> updatePassword(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest request
+    );
+
+    @Operation(summary = "본인 지원 내역 조회", description = "로그인한 사용자가 지원한 모집 공고 목록을 조회합니다.")
+    @GetMapping("/me/applications")
+    ResponseEntity<MyApplicationListResponse> getMyApplications(
+        @Parameter(hidden = true) @AuthUser User user,
+        @Parameter(hidden = true) Pageable pageable
     );
 }

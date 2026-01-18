@@ -42,11 +42,11 @@ public class TeamService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public Long create(User user, TeamCreateRequest req) {
+    public Long create(User user, TeamCreateRequest request) {
         Team team = Team.builder()
-            .name(req.name())
-            .description(req.description())
-            .imageUrl(req.imageUrl())
+            .name(request.name())
+            .description(request.description())
+            .imageUrl(request.imageUrl())
             .build();
         teamRepository.save(team);
 
@@ -82,20 +82,19 @@ public class TeamService {
     }
 
     @Transactional
-    public void update(Long teamId, User user, TeamUpdateRequest req) {
+    public void update(Long teamId, User user, TeamUpdateRequest request) {
         Team team = teamRepository.getById(teamId);
         validateLeader(team, user);
 
-        team.update(req.name(), req.description(), req.imageUrl());
-        // save not needed with dirty checking, but explicit for some styles. Transactional handles it.
+        team.update(request.name(), request.description(), request.imageUrl());
     }
 
     @Transactional
-    public void inviteMember(Long teamId, User user, TeamInviteRequest req, String clientUrl) {
+    public void inviteMember(Long teamId, User user, TeamInviteRequest request, String clientUrl) {
         Team team = teamRepository.getById(teamId);
         validateLeader(team, user);
 
-        User invitee = userRepository.getByKutEmail(req.email());
+        User invitee = userRepository.getByKutEmail(request.email());
         if (teamMemberRepository.existsByTeamAndUser(team, invitee)) {
             throw new GlobalException(ExceptionMessage.TEAM_ALREADY_JOINED);
         }

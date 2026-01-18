@@ -24,6 +24,8 @@ public interface ArticleRepository extends Repository<Article, Long> {
     // For regular users - exclude deleted articles
     Page<Article> findByBoardAndIsDeletedFalse(Board board, Pageable pageable);
     
+    Page<Article> findByBoardAndIsPinnedTrueAndIsDeletedFalse(Board board, Pageable pageable);
+    
     java.util.List<Article> findByTitleContaining(String keyword);
     java.util.List<Article> findByTitleContainingAndIsDeletedFalse(String title);
 
