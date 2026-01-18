@@ -1,7 +1,5 @@
 package kr.ac.koreatech.sw.kosp.domain.mail.service;
 
-import static kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage.*;
-
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -12,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.ac.koreatech.sw.kosp.domain.mail.model.EmailVerification;
 import kr.ac.koreatech.sw.kosp.domain.mail.repository.EmailVerificationRepository;
 import kr.ac.koreatech.sw.kosp.global.auth.token.TokenType;
+import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
 import kr.ac.koreatech.sw.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
 import lombok.extern.slf4j.Slf4j;
@@ -54,10 +53,10 @@ public class EmailVerificationService {
     @Transactional
     public EmailVerification verifyCode(String email, String code) {
         EmailVerification verification = emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
         if (!verification.getCode().equals(code)) {
-            throw new GlobalException(INVALID_VERIFICATION_CODE);
+            throw new GlobalException(ExceptionMessage.INVALID_VERIFICATION_CODE);
         }
 
         verification.verify();
@@ -69,10 +68,10 @@ public class EmailVerificationService {
     @Transactional
     public void completeSignupVerification(String email) {
         EmailVerification verification = emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
         if (!verification.isVerified()) {
-            throw new GlobalException(EMAIL_NOT_VERIFIED);
+            throw new GlobalException(ExceptionMessage.EMAIL_NOT_VERIFIED);
         }
 
         emailVerificationRepository.delete(verification);
@@ -80,7 +79,7 @@ public class EmailVerificationService {
 
     public EmailVerification getVerification(String email) {
         return emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
     }
 
     private String generateCode() {
