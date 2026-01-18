@@ -131,9 +131,7 @@ public class ChallengeService {
     }
 
     public ChallengeListResponse getChallenges(User user, Integer tier) {
-        List<Challenge> challenges = (tier != null) 
-            ? challengeRepository.findByTier(tier)
-            : challengeRepository.findAll();
+        List<Challenge> challenges = findChallengesByTier(tier);
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
         
         Map<Long, ChallengeHistory> historyMap = histories.stream()
@@ -167,9 +165,7 @@ public class ChallengeService {
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
         long totalChallenges = challenges.size();
-        double overallProgress = totalChallenges > 0 
-            ? (double) completedCount / totalChallenges * 100.0 
-            : 0.0;
+        double overallProgress = calculateOverallProgress(completedCount, totalChallenges);
         
         int totalEarnedPoints = histories.stream()
             .filter(ChallengeHistory::isAchieved)
@@ -180,5 +176,19 @@ public class ChallengeService {
             challengeResponses,
             new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
         );
+    }
+
+    private List<Challenge> findChallengesByTier(Integer tier) {
+        if (tier == null) {
+            return challengeRepository.findAll();
+        }
+        return challengeRepository.findByTier(tier);
+    }
+
+    private double calculateOverallProgress(long completedCount, long totalChallenges) {
+        if (totalChallenges <= 0) {
+            return 0.0;
+        }
+        return (double) completedCount / totalChallenges * 100.0;
     }
 }

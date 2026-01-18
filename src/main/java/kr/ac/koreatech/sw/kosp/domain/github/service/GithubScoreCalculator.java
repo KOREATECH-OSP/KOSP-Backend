@@ -82,19 +82,44 @@ public class GithubScoreCalculator {
         double maxScore = 0.0;
 
         for (GithubRepositoryStatistics repo : repoStats) {
-            int commits = repo.getUserCommitsCount() != null ? repo.getUserCommitsCount() : 0;
-            int prs = repo.getUserPrsCount() != null ? repo.getUserPrsCount() : 0;
+            int commits = extractCommitsCount(repo);
+            int prs = extractPrsCount(repo);
 
-            if (commits >= 100 && prs >= 20) {
-                return 3.0; // 최고 점수 도달 시 즉시 리턴
-            } else if (commits >= 30 && prs >= 5) {
-                maxScore = Math.max(maxScore, 2.0);
-            } else if (commits >= 5 || prs >= 1) {
-                maxScore = Math.max(maxScore, 1.0);
+            double repoScore = calculateRepoScore(commits, prs);
+            if (repoScore == 3.0) {
+                return 3.0;
             }
+            maxScore = Math.max(maxScore, repoScore);
         }
 
         return maxScore;
+    }
+
+    private int extractCommitsCount(GithubRepositoryStatistics repo) {
+        if (repo.getUserCommitsCount() == null) {
+            return 0;
+        }
+        return repo.getUserCommitsCount();
+    }
+
+    private int extractPrsCount(GithubRepositoryStatistics repo) {
+        if (repo.getUserPrsCount() == null) {
+            return 0;
+        }
+        return repo.getUserPrsCount();
+    }
+
+    private double calculateRepoScore(int commits, int prs) {
+        if (commits >= 100 && prs >= 20) {
+            return 3.0;
+        }
+        if (commits >= 30 && prs >= 5) {
+            return 2.0;
+        }
+        if (commits >= 5 || prs >= 1) {
+            return 1.0;
+        }
+        return 0.0;
     }
 
     /**
@@ -109,13 +134,14 @@ public class GithubScoreCalculator {
 
         if (repoCount >= 10) {
             return 1.0;
-        } else if (repoCount >= 5) {
-            return 0.7;
-        } else if (repoCount >= 2) {
-            return 0.4;
-        } else {
-            return 0.0;
         }
+        if (repoCount >= 5) {
+            return 0.7;
+        }
+        if (repoCount >= 2) {
+            return 0.4;
+        }
+        return 0.0;
     }
 
     /**

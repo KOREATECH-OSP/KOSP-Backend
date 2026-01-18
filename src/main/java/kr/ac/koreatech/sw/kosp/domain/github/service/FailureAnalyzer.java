@@ -24,7 +24,7 @@ public class FailureAnalyzer {
      * 예외를 분석하여 실패 유형 분류
      */
     public FailureType classifyFailure(Exception e) {
-        String message = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+        String message = extractMessage(e);
         
         if (e instanceof PrematureCloseException || 
             e.getCause() instanceof PrematureCloseException ||
@@ -46,18 +46,7 @@ public class FailureAnalyzer {
         
         // WebClient 응답 에러
         if (e instanceof WebClientResponseException webClientError) {
-            int statusCode = webClientError.getStatusCode().value();
-            
-            if (statusCode == 401 || statusCode == 403) {
-                if (message.contains("rate limit")) {
-                    return FailureType.RATE_LIMIT;
-                }
-                return FailureType.UNAUTHORIZED;
-            } else if (statusCode == 404) {
-                return FailureType.NOT_FOUND;
-            } else if (statusCode >= 500) {
-                return FailureType.SERVER_ERROR;
-            }
+            return classifyWebClientError(webClientError, message);
         }
         
         // Network 에러
@@ -67,6 +56,31 @@ public class FailureAnalyzer {
             return FailureType.NETWORK_ERROR;
         }
         
+        return FailureType.UNKNOWN;
+    }
+
+    private String extractMessage(Exception e) {
+        if (e.getMessage() == null) {
+            return "";
+        }
+        return e.getMessage().toLowerCase();
+    }
+
+    private FailureType classifyWebClientError(WebClientResponseException webClientError, String message) {
+        int statusCode = webClientError.getStatusCode().value();
+        
+        if (statusCode == 401 || statusCode == 403) {
+            if (message.contains("rate limit")) {
+                return FailureType.RATE_LIMIT;
+            }
+            return FailureType.UNAUTHORIZED;
+        }
+        if (statusCode == 404) {
+            return FailureType.NOT_FOUND;
+        }
+        if (statusCode >= 500) {
+            return FailureType.SERVER_ERROR;
+        }
         return FailureType.UNKNOWN;
     }
 

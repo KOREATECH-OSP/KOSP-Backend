@@ -93,13 +93,20 @@ public class ChallengeEvaluator {
         try {
             Expression exp = parser.parseExpression(challenge.getProgressField());
             Object value = exp.getValue(context);
-            int current = (value instanceof Number) ? ((Number) value).intValue() : 0;
+            int current = extractIntValue(value);
             int target = challenge.getMaxProgress();
             return new ProgressInfo(current, target);
         } catch (Exception e) {
             log.warn("Failed to calculate progress for challenge {}: {}", challenge.getId(), e.getMessage());
             return new ProgressInfo(0, challenge.getMaxProgress());
         }
+    }
+
+    private int extractIntValue(Object value) {
+        if (value instanceof Number number) {
+            return number.intValue();
+        }
+        return 0;
     }
 
     private boolean isConditionMet(Challenge challenge, StandardEvaluationContext context) {

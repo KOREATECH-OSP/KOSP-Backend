@@ -33,12 +33,12 @@ public class CommentService {
     private final ArticleRepository articleRepository;
 
     @Transactional
-    public Long create(User user, Long articleId, CommentCreateRequest req) {
+    public Long create(User user, Long articleId, CommentCreateRequest request) {
         Article article = articleRepository.getById(articleId);
         Comment comment = Comment.builder()
             .author(user)
             .article(article)
-            .content(req.content())
+            .content(request.content())
             .build();
         commentRepository.save(comment);
         
