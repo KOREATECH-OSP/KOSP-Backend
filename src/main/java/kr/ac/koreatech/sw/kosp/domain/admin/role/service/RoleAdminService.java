@@ -43,10 +43,12 @@ public class RoleAdminService {
         if (roleRepository.existsByName(request.name())) {
             throw new GlobalException(ExceptionMessage.CONFLICT);
         }
+        Boolean canAccessAdmin = request.canAccessAdmin() != null ? request.canAccessAdmin() : false;
         roleRepository.save(
             Role.builder()
                 .name(request.name())
                 .description(request.description())
+                .canAccessAdmin(canAccessAdmin)
                 .build()
         );
     }
@@ -56,6 +58,7 @@ public class RoleAdminService {
         validateNotSuperuser(name);
         Role role = roleRepository.getByName(name);
         role.updateDescription(request.description());
+        role.updateCanAccessAdmin(request.canAccessAdmin());
     }
 
     @Transactional
