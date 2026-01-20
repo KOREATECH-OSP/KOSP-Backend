@@ -8,12 +8,14 @@ import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 public record RoleResponse(
     String name,
     String description,
+    Boolean canAccessAdmin,
     Set<String> policies
 ) {
     public static RoleResponse from(Role role) {
         return new RoleResponse(
             role.getName(),
             role.getDescription(),
+            role.getCanAccessAdmin(),
             role.getPolicies().stream().map(Policy::getName).collect(Collectors.toSet())
         );
     }
