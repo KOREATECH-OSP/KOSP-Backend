@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.api.AdminPointApi;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointHistoryResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointTransactionResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.service.AdminPointService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
@@ -22,9 +21,9 @@ public class AdminPointController implements AdminPointApi {
 
     @Override
     @Permit(name = "admin:points:change", description = "포인트 변경")
-    public ResponseEntity<PointTransactionResponse> changePoint(Long userId, PointTransactionRequest request, User admin) {
-        PointTransactionResponse response = adminPointService.changePoint(userId, request, admin);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Void> changePoint(Long userId, PointTransactionRequest request, User admin) {
+        adminPointService.changePoint(userId, request);
+        return ResponseEntity.ok().build();
     }
 
     @Override
