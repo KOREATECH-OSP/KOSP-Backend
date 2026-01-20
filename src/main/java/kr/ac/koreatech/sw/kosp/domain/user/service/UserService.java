@@ -9,8 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.repository.PointTransactionRepository;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.repository.PointTransactionRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
