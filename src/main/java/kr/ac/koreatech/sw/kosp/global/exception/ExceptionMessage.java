@@ -43,6 +43,7 @@ public enum ExceptionMessage {
     RECRUIT_CLOSED("마감된 모집 공고입니다.", HttpStatus.BAD_REQUEST),
     INSUFFICIENT_POINTS("포인트가 부족합니다.", HttpStatus.BAD_REQUEST),
     INVALID_POINT_AMOUNT("포인트 금액이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
+    POINT_TRANSACTION_NOT_FOUND("포인트 거래 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     ;
 

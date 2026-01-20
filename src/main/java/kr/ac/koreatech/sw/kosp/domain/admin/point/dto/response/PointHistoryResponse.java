@@ -27,13 +27,17 @@ public record PointHistoryResponse(
         java.time.LocalDateTime createdAt
     ) {
         public static TransactionInfo from(PointTransaction transaction) {
+            String adminName = null;
+            if (transaction.getAdmin() != null) {
+                adminName = transaction.getAdmin().getName();
+            }
             return new TransactionInfo(
                 transaction.getId(),
                 transaction.getAmount(),
                 transaction.getType().name(),
                 transaction.getReason(),
                 transaction.getBalanceAfter(),
-                transaction.getAdmin().getName(),
+                adminName,
                 transaction.getCreatedAt()
             );
         }
