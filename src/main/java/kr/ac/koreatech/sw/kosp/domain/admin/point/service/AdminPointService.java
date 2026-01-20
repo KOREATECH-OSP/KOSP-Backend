@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.admin.point.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -7,11 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointHistoryResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointTransactionResponse;
-import kr.ac.koreatech.sw.kosp.domain.point.model.PointSource;
+import kr.ac.koreatech.sw.kosp.domain.point.event.PointChangeEvent;
 import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
 import kr.ac.koreatech.sw.kosp.domain.point.repository.PointTransactionRepository;
-import kr.ac.koreatech.sw.kosp.domain.point.service.PointService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
@@ -25,18 +24,12 @@ public class AdminPointService {
 
     private final UserRepository userRepository;
     private final PointTransactionRepository pointTransactionRepository;
-    private final PointService pointService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public PointTransactionResponse changePoint(Long userId, PointTransactionRequest request, User admin) {
+    public void changePoint(Long userId, PointTransactionRequest request) {
         User user = findUser(userId);
-        pointService.changePoint(user, request.point(), request.reason(), PointSource.ADMIN);
-
-        PointTransaction lastTransaction = pointTransactionRepository
-            .findFirstByUserOrderByCreatedAtDesc(user)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.POINT_TRANSACTION_NOT_FOUND));
-
-        return PointTransactionResponse.from(lastTransaction);
+        eventPublisher.publishEvent(PointChangeEvent.fromAdmin(user, request.point(), request.reason()));
     }
 
     public PointHistoryResponse getPointHistory(Long userId, Pageable pageable) {

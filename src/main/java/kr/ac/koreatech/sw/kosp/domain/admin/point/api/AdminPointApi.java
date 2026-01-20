@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointHistoryResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointTransactionResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.AuthUser;
 
@@ -29,7 +28,7 @@ public interface AdminPointApi {
     )
     @ApiResponse(responseCode = "200", description = "변경 성공")
     @PostMapping("/users/{userId}")
-    ResponseEntity<PointTransactionResponse> changePoint(
+    ResponseEntity<Void> changePoint(
         @Parameter(description = "사용자 ID") @PathVariable Long userId,
         @RequestBody @Valid PointTransactionRequest request,
         @Parameter(hidden = true) @AuthUser User admin
