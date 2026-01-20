@@ -1,4 +1,4 @@
-package kr.ac.koreatech.sw.kosp.domain.admin.point.model;
+package kr.ac.koreatech.sw.kosp.domain.point.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -16,7 +16,6 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.model.BaseEntity;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -47,19 +46,15 @@ public class PointTransaction extends BaseEntity {
     private TransactionType type;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", nullable = false, length = 20)
+    private PointSource source;
+
+    @NotNull
     @Column(name = "reason", nullable = false)
     private String reason;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private User admin;
 
     @NotNull
     @Column(name = "balance_after", nullable = false)
     private Integer balanceAfter;
-
-    public enum TransactionType {
-        GRANT,
-        DEDUCT
-    }
 }

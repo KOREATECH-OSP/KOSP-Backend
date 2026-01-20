@@ -3,9 +3,10 @@ package kr.ac.koreatech.sw.kosp.domain.point.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction.TransactionType;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.repository.PointTransactionRepository;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointSource;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.model.TransactionType;
+import kr.ac.koreatech.sw.kosp.domain.point.repository.PointTransactionRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
@@ -18,26 +19,22 @@ public class PointService {
 
     private final PointTransactionRepository pointTransactionRepository;
 
-    public void changePoint(User user, Integer amount, String reason, User admin) {
+    public void changePoint(User user, Integer amount, String reason, PointSource source) {
         validateNonZeroAmount(amount);
         validateSufficientBalanceIfDeduct(user, amount);
 
         user.addPoint(amount);
-        saveTransaction(user, amount, reason, admin);
+        saveTransaction(user, amount, reason, source);
     }
 
-    public void changePoint(User user, Integer amount, String reason) {
-        changePoint(user, amount, reason, null);
-    }
-
-    private void saveTransaction(User user, Integer amount, String reason, User admin) {
+    private void saveTransaction(User user, Integer amount, String reason, PointSource source) {
         TransactionType type = determineType(amount);
         PointTransaction transaction = PointTransaction.builder()
             .user(user)
             .amount(amount)
             .type(type)
+            .source(source)
             .reason(reason)
-            .admin(admin)
             .balanceAfter(user.getPoint())
             .build();
         pointTransactionRepository.save(transaction);

@@ -22,6 +22,6 @@ public class PointEventListener {
         log.info("Processing point change: user={}, amount={}, source={}",
             event.user().getId(), event.amount(), event.source());
 
-        pointService.changePoint(event.user(), event.amount(), event.reason(), event.admin());
+        pointService.changePoint(event.user(), event.amount(), event.reason(), event.source());
     }
 }
