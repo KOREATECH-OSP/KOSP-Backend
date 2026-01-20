@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 
