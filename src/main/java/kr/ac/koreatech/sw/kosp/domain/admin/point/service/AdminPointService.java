@@ -8,8 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointHistoryResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response.PointTransactionResponse;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
-import kr.ac.koreatech.sw.kosp.domain.admin.point.repository.PointTransactionRepository;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointSource;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.repository.PointTransactionRepository;
 import kr.ac.koreatech.sw.kosp.domain.point.service.PointService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
@@ -29,7 +30,7 @@ public class AdminPointService {
     @Transactional
     public PointTransactionResponse changePoint(Long userId, PointTransactionRequest request, User admin) {
         User user = findUser(userId);
-        pointService.changePoint(user, request.point(), request.reason(), admin);
+        pointService.changePoint(user, request.point(), request.reason(), PointSource.ADMIN);
 
         PointTransaction lastTransaction = pointTransactionRepository
             .findFirstByUserOrderByCreatedAtDesc(user)

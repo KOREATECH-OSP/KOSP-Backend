@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 
 public record PointHistoryResponse(
@@ -23,21 +23,17 @@ public record PointHistoryResponse(
         String type,
         String reason,
         Integer balanceAfter,
-        String adminName,
+        String source,
         java.time.LocalDateTime createdAt
     ) {
         public static TransactionInfo from(PointTransaction transaction) {
-            String adminName = null;
-            if (transaction.getAdmin() != null) {
-                adminName = transaction.getAdmin().getName();
-            }
             return new TransactionInfo(
                 transaction.getId(),
                 transaction.getAmount(),
                 transaction.getType().name(),
                 transaction.getReason(),
                 transaction.getBalanceAfter(),
-                adminName,
+                transaction.getSource().name(),
                 transaction.getCreatedAt()
             );
         }

@@ -2,7 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.admin.point.dto.response;
 
 import java.time.LocalDateTime;
 
-import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.point.model.PointTransaction;
 
 public record PointTransactionResponse(
     Long transactionId,
@@ -12,7 +12,7 @@ public record PointTransactionResponse(
     String type,
     String reason,
     Integer balanceAfter,
-    String adminName,
+    String source,
     LocalDateTime createdAt
 ) {
     public static PointTransactionResponse from(PointTransaction transaction) {
@@ -24,7 +24,7 @@ public record PointTransactionResponse(
             transaction.getType().name(),
             transaction.getReason(),
             transaction.getBalanceAfter(),
-            transaction.getAdmin().getName(),
+            transaction.getSource().name(),
             transaction.getCreatedAt()
         );
     }
