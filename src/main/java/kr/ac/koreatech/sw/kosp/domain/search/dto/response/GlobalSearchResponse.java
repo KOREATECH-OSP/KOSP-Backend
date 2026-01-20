@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.search.dto.response;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
 import kr.ac.koreatech.sw.kosp.domain.community.article.model.Article;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;

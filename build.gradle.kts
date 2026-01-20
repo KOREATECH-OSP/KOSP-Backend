@@ -53,6 +53,10 @@ dependencies {
 
     implementation(libs.jsoup)  // HTML 파싱용
 
+    implementation(libs.rsql.jpa.spring.boot.starter)
+
+    implementation(libs.flyway.mysql)
+
     runtimeOnly(libs.jjwt.impl)
     runtimeOnly(libs.jjwt.jackson)
 
