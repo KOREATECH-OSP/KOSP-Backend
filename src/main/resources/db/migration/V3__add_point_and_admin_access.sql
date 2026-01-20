@@ -14,17 +14,14 @@ CREATE TABLE point_transactions (
     user_id       BIGINT                NOT NULL,
     amount        INT                   NOT NULL,
     type          VARCHAR(20)           NOT NULL,
+    source        VARCHAR(20)           NOT NULL,
     reason        VARCHAR(255)          NOT NULL,
-    admin_id      BIGINT                NULL,
     balance_after INT                   NOT NULL,
     CONSTRAINT pk_point_transactions PRIMARY KEY (id)
 );
 
 ALTER TABLE point_transactions
     ADD CONSTRAINT fk_point_transactions_user FOREIGN KEY (user_id) REFERENCES users (id);
-
-ALTER TABLE point_transactions
-    ADD CONSTRAINT fk_point_transactions_admin FOREIGN KEY (admin_id) REFERENCES users (id);
 
 CREATE INDEX idx_point_transactions_user ON point_transactions (user_id);
 CREATE INDEX idx_point_transactions_created_at ON point_transactions (created_at DESC);
