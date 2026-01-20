@@ -41,6 +41,8 @@ public enum ExceptionMessage {
     APPLICATION_NOT_FOUND("지원 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_DECIDED("이미 처리된 지원입니다.", HttpStatus.CONFLICT),
     RECRUIT_CLOSED("마감된 모집 공고입니다.", HttpStatus.BAD_REQUEST),
+    INSUFFICIENT_POINTS("포인트가 부족합니다.", HttpStatus.BAD_REQUEST),
+    INVALID_POINT_AMOUNT("포인트 금액이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
 
     ;
 
