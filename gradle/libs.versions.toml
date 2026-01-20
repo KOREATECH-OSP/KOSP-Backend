@@ -5,6 +5,7 @@ jjwt = "0.12.3"
 webmvc-ui = "2.8.14"
 awssdk = "2.40.16"
 jsoup = "1.17.2"
+rsql-jpa = "6.0.33"
 
 [libraries]
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
@@ -47,6 +48,8 @@ awssdk-ses = { module = "software.amazon.awssdk:ses", version.ref = "awssdk" }
 awssdk-s3 = { module = "software.amazon.awssdk:s3", version.ref = "awssdk" }
 
 flyway-mysql = { module = "org.flywaydb:flyway-mysql" }
+
+rsql-jpa-spring-boot-starter = { group = "io.github.perplexhub", name = "rsql-jpa-spring-boot-starter", version.ref = "rsql-jpa" }
 
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 

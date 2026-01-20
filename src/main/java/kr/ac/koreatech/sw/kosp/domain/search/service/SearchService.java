@@ -1,22 +1,24 @@
 package kr.ac.koreatech.sw.kosp.domain.search.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
-
 import kr.ac.koreatech.sw.kosp.domain.community.article.repository.ArticleRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.Recruit;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitRepository;
-
 import kr.ac.koreatech.sw.kosp.domain.community.team.repository.TeamRepository;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse.ChallengeSummary;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse.RecruitSummary;
 import kr.ac.koreatech.sw.kosp.domain.search.dto.response.GlobalSearchResponse.TeamSummary;
+import kr.ac.koreatech.sw.kosp.domain.search.model.SearchFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,35 +31,65 @@ public class SearchService {
     private final ChallengeRepository challengeRepository;
 
     public GlobalSearchResponse search(String keyword) {
-        // 1. Articles (excluding Recruits to avoid duplication)
-        List<ArticleSummary> articles = articleRepository
-            .findByTitleContainingAndIsDeletedFalse(keyword)
+        return search(keyword, null);
+    }
+
+    public GlobalSearchResponse search(String keyword, Set<SearchFilter> filters) {
+        Set<SearchFilter> effectiveFilters = resolveFilters(filters);
+
+        List<ArticleSummary> articles = searchArticles(keyword, effectiveFilters);
+        List<RecruitSummary> recruits = searchRecruits(keyword, effectiveFilters);
+        List<TeamSummary> teams = searchTeams(keyword, effectiveFilters);
+        List<ChallengeSummary> challenges = searchChallenges(keyword, effectiveFilters);
+
+        return new GlobalSearchResponse(articles, recruits, teams, challenges);
+    }
+
+    private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
+        if (filters == null || filters.isEmpty()) {
+            return Set.of(SearchFilter.values());
+        }
+        return filters;
+    }
+
+    private List<ArticleSummary> searchArticles(String keyword, Set<SearchFilter> filters) {
+        if (!filters.contains(SearchFilter.articles)) {
+            return Collections.emptyList();
+        }
+        return articleRepository.findByTitleContainingAndIsDeletedFalse(keyword)
             .stream()
             .filter(article -> !(article instanceof Recruit))
             .map(ArticleSummary::from)
             .toList();
+    }
 
-        // 2. Recruits (separate query)
-        List<RecruitSummary> recruits = recruitRepository
-            .findByTitleContainingAndIsDeletedFalse(keyword)
+    private List<RecruitSummary> searchRecruits(String keyword, Set<SearchFilter> filters) {
+        if (!filters.contains(SearchFilter.recruits)) {
+            return Collections.emptyList();
+        }
+        return recruitRepository.findByTitleContainingAndIsDeletedFalse(keyword)
             .stream()
             .map(RecruitSummary::from)
             .toList();
+    }
 
-        // 3. Teams
-        List<TeamSummary> teams = teamRepository
-            .findByNameContaining(keyword)
+    private List<TeamSummary> searchTeams(String keyword, Set<SearchFilter> filters) {
+        if (!filters.contains(SearchFilter.teams)) {
+            return Collections.emptyList();
+        }
+        return teamRepository.findByNameContaining(keyword)
             .stream()
             .map(TeamSummary::from)
             .toList();
+    }
 
-        // 4. Challenges
-        List<ChallengeSummary> challenges = challengeRepository
-            .findByNameContaining(keyword)
+    private List<ChallengeSummary> searchChallenges(String keyword, Set<SearchFilter> filters) {
+        if (!filters.contains(SearchFilter.challenges)) {
+            return Collections.emptyList();
+        }
+        return challengeRepository.findByNameContaining(keyword)
             .stream()
             .map(ChallengeSummary::from)
             .toList();
-
-        return new GlobalSearchResponse(articles, recruits, teams, challenges);
     }
 }

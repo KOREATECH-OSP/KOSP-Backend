@@ -71,6 +71,11 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @Builder.Default
+    @NotNull
+    @Column(name = "point", nullable = false)
+    private Integer point = 0;
+
     @OneToOne
     @JoinColumn(name = "github_id")
     private GithubUser githubUser;
@@ -103,6 +108,14 @@ public class User extends BaseEntity implements UserDetails {
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    public void addPoint(Integer amount) {
+        this.point = this.point + amount;
+    }
+
+    public void deductPoint(Integer amount) {
+        this.point = this.point - amount;
     }
 
     public void reactivate() {

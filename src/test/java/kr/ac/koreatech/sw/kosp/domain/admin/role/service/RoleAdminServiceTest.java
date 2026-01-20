@@ -136,7 +136,7 @@ class RoleAdminServiceTest {
         void throwsException_whenDuplicateName() {
             // given
             given(roleRepository.existsByName("ROLE_USER")).willReturn(true);
-            RoleRequest request = new RoleRequest("ROLE_USER", "사용자 역할");
+            RoleRequest request = new RoleRequest("ROLE_USER", "사용자 역할", false);
 
             // when & then
             assertThatThrownBy(() -> roleAdminService.createRole(request))
@@ -148,7 +148,7 @@ class RoleAdminServiceTest {
         void createsRoleSuccessfully() {
             // given
             given(roleRepository.existsByName("ROLE_NEW")).willReturn(false);
-            RoleRequest request = new RoleRequest("ROLE_NEW", "새 역할");
+            RoleRequest request = new RoleRequest("ROLE_NEW", "새 역할", false);
 
             // when
             roleAdminService.createRole(request);
@@ -166,7 +166,7 @@ class RoleAdminServiceTest {
         @DisplayName("ROLE_SUPERUSER를 수정하면 예외가 발생한다")
         void throwsException_whenUpdatingSuperuser() {
             // given
-            RoleUpdateRequest request = new RoleUpdateRequest("수정된 설명");
+            RoleUpdateRequest request = new RoleUpdateRequest("수정된 설명", false);
 
             // when & then
             assertThatThrownBy(() -> roleAdminService.updateRole("ROLE_SUPERUSER", request))
@@ -179,7 +179,7 @@ class RoleAdminServiceTest {
             // given
             Role role = createRole(1L, "ROLE_USER");
             given(roleRepository.getByName("ROLE_USER")).willReturn(role);
-            RoleUpdateRequest request = new RoleUpdateRequest("수정된 설명");
+            RoleUpdateRequest request = new RoleUpdateRequest("수정된 설명", false);
 
             // when
             roleAdminService.updateRole("ROLE_USER", request);

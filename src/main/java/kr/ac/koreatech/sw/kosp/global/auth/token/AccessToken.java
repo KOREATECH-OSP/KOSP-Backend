@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.global.auth.token;
 
+import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.auth.annotation.TokenSpec;
 import lombok.Builder;
@@ -17,6 +18,7 @@ public class AccessToken extends JwtToken {
     private final String kutEmail;
     private final String kutId;
     private final String name;
+    private final Boolean canAccessAdmin;
 
     @Override
     public String getSubject() {
@@ -27,11 +29,15 @@ public class AccessToken extends JwtToken {
      * User 객체로부터 LoginToken 생성
      */
     public static AccessToken from(User user) {
+        boolean hasAdminAccess = user.getRoles().stream()
+            .anyMatch(Role::getCanAccessAdmin);
+
         return AccessToken.builder()
             .userId(user.getId())
             .kutEmail(user.getKutEmail())
             .kutId(user.getKutId())
             .name(user.getName())
+            .canAccessAdmin(hasAdminAccess)
             .build();
     }
 }

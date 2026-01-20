@@ -35,6 +35,10 @@ public class Role extends BaseEntity {
 
     private String description;
 
+    @Builder.Default
+    @Column(name = "can_access_admin", columnDefinition = "BIT(1) DEFAULT 0", nullable = false)
+    private Boolean canAccessAdmin = false;
+
     @ManyToMany
     @JoinTable(
         name = "role_policy",
@@ -46,5 +50,11 @@ public class Role extends BaseEntity {
 
     public void updateDescription(String description) {
         this.description = description;
+    }
+
+    public void updateCanAccessAdmin(Boolean canAccessAdmin) {
+        if (canAccessAdmin != null) {
+            this.canAccessAdmin = canAccessAdmin;
+        }
     }
 }
