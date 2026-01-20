@@ -15,6 +15,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationListResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyPointHistoryResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.service.UserService;
@@ -80,5 +81,11 @@ public class UserController implements UserApi {
     @Permit(description = "본인 지원 내역 조회")
     public ResponseEntity<MyApplicationListResponse> getMyApplications(@AuthUser User user, Pageable pageable) {
         return ResponseEntity.ok(userService.getMyApplications(user, pageable));
+    }
+
+    @Override
+    @Permit(description = "본인 포인트 내역 조회")
+    public ResponseEntity<MyPointHistoryResponse> getMyPointHistory(@AuthUser User user, Pageable pageable) {
+        return ResponseEntity.ok(userService.getMyPointHistory(user, pageable));
     }
 }

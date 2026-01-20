@@ -9,6 +9,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.ac.koreatech.sw.kosp.domain.admin.point.model.PointTransaction;
+import kr.ac.koreatech.sw.kosp.domain.admin.point.repository.PointTransactionRepository;
 import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
@@ -20,6 +22,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserSignupRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserUpdateRequest;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationListResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyApplicationResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.MyPointHistoryResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.UserProfileResponse;
 import kr.ac.koreatech.sw.kosp.domain.user.event.UserSignupEvent;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
@@ -40,6 +43,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
     private final RecruitApplyRepository recruitApplyRepository;
+    private final PointTransactionRepository pointTransactionRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepository roleRepository;
     private final kr.ac.koreatech.sw.kosp.domain.auth.service.AuthService authService;
@@ -160,6 +164,11 @@ public class UserService {
             page.getContent().stream().map(MyApplicationResponse::from).toList(),
             PageMeta.from(page)
         );
+    }
+
+    public MyPointHistoryResponse getMyPointHistory(User user, Pageable pageable) {
+        Page<PointTransaction> transactions = pointTransactionRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        return MyPointHistoryResponse.from(user, transactions);
     }
 
     private User createOrReactivateUser(Optional<User> existingUser, UserSignupRequest request, String kutEmail) {
