@@ -50,9 +50,8 @@ public class PointTransaction extends BaseEntity {
     @Column(name = "reason", nullable = false)
     private String reason;
 
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @JoinColumn(name = "admin_id")
     private User admin;
 
     @NotNull
