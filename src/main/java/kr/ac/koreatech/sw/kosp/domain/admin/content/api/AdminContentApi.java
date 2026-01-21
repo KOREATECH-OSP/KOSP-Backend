@@ -49,12 +49,4 @@ public interface AdminContentApi {
         @RequestBody @Valid NoticeUpdateRequest request
     );
 
-    @Operation(summary = "게시글 고정(배너) 토글", description = "관리자 권한으로 게시글의 고정 상태를 토글합니다. 고정된 게시글은 배너로 표시됩니다.")
-    @ApiResponse(responseCode = "200", description = "토글 성공")
-    @ApiResponse(responseCode = "404", description = "게시글을 찾을 수 없음")
-    @org.springframework.web.bind.annotation.PatchMapping("/articles/{articleId}/pin")
-    ResponseEntity<kr.ac.koreatech.sw.kosp.domain.admin.content.dto.response.TogglePinnedResponse> toggleArticlePinned(
-        @Parameter(description = "게시글 ID") @PathVariable Long articleId
-    );
-
 }
