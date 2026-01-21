@@ -132,9 +132,10 @@ public class RecruitController implements RecruitApi {
     public ResponseEntity<RecruitApplyListResponse> getApplicants(
         @AuthUser User user,
         @PathVariable Long recruitId,
+        @RequestParam(required = false) String filter,
         Pageable pageable
     ) {
-        RecruitApplyListResponse response = recruitApplyService.getApplicants(recruitId, user, pageable);
+        RecruitApplyListResponse response = recruitApplyService.getApplicants(recruitId, user, filter, pageable);
         return ResponseEntity.ok(response);
     }
 
