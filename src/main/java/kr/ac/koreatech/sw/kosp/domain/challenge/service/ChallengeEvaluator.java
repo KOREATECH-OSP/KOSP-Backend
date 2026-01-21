@@ -1,6 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.challenge.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -13,8 +15,6 @@ import kr.ac.koreatech.sw.kosp.domain.challenge.model.Challenge;
 import kr.ac.koreatech.sw.kosp.domain.challenge.model.ChallengeHistory;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import kr.ac.koreatech.sw.kosp.domain.challenge.repository.ChallengeRepository;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubProfileRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,14 +26,9 @@ public class ChallengeEvaluator {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
-    private final GithubProfileRepository githubProfileRepository;
-    
-    // SpEL Parser is thread-safe
+
     private final ExpressionParser parser = new SpelExpressionParser();
 
-    /**
-     * 특정 사용자의 챌린지 달성 여부를 평가합니다.
-     */
     @Transactional
     public void evaluate(User user) {
         log.info("Starting challenge evaluation for user: {}", user.getId());
@@ -44,23 +39,34 @@ public class ChallengeEvaluator {
         }
 
         Long githubId = user.getGithubUser().getGithubId();
-        githubProfileRepository.findByGithubId(githubId)
-            .ifPresentOrElse(
-                profile -> evaluateAll(user, profile),
-                () -> log.warn("No GitHub profile found for githubId {}", githubId)
-            );
+        Map<String, Object> stats = fetchGithubStats(githubId);
+
+        if (stats.isEmpty()) {
+            log.warn("No GitHub stats found for githubId {}", githubId);
+            return;
+        }
+
+        evaluateAllChallenges(user, stats);
     }
 
-    private void evaluateAll(User user, GithubProfile profile) {
-        StandardEvaluationContext context = createEvaluationContext(profile);
+    private Map<String, Object> fetchGithubStats(Long githubId) {
+        // TODO: MongoDB 스키마 재구축 후 GithubProfileRepository 연결
+        // return githubProfileRepository.findByGithubId(githubId)
+        //     .map(GithubProfile::getStats)
+        //     .orElse(Map.of());
+        return Map.of();
+    }
+
+    private void evaluateAllChallenges(User user, Map<String, Object> stats) {
+        StandardEvaluationContext context = createEvaluationContext(stats);
         List<Challenge> challenges = challengeRepository.findAll();
-        
+
         challenges.forEach(challenge -> tryEvaluate(user, challenge, context));
     }
 
-    private StandardEvaluationContext createEvaluationContext(GithubProfile profile) {
+    private StandardEvaluationContext createEvaluationContext(Map<String, Object> stats) {
         StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("activity", profile.getStats());
+        context.setVariable("activity", stats);
         return context;
     }
 
@@ -68,7 +74,7 @@ public class ChallengeEvaluator {
         if (isAlreadyAchieved(user, challenge)) {
             return;
         }
-        
+
         evaluateAndReward(user, challenge, context);
     }
 
@@ -80,7 +86,7 @@ public class ChallengeEvaluator {
         try {
             ProgressInfo progress = calculateProgress(challenge, context);
             boolean isAchieved = isConditionMet(challenge, context);
-            
+
             if (isAchieved) {
                 grantReward(user, challenge, progress);
             }
@@ -116,21 +122,23 @@ public class ChallengeEvaluator {
 
     private void grantReward(User user, Challenge challenge, ProgressInfo progress) {
         log.info("User {} achieved challenge: {}", user.getId(), challenge.getName());
-        
+
         ChallengeHistory history = ChallengeHistory.builder()
             .user(user)
             .challenge(challenge)
             .isAchieved(true)
-            .achievedAt(java.time.LocalDateTime.now())
+            .achievedAt(LocalDateTime.now())
             .currentProgress(progress.current())
             .targetProgress(progress.target())
             .build();
-            
+
         challengeHistoryRepository.save(history);
     }
 
     private void handleEvaluationError(User user, Challenge challenge, Exception e) {
-        log.error("Failed to evaluate challenge {} for user {}. Condition: {}", 
+        log.error("Failed to evaluate challenge {} for user {}. Condition: {}",
             challenge.getId(), user.getId(), challenge.getCondition(), e);
     }
+
+    private record ProgressInfo(int current, int target) {}
 }
