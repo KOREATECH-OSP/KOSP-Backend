@@ -20,4 +20,12 @@ public interface RecruitApplyRepository extends JpaRepository<RecruitApply, Long
     List<RecruitApply> findByRecruitAndStatus(Recruit recruit, ApplyStatus status);
 
     Page<RecruitApply> findByUser(User user, Pageable pageable);
+
+    Page<RecruitApply> findByUserAndStatus(User user, ApplyStatus status, Pageable pageable);
+
+    Page<RecruitApply> findByUserOrderByCreatedAtDesc(User user, Pageable pageable);
+
+    Page<RecruitApply> findByUserAndStatusOrderByCreatedAtDesc(User user, ApplyStatus status, Pageable pageable);
+
+    void deleteByRecruit(Recruit recruit);
 }

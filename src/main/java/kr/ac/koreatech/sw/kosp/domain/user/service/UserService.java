@@ -15,6 +15,7 @@ import kr.ac.koreatech.sw.kosp.domain.auth.dto.response.AuthTokenResponse;
 import kr.ac.koreatech.sw.kosp.domain.auth.model.Role;
 import kr.ac.koreatech.sw.kosp.domain.auth.repository.RoleRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitApply;
+import kr.ac.koreatech.sw.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
 import kr.ac.koreatech.sw.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
 import kr.ac.koreatech.sw.kosp.domain.github.repository.GithubUserRepository;
@@ -158,8 +159,14 @@ public class UserService {
         return "사용 가능한 " + label + "입니다.";
     }
 
-    public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
-        Page<RecruitApply> page = recruitApplyRepository.findByUser(user, pageable);
+    public MyApplicationListResponse getMyApplications(User user, String status, Pageable pageable) {
+        Page<RecruitApply> page;
+        if (status != null) {
+            ApplyStatus applyStatus = ApplyStatus.valueOf(status.toUpperCase());
+            page = recruitApplyRepository.findByUserAndStatusOrderByCreatedAtDesc(user, applyStatus, pageable);
+        } else {
+            page = recruitApplyRepository.findByUserOrderByCreatedAtDesc(user, pageable);
+        }
         return new MyApplicationListResponse(
             page.getContent().stream().map(MyApplicationResponse::from).toList(),
             PageMeta.from(page)

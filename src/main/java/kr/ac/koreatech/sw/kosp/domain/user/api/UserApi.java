@@ -71,10 +71,11 @@ public interface UserApi {
         @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.user.dto.request.UserPasswordChangeRequest request
     );
 
-    @Operation(summary = "본인 지원 내역 조회", description = "로그인한 사용자가 지원한 모집 공고 목록을 조회합니다.")
+    @Operation(summary = "본인 지원 내역 조회", description = "로그인한 사용자가 지원한 모집 공고 목록을 조회합니다. status 파라미터로 필터링 가능 (PENDING, ACCEPTED, REJECTED)")
     @GetMapping("/me/applications")
     ResponseEntity<MyApplicationListResponse> getMyApplications(
         @Parameter(hidden = true) @AuthUser User user,
+        @Parameter(description = "지원 상태 필터 (PENDING, ACCEPTED, REJECTED)") @org.springframework.web.bind.annotation.RequestParam(required = false) String status,
         @Parameter(hidden = true) Pageable pageable
     );
 

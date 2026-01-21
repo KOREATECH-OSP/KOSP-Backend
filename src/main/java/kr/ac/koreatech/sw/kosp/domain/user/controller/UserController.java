@@ -79,8 +79,12 @@ public class UserController implements UserApi {
 
     @Override
     @Permit(description = "본인 지원 내역 조회")
-    public ResponseEntity<MyApplicationListResponse> getMyApplications(@AuthUser User user, Pageable pageable) {
-        return ResponseEntity.ok(userService.getMyApplications(user, pageable));
+    public ResponseEntity<MyApplicationListResponse> getMyApplications(
+        @AuthUser User user,
+        @org.springframework.web.bind.annotation.RequestParam(required = false) String status,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(userService.getMyApplications(user, status, pageable));
     }
 
     @Override
