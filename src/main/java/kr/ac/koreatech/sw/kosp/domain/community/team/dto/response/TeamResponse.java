@@ -1,7 +1,8 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.dto.response;
 
 import kr.ac.koreatech.sw.kosp.domain.community.team.model.Team;
-
+import kr.ac.koreatech.sw.kosp.domain.user.dto.response.AuthorResponse;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 
 public record TeamResponse(
     Long id,
@@ -9,16 +10,16 @@ public record TeamResponse(
     String description,
     String imageUrl,
     int memberCount,
-    String createdBy
+    AuthorResponse createdBy
 ) {
-    public static TeamResponse from(Team team, String leaderName) {
+    public static TeamResponse from(Team team, User leader) {
         return new TeamResponse(
             team.getId(),
             team.getName(),
             team.getDescription(),
             team.getImageUrl(),
             team.getMembers().size(),
-            leaderName
+            AuthorResponse.from(leader)
         );
     }
 }
