@@ -1,5 +1,6 @@
 package kr.ac.koreatech.sw.kosp.domain.user.service;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -18,16 +19,13 @@ import kr.ac.koreatech.sw.kosp.domain.community.comment.dto.response.CommentResp
 import kr.ac.koreatech.sw.kosp.domain.community.comment.model.Comment;
 import kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentLikeRepository;
 import kr.ac.koreatech.sw.kosp.domain.community.comment.repository.CommentRepository;
-import kr.ac.koreatech.sw.kosp.domain.user.model.User;
-import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
-import lombok.RequiredArgsConstructor;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubRepositoryRepository;
 import kr.ac.koreatech.sw.kosp.domain.user.dto.response.GithubActivityResponse;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubRepository;
+import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
-import java.util.Collections;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,13 +37,12 @@ public class UserActivityService {
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final GithubRepositoryRepository githubRepositoryRepository;
     private final UserRepository userRepository;
 
     public ArticleListResponse getPosts(Long userId, Pageable pageable, User user) {
         User author = User.builder().id(userId).build();
         Page<Article> page = articleRepository.findByAuthor(author, pageable);
-        
+
         return toArticleResponse(page, user);
     }
 
@@ -67,36 +64,15 @@ public class UserActivityService {
             return new GithubActivityResponse(Collections.emptyList());
         }
 
-        Long githubId = targetUser.getGithubUser().getGithubId();
-        List<GithubRepository> repos = githubRepositoryRepository.findByOwnerIdOrderByCodeVolumeTotalCommitsDesc(githubId);
-
-        List<GithubActivityResponse.Activity> activities = repos.stream()
-            .map(this::mapToActivity)
-            .toList();
-
-        return new GithubActivityResponse(activities);
-    }
-
-    private GithubActivityResponse.Activity mapToActivity(GithubRepository repo) {
-        String date = repo.getDates() != null && repo.getDates().getPushedAt() != null 
-            ? repo.getDates().getPushedAt().toString() 
-            : null;
-            
-        return new GithubActivityResponse.Activity(
-            repo.getId(),
-            "REPOSITORY",
-            repo.getName(),
-            repo.getDescription(),
-            date,
-            repo.getUrl()
-        );
+        // TODO: Implement after MongoDB schema is rebuilt
+        return new GithubActivityResponse(Collections.emptyList());
     }
 
     private ArticleListResponse toArticleResponse(Page<Article> page, User user) {
         List<ArticleResponse> posts = page.getContent().stream()
             .map(article -> ArticleResponse.from(
-                article, 
-                isArticleLiked(user, article), 
+                article,
+                isArticleLiked(user, article),
                 isArticleBookmarked(user, article)
             ))
             .toList();
