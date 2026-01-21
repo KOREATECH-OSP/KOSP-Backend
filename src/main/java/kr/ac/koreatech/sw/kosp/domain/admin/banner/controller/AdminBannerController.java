@@ -11,15 +11,9 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
-public class BannerController implements BannerApi {
+public class AdminBannerController implements BannerApi {
 
     private final BannerService bannerService;
-
-    @Override
-    @Permit(permitAll = true, name = "banner:read", description = "배너 설정 조회")
-    public ResponseEntity<BannerSettingResponse> getSetting() {
-        return ResponseEntity.ok(bannerService.getSetting());
-    }
 
     @Override
     @Permit(name = "admin:banner:toggle", description = "배너 설정 토글")
