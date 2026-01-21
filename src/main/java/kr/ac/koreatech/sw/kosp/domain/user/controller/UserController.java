@@ -81,10 +81,10 @@ public class UserController implements UserApi {
     @Permit(description = "본인 지원 내역 조회")
     public ResponseEntity<MyApplicationListResponse> getMyApplications(
         @AuthUser User user,
-        @org.springframework.web.bind.annotation.RequestParam(required = false) String status,
+        @org.springframework.web.bind.annotation.RequestParam(required = false) String filter,
         Pageable pageable
     ) {
-        return ResponseEntity.ok(userService.getMyApplications(user, status, pageable));
+        return ResponseEntity.ok(userService.getMyApplications(user, filter, pageable));
     }
 
     @Override
