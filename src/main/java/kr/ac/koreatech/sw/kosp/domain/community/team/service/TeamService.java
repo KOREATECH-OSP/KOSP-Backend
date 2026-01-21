@@ -68,17 +68,17 @@ public class TeamService {
     public TeamListResponse getList(String search, Pageable pageable) {
         Page<Team> page = teamRepository.findByNameContaining(search, pageable);
         List<TeamResponse> teams = page.getContent().stream()
-            .map(team -> TeamResponse.from(team, getLeaderName(team)))
+            .map(team -> TeamResponse.from(team, getLeader(team)))
             .toList();
         return new TeamListResponse(teams, PageMeta.from(page));
     }
 
-    private String getLeaderName(Team team) {
+    private User getLeader(Team team) {
         return team.getMembers().stream()
             .filter(member -> member.getRole() == TeamRole.LEADER)
             .findFirst()
-            .map(member -> member.getUser().getName())
-            .orElse("Unknown");
+            .map(TeamMember::getUser)
+            .orElse(null);
     }
 
     @Transactional
