@@ -19,25 +19,25 @@ public class UserActivityController implements UserActivityApi {
     private final UserActivityService userActivityService;
 
     @Override
-    @Permit(permitAll = true, description = "사용자 작성 글 목록")
+    @Permit(permitAll = true, name = "users:posts:list", description = "사용자 작성 글 목록")
     public ResponseEntity<ArticleListResponse> getPosts(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getPosts(userId, pageable, user));
     }
 
     @Override
-    @Permit(permitAll = true, description = "사용자 즐겨찾기 목록")
+    @Permit(permitAll = true, name = "users:bookmarks:list", description = "사용자 즐겨찾기 목록")
     public ResponseEntity<ArticleListResponse> getBookmarks(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getBookmarks(userId, pageable, user));
     }
 
     @Override
-    @Permit(permitAll = true, description = "사용자 작성 댓글 목록")
+    @Permit(permitAll = true, name = "users:comments:list", description = "사용자 작성 댓글 목록")
     public ResponseEntity<CommentListResponse> getComments(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getComments(userId, pageable, user));
     }
 
     @Override
-    @Permit(permitAll = true, description = "사용자 활동 조회 (GitHub)")
+    @Permit(permitAll = true, name = "users:github:activities", description = "사용자 활동 조회 (GitHub)")
     public ResponseEntity<kr.ac.koreatech.sw.kosp.domain.user.dto.response.GithubActivityResponse> getGithubActivities(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getGithubActivities(userId));
     }

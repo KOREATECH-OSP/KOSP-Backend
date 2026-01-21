@@ -21,7 +21,7 @@ public class CommentController implements CommentApi {
     private final CommentService commentService;
 
     @Override
-    @Permit(permitAll = true, description = "댓글 목록 조회")
+    @Permit(permitAll = true, name = "comments:list", description = "댓글 목록 조회")
     public ResponseEntity<CommentListResponse> getList(
         @AuthUser User user,
         Long articleId,
