@@ -3,6 +3,7 @@ package kr.ac.koreatech.sw.kosp.domain.github.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import kr.ac.koreatech.sw.kosp.domain.github.model.GithubUser;
@@ -18,6 +19,9 @@ public interface GithubUserRepository extends PagingAndSortingRepository<GithubU
     List<GithubUser> findAll();
 
     GithubUser save(GithubUser githubUser);
+
+    @Query("SELECT g.githubId FROM GithubUser g")
+    List<Long> findAllGithubIds();
 
     default GithubUser getByGithubId(Long githubId) {
         return findByGithubId(githubId)
