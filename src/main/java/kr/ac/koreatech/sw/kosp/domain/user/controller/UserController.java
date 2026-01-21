@@ -37,7 +37,7 @@ public class UserController implements UserApi {
 
     @Override
     @PostMapping("/signup")
-    @Permit(permitAll = true, description = "회원가입")
+    @Permit(permitAll = true, name = "users:signup", description = "회원가입")
     public ResponseEntity<AuthTokenResponse> signup(
         @RequestBody @Valid UserSignupRequest request,
         @Token SignupToken token
@@ -66,7 +66,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    @Permit(permitAll = true, description = "사용자 상세 조회")
+    @Permit(permitAll = true, name = "users:profile", description = "사용자 상세 조회")
     public ResponseEntity<UserProfileResponse> getProfile(Long userId) {
         return ResponseEntity.ok(userService.getProfile(userId));
     }

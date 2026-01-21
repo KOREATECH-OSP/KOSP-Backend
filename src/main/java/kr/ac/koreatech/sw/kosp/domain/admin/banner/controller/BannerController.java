@@ -16,7 +16,7 @@ public class BannerController implements BannerApi {
     private final BannerService bannerService;
 
     @Override
-    @Permit(permitAll = true, description = "배너 설정 조회")
+    @Permit(permitAll = true, name = "banner:read", description = "배너 설정 조회")
     public ResponseEntity<BannerSettingResponse> getSetting() {
         return ResponseEntity.ok(bannerService.getSetting());
     }
