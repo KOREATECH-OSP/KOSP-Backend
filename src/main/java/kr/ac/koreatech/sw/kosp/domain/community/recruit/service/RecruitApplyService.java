@@ -2,6 +2,7 @@ package kr.ac.koreatech.sw.kosp.domain.community.recruit.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -57,13 +59,15 @@ public class RecruitApplyService {
         recruitApplyRepository.save(recruitApply);
     }
 
-    public RecruitApplyListResponse getApplicants(Long recruitId, User user, Pageable pageable) {
+    public RecruitApplyListResponse getApplicants(Long recruitId, User user, String filter, Pageable pageable) {
         Recruit recruit = recruitRepository.findById(recruitId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.RECRUITMENT_NOT_FOUND));
 
         validateLeader(recruit.getTeam(), user);
 
-        Page<RecruitApply> page = recruitApplyRepository.findByRecruit(recruit, pageable);
+        Specification<RecruitApply> baseSpec = (root, query, cb) -> cb.equal(root.get("recruit"), recruit);
+        Specification<RecruitApply> spec = RsqlUtils.toSpecification(filter, baseSpec);
+        Page<RecruitApply> page = recruitApplyRepository.findAll(spec, pageable);
 
         return new RecruitApplyListResponse(
             page.getContent().stream()

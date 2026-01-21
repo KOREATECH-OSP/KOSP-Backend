@@ -39,7 +39,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @GetMapping
-    @Permit(permitAll = true, description = "게시글 목록 조회")
+    @Permit(permitAll = true, name = "articles:list", description = "게시글 목록 조회")
     public ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
@@ -55,7 +55,7 @@ public class ArticleController implements ArticleApi {
 
     @Override
     @GetMapping("/{id}")
-    @Permit(permitAll = true, description = "게시글 상세 조회")
+    @Permit(permitAll = true, name = "articles:read", description = "게시글 상세 조회")
     public ResponseEntity<ArticleResponse> getOne(
         @AuthUser User user,
         @PathVariable Long id

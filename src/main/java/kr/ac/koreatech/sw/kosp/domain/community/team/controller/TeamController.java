@@ -1,6 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class TeamController implements TeamApi {
     private final TeamService teamService;
 
     @Override
-    @Permit(permitAll = true, description = "팀 목록 조회")
+    @Permit(permitAll = true, name = "teams:list", description = "팀 목록 조회")
     public ResponseEntity<TeamListResponse> getList(String search, Pageable pageable) {
         TeamListResponse response = teamService.getList(search, pageable);
         return ResponseEntity.ok(response);
@@ -40,7 +41,7 @@ public class TeamController implements TeamApi {
     }
 
     @Override
-    @Permit(permitAll = true, description = "팀 상세 조회")
+    @Permit(permitAll = true, name = "teams:read", description = "팀 상세 조회")
     public ResponseEntity<TeamDetailResponse> getTeam(Long teamId) {
         TeamDetailResponse response = teamService.getTeam(teamId);
         return ResponseEntity.ok(response);
@@ -48,8 +49,8 @@ public class TeamController implements TeamApi {
 
     @Override
     @Permit(name = "team:read", description = "내 팀 조회")
-    public ResponseEntity<TeamDetailResponse> getMyTeam(@AuthUser User user) {
-        TeamDetailResponse response = teamService.getMyTeam(user);
+    public ResponseEntity<List<TeamDetailResponse>> getMyTeams(@AuthUser User user) {
+        List<TeamDetailResponse> response = teamService.getMyTeams(user);
         return ResponseEntity.ok(response);
     }
 
@@ -68,14 +69,14 @@ public class TeamController implements TeamApi {
     }
 
     @Override
-    @Permit(permitAll = true, description = "초대 수락")
+    @Permit(permitAll = true, name = "teams:invites:accept", description = "초대 수락")
     public ResponseEntity<Void> acceptInvite(@AuthUser User user, Long inviteId) {
         teamService.acceptInvite(inviteId, user);
         return ResponseEntity.ok().build();
     }
 
     @Override
-    @Permit(permitAll = true, description = "초대 거절")
+    @Permit(permitAll = true, name = "teams:invites:reject", description = "초대 거절")
     public ResponseEntity<Void> rejectInvite(@AuthUser User user, Long inviteId) {
         teamService.rejectInvite(inviteId, user);
         return ResponseEntity.ok().build();

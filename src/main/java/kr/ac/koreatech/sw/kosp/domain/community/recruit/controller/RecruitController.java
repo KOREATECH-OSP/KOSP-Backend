@@ -45,7 +45,7 @@ public class RecruitController implements RecruitApi {
 
     @Override
     @GetMapping
-    @Permit(permitAll = true, description = "모집 공고 목록 조회")
+    @Permit(permitAll = true, name = "recruits:list", description = "모집 공고 목록 조회")
     public ResponseEntity<RecruitListResponse> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
@@ -58,7 +58,7 @@ public class RecruitController implements RecruitApi {
 
     @Override
     @GetMapping("/{id}")
-    @Permit(permitAll = true, description = "모집 공고 상세 조회")
+    @Permit(permitAll = true, name = "recruits:read", description = "모집 공고 상세 조회")
     public ResponseEntity<RecruitResponse> getOne(
         @AuthUser User user,
         @PathVariable Long id
@@ -132,9 +132,10 @@ public class RecruitController implements RecruitApi {
     public ResponseEntity<RecruitApplyListResponse> getApplicants(
         @AuthUser User user,
         @PathVariable Long recruitId,
+        @RequestParam(required = false) String filter,
         Pageable pageable
     ) {
-        RecruitApplyListResponse response = recruitApplyService.getApplicants(recruitId, user, pageable);
+        RecruitApplyListResponse response = recruitApplyService.getApplicants(recruitId, user, filter, pageable);
         return ResponseEntity.ok(response);
     }
 

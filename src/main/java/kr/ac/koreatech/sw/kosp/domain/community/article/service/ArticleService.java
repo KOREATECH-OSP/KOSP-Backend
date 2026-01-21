@@ -67,6 +67,7 @@ public class ArticleService {
         return savedArticle.getId();
     }
 
+    @Transactional
     public ArticleResponse getOne(Long id, User user) {
         Article article = articleRepository.getById(id);
         
@@ -106,6 +107,7 @@ public class ArticleService {
         return toAdminResponse(page, user);
     }
     
+    @Transactional
     public kr.ac.koreatech.sw.kosp.domain.community.article.dto.response.AdminArticleResponse getOneForAdmin(Long id, User user) {
         Article article = articleRepository.getById(id);
         article.increaseViews();

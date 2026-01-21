@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ import kr.ac.koreatech.sw.kosp.global.auth.token.SignupToken;
 import kr.ac.koreatech.sw.kosp.global.dto.PageMeta;
 import kr.ac.koreatech.sw.kosp.global.exception.ExceptionMessage;
 import kr.ac.koreatech.sw.kosp.global.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -158,8 +160,10 @@ public class UserService {
         return "사용 가능한 " + label + "입니다.";
     }
 
-    public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
-        Page<RecruitApply> page = recruitApplyRepository.findByUser(user, pageable);
+    public MyApplicationListResponse getMyApplications(User user, String filter, Pageable pageable) {
+        Specification<RecruitApply> baseSpec = (root, query, cb) -> cb.equal(root.get("user"), user);
+        Specification<RecruitApply> spec = RsqlUtils.toSpecification(filter, baseSpec);
+        Page<RecruitApply> page = recruitApplyRepository.findAll(spec, pageable);
         return new MyApplicationListResponse(
             page.getContent().stream().map(MyApplicationResponse::from).toList(),
             PageMeta.from(page)
