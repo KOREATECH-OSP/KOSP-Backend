@@ -20,7 +20,7 @@ public class BoardController implements BoardApi {
 
     @Override
     @GetMapping
-    @Permit(permitAll = true, description = "게시판 목록 조회")
+    @Permit(permitAll = true, name = "boards:list", description = "게시판 목록 조회")
     public ResponseEntity<BoardListResponse> getBoards() {
         BoardListResponse response = boardService.getBoards();
         return ResponseEntity.ok(response);

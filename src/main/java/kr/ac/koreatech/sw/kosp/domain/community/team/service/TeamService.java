@@ -187,15 +187,8 @@ public class TeamService {
     }
 
     public List<TeamDetailResponse> getMyTeams(User user) {
-        return teamMemberRepository.findByUser(user)
-            .map(m -> List.of(TeamDetailResponse.from(m.getTeam())))
-            .orElse(List.of());
-    }
-
-    // Deprecated single team accessor
-    public TeamDetailResponse getMyTeam(User user) {
-        return teamMemberRepository.findByUser(user)
-             .map(m -> TeamDetailResponse.from(m.getTeam()))
-             .orElseThrow(() -> new GlobalException(ExceptionMessage.TEAM_NOT_FOUND));
+        return teamMemberRepository.findAllByUser(user).stream()
+            .map(member -> TeamDetailResponse.from(member.getTeam()))
+            .toList();
     }
 }

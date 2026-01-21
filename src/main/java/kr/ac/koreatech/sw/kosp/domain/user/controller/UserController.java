@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -36,7 +37,7 @@ public class UserController implements UserApi {
 
     @Override
     @PostMapping("/signup")
-    @Permit(permitAll = true, description = "회원가입")
+    @Permit(permitAll = true, name = "users:signup", description = "회원가입")
     public ResponseEntity<AuthTokenResponse> signup(
         @RequestBody @Valid UserSignupRequest request,
         @Token SignupToken token
@@ -65,7 +66,7 @@ public class UserController implements UserApi {
     }
 
     @Override
-    @Permit(permitAll = true, description = "사용자 상세 조회")
+    @Permit(permitAll = true, name = "users:profile", description = "사용자 상세 조회")
     public ResponseEntity<UserProfileResponse> getProfile(Long userId) {
         return ResponseEntity.ok(userService.getProfile(userId));
     }
@@ -79,8 +80,12 @@ public class UserController implements UserApi {
 
     @Override
     @Permit(description = "본인 지원 내역 조회")
-    public ResponseEntity<MyApplicationListResponse> getMyApplications(@AuthUser User user, Pageable pageable) {
-        return ResponseEntity.ok(userService.getMyApplications(user, pageable));
+    public ResponseEntity<MyApplicationListResponse> getMyApplications(
+        @AuthUser User user,
+        @RequestParam(required = false) String filter,
+        Pageable pageable
+    ) {
+        return ResponseEntity.ok(userService.getMyApplications(user, filter, pageable));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.api;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,9 +48,9 @@ public interface TeamApi {
         @PathVariable Long teamId
     );
 
-    @Operation(summary = "내 팀 조회", description = "인증된 사용자가 소속된 팀을 조회합니다.")
+    @Operation(summary = "내 팀 조회", description = "인증된 사용자가 소속된 모든 팀을 조회합니다.")
     @GetMapping("/v1/teams/me")
-    ResponseEntity<TeamDetailResponse> getMyTeam(
+    ResponseEntity<List<TeamDetailResponse>> getMyTeams(
         @Parameter(hidden = true) @AuthUser User user
     );
 

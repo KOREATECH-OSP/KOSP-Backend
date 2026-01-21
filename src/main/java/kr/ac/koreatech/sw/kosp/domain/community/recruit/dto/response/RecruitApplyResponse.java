@@ -9,17 +9,23 @@ public record RecruitApplyResponse(
     Long userId,
     String userName,
     String userEmail,
+    String userProfileImage,
     String reason,
     String portfolioUrl,
     String status,
     LocalDateTime appliedAt
 ) {
     public static RecruitApplyResponse from(RecruitApply apply) {
+        String profileImage = null;
+        if (apply.getUser().getGithubUser() != null) {
+            profileImage = apply.getUser().getGithubUser().getGithubAvatarUrl();
+        }
         return new RecruitApplyResponse(
             apply.getId(),
             apply.getUser().getId(),
             apply.getUser().getName(),
             apply.getUser().getKutEmail(),
+            profileImage,
             apply.getReason(),
             apply.getPortfolioUrl(),
             apply.getStatus().name(),
