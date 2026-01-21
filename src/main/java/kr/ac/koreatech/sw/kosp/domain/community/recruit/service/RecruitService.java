@@ -94,7 +94,7 @@ public class RecruitService {
     public void delete(User author, Long id) {
         Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, author.getId());
-        recruitRepository.delete(recruit);
+        recruit.delete();
     }
 
     private void validateOwner(Recruit recruit, Long authorId) {
