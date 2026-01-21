@@ -1,6 +1,7 @@
 package kr.ac.koreatech.sw.kosp.domain.community.team.controller;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +49,8 @@ public class TeamController implements TeamApi {
 
     @Override
     @Permit(name = "team:read", description = "내 팀 조회")
-    public ResponseEntity<TeamDetailResponse> getMyTeam(@AuthUser User user) {
-        TeamDetailResponse response = teamService.getMyTeam(user);
+    public ResponseEntity<List<TeamDetailResponse>> getMyTeams(@AuthUser User user) {
+        List<TeamDetailResponse> response = teamService.getMyTeams(user);
         return ResponseEntity.ok(response);
     }
 
