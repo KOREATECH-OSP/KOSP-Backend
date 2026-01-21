@@ -80,11 +80,12 @@ public interface RecruitApi {
         @RequestBody @Valid kr.ac.koreatech.sw.kosp.domain.community.recruit.dto.request.RecruitApplyRequest request
     );
 
-    @Operation(summary = "지원자 목록 조회", description = "모집 공고에 대한 지원자 목록을 조회합니다. (팀장 전용)")
+    @Operation(summary = "지원자 목록 조회", description = "모집 공고에 대한 지원자 목록을 조회합니다. (팀장 전용) RSQL filter로 필터링 가능 (예: status==PENDING)")
     @GetMapping("/{recruitId}/applications")
     ResponseEntity<RecruitApplyListResponse> getApplicants(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long recruitId,
+        @Parameter(description = "RSQL 필터 (예: status==PENDING, status==ACCEPTED)") @RequestParam(required = false) String filter,
         @Parameter(hidden = true) Pageable pageable
     );
 
