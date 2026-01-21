@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -75,7 +76,7 @@ public interface UserApi {
     @GetMapping("/me/applications")
     ResponseEntity<MyApplicationListResponse> getMyApplications(
         @Parameter(hidden = true) @AuthUser User user,
-        @Parameter(description = "RSQL 필터 (예: status==PENDING, status==ACCEPTED;createdAt=gt=2024-01-01)") @org.springframework.web.bind.annotation.RequestParam(required = false) String filter,
+        @Parameter(description = "RSQL 필터 (예: status==PENDING, status==ACCEPTED;createdAt=gt=2024-01-01)") @RequestParam(required = false) String filter,
         @Parameter(hidden = true) Pageable pageable
     );
 

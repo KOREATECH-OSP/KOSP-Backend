@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
@@ -81,7 +82,7 @@ public class UserController implements UserApi {
     @Permit(description = "본인 지원 내역 조회")
     public ResponseEntity<MyApplicationListResponse> getMyApplications(
         @AuthUser User user,
-        @org.springframework.web.bind.annotation.RequestParam(required = false) String filter,
+        @RequestParam(required = false) String filter,
         Pageable pageable
     ) {
         return ResponseEntity.ok(userService.getMyApplications(user, filter, pageable));
