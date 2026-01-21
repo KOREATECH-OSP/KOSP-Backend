@@ -44,6 +44,8 @@ public enum ExceptionMessage {
     INSUFFICIENT_POINTS("포인트가 부족합니다.", HttpStatus.BAD_REQUEST),
     INVALID_POINT_AMOUNT("포인트 금액이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
     POINT_TRANSACTION_NOT_FOUND("포인트 거래 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    BANNER_NOT_FOUND("배너를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    BANNER_ALREADY_EXISTS("이미 배너로 등록된 게시글입니다.", HttpStatus.CONFLICT),
 
     ;
 
