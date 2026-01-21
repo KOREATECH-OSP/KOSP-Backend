@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import kr.ac.koreatech.sw.kosp.domain.admin.content.api.AdminContentApi;
 import kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
+import kr.ac.koreatech.sw.kosp.domain.admin.content.dto.response.TogglePinnedResponse;
 import kr.ac.koreatech.sw.kosp.domain.admin.content.service.AdminContentService;
 import kr.ac.koreatech.sw.kosp.domain.user.model.User;
 import kr.ac.koreatech.sw.kosp.global.security.annotation.Permit;
@@ -43,6 +44,13 @@ public class AdminContentController implements AdminContentApi {
     public ResponseEntity<Void> updateNotice(Long noticeId, kr.ac.koreatech.sw.kosp.domain.admin.content.dto.request.NoticeUpdateRequest request) {
         adminContentService.updateNotice(noticeId, request);
         return ResponseEntity.ok().build();
+    }
+
+    @Override
+    @Permit(name = "admin:articles:pin", description = "게시글 고정 토글")
+    public ResponseEntity<TogglePinnedResponse> toggleArticlePinned(Long articleId) {
+        boolean isPinned = adminContentService.toggleArticlePinned(articleId);
+        return ResponseEntity.ok(new TogglePinnedResponse(isPinned));
     }
 
 }

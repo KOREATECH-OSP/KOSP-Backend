@@ -69,5 +69,12 @@ public class AdminContentService {
         notice.updateArticle(request.title(), request.content(), request.isPinned(), request.tags());
     }
 
+    @Transactional
+    public boolean toggleArticlePinned(Long articleId) {
+        Article article = articleRepository.findById(articleId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.ARTICLE_NOT_FOUND));
+        return article.togglePinned();
+    }
+
 
 }

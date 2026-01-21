@@ -133,6 +133,11 @@ public class Article extends BaseEntity {
         this.isDeleted = true;
     }
 
+    public boolean togglePinned() {
+        this.isPinned = !this.isPinned;
+        return this.isPinned;
+    }
+
     public void incrementCommentsCount() {
         this.commentsCount++;
     }
