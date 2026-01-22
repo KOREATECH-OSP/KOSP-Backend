@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.harvester.client;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,10 +24,11 @@ public class GithubGraphQLClient {
     private final ResourceLoader resourceLoader;
     
     private String userBasicInfoQuery;
-    private String userBasicInfoPaginatedQuery;
     private String userContributionsQuery;
-    private String repositoryInfoQuery;
     private String contributedReposQuery;
+    private String userPullRequestsQuery;
+    private String userIssuesQuery;
+    private String repositoryCommitsQuery;
 
     public GithubGraphQLClient(
         @Value("${github.api.graphql-url}") String graphqlUrl,
@@ -45,9 +47,12 @@ public class GithubGraphQLClient {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
             contributedReposQuery = loadQuery("classpath:graphql/contributed-repositories.graphql");
+            userPullRequestsQuery = loadQuery("classpath:graphql/user-pull-requests.graphql");
+            userIssuesQuery = loadQuery("classpath:graphql/user-issues.graphql");
+            repositoryCommitsQuery = loadQuery("classpath:graphql/repository-commits.graphql");
             log.info("GraphQL queries loaded successfully");
         } catch (IOException e) {
-            log.warn("GraphQL queries not found. They will be loaded on demand: {}", e.getMessage());
+            log.warn("GraphQL queries not found: {}", e.getMessage());
         }
     }
 
@@ -59,89 +64,19 @@ public class GithubGraphQLClient {
         return resource.getContentAsString(StandardCharsets.UTF_8);
     }
 
-    public <T> Mono<T> query(String query, String token, Class<T> responseType) {
-        Map<String, Object> requestBody = Map.of("query", query);
-
-        return webClient.post()
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
-            .bodyValue(requestBody)
-            .retrieve()
-            .bodyToMono(responseType)
-            .doOnSuccess(response -> log.debug("GraphQL query executed successfully"))
-            .doOnError(error -> log.error("GraphQL query failed: {}", error.getMessage()));
-    }
-
     public <T> Mono<T> query(String query, Map<String, Object> variables, String token, Class<T> responseType) {
-        Map<String, Object> requestBody = Map.of(
-            "query", query,
-            "variables", variables
-        );
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("query", query);
+        if (variables != null && !variables.isEmpty()) {
+            requestBody.put("variables", variables);
+        }
 
         return webClient.post()
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .bodyValue(requestBody)
             .retrieve()
             .bodyToMono(responseType)
-            .doOnSuccess(response -> log.debug("GraphQL query with variables executed successfully"))
-            .doOnError(error -> log.error("GraphQL query with variables failed: {}", error.getMessage()));
-    }
-
-    public <T> Mono<T> getUserBasicInfo(String login, String token, Class<T> responseType) {
-        if (userBasicInfoQuery == null) {
-            return Mono.error(new IllegalStateException("userBasicInfoQuery not loaded"));
-        }
-        Map<String, Object> variables = Map.of("login", login);
-        return query(userBasicInfoQuery, variables, token, responseType);
-    }
-
-    public <T> Mono<T> getUserContributions(
-        String login,
-        String from,
-        String to,
-        String token,
-        Class<T> responseType
-    ) {
-        if (userContributionsQuery == null) {
-            return Mono.error(new IllegalStateException("userContributionsQuery not loaded"));
-        }
-        Map<String, Object> variables = Map.of(
-            "login", login,
-            "from", from,
-            "to", to
-        );
-        return query(userContributionsQuery, variables, token, responseType);
-    }
-
-    public <T> Mono<T> getRepositoryInfo(
-        String owner,
-        String name,
-        String token,
-        Class<T> responseType
-    ) {
-        if (repositoryInfoQuery == null) {
-            return Mono.error(new IllegalStateException("repositoryInfoQuery not loaded"));
-        }
-        Map<String, Object> variables = Map.of(
-            "owner", owner,
-            "name", name
-        );
-        return query(repositoryInfoQuery, variables, token, responseType);
-    }
-
-    public <T> Mono<T> getUserBasicInfoPaginated(
-        String login,
-        String cursor,
-        String token,
-        Class<T> responseType
-    ) {
-        if (userBasicInfoPaginatedQuery == null) {
-            return Mono.error(new IllegalStateException("userBasicInfoPaginatedQuery not loaded"));
-        }
-        Map<String, Object> variables = cursor == null ?
-            Map.of("login", login) :
-            Map.of("login", login, "cursor", cursor);
-        
-        return query(userBasicInfoPaginatedQuery, variables, token, responseType);
+            .doOnError(error -> log.error("GraphQL query failed: {}", error.getMessage()));
     }
 
     public <T> Mono<T> getContributedRepos(
@@ -151,14 +86,47 @@ public class GithubGraphQLClient {
         String token,
         Class<T> responseType
     ) {
-        if (contributedReposQuery == null) {
-            return Mono.error(new IllegalStateException("contributedReposQuery not loaded"));
-        }
         Map<String, Object> variables = Map.of(
             "login", login,
             "from", from,
             "to", to
         );
         return query(contributedReposQuery, variables, token, responseType);
+    }
+
+    public <T> Mono<T> getUserPullRequests(String login, String cursor, String token, Class<T> responseType) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("login", login);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
+        return query(userPullRequestsQuery, variables, token, responseType);
+    }
+
+    public <T> Mono<T> getUserIssues(String login, String cursor, String token, Class<T> responseType) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("login", login);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
+        return query(userIssuesQuery, variables, token, responseType);
+    }
+
+    public <T> Mono<T> getRepositoryCommits(
+        String owner,
+        String name,
+        String authorId,
+        String cursor,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("owner", owner);
+        variables.put("name", name);
+        variables.put("authorId", authorId);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
+        return query(repositoryCommitsQuery, variables, token, responseType);
     }
 }

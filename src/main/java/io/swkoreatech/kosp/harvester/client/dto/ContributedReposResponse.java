@@ -22,9 +22,17 @@ public class ContributedReposResponse {
         return user.collectAllRepositories();
     }
 
+    public String getUserNodeId() {
+        if (user == null) {
+            return null;
+        }
+        return user.getId();
+    }
+
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class User {
+        private String id;
         private ContributionsCollection contributionsCollection;
 
         public Set<RepositoryInfo> collectAllRepositories() {

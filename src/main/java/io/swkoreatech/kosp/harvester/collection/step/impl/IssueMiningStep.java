@@ -7,19 +7,19 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ExecutionContext;
 import org.springframework.batch.repeat.RepeatStatus;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.harvester.client.GithubRestApiClient;
-import io.swkoreatech.kosp.harvester.client.dto.IssueResponse;
+import io.swkoreatech.kosp.harvester.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.harvester.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.harvester.client.dto.UserIssuesResponse;
+import io.swkoreatech.kosp.harvester.client.dto.UserIssuesResponse.IssueNode;
+import io.swkoreatech.kosp.harvester.client.dto.UserIssuesResponse.PageInfo;
 import io.swkoreatech.kosp.harvester.collection.document.IssueDocument;
 import io.swkoreatech.kosp.harvester.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
-import io.swkoreatech.kosp.harvester.user.GithubUser;
-import io.swkoreatech.kosp.harvester.user.User;
-import io.swkoreatech.kosp.harvester.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,17 +32,14 @@ public class IssueMiningStep implements StepProvider {
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
-    private final UserRepository userRepository;
-    private final GithubRestApiClient restApiClient;
-    private final TextEncryptor textEncryptor;
+    private final GithubGraphQLClient graphQLClient;
     private final IssueDocumentRepository issueDocumentRepository;
 
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
-                execute(userId, chunkContext);
+                execute(chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
             .build();
@@ -53,6 +50,28 @@ public class IssueMiningStep implements StepProvider {
         return STEP_NAME;
     }
 
+    private void execute(ChunkContext chunkContext) {
+        ExecutionContext context = getExecutionContext(chunkContext);
+        Long userId = extractUserId(chunkContext);
+        String login = context.getString("githubLogin");
+        String token = context.getString("githubToken");
+
+        if (login == null || token == null) {
+            log.warn("GitHub credentials not found in context for user {}", userId);
+            return;
+        }
+
+        int totalIssues = fetchAllIssues(userId, login, token);
+        log.info("Mined {} issues for user {}", totalIssues, userId);
+    }
+
+    private ExecutionContext getExecutionContext(ChunkContext chunkContext) {
+        return chunkContext.getStepContext()
+            .getStepExecution()
+            .getJobExecution()
+            .getExecutionContext();
+    }
+
     private Long extractUserId(ChunkContext chunkContext) {
         return chunkContext.getStepContext()
             .getStepExecution()
@@ -60,108 +79,73 @@ public class IssueMiningStep implements StepProvider {
             .getLong("userId");
     }
 
-    private void execute(Long userId, ChunkContext chunkContext) {
-        User user = userRepository.getById(userId);
-        if (!user.hasGithubUser()) {
-            log.warn("User {} does not have GitHub account linked", userId);
-            return;
-        }
-
-        GithubUser githubUser = user.getGithubUser();
-        String token = decryptToken(githubUser.getGithubToken());
-        String login = githubUser.getGithubLogin();
-
-        String[] repos = getDiscoveredRepos(chunkContext);
-        if (repos == null || repos.length == 0) {
-            log.info("No repositories to mine issues from for user {}", userId);
-            return;
-        }
-
-        int totalIssues = 0;
-        for (String repoFullName : repos) {
-            int issues = mineIssuesForRepo(userId, login, repoFullName, token);
-            totalIssues += issues;
-        }
-
-        log.info("Mined {} issues across {} repos for user {}", totalIssues, repos.length, userId);
-    }
-
-    private String decryptToken(String encryptedToken) {
-        return textEncryptor.decrypt(encryptedToken);
-    }
-
-    private String[] getDiscoveredRepos(ChunkContext chunkContext) {
-        Object repos = chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobExecution()
-            .getExecutionContext()
-            .get("discoveredRepos");
-
-        if (repos instanceof String[]) {
-            return (String[]) repos;
-        }
-        return null;
-    }
-
-    private int mineIssuesForRepo(Long userId, String login, String repoFullName, String token) {
-        String[] parts = repoFullName.split("/");
-        if (parts.length != 2) {
-            log.warn("Invalid repo name format: {}", repoFullName);
-            return 0;
-        }
-
-        String owner = parts[0];
-        String repoName = parts[1];
-        String uri = buildIssuesUri(owner, repoName, login);
-
-        List<IssueResponse> issues = fetchIssueList(uri, token);
-        if (issues == null || issues.isEmpty()) {
-            return 0;
-        }
-
-        return processIssues(userId, owner, repoName, issues);
-    }
-
-    private String buildIssuesUri(String owner, String repo, String creator) {
-        return String.format("/repos/%s/%s/issues?state=all&creator=%s", owner, repo, creator);
-    }
-
-    private List<IssueResponse> fetchIssueList(String uri, String token) {
-        return restApiClient.getAllWithPagination(uri, token, IssueResponse.class).block();
-    }
-
-    private int processIssues(Long userId, String owner, String repoName, List<IssueResponse> issues) {
-        Instant now = Instant.now();
+    private int fetchAllIssues(Long userId, String login, String token) {
         int saved = 0;
+        String cursor = null;
+        Instant now = Instant.now();
 
-        for (IssueResponse item : issues) {
-            if (item.isPullRequest()) {
-                continue;
+        do {
+            GraphQLResponse<UserIssuesResponse> response = fetchIssuesPage(login, cursor, token);
+            if (response == null || response.hasErrors()) {
+                logErrors(response, login);
+                break;
             }
 
-            if (issueDocumentRepository.existsByUserIdAndIssueNumber(userId, item.getNumber())) {
-                continue;
-            }
+            List<IssueNode> issues = response.getData().getIssues();
+            saved += saveIssues(userId, issues, now);
 
-            IssueDocument document = buildDocument(userId, owner, repoName, item, now);
-            issueDocumentRepository.save(document);
-            saved++;
-        }
+            PageInfo pageInfo = response.getData().getPageInfo();
+            if (pageInfo == null || !pageInfo.isHasNextPage()) {
+                break;
+            }
+            cursor = pageInfo.getEndCursor();
+        } while (cursor != null);
 
         return saved;
     }
 
-    private IssueDocument buildDocument(Long userId, String owner, String repoName, IssueResponse item, Instant now) {
+    private GraphQLResponse<UserIssuesResponse> fetchIssuesPage(String login, String cursor, String token) {
+        return graphQLClient.getUserIssues(login, cursor, token, createResponseType()).block();
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<GraphQLResponse<UserIssuesResponse>> createResponseType() {
+        return (Class<GraphQLResponse<UserIssuesResponse>>) (Class<?>) GraphQLResponse.class;
+    }
+
+    private void logErrors(GraphQLResponse<UserIssuesResponse> response, String login) {
+        if (response == null) {
+            log.warn("No response from GraphQL for user {}", login);
+            return;
+        }
+        log.error("GraphQL errors for user {}: {}", login, response.getErrors());
+    }
+
+    private int saveIssues(Long userId, List<IssueNode> issues, Instant now) {
+        int saved = 0;
+        for (IssueNode issue : issues) {
+            if (issueDocumentRepository.existsByUserIdAndIssueNumber(userId, issue.getNumber())) {
+                continue;
+            }
+
+            IssueDocument document = buildDocument(userId, issue, now);
+            issueDocumentRepository.save(document);
+            saved++;
+        }
+        return saved;
+    }
+
+    private IssueDocument buildDocument(Long userId, IssueNode issue, Instant now) {
         return IssueDocument.builder()
             .userId(userId)
-            .issueNumber(item.getNumber())
-            .title(item.getTitle())
-            .state(item.getState())
-            .repositoryName(repoName)
-            .repositoryOwner(owner)
-            .commentsCount(item.getComments())
-            .createdAt(item.getCreatedAt())
-            .closedAt(item.getClosedAt())
+            .issueNumber(issue.getNumber())
+            .title(issue.getTitle())
+            .state(issue.getState())
+            .repositoryName(issue.getRepoName())
+            .repositoryOwner(issue.getRepoOwner())
+            .commentsCount(issue.getCommentsCount())
+            .createdAt(issue.getCreatedAt())
+            .closedAt(issue.getClosedAt())
             .collectedAt(now)
             .build();
     }
