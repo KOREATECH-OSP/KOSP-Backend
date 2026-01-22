@@ -10,6 +10,7 @@ public interface CommentLikeRepository extends Repository<CommentLike, Long> {
 
     CommentLike save(CommentLike commentLike);
     void delete(CommentLike commentLike);
+    void deleteAllByComment(Comment comment);
     boolean existsByUserAndComment(User user, Comment comment);
     Optional<CommentLike> findByUserAndComment(User user, Comment comment);
 }

@@ -56,7 +56,8 @@ public class CommentService {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
         
-        // Decrement article comment count
+        commentLikeRepository.deleteAllByComment(comment);
+        
         Article article = comment.getArticle();
         article.decrementCommentsCount();
         articleRepository.save(article);
