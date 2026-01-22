@@ -38,14 +38,14 @@ public class S3StorageClient {
     public S3StorageClient(
         S3Client s3Client,
         S3Presigner s3Presigner,
-        @Value("${aws.s3.bucket:kosp-bucket}") String bucketName,
-        @Value("${aws.region:ap-northeast-2}") String region,
+        @Value("${aws.s3.bucket}") String bucketName,
+        @Value("${aws.s3.custom_domain}") String customDomain,
         Clock clock
     ) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.bucketName = bucketName;
-        this.domainUrlPrefix = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
+        this.domainUrlPrefix = customDomain;
         this.clock = clock;
     }
 
