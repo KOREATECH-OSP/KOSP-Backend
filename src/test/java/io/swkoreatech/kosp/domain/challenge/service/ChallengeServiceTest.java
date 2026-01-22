@@ -29,6 +29,7 @@ import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 
@@ -45,16 +46,17 @@ class ChallengeServiceTest {
     @Mock
     private ChallengeHistoryRepository challengeHistoryRepository;
 
+    @Mock
+    private GithubUserStatisticsRepository statisticsRepository;
+
     private Challenge createChallenge(Long id, String name, Integer tier) {
         Challenge challenge = Challenge.builder()
             .name(name)
             .description(name + " 설명")
-            .condition("#activity.commits >= 10")
+            .condition("T(Math).min(totalCommits * 100 / 10, 100)")
             .tier(tier)
             .imageUrl("https://image.url/" + id)
             .point(100)
-            .maxProgress(10)
-            .progressField("#activity.commits")
             .build();
         ReflectionTestUtils.setField(challenge, "id", id);
         return challenge;
@@ -77,8 +79,7 @@ class ChallengeServiceTest {
             .user(user)
             .challenge(challenge)
             .isAchieved(achieved)
-            .currentProgress(10)
-            .targetProgress(10)
+            .progressAtAchievement(100)
             .build();
         ReflectionTestUtils.setField(history, "id", id);
         return history;
@@ -159,12 +160,10 @@ class ChallengeServiceTest {
             ChallengeRequest request = new ChallengeRequest(
                 "새 챌린지",
                 "설명",
-                "#activity.commits >= 10",
+                "T(Math).min(totalCommits * 100 / 10, 100)",
                 1,
                 "https://image.url",
-                100,
-                10,
-                "#activity.commits"
+                100
             );
 
             // when
@@ -184,9 +183,7 @@ class ChallengeServiceTest {
                 "((( invalid spel",
                 1,
                 "https://image.url",
-                100,
-                10,
-                "#activity.commits"
+                100
             );
 
             // when & then
@@ -234,7 +231,7 @@ class ChallengeServiceTest {
         void throwsException_whenChallengeNotFound() {
             // given
             given(challengeRepository.findById(999L)).willReturn(Optional.empty());
-            ChallengeRequest request = new ChallengeRequest("수정", "설명", "#activity.commits >= 10", 1, null, 100, 10, "#activity.commits");
+            ChallengeRequest request = new ChallengeRequest("수정", "설명", "T(Math).min(totalCommits * 100 / 10, 100)", 1, null, 100);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(999L, request))
@@ -247,7 +244,7 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "#activity.commits >= 10", 2, null, 200, 20, "#activity.commits");
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalCommits * 100 / 10, 100)", 2, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
@@ -264,13 +261,13 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "#activity.prs >= 5", 2, null, 200, 20, "#activity.prs");
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalPrs * 100 / 5, 100)", 2, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
 
             // then
-            assertThat(challenge.getCondition()).isEqualTo("#activity.prs >= 5");
+            assertThat(challenge.getCondition()).isEqualTo("T(Math).min(totalPrs * 100 / 5, 100)");
         }
 
         @Test
@@ -279,7 +276,7 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "((( invalid", 2, null, 200, 20, "#activity.commits");
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "((( invalid", 2, null, 200);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(1L, request))

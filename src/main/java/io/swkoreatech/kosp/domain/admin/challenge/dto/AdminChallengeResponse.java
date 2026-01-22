@@ -7,8 +7,6 @@ public record AdminChallengeResponse(
     String condition,
     Integer tier,
     String imageUrl,
-    Integer point,
-    Integer maxProgress,
-    String progressField
+    Integer point
 ) {
 }

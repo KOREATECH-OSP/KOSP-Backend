@@ -82,8 +82,8 @@ public class ChallengeEvaluator {
 
     private void evaluateAndReward(User user, Challenge challenge, StandardEvaluationContext context) {
         try {
-            ProgressInfo progress = calculateProgress(challenge, context);
-            boolean isAchieved = isConditionMet(challenge, context);
+            int progress = calculateProgress(challenge, context);
+            boolean isAchieved = progress >= 100;
 
             if (isAchieved) {
                 grantReward(user, challenge, progress);
@@ -93,32 +93,25 @@ public class ChallengeEvaluator {
         }
     }
 
-    private ProgressInfo calculateProgress(Challenge challenge, StandardEvaluationContext context) {
+    private int calculateProgress(Challenge challenge, StandardEvaluationContext context) {
         try {
-            Expression exp = parser.parseExpression(challenge.getProgressField());
-            Object value = exp.getValue(context);
-            int current = extractIntValue(value);
-            int target = challenge.getMaxProgress();
-            return new ProgressInfo(current, target);
+            Expression expression = parser.parseExpression(challenge.getCondition());
+            Object result = expression.getValue(context);
+            return extractProgress(result);
         } catch (Exception e) {
             log.warn("Failed to calculate progress for challenge {}: {}", challenge.getId(), e.getMessage());
-            return new ProgressInfo(0, challenge.getMaxProgress());
+            return 0;
         }
     }
 
-    private int extractIntValue(Object value) {
+    private int extractProgress(Object value) {
         if (value instanceof Number number) {
-            return number.intValue();
+            return Math.max(0, Math.min(100, number.intValue()));
         }
         return 0;
     }
 
-    private boolean isConditionMet(Challenge challenge, StandardEvaluationContext context) {
-        Expression exp = parser.parseExpression(challenge.getCondition());
-        return Boolean.TRUE.equals(exp.getValue(context, Boolean.class));
-    }
-
-    private void grantReward(User user, Challenge challenge, ProgressInfo progress) {
+    private void grantReward(User user, Challenge challenge, int progress) {
         log.info("User {} achieved challenge: {} (+{} points)", 
             user.getId(), challenge.getName(), challenge.getPoint());
 
@@ -130,8 +123,7 @@ public class ChallengeEvaluator {
             .challenge(challenge)
             .isAchieved(true)
             .achievedAt(LocalDateTime.now())
-            .currentProgress(progress.current())
-            .targetProgress(progress.target())
+            .progressAtAchievement(progress)
             .build();
 
         challengeHistoryRepository.save(history);
@@ -141,6 +133,4 @@ public class ChallengeEvaluator {
         log.error("Failed to evaluate challenge {} for user {}. Condition: {}",
             challenge.getId(), user.getId(), challenge.getCondition(), e);
     }
-
-    private record ProgressInfo(int current, int target) {}
 }

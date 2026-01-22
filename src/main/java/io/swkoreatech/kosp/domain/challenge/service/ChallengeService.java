@@ -8,8 +8,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.expression.Expression;
 import org.springframework.expression.ParseException;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
@@ -37,6 +40,7 @@ public class ChallengeService {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
+    private final GithubUserStatisticsRepository statisticsRepository;
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
     public AdminChallengeListResponse getAllChallenges() {
@@ -49,9 +53,7 @@ public class ChallengeService {
                 challenge.getCondition(),
                 challenge.getTier(),
                 challenge.getImageUrl(),
-                challenge.getPoint(),
-                challenge.getMaxProgress(),
-                challenge.getProgressField()
+                challenge.getPoint()
             ))
             .toList();
         return new AdminChallengeListResponse(challengeInfos);
@@ -68,9 +70,7 @@ public class ChallengeService {
             challenge.getCondition(),
             challenge.getTier(),
             challenge.getImageUrl(),
-            challenge.getPoint(),
-            challenge.getMaxProgress(),
-            challenge.getProgressField()
+            challenge.getPoint()
         );
     }
 
@@ -86,8 +86,6 @@ public class ChallengeService {
             .tier(request.tier())
             .imageUrl(request.imageUrl())
             .point(request.point())
-            .maxProgress(request.maxProgress())
-            .progressField(request.progressField())
             .build();
 
         challengeRepository.save(challenge);
@@ -120,9 +118,7 @@ public class ChallengeService {
             request.condition(),
             request.tier(),
             request.imageUrl(),
-            request.point(),
-            request.maxProgress(),
-            request.progressField()
+            request.point()
         );
         log.info("Updated challenge: {}", challengeId);
     }
@@ -143,30 +139,28 @@ public class ChallengeService {
         Map<Long, ChallengeHistory> historyMap = histories.stream()
             .collect(Collectors.toMap(h -> h.getChallenge().getId(), h -> h));
 
+        Optional<GithubUserStatistics> statsOpt = findUserStatistics(user);
+        StandardEvaluationContext context = createEvaluationContext(statsOpt.orElse(null));
+
         List<ChallengeListResponse.ChallengeResponse> challengeResponses = challenges.stream()
             .map(challenge -> {
                 Optional<ChallengeHistory> historyOpt = Optional.ofNullable(historyMap.get(challenge.getId()));
                 boolean isCompleted = historyOpt.map(ChallengeHistory::isAchieved).orElse(false);
                 
-                int current = historyOpt
-                    .map(ChallengeHistory::getCurrentProgress)
-                    .orElse(0);
-                int total = historyOpt
-                    .map(ChallengeHistory::getTargetProgress)
-                    .orElse(challenge.getMaxProgress());
+                int progress = isCompleted ? 100 : evaluateProgress(challenge, context);
 
                 return new ChallengeListResponse.ChallengeResponse(
                     challenge.getId(),
                     challenge.getName(),
                     challenge.getDescription(),
                     "general",
-                    current,
-                    total,
+                    progress,
                     isCompleted,
                     challenge.getImageUrl(),
                     challenge.getTier(),
                     challenge.getPoint()
-                );            })
+                );
+            })
             .toList();
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
@@ -182,6 +176,42 @@ public class ChallengeService {
             challengeResponses,
             new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
         );
+    }
+
+    private Optional<GithubUserStatistics> findUserStatistics(User user) {
+        if (user.getGithubUser() == null) {
+            return Optional.empty();
+        }
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        return statisticsRepository.findByGithubId(githubId);
+    }
+
+    private StandardEvaluationContext createEvaluationContext(GithubUserStatistics stats) {
+        if (stats == null) {
+            return new StandardEvaluationContext();
+        }
+        StandardEvaluationContext context = new StandardEvaluationContext(stats);
+        context.setVariable("stats", stats);
+        return context;
+    }
+
+    private int evaluateProgress(Challenge challenge, StandardEvaluationContext context) {
+        try {
+            Expression expression = parser.parseExpression(challenge.getCondition());
+            Object result = expression.getValue(context);
+            return extractProgress(result);
+        } catch (Exception e) {
+            log.warn("Failed to evaluate condition for challenge {}: {}", challenge.getId(), e.getMessage());
+            return 0;
+        }
+    }
+
+    private int extractProgress(Object result) {
+        if (result instanceof Number number) {
+            int progress = number.intValue();
+            return Math.max(0, Math.min(100, progress));
+        }
+        return 0;
     }
 
     private List<Challenge> findChallengesByTier(Integer tier) {
@@ -202,11 +232,18 @@ public class ChallengeService {
         List<SpelVariableResponse.VariableInfo> variables = buildVariablesFromEntity();
 
         List<SpelVariableResponse.ExampleExpression> examples = List.of(
-            new SpelVariableResponse.ExampleExpression("totalCommits >= 100", "커밋 100회 이상"),
-            new SpelVariableResponse.ExampleExpression("totalPrs >= 10", "PR 10개 이상"),
-            new SpelVariableResponse.ExampleExpression("totalStarsReceived >= 50", "스타 50개 이상"),
-            new SpelVariableResponse.ExampleExpression("contributedReposCount >= 5", "기여 레포 5개 이상"),
-            new SpelVariableResponse.ExampleExpression("totalCommits >= 50 && totalPrs >= 5", "커밋 50회 AND PR 5개 이상")
+            new SpelVariableResponse.ExampleExpression(
+                "T(Math).min(totalCommits * 100 / 100, 100)", 
+                "커밋 100회 달성 (0~100%)"),
+            new SpelVariableResponse.ExampleExpression(
+                "T(Math).min(totalPrs * 100 / 10, 100)", 
+                "PR 10개 달성 (0~100%)"),
+            new SpelVariableResponse.ExampleExpression(
+                "T(Math).min(totalStarsReceived * 100 / 50, 100)", 
+                "스타 50개 달성 (0~100%)"),
+            new SpelVariableResponse.ExampleExpression(
+                "(T(Math).min(totalCommits * 100 / 50, 100) + T(Math).min(totalPrs * 100 / 5, 100)) / 2", 
+                "커밋 50회 + PR 5개 복합 조건 (평균)")
         );
 
         return new SpelVariableResponse(variables, examples);

@@ -2,6 +2,8 @@ package io.swkoreatech.kosp.domain.challenge.model;
 
 import java.time.LocalDateTime;
 
+import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.global.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -11,8 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.model.BaseEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -42,20 +42,16 @@ public class ChallengeHistory extends BaseEntity {
     @Column(name = "achieved_at")
     private LocalDateTime achievedAt;
 
-    @Column(name = "current_progress")
-    private Integer currentProgress;
-
-    @Column(name = "target_progress")
-    private Integer targetProgress;
+    @Column(name = "progress_at_achievement")
+    private Integer progressAtAchievement;
 
     @Builder
-    private ChallengeHistory(User user, Challenge challenge, boolean isAchieved, LocalDateTime achievedAt, Integer currentProgress, Integer targetProgress) {
+    private ChallengeHistory(User user, Challenge challenge, boolean isAchieved, LocalDateTime achievedAt, Integer progressAtAchievement) {
         this.user = user;
         this.challenge = challenge;
         this.isAchieved = isAchieved;
         this.achievedAt = achievedAt;
-        this.currentProgress = currentProgress;
-        this.targetProgress = targetProgress;
+        this.progressAtAchievement = progressAtAchievement;
     }
 
     public void achieve() {
