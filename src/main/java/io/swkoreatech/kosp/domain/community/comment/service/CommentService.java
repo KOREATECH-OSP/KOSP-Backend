@@ -56,17 +56,14 @@ public class CommentService {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
         
-        commentLikeRepository.deleteAllByComment(comment);
-        
         Article article = comment.getArticle();
         article.decrementCommentsCount();
-        articleRepository.save(article);
         
-        commentRepository.delete(comment);
+        comment.delete();
     }
 
     public CommentListResponse getList(Long articleId, Pageable pageable, User user) {
-        Page<Comment> page = commentRepository.findByArticleId(articleId, pageable);
+        Page<Comment> page = commentRepository.findByArticleIdAndIsDeletedFalse(articleId, pageable);
         return toResponse(page, user);
     }
 
