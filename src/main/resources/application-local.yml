@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: local
   config:
     import: optional:file:.env[.properties]
   web:
@@ -29,7 +27,7 @@ spring:
     jdbc:
       initialize-schema: always
     job:
-        enabled: false # 프로덕션에서만 true
+      enabled: false
   security:
     oauth2:
       client:
@@ -62,9 +60,6 @@ spring:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
       database: ${MONGODB_DATABASE}
-      authentication-database: ${MONGODB_AUTHENTICATION_DATABASE}
-      username: ${MONGODB_USERNAME}
-      password: ${MONGODB_PASSWORD}
       auto-index-creation: false
       uuid-representation: standard
 
@@ -93,7 +88,6 @@ cors:
 server:
   tomcat:
     max-http-form-post-size: 10MB
-  #  MockMvc이용하면 한글 깨지는 문제 해결하는 설정
   servlet:
     encoding:
       force-response: true
@@ -102,26 +96,13 @@ logging:
   level:
     org:
       springframework:
-        transaction: DEBUG  # 스프링 트랜잭션 관련 로그 출력
+        transaction: DEBUG
         orm.jpa.JpaTransactionManager: DEBUG
         security: DEBUG
       hibernate:
         engine:
           transaction:
-            internal: DEBUG  # Hibernate 트랜잭션 로그 상세 출력
+            internal: DEBUG
         type:
           descriptor:
             sql: trace
-
-github:
-  api:
-    base-url: https://api.github.com
-    graphql-url: https://api.github.com/graphql
-    rate-limit:
-      threshold: 100  # API 호출 여유분
-  collection:
-    worker:
-      enabled: true
-      poll-interval: 1000  # Poll every 1 second
-      max-retry: 5  # Maximum retry attempts
-    batch-size: 100  # Documents per batch for MongoDB insert
