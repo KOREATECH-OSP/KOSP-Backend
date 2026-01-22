@@ -5,6 +5,7 @@ query GetContributedRepositories($login: String!, $from: DateTime!, $to: DateTim
       commitContributionsByRepository(maxRepositories: 100) {
         repository {
           name
+          description
           owner {
             login
           }

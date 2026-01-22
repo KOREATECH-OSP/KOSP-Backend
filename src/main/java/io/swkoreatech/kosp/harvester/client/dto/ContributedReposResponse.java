@@ -104,6 +104,7 @@ public class ContributedReposResponse {
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RepositoryInfo {
         private String name;
+        private String description;
         private Owner owner;
         private String nameWithOwner;
         private boolean isFork;

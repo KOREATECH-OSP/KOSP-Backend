@@ -142,6 +142,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
                 .repositoryName(repo.getName())
                 .repositoryOwner(repo.getOwnerLogin())
                 .fullName(repo.getNameWithOwner())
+                .description(repo.getDescription())
                 .isOwner(login.equals(repo.getOwnerLogin()))
                 .isFork(repo.isFork())
                 .isPrivate(repo.isPrivate())
