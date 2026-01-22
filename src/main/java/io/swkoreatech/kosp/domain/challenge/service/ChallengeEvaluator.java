@@ -116,7 +116,10 @@ public class ChallengeEvaluator {
     }
 
     private void grantReward(User user, Challenge challenge, ProgressInfo progress) {
-        log.info("User {} achieved challenge: {}", user.getId(), challenge.getName());
+        log.info("User {} achieved challenge: {} (+{} points)", 
+            user.getId(), challenge.getName(), challenge.getPoint());
+
+        user.addPoint(challenge.getPoint());
 
         ChallengeHistory history = ChallengeHistory.builder()
             .user(user)
