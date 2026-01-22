@@ -76,6 +76,7 @@ aws:
   region: ${AWS_REGION}
   s3:
     bucket: ${AWS_S3_BUCKET}
+    custom_domain: ${AWS_S3_CUSTOM_DOMAIN}
 
 jwt:
   secret-key: ${JWT_SECRET_KEY}
