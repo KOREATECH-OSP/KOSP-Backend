@@ -1,0 +1,51 @@
+package io.swkoreatech.kosp.domain.github.repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.Repository;
+import org.springframework.data.repository.query.Param;
+
+import io.swkoreatech.kosp.domain.github.model.GithubMonthlyStatistics;
+
+public interface GithubMonthlyStatisticsRepository extends Repository<GithubMonthlyStatistics, Long> {
+
+    GithubMonthlyStatistics save(GithubMonthlyStatistics statistics);
+
+    <S extends GithubMonthlyStatistics> List<S> saveAll(Iterable<S> entities);
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId AND m.year = :year AND m.month = :month")
+    Optional<GithubMonthlyStatistics> findByGithubIdAndYearAndMonth(
+        @Param("githubId") String githubId,
+        @Param("year") Integer year,
+        @Param("month") Integer month
+    );
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId")
+    List<GithubMonthlyStatistics> findByGithubId(@Param("githubId") String githubId);
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId ORDER BY m.year DESC")
+    List<GithubMonthlyStatistics> findByGithubIdOrderByYearDesc(@Param("githubId") String githubId);
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId ORDER BY m.year DESC, m.month DESC")
+    List<GithubMonthlyStatistics> findByGithubIdOrderByYearDescMonthDesc(@Param("githubId") String githubId);
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId AND m.year = :year")
+    List<GithubMonthlyStatistics> findByGithubIdAndYear(
+        @Param("githubId") String githubId,
+        @Param("year") Integer year
+    );
+
+    @Query("SELECT m FROM GithubMonthlyStatistics m WHERE m.githubId = :githubId " +
+           "AND ((m.year > :startYear) OR (m.year = :startYear AND m.month >= :startMonth)) " +
+           "AND ((m.year < :endYear) OR (m.year = :endYear AND m.month <= :endMonth)) " +
+           "ORDER BY m.year, m.month")
+    List<GithubMonthlyStatistics> findByGithubIdAndYearMonthBetween(
+        @Param("githubId") String githubId,
+        @Param("startYear") Integer startYear,
+        @Param("startMonth") Integer startMonth,
+        @Param("endYear") Integer endYear,
+        @Param("endMonth") Integer endMonth
+    );
+}

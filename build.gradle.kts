@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.io.spring.dependency.management)
 }
 
-group = "kr.ac.koreatech.sw"
+group = "io.swkoreatech"
 
 java {
 	toolchain {
