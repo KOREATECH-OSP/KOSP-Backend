@@ -44,6 +44,9 @@ public enum ExceptionMessage {
     INSUFFICIENT_POINTS("포인트가 부족합니다.", HttpStatus.BAD_REQUEST),
     INVALID_POINT_AMOUNT("포인트 금액이 올바르지 않습니다.", HttpStatus.BAD_REQUEST),
     POINT_TRANSACTION_NOT_FOUND("포인트 거래 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    INVALID_PARAMETER("잘못된 파라미터입니다.", HttpStatus.BAD_REQUEST),
+    FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_DELETE_FAILED("파일 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
     ;
 

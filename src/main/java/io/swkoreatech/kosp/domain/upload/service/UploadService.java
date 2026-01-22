@@ -1,50 +1,55 @@
 package io.swkoreatech.kosp.domain.upload.service;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 import java.util.UUID;
-import io.swkoreatech.kosp.domain.upload.client.S3StorageClient;
-import io.swkoreatech.kosp.domain.upload.dto.response.FileResponse;
-import io.swkoreatech.kosp.domain.upload.event.FileUploadEvent;
-import io.swkoreatech.kosp.domain.upload.model.Attachment;
-import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+
+import io.swkoreatech.kosp.domain.upload.client.S3StorageClient;
+import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UploadService {
 
-    private final AttachmentRepository attachmentRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final S3StorageClient s3Client;
+    private final Clock clock;
 
-    @Transactional
-    public FileResponse uploadFile(MultipartFile file, User user) {
-        // 1. Generate UUID-based filename
-        String storedFileName = UUID.randomUUID().toString() + getExtension(file.getOriginalFilename());
+    public UploadUrlResponse getPresignedUrl(UploadUrlRequest request) {
+        String filePath = generateFilePath(request.fileName());
+        return s3Client.getPresignedUrl(filePath, request.contentLength(), request.contentType());
+    }
 
-        // 2. Publish async upload event
-        eventPublisher.publishEvent(new FileUploadEvent(file, storedFileName));
+    private String generateFilePath(String originalFilename) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        String extension = getExtension(originalFilename);
+        String nameWithoutExtension = extractNameWithoutExtension(originalFilename);
 
-        // 3. Save Attachment entity (article_id = null initially)
-        Attachment attachment = Attachment.builder()
-            .originalFileName(file.getOriginalFilename())
-            .storedFileName(storedFileName)
-            .fileSize(file.getSize())
-            .contentType(file.getContentType())
-            .url(s3Client.generateUrl(storedFileName))
-            .uploadedBy(user)
-            .uploadedAt(LocalDateTime.now())
-            .build();
+        StringJoiner path = new StringJoiner("/");
+        path.add("upload")
+            .add(String.valueOf(now.getYear()))
+            .add(String.valueOf(now.getMonthValue()))
+            .add(String.valueOf(now.getDayOfMonth()))
+            .add(UUID.randomUUID().toString())
+            .add(nameWithoutExtension);
 
-        attachmentRepository.save(attachment);
+        return path + extension;
+    }
 
-        return FileResponse.from(attachment);
+    private String extractNameWithoutExtension(String filename) {
+        if (filename == null) {
+            return "file";
+        }
+        if (!filename.contains(".")) {
+            return filename;
+        }
+        return filename.substring(0, filename.lastIndexOf("."));
     }
 
     private String getExtension(String filename) {
