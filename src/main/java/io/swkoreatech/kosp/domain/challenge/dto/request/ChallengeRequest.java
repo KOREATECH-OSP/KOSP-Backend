@@ -22,13 +22,6 @@ public record ChallengeRequest(
     
     @NotNull(message = "포인트는 필수입니다.")
     @Positive(message = "포인트는 양수여야 합니다.")
-    Integer point,
-    
-    @NotNull(message = "최대 진행도는 필수입니다.")
-    @Positive(message = "최대 진행도는 양수여야 합니다.")
-    Integer maxProgress,
-    
-    @NotBlank(message = "진행도 필드는 필수입니다.")
-    String progressField
+    Integer point
 ) {
 }
