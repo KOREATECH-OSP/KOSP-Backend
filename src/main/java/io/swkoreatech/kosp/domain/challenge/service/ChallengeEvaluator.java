@@ -59,7 +59,7 @@ public class ChallengeEvaluator {
 
     private void evaluateAllChallenges(User user, Map<String, Object> stats) {
         StandardEvaluationContext context = createEvaluationContext(stats);
-        List<Challenge> challenges = challengeRepository.findAllByIsDeletedFalse();
+        List<Challenge> challenges = challengeRepository.findAll();
 
         challenges.forEach(challenge -> tryEvaluate(user, challenge, context));
     }

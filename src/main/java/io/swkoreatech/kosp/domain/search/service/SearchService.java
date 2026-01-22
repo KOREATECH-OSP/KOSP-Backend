@@ -87,7 +87,7 @@ public class SearchService {
         if (!filters.contains(SearchFilter.challenges)) {
             return Collections.emptyList();
         }
-        return challengeRepository.findByNameContainingAndIsDeletedFalse(keyword)
+        return challengeRepository.findByNameContaining(keyword)
             .stream()
             .map(ChallengeSummary::from)
             .toList();
