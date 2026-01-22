@@ -100,8 +100,8 @@ public class UserService {
         
         // 6. GitHub 데이터 수집 이벤트 발행
         if (githubUser.getGithubLogin() != null) {
-            eventPublisher.publishEvent(new UserSignupEvent(this, githubUser.getGithubLogin()));
-            log.info("Published UserSignupEvent for GitHub user: {}", githubUser.getGithubLogin());
+            eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
+            log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
         }
         
         return authService.createTokensForUser(user);
