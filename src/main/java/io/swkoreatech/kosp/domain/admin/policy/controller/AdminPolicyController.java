@@ -11,6 +11,7 @@ import io.swkoreatech.kosp.domain.admin.policy.service.PolicyAdminService;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class AdminPolicyController implements AdminPolicyApi {
 
     @Override
     @Permit(name = "admin:policies:read", description = "정책 단일 조회")
-    public ResponseEntity<PolicyResponse> getPolicy(String policyName) {
+    public ResponseEntity<PolicyDetailResponse> getPolicy(String policyName) {
         return ResponseEntity.ok(policyAdminService.getPolicy(policyName));
     }
 

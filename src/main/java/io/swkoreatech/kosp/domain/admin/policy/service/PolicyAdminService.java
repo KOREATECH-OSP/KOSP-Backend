@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PermissionResponse;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
 import io.swkoreatech.kosp.domain.auth.model.Permission;
 import io.swkoreatech.kosp.domain.auth.model.Policy;
@@ -32,8 +33,8 @@ public class PolicyAdminService {
             .toList();
     }
 
-    public PolicyResponse getPolicy(String name) {
-        return PolicyResponse.from(findPolicy(name));
+    public PolicyDetailResponse getPolicy(String name) {
+        return PolicyDetailResponse.from(findPolicy(name));
     }
 
     @Transactional
