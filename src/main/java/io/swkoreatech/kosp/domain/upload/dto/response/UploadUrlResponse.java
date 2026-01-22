@@ -1,0 +1,20 @@
+package io.swkoreatech.kosp.domain.upload.dto.response;
+
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+public record UploadUrlResponse(
+    @Schema(description = "파일을 업로드할 수 있는 presigned URL")
+    String preSignedUrl,
+
+    @Schema(description = "업로드 완료 후 접근 가능한 파일 URL", example = "https://kosp-bucket.s3.ap-northeast-2.amazonaws.com/upload/articles/2026/1/22/uuid/image.png")
+    String fileUrl,
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "presigned URL 만료 일시", example = "2026-01-22 12:34:56")
+    LocalDateTime expirationDate
+) {
+}
