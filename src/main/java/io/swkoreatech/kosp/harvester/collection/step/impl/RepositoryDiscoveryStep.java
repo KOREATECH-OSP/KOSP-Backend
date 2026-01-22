@@ -76,9 +76,18 @@ public class RepositoryDiscoveryStep implements StepProvider {
         String token = decryptToken(githubUser.getGithubToken());
         String login = githubUser.getGithubLogin();
 
-        Set<RepositoryInfo> repositories = discoverRepositories(login, token);
-        saveRepositories(userId, login, repositories);
+        GraphQLResponse<ContributedReposResponse> response = fetchContributedRepos(login, token);
+        if (response == null || response.hasErrors()) {
+            logErrors(response, userId);
+            return;
+        }
 
+        ContributedReposResponse data = response.getData();
+        Set<RepositoryInfo> repositories = data.collectAllRepositories();
+        String userNodeId = data.getUserNodeId();
+
+        saveRepositories(userId, login, repositories);
+        storeUserInfoInContext(chunkContext, login, token, userNodeId);
         storeReposInContext(chunkContext, repositories);
         log.info("Discovered {} repositories for user {}", repositories.size(), userId);
     }
@@ -88,25 +97,31 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private Set<RepositoryInfo> discoverRepositories(String login, String token) {
+        GraphQLResponse<ContributedReposResponse> response = fetchContributedRepos(login, token);
+        if (response == null || response.hasErrors()) {
+            return Set.of();
+        }
+        return response.getData().collectAllRepositories();
+    }
+
+    private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime oneYearAgo = now.minusYears(1);
 
         String from = formatDateTime(oneYearAgo);
         String to = formatDateTime(now);
 
-        GraphQLResponse<ContributedReposResponse> response = graphQLClient
+        return graphQLClient
             .getContributedRepos(login, from, to, token, createResponseType())
             .block();
+    }
 
+    private void logErrors(GraphQLResponse<ContributedReposResponse> response, Long userId) {
         if (response == null) {
-            return Set.of();
+            log.warn("No response from GraphQL for user {}", userId);
+            return;
         }
-        if (response.hasErrors()) {
-            log.error("GraphQL errors: {}", response.getErrors());
-            return Set.of();
-        }
-
-        return response.getData().collectAllRepositories();
+        log.error("GraphQL errors for user {}: {}", userId, response.getErrors());
     }
 
     private String formatDateTime(ZonedDateTime dateTime) {
@@ -138,6 +153,17 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
             repoDocumentRepository.save(document);
         }
+    }
+
+    private void storeUserInfoInContext(ChunkContext chunkContext, String login, String token, String nodeId) {
+        var context = chunkContext.getStepContext()
+            .getStepExecution()
+            .getJobExecution()
+            .getExecutionContext();
+
+        context.putString("githubLogin", login);
+        context.putString("githubToken", token);
+        context.putString("githubNodeId", nodeId);
     }
 
     private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories) {
