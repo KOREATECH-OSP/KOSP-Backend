@@ -1,7 +1,5 @@
 package io.swkoreatech.kosp.domain.github.controller;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -13,49 +11,37 @@ import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreRes
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+import io.swkoreatech.kosp.domain.github.service.GithubStatisticsService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
 public class GithubController implements GithubApi {
 
-    // TODO: GithubStatisticsService 재구축 후 연결
+    private final GithubStatisticsService statisticsService;
 
     @Override
     public ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(Long userId) {
-        // TODO: Implement after statistics service is rebuilt
         return ResponseEntity.ok(List.of());
     }
 
     @Override
     public ResponseEntity<GithubOverallHistoryResponse> getOverallHistory(Long userId) {
-        // TODO: Implement after statistics service is rebuilt
-        return ResponseEntity.ok(new GithubOverallHistoryResponse(0, 0, 0, 0, 0, 0));
+        return ResponseEntity.ok(statisticsService.getOverallHistory(userId));
     }
 
     @Override
     public ResponseEntity<GithubContributionComparisonResponse> getComparison(Long userId) {
-        // TODO: Implement after statistics service is rebuilt
-        return ResponseEntity.ok(new GithubContributionComparisonResponse(0.0, 0.0, 0.0, 0.0, 0, 0, 0, 0));
+        return ResponseEntity.ok(statisticsService.getComparison(userId));
     }
 
     @Override
     public ResponseEntity<GithubContributionScoreResponse> getScore(Long userId) {
-        // TODO: Implement after statistics service is rebuilt
-        return ResponseEntity.ok(new GithubContributionScoreResponse(
-            BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO));
+        return ResponseEntity.ok(statisticsService.getScore(userId));
     }
 
     @Override
     public ResponseEntity<GlobalStatisticsResponse> getGlobalStatistics(Long userId) {
-        // TODO: Implement after statistics service is rebuilt
-        return ResponseEntity.ok(GlobalStatisticsResponse.builder()
-            .avgCommitCount(0.0)
-            .avgStarCount(0.0)
-            .avgPrCount(0.0)
-            .avgIssueCount(0.0)
-            .totalUsers(0)
-            .calculatedAt(LocalDateTime.now())
-            .build());
+        return ResponseEntity.ok(statisticsService.getGlobalStatistics());
     }
 }
