@@ -1,18 +1,31 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: validate
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:kosp}?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
-    username: ${DB_USERNAME:root}
-    password: ${DB_PASSWORD:password}
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   data:
     redis:
-      port: ${REDIS_PORT:6379}
-      host: ${REDIS_HOST:localhost}
-      password: ${REDIS_PASSWORD:}
+      port: ${REDIS_PORT}
+      host: ${REDIS_HOST}
+      password: ${REDIS_PASSWORD}
       lettuce:
         pool:
           max-active: 20
@@ -20,12 +33,29 @@ spring:
           min-idle: 5
           max-wait: 2000ms
     mongodb:
-      host: ${MONGODB_HOST:localhost}
-      port: ${MONGODB_PORT:27017}
-      database: ${MONGODB_DATABASE:kosp}
-      authentication-database: ${MONGODB_AUTHENTICATION_DATABASE:admin}
+      host: ${MONGODB_HOST}
+      port: ${MONGODB_PORT}
+      database: ${MONGODB_DATABASE}
       auto-index-creation: false
       uuid-representation: standard
+
+encryption:
+  password: ${ENCRYPTION_PASSWORD}
+  salt: ${ENCRYPTION_SALT}
+
+github:
+  api:
+    base-url: https://api.github.com
+    graphql-url: https://api.github.com/graphql
+    rate-limit:
+      threshold: 100
+
+harvester:
+  redis:
+    stream:
+      key: github:collection:trigger
+      consumer-group: harvester-group
+      consumer-name: ${HOSTNAME:harvester-1}
 
 logging:
   level:
