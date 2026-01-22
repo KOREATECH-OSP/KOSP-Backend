@@ -64,16 +64,13 @@ public class GithubUserStatistics {
     private Integer dayCommits = 0;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal mainRepoScore = BigDecimal.ZERO;
+    private BigDecimal activityScore = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal otherRepoScore = BigDecimal.ZERO;
+    private BigDecimal diversityScore = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal prIssueScore = BigDecimal.ZERO;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal reputationScore = BigDecimal.ZERO;
+    private BigDecimal impactScore = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalScore = BigDecimal.ZERO;
@@ -121,20 +118,15 @@ public class GithubUserStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
-    public void updateDetailedScore(
-        BigDecimal mainRepoScore,
-        BigDecimal otherRepoScore,
-        BigDecimal prIssueScore,
-        BigDecimal reputationScore
+    public void updateScores(
+        BigDecimal activityScore,
+        BigDecimal diversityScore,
+        BigDecimal impactScore
     ) {
-        this.mainRepoScore = mainRepoScore;
-        this.otherRepoScore = otherRepoScore;
-        this.prIssueScore = prIssueScore;
-        this.reputationScore = reputationScore;
-        this.totalScore = mainRepoScore
-            .add(otherRepoScore)
-            .add(prIssueScore)
-            .add(reputationScore);
+        this.activityScore = activityScore;
+        this.diversityScore = diversityScore;
+        this.impactScore = impactScore;
+        this.totalScore = activityScore.add(diversityScore).add(impactScore);
     }
 
     public void updateDataPeriod(LocalDate start, LocalDate end) {

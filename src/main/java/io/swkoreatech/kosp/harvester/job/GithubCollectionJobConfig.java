@@ -11,6 +11,7 @@ import io.swkoreatech.kosp.harvester.collection.step.impl.CommitMiningStep;
 import io.swkoreatech.kosp.harvester.collection.step.impl.IssueMiningStep;
 import io.swkoreatech.kosp.harvester.collection.step.impl.PullRequestMiningStep;
 import io.swkoreatech.kosp.harvester.collection.step.impl.RepositoryDiscoveryStep;
+import io.swkoreatech.kosp.harvester.collection.step.impl.ScoreCalculationStep;
 import io.swkoreatech.kosp.harvester.collection.step.impl.StatisticsAggregationStep;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class GithubCollectionJobConfig {
     private final PullRequestMiningStep pullRequestMiningStep;
     private final IssueMiningStep issueMiningStep;
     private final StatisticsAggregationStep statisticsAggregationStep;
+    private final ScoreCalculationStep scoreCalculationStep;
     private final CleanupStep cleanupStep;
 
     @Bean
@@ -39,6 +41,7 @@ public class GithubCollectionJobConfig {
             .next(issueMiningStep.getStep())
             .next(commitMiningStep.getStep())
             .next(statisticsAggregationStep.getStep())
+            .next(scoreCalculationStep.getStep())
             .next(cleanupStep.getStep())
             .build();
     }
