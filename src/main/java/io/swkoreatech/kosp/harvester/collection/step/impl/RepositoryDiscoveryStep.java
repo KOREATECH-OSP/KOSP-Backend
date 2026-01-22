@@ -22,6 +22,7 @@ import io.swkoreatech.kosp.harvester.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.harvester.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.harvester.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
+import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
 import io.swkoreatech.kosp.harvester.user.GithubUser;
 import io.swkoreatech.kosp.harvester.user.User;
 import io.swkoreatech.kosp.harvester.user.UserRepository;
@@ -41,6 +42,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final GithubGraphQLClient graphQLClient;
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
+    private final StepCompletionListener stepCompletionListener;
 
     @Override
     public Step getStep() {
@@ -50,6 +52,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(stepCompletionListener)
             .build();
     }
 

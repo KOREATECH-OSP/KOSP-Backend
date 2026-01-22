@@ -20,6 +20,7 @@ import io.swkoreatech.kosp.harvester.collection.repository.ContributedRepoDocume
 import io.swkoreatech.kosp.harvester.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
+import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
 import io.swkoreatech.kosp.harvester.statistics.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.statistics.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.harvester.user.GithubUser;
@@ -46,6 +47,7 @@ public class StatisticsAggregationStep implements StepProvider {
     private final IssueDocumentRepository issueDocumentRepository;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final StepCompletionListener stepCompletionListener;
 
     @Override
     public Step getStep() {
@@ -55,6 +57,7 @@ public class StatisticsAggregationStep implements StepProvider {
                 execute(userId);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(stepCompletionListener)
             .build();
     }
 
