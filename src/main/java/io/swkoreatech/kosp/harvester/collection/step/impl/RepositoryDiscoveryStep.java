@@ -82,7 +82,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
             return;
         }
 
-        ContributedReposResponse data = response.getData();
+        ContributedReposResponse data = response.getDataAs(ContributedReposResponse.class);
         Set<RepositoryInfo> repositories = data.collectAllRepositories();
         String userNodeId = data.getUserNodeId();
 
@@ -101,7 +101,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
         if (response == null || response.hasErrors()) {
             return Set.of();
         }
-        return response.getData().collectAllRepositories();
+        return response.getDataAs(ContributedReposResponse.class).collectAllRepositories();
     }
 
     private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {

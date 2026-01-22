@@ -91,10 +91,11 @@ public class PullRequestMiningStep implements StepProvider {
                 break;
             }
 
-            List<PullRequestNode> prs = response.getData().getPullRequests();
+            UserPullRequestsResponse data = response.getDataAs(UserPullRequestsResponse.class);
+            List<PullRequestNode> prs = data.getPullRequests();
             saved += savePullRequests(userId, prs, now);
 
-            PageInfo pageInfo = response.getData().getPageInfo();
+            PageInfo pageInfo = data.getPageInfo();
             if (pageInfo == null || !pageInfo.isHasNextPage()) {
                 break;
             }

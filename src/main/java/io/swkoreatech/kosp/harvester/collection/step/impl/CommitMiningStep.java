@@ -125,10 +125,11 @@ public class CommitMiningStep implements StepProvider {
                 break;
             }
 
-            List<CommitNode> commits = response.getData().getCommits();
+            RepositoryCommitsResponse data = response.getDataAs(RepositoryCommitsResponse.class);
+            List<CommitNode> commits = data.getCommits();
             saved += saveCommits(userId, owner, name, commits, now);
 
-            PageInfo pageInfo = response.getData().getPageInfo();
+            PageInfo pageInfo = data.getPageInfo();
             if (pageInfo == null || !pageInfo.isHasNextPage()) {
                 break;
             }
