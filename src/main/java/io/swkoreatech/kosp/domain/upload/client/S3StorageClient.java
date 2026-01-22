@@ -57,7 +57,6 @@ public class S3StorageClient {
                 .key(uploadFilePath)
                 .contentLength(contentLength)
                 .contentType(contentType)
-                .acl(ObjectCannedACL.PUBLIC_READ)
                 .build()
             )
             .build();
