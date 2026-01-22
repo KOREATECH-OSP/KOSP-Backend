@@ -4,6 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,5 +51,12 @@ public interface AdminMemberApi {
     ResponseEntity<Void> updateUserRoles(
         @Parameter(description = "사용자 ID") @PathVariable Long userId,
         @RequestBody @Valid UserRoleUpdateRequest request
+    );
+
+    @Operation(summary = "[임시] GitHub 수집 트리거", description = "특정 사용자의 GitHub 데이터 수집을 수동으로 트리거합니다.")
+    @ApiResponse(responseCode = "200", description = "트리거 성공")
+    @PostMapping("/{userId}/trigger-github-collection")
+    ResponseEntity<Void> triggerGithubCollection(
+        @Parameter(description = "사용자 ID") @PathVariable Long userId
     );
 }

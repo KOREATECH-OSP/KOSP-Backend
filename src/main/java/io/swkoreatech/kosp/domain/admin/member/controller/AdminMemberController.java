@@ -46,4 +46,11 @@ public class AdminMemberController implements AdminMemberApi {
         adminMemberService.updateUserRoles(userId, request.roles());
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    @Permit(name = "admin:users:trigger-github", description = "[임시] GitHub 수집 트리거")
+    public ResponseEntity<Void> triggerGithubCollection(Long userId) {
+        adminMemberService.triggerGithubCollection(userId);
+        return ResponseEntity.ok().build();
+    }
 }
