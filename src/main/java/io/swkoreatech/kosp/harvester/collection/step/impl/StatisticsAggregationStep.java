@@ -1,7 +1,9 @@
 package io.swkoreatech.kosp.harvester.collection.step.impl;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -85,6 +87,7 @@ public class StatisticsAggregationStep implements StepProvider {
 
         AggregatedStats stats = aggregateFromMongoDB(userId);
         saveToMySQL(githubId, stats);
+        updateContributedRepoStats(userId);
 
         log.info("Aggregated statistics for user {}: {} commits, {} PRs, {} issues",
             userId, stats.totalCommits, stats.totalPrs, stats.totalIssues);
@@ -170,6 +173,62 @@ public class StatisticsAggregationStep implements StepProvider {
         );
 
         statisticsRepository.save(statistics);
+    }
+
+    private void updateContributedRepoStats(Long userId) {
+        List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
+        List<CommitDocument> commits = commitDocumentRepository.findByUserId(userId);
+        List<PullRequestDocument> prs = prDocumentRepository.findByUserId(userId);
+        List<IssueDocument> issues = issueDocumentRepository.findByUserId(userId);
+
+        for (ContributedRepoDocument repo : repos) {
+            updateSingleRepoStats(repo, commits, prs, issues);
+        }
+
+        repoDocumentRepository.saveAll(repos);
+    }
+
+    private void updateSingleRepoStats(
+        ContributedRepoDocument repo,
+        List<CommitDocument> allCommits,
+        List<PullRequestDocument> allPrs,
+        List<IssueDocument> allIssues
+    ) {
+        String repoFullName = repo.getFullName();
+
+        int commitCount = countCommitsForRepo(allCommits, repoFullName);
+        int prCount = countPrsForRepo(allPrs, repoFullName);
+        int issueCount = countIssuesForRepo(allIssues, repoFullName);
+        Instant lastCommit = findLastCommitDate(allCommits, repoFullName);
+
+        repo.updateUserStats(commitCount, prCount, issueCount, lastCommit);
+    }
+
+    private int countCommitsForRepo(List<CommitDocument> commits, String repoFullName) {
+        return (int) commits.stream()
+            .filter(c -> repoFullName.equals(c.getRepositoryOwner() + "/" + c.getRepositoryName()))
+            .count();
+    }
+
+    private int countPrsForRepo(List<PullRequestDocument> prs, String repoFullName) {
+        return (int) prs.stream()
+            .filter(p -> repoFullName.equals(p.getRepositoryOwner() + "/" + p.getRepositoryName()))
+            .count();
+    }
+
+    private int countIssuesForRepo(List<IssueDocument> issues, String repoFullName) {
+        return (int) issues.stream()
+            .filter(i -> repoFullName.equals(i.getRepositoryOwner() + "/" + i.getRepositoryName()))
+            .count();
+    }
+
+    private Instant findLastCommitDate(List<CommitDocument> commits, String repoFullName) {
+        return commits.stream()
+            .filter(c -> repoFullName.equals(c.getRepositoryOwner() + "/" + c.getRepositoryName()))
+            .map(CommitDocument::getAuthoredAt)
+            .filter(Objects::nonNull)
+            .max(Instant::compareTo)
+            .orElse(null);
     }
 
     private record AggregatedStats(
