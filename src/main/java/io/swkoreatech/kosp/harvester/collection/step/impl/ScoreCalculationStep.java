@@ -22,6 +22,7 @@ import io.swkoreatech.kosp.harvester.collection.repository.PullRequestDocumentRe
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
 import io.swkoreatech.kosp.harvester.statistics.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.statistics.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.harvester.trigger.ChallengeCheckPublisher;
 import io.swkoreatech.kosp.harvester.user.GithubUser;
 import io.swkoreatech.kosp.harvester.user.User;
 import io.swkoreatech.kosp.harvester.user.UserRepository;
@@ -46,6 +47,7 @@ public class ScoreCalculationStep implements StepProvider {
     private final PullRequestDocumentRepository prRepository;
     private final ContributedRepoDocumentRepository repoRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final ChallengeCheckPublisher challengeCheckPublisher;
 
     @Override
     public Step getStep() {
@@ -85,6 +87,7 @@ public class ScoreCalculationStep implements StepProvider {
         BigDecimal impactScore = calculateImpactScore(userId);
 
         saveScores(githubId, activityScore, diversityScore, impactScore);
+        challengeCheckPublisher.publish(userId, githubId);
 
         log.info("Calculated scores for user {}: activity={}, diversity={}, impact={}",
             userId, activityScore, diversityScore, impactScore);
