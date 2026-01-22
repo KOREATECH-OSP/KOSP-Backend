@@ -7,16 +7,20 @@ import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 
 @Schema(description = "4. GitHub 기여점수 항목")
 public record GithubContributionScoreResponse(
-    BigDecimal activityScore, // 4.1
-    BigDecimal diversityScore, // 4.2
-    BigDecimal impactScore, // 4.3
+    @Schema(description = "활동 수준 점수 (0~3)")
+    BigDecimal activityScore,
+    @Schema(description = "다양성 점수 (0~1)")
+    BigDecimal diversityScore,
+    @Schema(description = "영향력 점수 (0~5)")
+    BigDecimal impactScore,
+    @Schema(description = "총점")
     BigDecimal totalScore
 ) {
     public static GithubContributionScoreResponse from(GithubUserStatistics stats) {
         return new GithubContributionScoreResponse(
-            stats.getMainRepoScore(),
-            stats.getOtherRepoScore(),
-            stats.getPrIssueScore().add(stats.getReputationScore()),
+            stats.getActivityScore(),
+            stats.getDiversityScore(),
+            stats.getImpactScore(),
             stats.getTotalScore()
         );
     }

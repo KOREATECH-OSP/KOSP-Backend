@@ -2,7 +2,7 @@ package io.swkoreatech.kosp.domain.challenge.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -15,6 +15,8 @@ import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +28,7 @@ public class ChallengeEvaluator {
 
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
+    private final GithubUserStatisticsRepository statisticsRepository;
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -38,35 +41,27 @@ public class ChallengeEvaluator {
             return;
         }
 
-        Long githubId = user.getGithubUser().getGithubId();
-        Map<String, Object> stats = fetchGithubStats(githubId);
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        Optional<GithubUserStatistics> statsOpt = statisticsRepository.findByGithubId(githubId);
 
-        if (stats.isEmpty()) {
+        if (statsOpt.isEmpty()) {
             log.warn("No GitHub stats found for githubId {}", githubId);
             return;
         }
 
-        evaluateAllChallenges(user, stats);
+        evaluateAllChallenges(user, statsOpt.get());
     }
 
-    private Map<String, Object> fetchGithubStats(Long githubId) {
-        // TODO: MongoDB 스키마 재구축 후 GithubProfileRepository 연결
-        // return githubProfileRepository.findByGithubId(githubId)
-        //     .map(GithubProfile::getStats)
-        //     .orElse(Map.of());
-        return Map.of();
-    }
-
-    private void evaluateAllChallenges(User user, Map<String, Object> stats) {
+    private void evaluateAllChallenges(User user, GithubUserStatistics stats) {
         StandardEvaluationContext context = createEvaluationContext(stats);
         List<Challenge> challenges = challengeRepository.findAll();
 
         challenges.forEach(challenge -> tryEvaluate(user, challenge, context));
     }
 
-    private StandardEvaluationContext createEvaluationContext(Map<String, Object> stats) {
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        context.setVariable("activity", stats);
+    private StandardEvaluationContext createEvaluationContext(GithubUserStatistics stats) {
+        StandardEvaluationContext context = new StandardEvaluationContext(stats);
+        context.setVariable("stats", stats);
         return context;
     }
 

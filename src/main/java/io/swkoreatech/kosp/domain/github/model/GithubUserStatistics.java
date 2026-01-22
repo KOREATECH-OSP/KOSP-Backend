@@ -27,7 +27,6 @@ public class GithubUserStatistics {
     @Column(nullable = false, unique = true, length = 100)
     private String githubId;
 
-    // 기본 통계
     @Column(nullable = false)
     private Integer totalCommits = 0;
 
@@ -46,7 +45,6 @@ public class GithubUserStatistics {
     @Column(nullable = false)
     private Integer totalIssues = 0;
 
-    // 레포지토리 통계
     @Column(nullable = false)
     private Integer ownedReposCount = 0;
 
@@ -59,30 +57,24 @@ public class GithubUserStatistics {
     @Column(nullable = false)
     private Integer totalForksReceived = 0;
 
-    // 시간대 분석
     @Column(nullable = false)
     private Integer nightCommits = 0;
 
     @Column(nullable = false)
     private Integer dayCommits = 0;
 
-    // 점수 세분화
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal mainRepoScore = BigDecimal.ZERO;
+    @Column(name = "activity_score", nullable = false, precision = 10, scale = 2)
+    private BigDecimal activityScore = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal otherRepoScore = BigDecimal.ZERO;
+    @Column(name = "diversity_score", nullable = false, precision = 10, scale = 2)
+    private BigDecimal diversityScore = BigDecimal.ZERO;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal prIssueScore = BigDecimal.ZERO;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal reputationScore = BigDecimal.ZERO;
+    @Column(name = "impact_score", nullable = false, precision = 10, scale = 2)
+    private BigDecimal impactScore = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalScore = BigDecimal.ZERO;
 
-    // 메타
     @Column(nullable = false)
     private LocalDateTime calculatedAt;
 
@@ -126,24 +118,15 @@ public class GithubUserStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
-    public void updateScore(BigDecimal totalScore) {
-        this.totalScore = totalScore;
-    }
-
-    public void updateDetailedScore(
-        BigDecimal mainRepoScore,
-        BigDecimal otherRepoScore,
-        BigDecimal prIssueScore,
-        BigDecimal reputationScore
+    public void updateScores(
+        BigDecimal activityScore,
+        BigDecimal diversityScore,
+        BigDecimal impactScore
     ) {
-        this.mainRepoScore = mainRepoScore;
-        this.otherRepoScore = otherRepoScore;
-        this.prIssueScore = prIssueScore;
-        this.reputationScore = reputationScore;
-        this.totalScore = mainRepoScore
-            .add(otherRepoScore)
-            .add(prIssueScore)
-            .add(reputationScore);
+        this.activityScore = activityScore;
+        this.diversityScore = diversityScore;
+        this.impactScore = impactScore;
+        this.totalScore = activityScore.add(diversityScore).add(impactScore);
     }
 
     public void updateDataPeriod(LocalDate start, LocalDate end) {
