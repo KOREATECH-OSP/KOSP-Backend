@@ -20,6 +20,7 @@ import io.swkoreatech.kosp.harvester.client.dto.UserIssuesResponse.PageInfo;
 import io.swkoreatech.kosp.harvester.collection.document.IssueDocument;
 import io.swkoreatech.kosp.harvester.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
+import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +35,7 @@ public class IssueMiningStep implements StepProvider {
     private final PlatformTransactionManager transactionManager;
     private final GithubGraphQLClient graphQLClient;
     private final IssueDocumentRepository issueDocumentRepository;
+    private final StepCompletionListener stepCompletionListener;
 
     @Override
     public Step getStep() {
@@ -42,6 +44,7 @@ public class IssueMiningStep implements StepProvider {
                 execute(chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(stepCompletionListener)
             .build();
     }
 

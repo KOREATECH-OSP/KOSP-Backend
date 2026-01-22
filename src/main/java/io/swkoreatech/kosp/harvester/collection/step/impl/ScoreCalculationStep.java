@@ -20,6 +20,7 @@ import io.swkoreatech.kosp.harvester.collection.repository.CommitDocumentReposit
 import io.swkoreatech.kosp.harvester.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
+import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
 import io.swkoreatech.kosp.harvester.statistics.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.statistics.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.harvester.trigger.ChallengeCheckPublisher;
@@ -48,6 +49,7 @@ public class ScoreCalculationStep implements StepProvider {
     private final ContributedRepoDocumentRepository repoRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
     private final ChallengeCheckPublisher challengeCheckPublisher;
+    private final StepCompletionListener stepCompletionListener;
 
     @Override
     public Step getStep() {
@@ -57,6 +59,7 @@ public class ScoreCalculationStep implements StepProvider {
                 execute(userId);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(stepCompletionListener)
             .build();
     }
 

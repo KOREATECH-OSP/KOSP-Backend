@@ -13,6 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import io.swkoreatech.kosp.harvester.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.harvester.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
+import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
 import io.swkoreatech.kosp.harvester.user.GithubUser;
 import io.swkoreatech.kosp.harvester.user.GithubUserRepository;
 import io.swkoreatech.kosp.harvester.user.User;
@@ -32,6 +33,7 @@ public class CleanupStep implements StepProvider {
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
     private final CollectionMetadataRepository metadataRepository;
+    private final StepCompletionListener stepCompletionListener;
 
     @Override
     public Step getStep() {
@@ -41,6 +43,7 @@ public class CleanupStep implements StepProvider {
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(stepCompletionListener)
             .build();
     }
 

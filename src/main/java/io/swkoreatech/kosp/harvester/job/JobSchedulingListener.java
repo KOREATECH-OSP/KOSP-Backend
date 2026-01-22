@@ -30,7 +30,7 @@ public class JobSchedulingListener implements JobExecutionListener {
     @Override
     public void beforeJob(JobExecution jobExecution) {
         Long userId = jobExecution.getJobParameters().getLong("userId");
-        log.info("Starting job for user {}", userId);
+        log.info("========== [User {}] JOB STARTED ==========", userId);
     }
 
     @Override
@@ -38,10 +38,11 @@ public class JobSchedulingListener implements JobExecutionListener {
         Long userId = jobExecution.getJobParameters().getLong("userId");
         BatchStatus status = jobExecution.getStatus();
 
+        log.info("========== [User {}] JOB FINISHED - {} ==========", userId, status);
+
         Instant nextRun = resolveNextRunTime(status);
 
-        log.info("Job completed for user {} with status {}. Next run scheduled at {}",
-            userId, status, nextRun);
+        log.info("[User {}] Next run scheduled at {}", userId, nextRun);
 
         taskScheduler.schedule(
             () -> priorityJobLauncher.submit(userId, Priority.LOW),
