@@ -19,6 +19,7 @@ import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
 
 @Tag(name = "Admin - Policy", description = "관리자 전용 정책 관리 API")
@@ -33,7 +34,7 @@ public interface AdminPolicyApi {
     @Operation(summary = "정책 단일 조회", description = "특정 정책의 상세 정보를 조회합니다.")
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{policyName}")
-    ResponseEntity<PolicyResponse> getPolicy(@Parameter(description = "정책 이름") @PathVariable String policyName);
+    ResponseEntity<PolicyDetailResponse> getPolicy(@Parameter(description = "정책 이름") @PathVariable String policyName);
 
     @Operation(summary = "정책 생성", description = "새로운 정책을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공")
