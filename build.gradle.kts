@@ -38,6 +38,9 @@ dependencies {
     // Batch
     implementation(libs.spring.boot.starter.batch)
     
+    // Security (for encryption)
+    implementation(libs.spring.security.crypto)
+    
     // Database
     runtimeOnly(libs.mysql.connector.j)
     
