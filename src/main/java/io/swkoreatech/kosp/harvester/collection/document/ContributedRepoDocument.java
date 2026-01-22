@@ -23,6 +23,7 @@ public class ContributedRepoDocument {
     private String repositoryName;
     private String repositoryOwner;
     private String fullName;
+    private String description;
 
     private Boolean isOwner;
     private Boolean isFork;
