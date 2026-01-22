@@ -58,14 +58,20 @@ public class UserPullRequestsResponse {
         private int deletions;
         private int changedFiles;
         private boolean merged;
+        private boolean isCrossRepository;
         private Instant mergedAt;
         private Instant createdAt;
         private Instant closedAt;
         private Commits commits;
+        private ClosingIssuesReferences closingIssuesReferences;
         private Repository repository;
 
         public int getCommitsCount() {
             return commits != null ? commits.getTotalCount() : 0;
+        }
+
+        public int getClosedIssuesCount() {
+            return closingIssuesReferences != null ? closingIssuesReferences.getTotalCount() : 0;
         }
 
         public String getRepoName() {
@@ -80,6 +86,10 @@ public class UserPullRequestsResponse {
         public String getRepoFullName() {
             return repository != null ? repository.getNameWithOwner() : null;
         }
+
+        public int getRepoStarCount() {
+            return repository != null ? repository.getStargazerCount() : 0;
+        }
     }
 
     @Getter
@@ -90,10 +100,17 @@ public class UserPullRequestsResponse {
 
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class ClosingIssuesReferences {
+        private int totalCount;
+    }
+
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Repository {
         private String name;
         private Owner owner;
         private String nameWithOwner;
+        private int stargazerCount;
     }
 
     @Getter

@@ -29,8 +29,11 @@ public class PullRequestDocument {
     private Integer deletions;
     private Integer changedFiles;
     private Integer commitsCount;
+    private Integer repoStarCount;
+    private Integer closedIssuesCount;
 
     private Boolean merged;
+    private Boolean isCrossRepository;
     private Instant mergedAt;
     private Instant createdAt;
     private Instant closedAt;
