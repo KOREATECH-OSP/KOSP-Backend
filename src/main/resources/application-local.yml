@@ -1,0 +1,44 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:kosp}?useSSL=false&useUnicode=true&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:password}
+
+  data:
+    redis:
+      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST:localhost}
+      password: ${REDIS_PASSWORD:}
+      lettuce:
+        pool:
+          max-active: 20
+          max-idle: 10
+          min-idle: 5
+          max-wait: 2000ms
+    mongodb:
+      host: ${MONGODB_HOST:localhost}
+      port: ${MONGODB_PORT:27017}
+      database: ${MONGODB_DATABASE:kosp}
+      authentication-database: ${MONGODB_AUTHENTICATION_DATABASE:admin}
+      auto-index-creation: false
+      uuid-representation: standard
+
+logging:
+  level:
+    io.swkoreatech.kosp.harvester: DEBUG
+    org.springframework.batch: DEBUG
+    org:
+      springframework:
+        transaction: DEBUG
+        orm.jpa.JpaTransactionManager: DEBUG
+      hibernate:
+        engine:
+          transaction:
+            internal: DEBUG
+        type:
+          descriptor:
+            sql: trace
