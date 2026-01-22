@@ -1,7 +1,12 @@
 package io.swkoreatech.kosp.domain.report.service;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.report.dto.request.ReportRequest;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
@@ -10,8 +15,6 @@ import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class ReportService {
 
     private final ReportRepository reportRepository;
     private final ArticleRepository articleRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void reportArticle(User reporter, Long articleId, ReportRequest request) {
@@ -43,5 +47,8 @@ public class ReportService {
             .build();
 
         reportRepository.save(report);
+
+        Long authorId = article.getAuthor().getId();
+        eventPublisher.publishEvent(NotificationEvent.articleReported(authorId, articleId));
     }
 }
