@@ -39,4 +39,15 @@ public class ContributedRepoDocument {
 
     private Instant lastContributedAt;
     private Instant collectedAt;
+
+    public void updateUserStats(int commitCount, int prCount, int issueCount, Instant lastContributed) {
+        this.userCommitCount = commitCount;
+        this.userPrCount = prCount;
+        this.userIssueCount = issueCount;
+        this.lastContributedAt = lastContributed;
+    }
+
+    public String getRepoFullName() {
+        return repositoryOwner + "/" + repositoryName;
+    }
 }
