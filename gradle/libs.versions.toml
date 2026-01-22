@@ -9,6 +9,7 @@ spring-boot-starter-data-mongodb = { module = "org.springframework.boot:spring-b
 spring-boot-starter-webflux = { module = "org.springframework.boot:spring-boot-starter-webflux" }
 spring-boot-starter-actuator = { module = "org.springframework.boot:spring-boot-starter-actuator" }
 spring-boot-starter-batch = { module = "org.springframework.boot:spring-boot-starter-batch" }
+spring-security-crypto = { module = "org.springframework.security:spring-security-crypto" }
 
 mysql-connector-j = { module = "com.mysql:mysql-connector-j" }
 h2database = { module = "com.h2database:h2" }

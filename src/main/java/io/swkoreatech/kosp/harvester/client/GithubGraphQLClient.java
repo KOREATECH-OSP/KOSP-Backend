@@ -26,6 +26,7 @@ public class GithubGraphQLClient {
     private String userBasicInfoPaginatedQuery;
     private String userContributionsQuery;
     private String repositoryInfoQuery;
+    private String contributedReposQuery;
 
     public GithubGraphQLClient(
         @Value("${github.api.graphql-url}") String graphqlUrl,
@@ -42,9 +43,8 @@ public class GithubGraphQLClient {
     private void loadQueries() {
         try {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
-            userBasicInfoPaginatedQuery = loadQuery("classpath:graphql/user-basic-info-paginated.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
-            repositoryInfoQuery = loadQuery("classpath:graphql/repository-info.graphql");
+            contributedReposQuery = loadQuery("classpath:graphql/contributed-repositories.graphql");
             log.info("GraphQL queries loaded successfully");
         } catch (IOException e) {
             log.warn("GraphQL queries not found. They will be loaded on demand: {}", e.getMessage());
@@ -142,5 +142,23 @@ public class GithubGraphQLClient {
             Map.of("login", login, "cursor", cursor);
         
         return query(userBasicInfoPaginatedQuery, variables, token, responseType);
+    }
+
+    public <T> Mono<T> getContributedRepos(
+        String login,
+        String from,
+        String to,
+        String token,
+        Class<T> responseType
+    ) {
+        if (contributedReposQuery == null) {
+            return Mono.error(new IllegalStateException("contributedReposQuery not loaded"));
+        }
+        Map<String, Object> variables = Map.of(
+            "login", login,
+            "from", from,
+            "to", to
+        );
+        return query(contributedReposQuery, variables, token, responseType);
     }
 }

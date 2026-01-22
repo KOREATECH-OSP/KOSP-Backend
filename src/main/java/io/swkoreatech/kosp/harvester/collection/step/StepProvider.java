@@ -7,6 +7,4 @@ public interface StepProvider {
     Step getStep();
 
     String getStepName();
-
-    int getOrder();
 }
