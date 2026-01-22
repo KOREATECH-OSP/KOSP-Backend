@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -17,6 +18,7 @@ import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepositor
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
 import io.swkoreatech.kosp.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +31,7 @@ public class ChallengeEvaluator {
     private final ChallengeRepository challengeRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -119,7 +122,8 @@ public class ChallengeEvaluator {
         log.info("User {} achieved challenge: {} (+{} points)", 
             user.getId(), challenge.getName(), challenge.getPoint());
 
-        user.addPoint(challenge.getPoint());
+        String reason = String.format("챌린지 달성: %s", challenge.getName());
+        eventPublisher.publishEvent(PointChangeEvent.fromChallenge(user, challenge.getPoint(), reason));
 
         ChallengeHistory history = ChallengeHistory.builder()
             .user(user)

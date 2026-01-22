@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.domain.challenge.service;
 
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +22,7 @@ import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
@@ -195,25 +199,75 @@ public class ChallengeService {
     }
 
     public SpelVariableResponse getSpelVariables() {
-        List<SpelVariableResponse.VariableInfo> variables = List.of(
-            new SpelVariableResponse.VariableInfo("#activity['commits']", "총 커밋 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['pullRequests']", "총 PR 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['issues']", "총 이슈 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['stars']", "받은 스타 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['repositories']", "기여한 레포지토리 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['followers']", "팔로워 수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['contributionDays']", "기여 일수", "Integer"),
-            new SpelVariableResponse.VariableInfo("#activity['streak']", "연속 기여 일수", "Integer")
-        );
+        List<SpelVariableResponse.VariableInfo> variables = buildVariablesFromEntity();
 
         List<SpelVariableResponse.ExampleExpression> examples = List.of(
-            new SpelVariableResponse.ExampleExpression("#activity['commits'] >= 100", "커밋 100회 이상"),
-            new SpelVariableResponse.ExampleExpression("#activity['pullRequests'] >= 10", "PR 10개 이상"),
-            new SpelVariableResponse.ExampleExpression("#activity['stars'] >= 50", "스타 50개 이상"),
-            new SpelVariableResponse.ExampleExpression("#activity['streak'] >= 7", "7일 연속 기여"),
-            new SpelVariableResponse.ExampleExpression("#activity['commits'] >= 50 && #activity['pullRequests'] >= 5", "커밋 50회 이상 AND PR 5개 이상")
+            new SpelVariableResponse.ExampleExpression("totalCommits >= 100", "커밋 100회 이상"),
+            new SpelVariableResponse.ExampleExpression("totalPrs >= 10", "PR 10개 이상"),
+            new SpelVariableResponse.ExampleExpression("totalStarsReceived >= 50", "스타 50개 이상"),
+            new SpelVariableResponse.ExampleExpression("contributedReposCount >= 5", "기여 레포 5개 이상"),
+            new SpelVariableResponse.ExampleExpression("totalCommits >= 50 && totalPrs >= 5", "커밋 50회 AND PR 5개 이상")
         );
 
         return new SpelVariableResponse(variables, examples);
+    }
+
+    private List<SpelVariableResponse.VariableInfo> buildVariablesFromEntity() {
+        List<SpelVariableResponse.VariableInfo> variables = new ArrayList<>();
+        
+        Map<String, String> descriptions = Map.ofEntries(
+            Map.entry("totalCommits", "총 커밋 수"),
+            Map.entry("totalLines", "총 라인 수"),
+            Map.entry("totalAdditions", "총 추가 라인 수"),
+            Map.entry("totalDeletions", "총 삭제 라인 수"),
+            Map.entry("totalPrs", "총 PR 수"),
+            Map.entry("totalIssues", "총 이슈 수"),
+            Map.entry("ownedReposCount", "소유 레포지토리 수"),
+            Map.entry("contributedReposCount", "기여 레포지토리 수"),
+            Map.entry("totalStarsReceived", "받은 스타 수"),
+            Map.entry("totalForksReceived", "받은 포크 수"),
+            Map.entry("nightCommits", "야간 커밋 수 (22시~06시)"),
+            Map.entry("dayCommits", "주간 커밋 수"),
+            Map.entry("activityScore", "활동 점수 (0~3)"),
+            Map.entry("diversityScore", "다양성 점수 (0~1)"),
+            Map.entry("impactScore", "영향력 점수 (0~5)"),
+            Map.entry("totalScore", "총 점수")
+        );
+
+        for (Field field : GithubUserStatistics.class.getDeclaredFields()) {
+            String fieldName = field.getName();
+            Class<?> fieldType = field.getType();
+            
+            if (!isSpelCompatibleType(fieldType)) {
+                continue;
+            }
+
+            String description = descriptions.getOrDefault(fieldName, fieldName);
+            String typeName = mapToSimpleTypeName(fieldType);
+            
+            variables.add(new SpelVariableResponse.VariableInfo(fieldName, description, typeName));
+        }
+        
+        return variables;
+    }
+
+    private boolean isSpelCompatibleType(Class<?> type) {
+        return type == Integer.class || type == int.class 
+            || type == Long.class || type == long.class
+            || type == BigDecimal.class
+            || type == Double.class || type == double.class;
+    }
+
+    private String mapToSimpleTypeName(Class<?> type) {
+        if (type == Integer.class || type == int.class) {
+            return "Integer";
+        }
+        if (type == Long.class || type == long.class) {
+            return "Long";
+        }
+        if (type == BigDecimal.class || type == Double.class || type == double.class) {
+            return "Decimal";
+        }
+        return type.getSimpleName();
     }
 }
