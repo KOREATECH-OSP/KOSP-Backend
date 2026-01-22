@@ -8,6 +8,7 @@ import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
 import io.swkoreatech.kosp.domain.admin.challenge.api.AdminChallengeApi;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
 import io.swkoreatech.kosp.domain.challenge.service.ChallengeService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +53,12 @@ public class AdminChallengeController implements AdminChallengeApi {
     public ResponseEntity<Void> deleteChallenge(Long challengeId) {
         challengeService.deleteChallenge(challengeId);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(name = "admin:challenges:read", description = "SpEL 변수 목록 조회")
+    public ResponseEntity<SpelVariableResponse> getSpelVariables() {
+        SpelVariableResponse response = challengeService.getSpelVariables();
+        return ResponseEntity.ok(response);
     }
 }
