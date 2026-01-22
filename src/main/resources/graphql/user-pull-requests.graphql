@@ -16,7 +16,11 @@ query GetUserPullRequests($login: String!, $after: String) {
         mergedAt
         createdAt
         closedAt
+        isCrossRepository
         commits {
+          totalCount
+        }
+        closingIssuesReferences {
           totalCount
         }
         repository {
@@ -25,6 +29,7 @@ query GetUserPullRequests($login: String!, $after: String) {
             login
           }
           nameWithOwner
+          stargazerCount
         }
       }
     }
