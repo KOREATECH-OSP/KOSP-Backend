@@ -2,20 +2,17 @@ package io.swkoreatech.kosp.domain.upload.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import io.swkoreatech.kosp.domain.upload.client.S3StorageClient;
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadResponse;
+import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,24 +21,15 @@ public class UploadService {
     private final S3StorageClient s3Client;
     private final Clock clock;
 
-    public UploadResponse upload(List<MultipartFile> files) {
-        List<String> urls = files.stream()
-            .map(this::uploadSingle)
-            .toList();
-        return UploadResponse.of(urls);
-    }
-
-    private String uploadSingle(MultipartFile file) {
-        String filePath = generateFilePath(file.getOriginalFilename());
-        return s3Client.uploadFile(filePath, file);
+    public UploadUrlResponse getPresignedUrl(UploadUrlRequest request) {
+        String filePath = generateFilePath(request.fileName());
+        return s3Client.getPresignedUrl(filePath, request.contentLength(), request.contentType());
     }
 
     private String generateFilePath(String originalFilename) {
         LocalDateTime now = LocalDateTime.now(clock);
-        String ext = getExtension(originalFilename);
-        String name = originalFilename != null && originalFilename.contains(".")
-            ? originalFilename.substring(0, originalFilename.lastIndexOf("."))
-            : originalFilename;
+        String extension = getExtension(originalFilename);
+        String nameWithoutExtension = extractNameWithoutExtension(originalFilename);
 
         StringJoiner path = new StringJoiner("/");
         path.add("upload")
@@ -49,9 +37,19 @@ public class UploadService {
             .add(String.valueOf(now.getMonthValue()))
             .add(String.valueOf(now.getDayOfMonth()))
             .add(UUID.randomUUID().toString())
-            .add(name);
+            .add(nameWithoutExtension);
 
-        return path + ext;
+        return path + extension;
+    }
+
+    private String extractNameWithoutExtension(String filename) {
+        if (filename == null) {
+            return "file";
+        }
+        if (!filename.contains(".")) {
+            return filename;
+        }
+        return filename.substring(0, filename.lastIndexOf("."));
     }
 
     private String getExtension(String filename) {

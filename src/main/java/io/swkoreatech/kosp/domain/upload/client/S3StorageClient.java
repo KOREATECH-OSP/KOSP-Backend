@@ -2,11 +2,15 @@ package io.swkoreatech.kosp.domain.upload.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;
@@ -15,23 +19,56 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 @Slf4j
 @Component
 public class S3StorageClient {
 
+    private static final int URL_EXPIRATION_MINUTES = 10;
+
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
     private final String bucketName;
     private final String domainUrlPrefix;
+    private final Clock clock;
 
     public S3StorageClient(
         S3Client s3Client,
+        S3Presigner s3Presigner,
         @Value("${aws.s3.bucket:kosp-bucket}") String bucketName,
-        @Value("${aws.region:ap-northeast-2}") String region
+        @Value("${aws.region:ap-northeast-2}") String region,
+        Clock clock
     ) {
         this.s3Client = s3Client;
+        this.s3Presigner = s3Presigner;
         this.bucketName = bucketName;
         this.domainUrlPrefix = String.format("https://%s.s3.%s.amazonaws.com/", bucketName, region);
+        this.clock = clock;
+    }
+
+    public UploadUrlResponse getPresignedUrl(String uploadFilePath, Long contentLength, String contentType) {
+        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(URL_EXPIRATION_MINUTES))
+            .putObjectRequest(builder -> builder
+                .bucket(bucketName)
+                .key(uploadFilePath)
+                .contentLength(contentLength)
+                .contentType(contentType)
+                .acl(ObjectCannedACL.PUBLIC_READ)
+                .build()
+            )
+            .build();
+
+        PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(presignRequest);
+
+        return new UploadUrlResponse(
+            presignedRequest.url().toExternalForm(),
+            domainUrlPrefix + uploadFilePath,
+            LocalDateTime.now(clock).plusMinutes(URL_EXPIRATION_MINUTES)
+        );
     }
 
     public String uploadFile(String uploadFilePath, MultipartFile file) {
