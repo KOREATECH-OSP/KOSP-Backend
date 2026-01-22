@@ -1,21 +1,21 @@
 package io.swkoreatech.kosp.harvester.launcher;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Instant;
+import java.util.concurrent.PriorityBlockingQueue;
+
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.util.concurrent.PriorityBlockingQueue;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class PriorityJobLauncher {
     
     private static final String JOB_NAME = "githubCollectionJob";
@@ -25,6 +25,16 @@ public class PriorityJobLauncher {
     private final Job githubCollectionJob;
     
     private final PriorityBlockingQueue<JobLaunchRequest> queue = new PriorityBlockingQueue<>();
+    
+    public PriorityJobLauncher(
+        JobLauncher jobLauncher,
+        JobExplorer jobExplorer,
+        @Lazy Job githubCollectionJob
+    ) {
+        this.jobLauncher = jobLauncher;
+        this.jobExplorer = jobExplorer;
+        this.githubCollectionJob = githubCollectionJob;
+    }
     
     public void submit(Long userId, Priority priority) {
         if (isJobRunning(userId)) {
