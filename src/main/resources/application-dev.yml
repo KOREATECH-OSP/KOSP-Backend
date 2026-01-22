@@ -1,6 +1,19 @@
 spring:
   config:
     import: optional:file:.env[.properties]
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: validate
+  batch:
+    jdbc:
+      initialize-schema: always
+    job:
+      enabled: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,18 +42,26 @@ spring:
       auto-index-creation: false
       uuid-representation: standard
 
+encryption:
+  password: ${ENCRYPTION_PASSWORD}
+  salt: ${ENCRYPTION_SALT}
+
+github:
+  api:
+    base-url: https://api.github.com
+    graphql-url: https://api.github.com/graphql
+    rate-limit:
+      threshold: 100
+
+harvester:
+  redis:
+    stream:
+      key: github:collection:trigger
+      consumer-group: harvester-group
+      consumer-name: ${HOSTNAME:harvester-1}
+
 logging:
   level:
+    root: INFO
     io.swkoreatech.kosp.harvester: DEBUG
-    org.springframework.batch: DEBUG
-    org:
-      springframework:
-        transaction: DEBUG
-        orm.jpa.JpaTransactionManager: DEBUG
-      hibernate:
-        engine:
-          transaction:
-            internal: DEBUG
-        type:
-          descriptor:
-            sql: trace
+    org.springframework.batch: INFO
