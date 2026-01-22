@@ -1,7 +1,12 @@
 package io.swkoreatech.kosp.harvester.launcher;
 
 import java.time.Instant;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import jakarta.annotation.PreDestroy;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
@@ -25,6 +30,8 @@ public class PriorityJobLauncher {
     private final Job githubCollectionJob;
     
     private final PriorityBlockingQueue<JobLaunchRequest> queue = new PriorityBlockingQueue<>();
+    private final ExecutorService jobExecutor = Executors.newSingleThreadExecutor();
+    private final AtomicBoolean jobRunning = new AtomicBoolean(false);
     
     public PriorityJobLauncher(
         JobLauncher jobLauncher,
@@ -53,6 +60,10 @@ public class PriorityJobLauncher {
     
     @Scheduled(fixedDelay = 100)
     public void processQueue() {
+        if (jobRunning.get()) {
+            return;
+        }
+        
         JobLaunchRequest request = queue.poll();
         if (request == null) {
             return;
@@ -63,6 +74,11 @@ public class PriorityJobLauncher {
             return;
         }
         
+        jobRunning.set(true);
+        jobExecutor.submit(() -> executeJob(request));
+    }
+    
+    private void executeJob(JobLaunchRequest request) {
         try {
             JobParameters params = new JobParametersBuilder()
                 .addLong("userId", request.userId())
@@ -71,9 +87,16 @@ public class PriorityJobLauncher {
             
             log.info("Launching job for user {} (priority: {})", request.userId(), request.priority());
             jobLauncher.run(githubCollectionJob, params);
-        } catch (Exception e) {
-            log.error("Failed to launch job for user {}", request.userId(), e);
+        } catch (Exception exception) {
+            log.error("Failed to launch job for user {}", request.userId(), exception);
+        } finally {
+            jobRunning.set(false);
         }
+    }
+    
+    @PreDestroy
+    public void shutdown() {
+        jobExecutor.shutdown();
     }
     
     private boolean isJobRunning(Long userId) {
