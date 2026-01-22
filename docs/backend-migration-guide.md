@@ -171,7 +171,90 @@ Backend에서 상세 조회 API가 필요하면 아래 컬렉션을 조회하세
 
 ---
 
-## 6. 적용 순서
+## 6. 챌린지 달성 확인 (Redis Stream)
+
+### 6.1 개요
+
+Harvester가 사용자의 통계 집계 및 점수 계산을 완료하면, Redis Stream을 통해 Backend에 챌린지 확인 요청을 발행합니다.
+
+**Flow:**
+```
+[Harvester] 점수 계산 완료 → Redis Stream 발행 → [Backend] 챌린지 달성 확인 → 포인트 지급
+```
+
+### 6.2 Redis Stream 설정
+
+**Stream Key:** `kosp:challenge-check` (설정 가능: `harvester.redis.challenge-check-stream`)
+
+**Message Format:**
+```json
+{
+  "userId": "123",
+  "githubId": "456789",
+  "timestamp": "1706000000000"
+}
+```
+
+### 6.3 Backend 구현 요구사항
+
+1. **Redis Stream Listener 추가**
+   - Stream: `kosp:challenge-check`
+   - Consumer Group 생성 필요
+
+2. **ChallengeCheckListener 구현**
+```java
+@Component
+@RequiredArgsConstructor
+public class ChallengeCheckListener implements StreamListener<String, MapRecord<String, String, String>> {
+    
+    private final ChallengeService challengeService;
+    
+    @Override
+    public void onMessage(MapRecord<String, String, String> message) {
+        Long userId = Long.parseLong(message.getValue().get("userId"));
+        String githubId = message.getValue().get("githubId");
+        
+        // 챌린지 달성 확인 및 포인트 지급
+        challengeService.checkAndRewardChallenges(userId, githubId);
+    }
+}
+```
+
+3. **ChallengeService 구현**
+```java
+public void checkAndRewardChallenges(Long userId, String githubId) {
+    GithubUserStatistics stats = statisticsRepository.findByGithubId(githubId);
+    List<Challenge> allChallenges = challengeRepository.findAll();
+    
+    for (Challenge challenge : allChallenges) {
+        if (isAchieved(stats, challenge) && !alreadyRewarded(userId, challenge)) {
+            rewardPoints(userId, challenge);
+        }
+    }
+}
+```
+
+### 6.4 챌린지 조건 평가 예시
+
+`docs/github-challenges.md` 기준:
+
+```java
+private boolean isAchieved(GithubUserStatistics stats, Challenge challenge) {
+    return switch (challenge.getConditionField()) {
+        case "totalCommitCount" -> stats.getTotalCommits() >= challenge.getThreshold();
+        case "totalPrCount" -> stats.getTotalPrs() >= challenge.getThreshold();
+        case "totalIssueCount" -> stats.getTotalIssues() >= challenge.getThreshold();
+        case "totalAdditions" -> stats.getTotalAdditions() >= challenge.getThreshold();
+        case "contributedRepoCount" -> stats.getContributedReposCount() >= challenge.getThreshold();
+        case "userStarCount" -> stats.getTotalStarsReceived() >= challenge.getThreshold();
+        default -> false;
+    };
+}
+```
+
+---
+
+## 7. 적용 순서
 
 1. DB 마이그레이션 실행 (테이블 변경 + 신규 테이블)
 2. Backend Entity 수정
