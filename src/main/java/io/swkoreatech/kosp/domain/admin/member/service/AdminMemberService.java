@@ -3,6 +3,7 @@ package io.swkoreatech.kosp.domain.admin.member.service;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,12 +11,15 @@ import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListRespons
 import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
+import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -23,6 +27,7 @@ public class AdminMemberService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void updateUserRoles(Long userId, Set<String> roleNames) {
@@ -100,6 +105,19 @@ public class AdminMemberService {
         if (request.profileImageUrl() != null && user.getGithubUser() != null) {
             user.getGithubUser().updateAvatarUrl(request.profileImageUrl());
         }
+    }
+
+    public void triggerGithubCollection(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+
+        if (user.getGithubUser() == null) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
+        }
+
+        String githubLogin = user.getGithubUser().getGithubLogin();
+        eventPublisher.publishEvent(new UserSignupEvent(this, userId, githubLogin));
+        log.info("Triggered GitHub collection for user {} (GitHub: {})", userId, githubLogin);
     }
 
 }
