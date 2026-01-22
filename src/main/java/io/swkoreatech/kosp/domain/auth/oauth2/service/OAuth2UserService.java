@@ -15,6 +15,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.security.crypto.encrypt.TextEncryptor;
+
 import io.swkoreatech.kosp.domain.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
@@ -28,6 +30,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
+    private final TextEncryptor textEncryptor;
 
     @Override
     @Transactional
@@ -64,11 +67,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
             .or(() -> githubUserRepository.findByGithubId(githubId));
 
         existingGithubUser.ifPresent(githubUser -> {
+            String encryptedToken = textEncryptor.encrypt(token);
             githubUser.updateProfile(
                 oAuth2User.getAttribute("login"),
                 oAuth2User.getAttribute("name"),
                 oAuth2User.getAttribute("avatar_url"),
-                token
+                encryptedToken
             );
             githubUserRepository.save(githubUser);
         });
