@@ -11,19 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import io.swkoreatech.kosp.domain.upload.client.S3StorageClient;
-import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
-import io.swkoreatech.kosp.domain.upload.dto.response.FileResponse;
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadFileResponse;
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadFilesResponse;
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
-import io.swkoreatech.kosp.domain.upload.event.FileUploadEvent;
-import io.swkoreatech.kosp.domain.upload.model.Attachment;
-import io.swkoreatech.kosp.domain.upload.model.ImageUploadDomain;
-import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 
 @Slf4j
 @Service
@@ -31,66 +21,37 @@ import org.springframework.context.ApplicationEventPublisher;
 @Transactional(readOnly = true)
 public class UploadService {
 
-    private final AttachmentRepository attachmentRepository;
-    private final ApplicationEventPublisher eventPublisher;
     private final S3StorageClient s3Client;
     private final Clock clock;
 
-    public UploadUrlResponse getPresignedUrl(ImageUploadDomain domain, UploadUrlRequest request) {
-        String filePath = generateFilePath(domain.name(), request.fileName());
-        return s3Client.getPresignedUrl(filePath);
+    public UploadResponse upload(List<MultipartFile> files) {
+        List<String> urls = files.stream()
+            .map(this::uploadSingle)
+            .toList();
+        return UploadResponse.of(urls);
     }
 
-    public UploadFileResponse uploadFile(ImageUploadDomain domain, MultipartFile file) {
-        String filePath = generateFilePath(domain.name(), file.getOriginalFilename());
+    private String uploadSingle(MultipartFile file) {
+        String filePath = generateFilePath(file.getOriginalFilename());
         return s3Client.uploadFile(filePath, file);
     }
 
-    public UploadFilesResponse uploadFiles(ImageUploadDomain domain, List<MultipartFile> files) {
-        List<String> urls = files.stream()
-            .map(file -> uploadFile(domain, file).fileUrl())
-            .toList();
-        return new UploadFilesResponse(urls);
-    }
-
-    @Transactional
-    public FileResponse uploadFileWithAttachment(MultipartFile file, User user) {
-        String storedFileName = UUID.randomUUID().toString() + getExtension(file.getOriginalFilename());
-
-        eventPublisher.publishEvent(new FileUploadEvent(file, storedFileName));
-
-        Attachment attachment = Attachment.builder()
-            .originalFileName(file.getOriginalFilename())
-            .storedFileName(storedFileName)
-            .fileSize(file.getSize())
-            .contentType(file.getContentType())
-            .url(s3Client.generateUrl(storedFileName))
-            .uploadedBy(user)
-            .uploadedAt(LocalDateTime.now(clock))
-            .build();
-
-        attachmentRepository.save(attachment);
-
-        return FileResponse.from(attachment);
-    }
-
-    private String generateFilePath(String domainName, String fileNameExt) {
+    private String generateFilePath(String originalFilename) {
         LocalDateTime now = LocalDateTime.now(clock);
-        StringJoiner pathBuilder = new StringJoiner("/");
-        String fileExt = getExtension(fileNameExt);
-        String fileName = fileNameExt.contains(".") 
-            ? fileNameExt.substring(0, fileNameExt.lastIndexOf(".")) 
-            : fileNameExt;
+        String ext = getExtension(originalFilename);
+        String name = originalFilename != null && originalFilename.contains(".")
+            ? originalFilename.substring(0, originalFilename.lastIndexOf("."))
+            : originalFilename;
 
-        pathBuilder.add("upload")
-            .add(domainName.toLowerCase())
+        StringJoiner path = new StringJoiner("/");
+        path.add("upload")
             .add(String.valueOf(now.getYear()))
             .add(String.valueOf(now.getMonthValue()))
             .add(String.valueOf(now.getDayOfMonth()))
             .add(UUID.randomUUID().toString())
-            .add(fileName);
+            .add(name);
 
-        return pathBuilder + fileExt;
+        return path + ext;
     }
 
     private String getExtension(String filename) {
