@@ -91,10 +91,11 @@ public class IssueMiningStep implements StepProvider {
                 break;
             }
 
-            List<IssueNode> issues = response.getData().getIssues();
+            UserIssuesResponse data = response.getDataAs(UserIssuesResponse.class);
+            List<IssueNode> issues = data.getIssues();
             saved += saveIssues(userId, issues, now);
 
-            PageInfo pageInfo = response.getData().getPageInfo();
+            PageInfo pageInfo = data.getPageInfo();
             if (pageInfo == null || !pageInfo.isHasNextPage()) {
                 break;
             }
