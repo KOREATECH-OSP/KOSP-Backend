@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
 import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
@@ -53,4 +54,9 @@ public interface AdminChallengeApi {
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/{challengeId}")
     ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId);
+
+    @Operation(summary = "SpEL 변수 목록 조회", description = "챌린지 조건 작성 시 사용 가능한 SpEL 변수 목록과 예제를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/spel-variables")
+    ResponseEntity<SpelVariableResponse> getSpelVariables();
 }

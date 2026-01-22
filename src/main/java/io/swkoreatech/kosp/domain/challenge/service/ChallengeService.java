@@ -14,6 +14,7 @@ import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
 import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
 import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
@@ -191,5 +192,28 @@ public class ChallengeService {
             return 0.0;
         }
         return (double) completedCount / totalChallenges * 100.0;
+    }
+
+    public SpelVariableResponse getSpelVariables() {
+        List<SpelVariableResponse.VariableInfo> variables = List.of(
+            new SpelVariableResponse.VariableInfo("#activity['commits']", "총 커밋 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['pullRequests']", "총 PR 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['issues']", "총 이슈 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['stars']", "받은 스타 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['repositories']", "기여한 레포지토리 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['followers']", "팔로워 수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['contributionDays']", "기여 일수", "Integer"),
+            new SpelVariableResponse.VariableInfo("#activity['streak']", "연속 기여 일수", "Integer")
+        );
+
+        List<SpelVariableResponse.ExampleExpression> examples = List.of(
+            new SpelVariableResponse.ExampleExpression("#activity['commits'] >= 100", "커밋 100회 이상"),
+            new SpelVariableResponse.ExampleExpression("#activity['pullRequests'] >= 10", "PR 10개 이상"),
+            new SpelVariableResponse.ExampleExpression("#activity['stars'] >= 50", "스타 50개 이상"),
+            new SpelVariableResponse.ExampleExpression("#activity['streak'] >= 7", "7일 연속 기여"),
+            new SpelVariableResponse.ExampleExpression("#activity['commits'] >= 50 && #activity['pullRequests'] >= 5", "커밋 50회 이상 AND PR 5개 이상")
+        );
+
+        return new SpelVariableResponse(variables, examples);
     }
 }
