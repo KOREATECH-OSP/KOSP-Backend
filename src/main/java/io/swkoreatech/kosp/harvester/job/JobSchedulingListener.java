@@ -9,6 +9,7 @@ import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.harvester.client.RateLimitManager;
 import io.swkoreatech.kosp.harvester.launcher.Priority;
 import io.swkoreatech.kosp.harvester.launcher.PriorityJobLauncher;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +20,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JobSchedulingListener implements JobExecutionListener {
 
-    private static final Duration SUCCESS_INTERVAL = Duration.ofHours(2);
-    private static final Duration FAILURE_INTERVAL = Duration.ofHours(1);
+    private static final Duration FAILURE_RETRY_DELAY = Duration.ofMinutes(30);
+    private static final Duration BUFFER_AFTER_RESET = Duration.ofMinutes(5);
 
     private final TaskScheduler taskScheduler;
     private final PriorityJobLauncher priorityJobLauncher;
+    private final RateLimitManager rateLimitManager;
 
     @Override
     public void beforeJob(JobExecution jobExecution) {
@@ -36,8 +38,7 @@ public class JobSchedulingListener implements JobExecutionListener {
         Long userId = jobExecution.getJobParameters().getLong("userId");
         BatchStatus status = jobExecution.getStatus();
 
-        Duration interval = resolveNextInterval(status);
-        Instant nextRun = Instant.now().plus(interval);
+        Instant nextRun = resolveNextRunTime(status);
 
         log.info("Job completed for user {} with status {}. Next run scheduled at {}",
             userId, status, nextRun);
@@ -48,10 +49,10 @@ public class JobSchedulingListener implements JobExecutionListener {
         );
     }
 
-    private Duration resolveNextInterval(BatchStatus status) {
-        if (status == BatchStatus.COMPLETED) {
-            return SUCCESS_INTERVAL;
+    private Instant resolveNextRunTime(BatchStatus status) {
+        if (status != BatchStatus.COMPLETED) {
+            return Instant.now().plus(FAILURE_RETRY_DELAY);
         }
-        return FAILURE_INTERVAL;
+        return rateLimitManager.getResetTime().plus(BUFFER_AFTER_RESET);
     }
 }

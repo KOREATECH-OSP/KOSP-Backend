@@ -99,4 +99,10 @@ public class RateLimitManager {
         log.debug("Rate limit updated from headers: remaining={}, reset={}", 
             remaining, resetDateTime);
     }
+
+    public Instant getResetTime() {
+        LocalDateTime start = windowStart.get();
+        LocalDateTime resetTime = start.plusHours(1);
+        return resetTime.atZone(ZoneId.systemDefault()).toInstant();
+    }
 }
