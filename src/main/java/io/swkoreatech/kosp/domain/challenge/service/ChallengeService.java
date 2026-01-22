@@ -36,7 +36,7 @@ public class ChallengeService {
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
     public AdminChallengeListResponse getAllChallenges() {
-        List<Challenge> challenges = challengeRepository.findAllByIsDeletedFalse();
+        List<Challenge> challenges = challengeRepository.findAll();
         List<AdminChallengeListResponse.ChallengeInfo> challengeInfos = challenges.stream()
             .map(challenge -> new AdminChallengeListResponse.ChallengeInfo(
                 challenge.getId(),
@@ -95,7 +95,7 @@ public class ChallengeService {
         Challenge challenge = challengeRepository.findById(challengeId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
 
-        challenge.delete();
+        challengeRepository.delete(challenge);
         log.info("Deleted challenge: {}", challengeId);
     }
 
@@ -182,9 +182,9 @@ public class ChallengeService {
 
     private List<Challenge> findChallengesByTier(Integer tier) {
         if (tier == null) {
-            return challengeRepository.findAllByIsDeletedFalse();
+            return challengeRepository.findAll();
         }
-        return challengeRepository.findByTierAndIsDeletedFalse(tier);
+        return challengeRepository.findByTier(tier);
     }
 
     private double calculateOverallProgress(long completedCount, long totalChallenges) {

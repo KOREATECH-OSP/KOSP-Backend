@@ -46,9 +46,6 @@ public class Challenge extends BaseEntity {
     @Column(name = "progress_field", nullable = false)
     private String progressField;
 
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
     @Builder
     private Challenge(String name, String description, String condition, Integer tier, String imageUrl, Integer point, Integer maxProgress, String progressField) {
         this.name = name;
@@ -59,7 +56,6 @@ public class Challenge extends BaseEntity {
         this.point = point;
         this.maxProgress = maxProgress;
         this.progressField = progressField;
-        this.isDeleted = false;
     }
 
     public void update(String name, String description, String condition, Integer tier, String imageUrl, Integer point, Integer maxProgress, String progressField) {
@@ -71,9 +67,5 @@ public class Challenge extends BaseEntity {
         this.point = point;
         this.maxProgress = maxProgress;
         this.progressField = progressField;
-    }
-
-    public void delete() {
-        this.isDeleted = true;
     }
 }
