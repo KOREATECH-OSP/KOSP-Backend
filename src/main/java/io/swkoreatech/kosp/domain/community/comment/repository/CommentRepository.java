@@ -12,14 +12,13 @@ import org.springframework.data.repository.Repository;
 public interface CommentRepository extends Repository<Comment, Long> {
 
     Comment save(Comment comment);
-    void delete(Comment comment);
-    Optional<Comment> findById(Long id);
+    Optional<Comment> findByIdAndIsDeletedFalse(Long id);
 
     default Comment getById(Long id) {
-        return findById(id).orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        return findByIdAndIsDeletedFalse(id).orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
     }
     
-    Page<Comment> findByArticleId(Long articleId, Pageable pageable);
+    Page<Comment> findByArticleIdAndIsDeletedFalse(Long articleId, Pageable pageable);
     
-    Page<Comment> findByAuthorId(Long authorId, Pageable pageable);
+    Page<Comment> findByAuthorIdAndIsDeletedFalse(Long authorId, Pageable pageable);
 }

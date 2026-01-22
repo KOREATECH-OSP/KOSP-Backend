@@ -52,7 +52,7 @@ public class UserActivityService {
     }
 
     public CommentListResponse getComments(Long userId, Pageable pageable, User user) {
-        Page<Comment> page = commentRepository.findByAuthorId(userId, pageable);
+        Page<Comment> page = commentRepository.findByAuthorIdAndIsDeletedFalse(userId, pageable);
         return toCommentResponse(page, user);
     }
 

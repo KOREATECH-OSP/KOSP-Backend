@@ -165,7 +165,7 @@ public class ArticleService {
     public void delete(User author, Long id) {
         Article article = articleRepository.getById(id);
         validateOwner(article, author.getId());
-        articleRepository.delete(article);
+        article.delete();
     }
 
     private void validateOwner(Article article, Long authorId) {

@@ -43,11 +43,19 @@ public class Comment extends BaseEntity {
     @Column(nullable = false)
     private Integer likes = 0;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @Builder
     private Comment(Article article, User author, String content) {
         this.article = article;
         this.author = author;
         this.content = content;
         this.likes = 0;
+        this.isDeleted = false;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

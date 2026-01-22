@@ -40,8 +40,7 @@ public class AdminContentService {
     @Transactional
     public void deleteComment(Long commentId) {
         var comment = commentRepository.getById(commentId);
-        // comment.delete(); // Comment 엔티티에 delete 메서드 필요. 현재는 리포지토리로 삭제 대체
-        commentRepository.delete(comment);
+        comment.delete();
     }
 
     @Transactional
