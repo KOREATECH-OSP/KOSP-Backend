@@ -26,15 +26,12 @@ echo "=========================================="
 
 mkdir -p "${LOG_DIR}"
 
-rm -f "./${PROJECT_DIR}/${MODULE}/src/main/resources/application-${PROFILE}.yml"
-
 echo "[1/6] 소스 업데이트 중..."
 cd "./${PROJECT_DIR}" || exit 1
 git pull origin "${BRANCH}" || exit 1
 cd ..
 
 echo "[2/6] 설정 파일 복사 중..."
-cp "./application-${PROFILE}.yml" "./${PROJECT_DIR}/${MODULE}/src/main/resources/application-${PROFILE}.yml" || exit 1
 cp "./.env.${PROFILE}" "./${PROJECT_DIR}/.env.${PROFILE}" || exit 1
 
 echo "[3/6] ${MODULE} 빌드 중..."
