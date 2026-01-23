@@ -1,0 +1,16 @@
+package io.swkoreatech.kosp.harvester.collection.repository;
+
+import java.util.List;
+
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import io.swkoreatech.kosp.harvester.collection.document.CommitDocument;
+
+public interface CommitDocumentRepository extends MongoRepository<CommitDocument, String> {
+
+    List<CommitDocument> findByUserId(Long userId);
+
+    List<CommitDocument> findByUserIdAndRepositoryName(Long userId, String repositoryName);
+
+    boolean existsByUserIdAndSha(Long userId, String sha);
+}
