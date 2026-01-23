@@ -14,8 +14,8 @@ BACKEND_PORT=8080
 # =============================================================================
 
 PROJECT_DIR="KOSP-Backend"
-LOG_DIR="/home/ubuntu/logs"
-LOG_FILE="${LOG_DIR}/${MODULE}.log"
+LOG_DIR="/home/ubuntu"
+LOG_FILE="${LOG_DIR}/app.log"
 PID_FILE="${LOG_DIR}/${MODULE}.pid"
 
 cd "$(dirname "$0")" || exit 1
