@@ -1,0 +1,14 @@
+logging:
+  level:
+    org:
+      springframework:
+        transaction: DEBUG
+        orm.jpa.JpaTransactionManager: DEBUG
+        security: DEBUG
+      hibernate:
+        engine:
+          transaction:
+            internal: DEBUG
+        type:
+          descriptor:
+            sql: trace
