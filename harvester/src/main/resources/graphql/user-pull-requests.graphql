@@ -1,0 +1,37 @@
+query GetUserPullRequests($login: String!, $after: String) {
+  user(login: $login) {
+    pullRequests(first: 100, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+      nodes {
+        number
+        title
+        state
+        additions
+        deletions
+        changedFiles
+        merged
+        mergedAt
+        createdAt
+        closedAt
+        isCrossRepository
+        commits {
+          totalCount
+        }
+        closingIssuesReferences {
+          totalCount
+        }
+        repository {
+          name
+          owner {
+            login
+          }
+          nameWithOwner
+          stargazerCount
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+query GetRepositoryCommits($owner: String!, $name: String!, $authorId: ID!, $after: String) {
+  repository(owner: $owner, name: $name) {
+    defaultBranchRef {
+      target {
+        ... on Commit {
+          history(first: 100, after: $after, author: {id: $authorId}) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            nodes {
+              oid
+              message
+              additions
+              deletions
+              changedFilesIfAvailable
+              authoredDate
+              author {
+                name
+                email
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
