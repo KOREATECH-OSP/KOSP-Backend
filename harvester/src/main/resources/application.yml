@@ -2,7 +2,7 @@ spring:
   main:
     web-application-type: none
   config:
-    import: optional:file:../.env.${spring.profiles.active}[.properties]
+    import: optional:file:.env.${spring.profiles.active}[.properties]
   jpa:
     open-in-view: false
     properties:
