@@ -37,7 +37,7 @@ public class Role extends BaseEntity {
     private String description;
 
     @Builder.Default
-    @Column(name = "can_access_admin", columnDefinition = "BIT(1) DEFAULT 0", nullable = false)
+    @Column(name = "can_access_admin", nullable = false)
     private Boolean canAccessAdmin = false;
 
     @ManyToMany

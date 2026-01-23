@@ -53,7 +53,7 @@ public class Article extends BaseEntity {
     private String title;
 
     @Lob
-    @Column(nullable = false, columnDefinition = "MEDIUMTEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
     @Builder.Default

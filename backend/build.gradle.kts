@@ -21,7 +21,7 @@ dependencies {
     implementation(libs.spring.boot.starter.webflux) // GitHub API Client
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
     implementation(libs.spring.boot.starter.batch)
-    implementation(libs.mysql.connector.j)
+    implementation(libs.postgresql)
 
     implementation(libs.jjwt.api)
     implementation(libs.spring.boot.starter.security)
@@ -38,12 +38,12 @@ dependencies {
 
     implementation(libs.rsql.jpa.spring.boot.starter)
 
-    implementation(libs.flyway.mysql)
+    implementation(libs.flyway.database.postgresql)
 
     runtimeOnly(libs.jjwt.impl)
     runtimeOnly(libs.jjwt.jackson)
 
-    runtimeOnly(libs.mysql.connector.j)
+    runtimeOnly(libs.postgresql)
     runtimeOnly(libs.h2database)
 
     compileOnly(libs.lombok)

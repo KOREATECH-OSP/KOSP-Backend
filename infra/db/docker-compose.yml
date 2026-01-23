@@ -1,17 +1,15 @@
 services:
-  mysql:
-    image: mysql:8.4.7
-    container_name: mysql-kosp-stage-compose
+  postgres:
+    image: postgres:18.1
+    container_name: postgres-kosp-stage-compose
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DATABASE}
     ports:
-      - "${MYSQL_PORT}:3306"
+      - "${POSTGRES_PORT}:5432"
     volumes:
-      - ${MYSQL_VOLUME_PATH}:/var/lib/mysql
-    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+      - ${POSTGRES_VOLUME_PATH}:/var/lib/postgresql/data
     restart: "unless-stopped"
 
   redis:
