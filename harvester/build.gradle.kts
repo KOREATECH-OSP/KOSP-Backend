@@ -18,7 +18,7 @@ dependencies {
 
     implementation(libs.spring.security.crypto)
 
-    runtimeOnly(libs.mysql.connector.j)
+    runtimeOnly(libs.postgresql)
 
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
