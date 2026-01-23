@@ -1,0 +1,51 @@
+query GetContributedRepositories($login: String!, $from: DateTime!, $to: DateTime!) {
+  user(login: $login) {
+    id
+    contributionsCollection(from: $from, to: $to) {
+      commitContributionsByRepository(maxRepositories: 100) {
+        repository {
+          name
+          description
+          owner {
+            login
+          }
+          nameWithOwner
+          isFork
+          isPrivate
+          primaryLanguage {
+            name
+          }
+          stargazerCount
+          forkCount
+        }
+        contributions {
+          totalCount
+        }
+      }
+      pullRequestContributionsByRepository(maxRepositories: 100) {
+        repository {
+          name
+          owner {
+            login
+          }
+          nameWithOwner
+        }
+        contributions {
+          totalCount
+        }
+      }
+      issueContributionsByRepository(maxRepositories: 100) {
+        repository {
+          name
+          owner {
+            login
+          }
+          nameWithOwner
+        }
+        contributions {
+          totalCount
+        }
+      }
+    }
+  }
+}

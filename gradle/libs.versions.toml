@@ -26,6 +26,9 @@ springdoc-openapi-starter-webmvc-ui = { module = "org.springdoc:springdoc-openap
 
 spring-boot-starter-security = { module = "org.springframework.boot:spring-boot-starter-security" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
+spring-security-crypto = { module = "org.springframework.security:spring-security-crypto" }
+
+spring-batch-test = { module = "org.springframework.batch:spring-batch-test" }
 
 spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 
