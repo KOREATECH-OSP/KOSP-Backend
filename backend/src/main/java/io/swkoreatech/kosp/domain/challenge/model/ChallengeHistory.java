@@ -2,8 +2,8 @@ package io.swkoreatech.kosp.domain.challenge.model;
 
 import java.time.LocalDateTime;
 
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

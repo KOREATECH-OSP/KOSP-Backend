@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.community.article.model;
 
+import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.domain.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,8 +10,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

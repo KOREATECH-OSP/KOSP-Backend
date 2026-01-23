@@ -1,53 +1,71 @@
 # AGENTS.md - KOSP Backend
 
-**K-OSP (Korea Open Source Platform)** - Spring Boot 3.5 backend for managing open-source contributions by Korean university students.
+**Generated:** 2026-01-23 | **Commit:** ee0d0e8 | **Branch:** fix/fix-everything
 
-**Tech Stack**: Java 17, Spring Boot 3.5, Gradle (Kotlin DSL), MySQL, MongoDB, Redis, AWS (S3, SES), JWT
+**K-OSP (Korea Open Source Platform)** — Spring Boot 3.5 backend for managing open-source contributions by Korean university students.
+
+**Stack**: Java 17, Spring Boot 3.5, Gradle (Kotlin DSL), MySQL, MongoDB, Redis, AWS (S3, SES), JWT
 
 ---
 
-## Build / Lint / Test Commands
+## Structure
+
+```
+KOSP/
+├── backend/           # Main REST API (Spring Web)
+├── harvester/         # GitHub data mining (Spring Batch) — see harvester/AGENTS.md
+├── common/            # Shared entities (BaseEntity, GithubUser)
+├── infra/             # Deployment: Docker, Nginx, DB scripts
+├── docs/              # Wiki, onboarding, domain specs
+└── references/        # SKKU-OSP legacy reference
+```
+
+### Package Layout (backend)
+```
+io.swkoreatech.kosp
+├── domain.{feature}/   # api/, controller/, service/, repository/, model/, dto/
+├── global/             # config/, exception/, security/, auth/, init/
+└── infra/              # External: github/, email/
+```
+
+---
+
+## Commands
 
 ```bash
 ./gradlew build                    # Full build with tests
 ./gradlew build -x test            # Build without tests
-./gradlew bootRun                  # Start application (requires .env.local)
+./gradlew bootRun                  # Start backend (requires .env.local)
 
-# Test commands
-./gradlew test                                         # Run all tests
-./gradlew test --tests "UserIntegrationTest"           # Single test class
-./gradlew test --tests "*Integration*"                 # Wildcard match
-./gradlew test --tests "*.UserIntegrationTest.update*" # Single method
+# Tests (90% Jacoco coverage required)
+./gradlew test                                         # All tests
+./gradlew test --tests "UserIntegrationTest"           # Single class
+./gradlew test --tests "*Integration*"                 # Wildcard
+./gradlew test --tests "*.UserServiceTest.signup*"     # Single method
+
+# Harvester
+./gradlew :harvester:bootRun       # Start harvester module
 ```
 
-**Test Profile**: `@ActiveProfiles("test")` uses H2 in-memory DB, local Redis/MongoDB.
-
----
-
-## Package Structure
-
-```
-kr.ac.koreatech.sw.kosp
-├── domain.{feature}/       # api/, controller/, service/, repository/, model/, dto/
-├── global/                 # config/, exception/, security/, auth/
-└── infra/                  # External integrations (GitHub, Email)
-```
+**Test Profile**: `@ActiveProfiles("test")` → H2 (MySQL mode), Redis DB 1, MongoDB `kosp_test`
 
 ---
 
 ## Strict Coding Rules (MUST FOLLOW)
 
-| Rule | Description |
-|------|-------------|
-| **Indent Depth <= 1** | No nested control structures. Use early returns. |
-| **No `else`/`else if`** | Always use early return pattern. |
-| **No Ternary** | `? :` is forbidden. |
-| **Method <= 10 lines** | Extract smaller methods if exceeded. |
-| **Max 2 Instance Variables** | Except repositories. Use `@Embeddable` for grouping. |
-| **No Abbreviations** | `request` not `req`, `response` not `res`. |
-| **Max 2 Words** | Keep method/variable names concise. |
-| **No Wildcard Imports** | Always use explicit imports. |
-| **Version Catalog** | Define deps in `gradle/libs.versions.toml`, use as `libs.xxx`. |
+| Rule | Violation = Reject |
+|------|--------------------|
+| **Indent Depth ≤ 1** | No nested if/for. Use early returns. |
+| **No `else`/`else if`** | Always early return. |
+| **No Ternary `? :`** | Forbidden. |
+| **Method ≤ 10 lines** | Extract smaller methods. |
+| **Max 2 Instance Vars** | Except repositories. Use `@Embeddable`. |
+| **No Abbreviations** | `request` not `req`. |
+| **Max 2 Words** | Method/variable names. |
+| **No Wildcard Imports** | Explicit imports only. |
+| **Version Catalog** | Deps in `gradle/libs.versions.toml` as `libs.xxx`. |
+| **No `@Setter`** | Use business methods on entities. |
+| **No Hard Delete** | Use `isDeleted` flag (soft delete). |
 
 ---
 
@@ -63,20 +81,25 @@ public class UserController implements UserApi {
     
     @Override
     @Permit(permitAll = true, description = "회원가입")
-    public ResponseEntity<AuthTokenResponse> signup(@RequestBody @Valid UserSignupRequest request, @Token SignupToken token) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request, token));
+    public ResponseEntity<AuthTokenResponse> signup(
+            @RequestBody @Valid UserSignupRequest request,
+            @Token SignupToken token) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(userService.signup(request, token));
     }
 }
 ```
 
-### API Interface (Swagger annotations)
+### API Interface (Swagger)
 ```java
 @Tag(name = "User", description = "사용자 관리 API")
 @RequestMapping("/v1/users")
 public interface UserApi {
     @Operation(summary = "회원가입")
     @PostMapping("/signup")
-    ResponseEntity<AuthTokenResponse> signup(@RequestBody @Valid UserSignupRequest request, @Parameter(hidden = true) @Token SignupToken token);
+    ResponseEntity<AuthTokenResponse> signup(
+        @RequestBody @Valid UserSignupRequest request,
+        @Parameter(hidden = true) @Token SignupToken token);
 }
 ```
 
@@ -85,13 +108,14 @@ public interface UserApi {
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Optional<User> findById(Long id);  // Returns Optional
     
-    default User getById(Long id) {    // Throws exception if not found
-        return findById(id).orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+    default User getById(Long id) {    // Throws if not found
+        return findById(id).orElseThrow(
+            () -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
     }
 }
 ```
 
-### DTO (Record with validation)
+### DTO (Record + validation)
 ```java
 public record UserSignupRequest(
     @NotBlank(message = "이름은 필수입니다.") String name,
@@ -99,14 +123,13 @@ public record UserSignupRequest(
 ) {}
 ```
 
-### Exception Handling
+### Exception (always use enum)
 ```java
-// ExceptionMessage enum defines all errors
 throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
 throw new GlobalException(ExceptionMessage.FORBIDDEN);
 ```
 
-### Entity (no @Setter, use business methods)
+### Entity (business methods, no @Setter)
 ```java
 @Getter @Entity @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED) @SuperBuilder
@@ -114,10 +137,33 @@ public class User extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    public void updateInfo(String name) { if (name != null) this.name = name; }  // Business method
-    public void delete() { this.isDeleted = true; }  // Soft delete
+    public void updateInfo(String name) {
+        if (name == null) return;
+        this.name = name;
+    }
+    
+    public void delete() { this.isDeleted = true; }
 }
 ```
+
+---
+
+## Security
+
+```java
+@Permit(permitAll = true)                              // Public
+@Permit(permitAll = false)                             // Auth required
+@Permit(name = "ADMIN", description = "관리자 전용")   // RBAC permission
+
+// Inject authenticated user
+public ResponseEntity<Void> update(@AuthUser User user, Long userId, ...) {
+    if (!user.getId().equals(userId)) {
+        throw new GlobalException(ExceptionMessage.FORBIDDEN);
+    }
+}
+```
+
+**Flow**: JWT in `Authorization` header → `JwtAuthenticationFilter` → `SecurityContext` → `@AuthUser` resolver
 
 ---
 
@@ -128,65 +174,93 @@ public class User extends BaseEntity {
 public abstract class IntegrationTestSupport {
     @Autowired protected MockMvc mockMvc;
     @Autowired protected ObjectMapper objectMapper;
+    
     // Helpers: createRole(), createGithubUser(), loginAndGetToken()
 }
 
-class UserIntegrationTest extends IntegrationTestSupport {
-    @Test @DisplayName("내 정보 수정 성공")
-    void update_myInfo_success() throws Exception {
-        // given
-        UserUpdateRequest request = new UserUpdateRequest("newName", "intro");
-        // when & then
-        mockMvc.perform(put("/v1/users/" + userId).header("Authorization", "Bearer " + accessToken)
-                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isOk());
-        assertThat(userRepository.findById(userId).get().getName()).isEqualTo("newName");
+class UserServiceTest {
+    @Nested @DisplayName("signup 메서드")
+    class SignupTest {
+        @Test @DisplayName("성공")
+        void success() { ... }
     }
 }
 ```
 
+**Conventions**:
+- Extend `IntegrationTestSupport` for controller tests
+- Use `@Nested` + `@DisplayName` (Korean OK) for service tests
+- AssertJ for assertions: `assertThat(...).isEqualTo(...)`
+- Mock data: `/src/test/resources/data/*.sql`
+
 ---
 
-## Security
+## Module Communication
 
-```java
-@Permit(permitAll = true)                              // Public endpoint
-@Permit(permitAll = false)                             // Requires auth
-@Permit(name = "ADMIN", description = "관리자 전용")   // RBAC
-
-// Inject authenticated user
-public ResponseEntity<Void> update(@AuthUser User user, Long userId, ...) {
-    if (!user.getId().equals(userId)) throw new GlobalException(ExceptionMessage.FORBIDDEN);
-}
 ```
+┌─────────────┐     Redis Stream      ┌─────────────┐
+│   backend   │ ──────────────────▶   │  harvester  │
+│  (REST API) │  github:collection    │ (Batch Job) │
+└─────────────┘      :trigger         └─────────────┘
+       ▲                                     │
+       │         kosp:challenge-check        │
+       └─────────────────────────────────────┘
+```
+
+- **backend → harvester**: Publishes to `github:collection:trigger` on signup/refresh
+- **harvester → backend**: Publishes to `kosp:challenge-check` after score calculation
+- **Shared**: MySQL for identity (User, GithubUser), MongoDB for activity data
+
+---
+
+## External Integrations
+
+| Service | Package | Client | Pattern |
+|---------|---------|--------|---------|
+| GitHub | `infra/github` | `RestClient` (GraphQL) | Sync, encrypted user token |
+| Email | `infra/email` | AWS SES SDK v2 | Event-driven, Thymeleaf templates |
+| S3 | `domain/upload` | AWS S3 SDK v2 | Presigned URLs for client upload |
 
 ---
 
 ## Environment Variables (`.env.local`)
 
-DB: `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`
-Redis: `REDIS_HOST`, `REDIS_PORT`, `REDIS_PASSWORD`
-MongoDB: `MONGODB_HOST`, `MONGODB_PORT`, `MONGODB_DATABASE`, `MONGODB_USERNAME`, `MONGODB_PASSWORD`
-JWT: `JWT_SECRET_KEY`, `JWT_EXPIRATION_ACCESS/REFRESH/SIGNUP`
-GitHub: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
-AWS: `AWS_ACCESS_KEY`, `AWS_SECRET_KEY`, `AWS_REGION`, `AWS_S3_BUCKET`
+```
+DB_HOST, DB_PORT, DB_NAME, DB_USERNAME, DB_PASSWORD
+REDIS_HOST, REDIS_PORT, REDIS_PASSWORD
+MONGODB_HOST, MONGODB_PORT, MONGODB_DATABASE, MONGODB_USERNAME, MONGODB_PASSWORD
+JWT_SECRET_KEY, JWT_EXPIRATION_ACCESS, JWT_EXPIRATION_REFRESH, JWT_EXPIRATION_SIGNUP
+GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET
+AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_REGION, AWS_S3_BUCKET
+```
 
 ---
 
-## Key Patterns
+## Anti-Patterns (THIS PROJECT)
 
-- **API versioning**: All endpoints start with `/v1/`
-- **Soft delete**: Use `isDeleted` flag, never hard delete
-- **Event-driven**: Spring Events for cross-domain (e.g., `UserSignupEvent`)
-- **GitHub integration**: OAuth creates `GithubUser` linked to `User`
+| ❌ Don't | ✅ Do |
+|----------|-------|
+| `@Setter` on entities | Business methods: `user.updateInfo(name)` |
+| `throw new RuntimeException("msg")` | `throw new GlobalException(ExceptionMessage.X)` |
+| Return entity from controller | Return DTO record |
+| `JpaRepository<User, Long>` | Custom interface with only needed methods |
+| Nested if/else | Early return pattern |
+| `implementation("group:artifact:1.0")` | `implementation(libs.xxx)` |
+| Directories with " 2" suffix | Clean up sync artifacts |
 
 ---
 
-## Common Mistakes
+## TODOs in Codebase
 
-- Using `@Setter` on entities (use business methods)
-- Hardcoding error messages (use `ExceptionMessage` enum)
-- Returning entities from controllers (use DTOs)
-- Using `JpaRepository` directly (use custom interface with needed methods only)
-- Nesting if statements (use early returns)
-- Adding deps without `libs.versions.toml`
+- `GithubApiClient:121` — Token validation logic needed
+- `UserActivityService:67` — Implement after MongoDB schema rebuild
+- `PermissionInitializer:148` — Policy exists check: do NOT overwrite
+
+---
+
+## Notes
+
+- **No CI/CD in repo**: Managed externally
+- **Valkey** used instead of Redis (compatible replacement)
+- **Package**: `io.swkoreatech.kosp` (not `kr.ac.koreatech.sw.kosp`)
+- Admin domain has deep nesting: `domain.admin.{feature}.{layer}`

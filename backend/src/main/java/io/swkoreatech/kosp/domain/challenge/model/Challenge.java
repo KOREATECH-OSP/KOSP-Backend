@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.model;
 
-import io.swkoreatech.kosp.global.model.BaseEntity;
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -28,7 +28,7 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
-    @Column(name = "`condition`", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "\"condition\"", nullable = false, columnDefinition = "TEXT")
     private String condition; // SpEL expression
 
     @Column(nullable = false)

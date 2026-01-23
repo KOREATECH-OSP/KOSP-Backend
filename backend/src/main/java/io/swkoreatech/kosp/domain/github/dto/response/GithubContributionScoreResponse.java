@@ -3,7 +3,7 @@ package io.swkoreatech.kosp.domain.github.dto.response;
 import java.math.BigDecimal;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 @Schema(description = "4. GitHub 기여점수 항목")
 public record GithubContributionScoreResponse(

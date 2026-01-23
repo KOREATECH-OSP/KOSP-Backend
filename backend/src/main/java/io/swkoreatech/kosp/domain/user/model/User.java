@@ -2,62 +2,39 @@ package io.swkoreatech.kosp.domain.user.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import io.swkoreatech.kosp.common.user.BaseUser;
 import io.swkoreatech.kosp.domain.auth.model.Role;
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
-import io.swkoreatech.kosp.global.model.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
-import lombok.experimental.SuperBuilder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.springframework.security.core.GrantedAuthority;
+import lombok.experimental.SuperBuilder;
 
 @Getter
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED)
-@ToString(exclude = {"password", "githubUser"})
+@ToString(exclude = {"password"})
 @SuperBuilder
-public class User extends BaseEntity implements UserDetails {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @NotNull
-    @Size(max = 50)
-    @Column(name = "name", length = 50, nullable = false)
-    private String name;
-
-    @NotNull
-    @Column(name = "kut_id", unique = true, nullable = false)
-    private String kutId;
-
-    @NotNull
-    @Size(max = 255)
-    @Column(name = "kut_email", unique = true, nullable = false)
-    private String kutEmail;
+public class User extends BaseUser implements UserDetails {
 
     @NotNull
     @Column(name = "password", nullable = false)
@@ -68,17 +45,8 @@ public class User extends BaseEntity implements UserDetails {
 
     @Builder.Default
     @NotNull
-    @Column(name = "is_deleted", nullable = false)
-    private boolean isDeleted = false;
-
-    @Builder.Default
-    @NotNull
     @Column(name = "point", nullable = false)
     private Integer point = 0;
-
-    @OneToOne
-    @JoinColumn(name = "github_id")
-    private GithubUser githubUser;
 
     @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
@@ -90,7 +58,7 @@ public class User extends BaseEntity implements UserDetails {
     private Set<Role> roles = new HashSet<>();
 
     public void updateInfo(String name, String introduction) {
-        if (name != null) this.name = name;
+        if (name != null) this.updateName(name);
         if (introduction != null) this.introduction = introduction;
     }
 
@@ -102,14 +70,6 @@ public class User extends BaseEntity implements UserDetails {
         this.password = passwordEncoder.encode(rawPassword);
     }
 
-    public void updateGithubUser(GithubUser githubUser) {
-        this.githubUser = githubUser;
-    }
-
-    public void delete() {
-        this.isDeleted = true;
-    }
-
     public void addPoint(Integer amount) {
         this.point = this.point + amount;
     }
@@ -119,7 +79,7 @@ public class User extends BaseEntity implements UserDetails {
     }
 
     public void reactivate() {
-        this.isDeleted = false;
+        this.markAsActive();
         this.roles.clear();
     }
 
@@ -136,7 +96,7 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.kutEmail;
+        return this.getKutEmail();
     }
 
     @Override
@@ -156,6 +116,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return !this.isDeleted;
+        return !this.isDeleted();
     }
 }

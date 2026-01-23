@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
 
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 public interface GithubUserStatisticsRepository extends Repository<GithubUserStatistics, Long> {
 
