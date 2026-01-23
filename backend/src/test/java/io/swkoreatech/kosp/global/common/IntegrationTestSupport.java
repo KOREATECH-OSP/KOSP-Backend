@@ -15,11 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.service.UserService;

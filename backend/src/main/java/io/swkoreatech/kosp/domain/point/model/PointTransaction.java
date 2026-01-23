@@ -2,6 +2,8 @@ package io.swkoreatech.kosp.domain.point.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.domain.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,8 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.model.BaseEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

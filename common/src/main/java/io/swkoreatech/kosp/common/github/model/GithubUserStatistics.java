@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.github.model;
+package io.swkoreatech.kosp.common.github.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

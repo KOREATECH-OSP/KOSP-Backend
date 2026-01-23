@@ -12,11 +12,11 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
 import io.swkoreatech.kosp.domain.user.model.User;

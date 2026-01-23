@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.model;
 
-import io.swkoreatech.kosp.global.model.BaseEntity;
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

@@ -2,7 +2,7 @@ package io.swkoreatech.kosp.domain.github.dto.response;
 
 import java.time.LocalDate;
 
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import lombok.Builder;
 
 @Builder

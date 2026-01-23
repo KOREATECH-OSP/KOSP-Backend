@@ -32,11 +32,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.security.Keys;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
 import io.swkoreatech.kosp.domain.user.model.User;

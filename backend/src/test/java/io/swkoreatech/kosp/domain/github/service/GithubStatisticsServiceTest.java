@@ -23,14 +23,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubContributionPattern;
 import io.swkoreatech.kosp.domain.github.model.GithubGlobalStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubMonthlyStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubTimelineDataRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubContributionPatternRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubGlobalStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubMonthlyStatisticsRepository;
@@ -39,6 +38,7 @@ import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsReposito
 import io.swkoreatech.kosp.domain.github.repository.GithubYearlyStatisticsRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubTimelineDataRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("GithubStatisticsService 단위 테스트")
