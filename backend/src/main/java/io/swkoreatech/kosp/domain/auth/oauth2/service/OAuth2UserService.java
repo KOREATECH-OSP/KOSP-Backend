@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
@@ -15,9 +16,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import org.springframework.security.crypto.encrypt.TextEncryptor;
-
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;

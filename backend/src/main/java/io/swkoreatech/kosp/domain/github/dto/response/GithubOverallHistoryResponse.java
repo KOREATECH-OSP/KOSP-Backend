@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 @Schema(description = "2. 전체 기여 내역 항목")
 public record GithubOverallHistoryResponse(

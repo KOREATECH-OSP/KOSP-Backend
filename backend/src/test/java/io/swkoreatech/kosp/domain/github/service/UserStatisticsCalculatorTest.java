@@ -16,11 +16,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.document.GithubCommitDetailRaw;
 import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubCommitDetailRawRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserStatisticsCalculator 단위 테스트")

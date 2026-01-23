@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.harvester.statistics.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.statistics.model.PlatformStatistics;
 import io.swkoreatech.kosp.harvester.statistics.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.harvester.statistics.repository.PlatformStatisticsRepository;

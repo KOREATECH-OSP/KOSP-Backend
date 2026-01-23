@@ -2,7 +2,8 @@ package io.swkoreatech.kosp.harvester.user;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import io.swkoreatech.kosp.harvester.global.model.BaseEntity;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

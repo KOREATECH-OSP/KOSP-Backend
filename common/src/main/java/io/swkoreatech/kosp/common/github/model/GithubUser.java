@@ -1,18 +1,18 @@
-package io.swkoreatech.kosp.domain.github.model;
+package io.swkoreatech.kosp.common.github.model;
 
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Persistable;
+
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import io.swkoreatech.kosp.global.model.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-
-import org.springframework.data.domain.Persistable;
 
 @Entity
 @Getter
@@ -26,16 +26,16 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
     private Long githubId;
 
     @Column(name = "github_login")
-    private String githubLogin; // username (ex. byungKHee)
+    private String githubLogin;
 
     @Column(name = "github_name")
-    private String githubName; // profile name (ex. 강병희)
+    private String githubName;
 
     @Column(name = "github_avatar_url")
     private String githubAvatarUrl;
 
     @Column(name = "github_token", columnDefinition = "TEXT")
-    private String githubToken; // Access Token
+    private String githubToken;
 
     @Builder.Default
     @Column(name = "last_crawling")

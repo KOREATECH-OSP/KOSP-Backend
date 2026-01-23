@@ -1,9 +1,10 @@
-package io.swkoreatech.kosp.global.converter;
+package io.swkoreatech.kosp.common.converter;
+
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 @Converter
 @RequiredArgsConstructor

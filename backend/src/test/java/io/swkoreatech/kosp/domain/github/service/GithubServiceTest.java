@@ -1,6 +1,5 @@
 package io.swkoreatech.kosp.domain.github.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
@@ -16,13 +15,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse;
-import io.swkoreatech.kosp.domain.github.model.GithubUser;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile;
-import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubProfileRepository;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.GlobalException;
+import kr.ac.koreatech.sw.kosp.domain.github.dto.response.GithubAnalysisResponse;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.model.GithubProfile;
+import kr.ac.koreatech.sw.kosp.domain.github.mongo.repository.GithubProfileRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("GithubService 단위 테스트")

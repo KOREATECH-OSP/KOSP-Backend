@@ -13,6 +13,8 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.collection.document.CommitDocument;
 import io.swkoreatech.kosp.harvester.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.harvester.collection.document.IssueDocument;
@@ -23,9 +25,7 @@ import io.swkoreatech.kosp.harvester.collection.repository.IssueDocumentReposito
 import io.swkoreatech.kosp.harvester.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
 import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
-import io.swkoreatech.kosp.harvester.statistics.model.GithubUserStatistics;
 import io.swkoreatech.kosp.harvester.statistics.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.harvester.user.GithubUser;
 import io.swkoreatech.kosp.harvester.user.User;
 import io.swkoreatech.kosp.harvester.user.UserRepository;
 import lombok.RequiredArgsConstructor;

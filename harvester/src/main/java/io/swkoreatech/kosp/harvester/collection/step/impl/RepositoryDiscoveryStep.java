@@ -15,6 +15,7 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.harvester.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.harvester.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.harvester.client.dto.ContributedReposResponse.RepositoryInfo;
@@ -23,7 +24,6 @@ import io.swkoreatech.kosp.harvester.collection.document.ContributedRepoDocument
 import io.swkoreatech.kosp.harvester.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.harvester.collection.step.StepProvider;
 import io.swkoreatech.kosp.harvester.job.StepCompletionListener;
-import io.swkoreatech.kosp.harvester.user.GithubUser;
 import io.swkoreatech.kosp.harvester.user.User;
 import io.swkoreatech.kosp.harvester.user.UserRepository;
 import lombok.RequiredArgsConstructor;

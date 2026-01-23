@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.global.config.encryption;
+package io.swkoreatech.kosp.common.config.encryption;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

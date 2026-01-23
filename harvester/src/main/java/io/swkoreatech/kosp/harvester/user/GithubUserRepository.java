@@ -1,10 +1,14 @@
 package io.swkoreatech.kosp.harvester.user;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.Optional;
 
-public interface GithubUserRepository extends JpaRepository<GithubUser, Long> {
+import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+
+public interface GithubUserRepository extends Repository<GithubUser, Long> {
+
+    GithubUser save(GithubUser githubUser);
 
     Optional<GithubUser> findById(Long githubId);
 

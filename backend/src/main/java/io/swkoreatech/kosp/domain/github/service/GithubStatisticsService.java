@@ -1,15 +1,13 @@
 package io.swkoreatech.kosp.domain.github.service;
 
-import java.math.BigDecimal;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
-import io.swkoreatech.kosp.domain.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
