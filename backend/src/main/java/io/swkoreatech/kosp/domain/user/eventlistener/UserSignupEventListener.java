@@ -1,12 +1,9 @@
 package io.swkoreatech.kosp.domain.user.eventlistener;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import lombok.RequiredArgsConstructor;
@@ -17,27 +14,21 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserSignupEventListener {
 
-    private final StringRedisTemplate redisTemplate;
+    private static final String CHANNEL = "github_collection_trigger";
 
-    @Value("${harvester.redis.collection-trigger-stream:github:collection:trigger}")
-    private String streamKey;
+    private final JdbcTemplate jdbcTemplate;
 
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserSignup(UserSignupEvent event) {
-        log.info("Received UserSignupEvent for user {} (GitHub: {})", 
+        log.info("Received UserSignupEvent for user {} (GitHub: {})",
             event.getUserId(), event.getGithubLogin());
 
         publishCollectionTrigger(event.getUserId());
     }
 
     private void publishCollectionTrigger(Long userId) {
-        Map<String, String> payload = Map.of(
-            "userId", String.valueOf(userId)
-        );
-
-        var record = StreamRecords.string(payload).withStreamKey(streamKey);
-        redisTemplate.opsForStream().add(record);
-
-        log.info("Published collection trigger to Harvester for user {}", userId);
+        String payload = String.valueOf(userId);
+        jdbcTemplate.execute("NOTIFY " + CHANNEL + ", '" + payload + "'");
+        log.info("Published NOTIFY to channel '{}' for user {}", CHANNEL, userId);
     }
 }

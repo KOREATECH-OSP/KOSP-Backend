@@ -1,10 +1,11 @@
 package io.swkoreatech.kosp.trigger;
 
-import io.swkoreatech.kosp.user.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
-import java.util.List;
+import io.swkoreatech.kosp.user.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
