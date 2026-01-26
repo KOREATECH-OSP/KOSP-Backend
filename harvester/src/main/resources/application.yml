@@ -51,10 +51,3 @@ github:
     graphql-url: https://api.github.com/graphql
     rate-limit:
       threshold: 100
-
-harvester:
-  redis:
-    stream:
-      key: github:collection:trigger
-      consumer-group: harvester-group
-      consumer-name: ${HOSTNAME:harvester-1}

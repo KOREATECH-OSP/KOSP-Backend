@@ -24,7 +24,6 @@ import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.trigger.ChallengeCheckPublisher;
 import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +47,6 @@ public class ScoreCalculationStep implements StepProvider {
     private final PullRequestDocumentRepository prRepository;
     private final ContributedRepoDocumentRepository repoRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
-    private final ChallengeCheckPublisher challengeCheckPublisher;
     private final StepCompletionListener stepCompletionListener;
 
     @Override
@@ -90,7 +88,6 @@ public class ScoreCalculationStep implements StepProvider {
         BigDecimal impactScore = calculateImpactScore(userId);
 
         saveScores(githubId, activityScore, diversityScore, impactScore);
-        challengeCheckPublisher.publish(userId, githubId);
 
         log.info("Calculated scores for user {}: activity={}, diversity={}, impact={}",
             userId, activityScore, diversityScore, impactScore);
