@@ -10,10 +10,10 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.GithubUserRepository;
 import io.swkoreatech.kosp.user.User;
