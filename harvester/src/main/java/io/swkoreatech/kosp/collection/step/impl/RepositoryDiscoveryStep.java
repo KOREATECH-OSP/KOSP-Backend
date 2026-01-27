@@ -108,15 +108,16 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {
+        String[] timeRange = calculateTimeRange();
+        return graphQLClient
+            .getContributedRepos(login, timeRange[0], timeRange[1], token, createResponseType())
+            .block();
+    }
+
+    private String[] calculateTimeRange() {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime oneYearAgo = now.minusYears(1);
-
-        String from = formatDateTime(oneYearAgo);
-        String to = formatDateTime(now);
-
-        return graphQLClient
-            .getContributedRepos(login, from, to, token, createResponseType())
-            .block();
+        return new String[] { formatDateTime(oneYearAgo), formatDateTime(now) };
     }
 
     private void logErrors(GraphQLResponse<ContributedReposResponse> response, Long userId) {
@@ -138,25 +139,35 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
     private void saveRepositories(Long userId, String login, Set<RepositoryInfo> repositories) {
         Instant now = Instant.now();
-
         for (RepositoryInfo repo : repositories) {
-            ContributedRepoDocument document = ContributedRepoDocument.builder()
-                .userId(userId)
-                .repositoryName(repo.getName())
-                .repositoryOwner(repo.getOwnerLogin())
-                .fullName(repo.getNameWithOwner())
-                .description(repo.getDescription())
-                .isOwner(login.equals(repo.getOwnerLogin()))
-                .isFork(repo.isFork())
-                .isPrivate(repo.isPrivate())
-                .primaryLanguage(repo.getLanguageName())
-                .stargazersCount(repo.getStargazerCount())
-                .forksCount(repo.getForkCount())
-                .collectedAt(now)
-                .build();
-
+            ContributedRepoDocument document = buildRepoDocument(userId, login, repo, now);
             repoDocumentRepository.save(document);
         }
+    }
+
+    private ContributedRepoDocument buildRepoDocument(Long userId, String login, RepositoryInfo repo, Instant now) {
+        var builder = ContributedRepoDocument.builder()
+            .userId(userId)
+            .repositoryName(repo.getName())
+            .repositoryOwner(repo.getOwnerLogin())
+            .fullName(repo.getNameWithOwner())
+            .description(repo.getDescription());
+        return buildRepoMetadata(builder, login, repo, now).build();
+    }
+
+    private ContributedRepoDocument.ContributedRepoDocumentBuilder buildRepoMetadata(
+            ContributedRepoDocument.ContributedRepoDocumentBuilder builder,
+            String login,
+            RepositoryInfo repo,
+            Instant now) {
+        return builder
+            .isOwner(login.equals(repo.getOwnerLogin()))
+            .isFork(repo.isFork())
+            .isPrivate(repo.isPrivate())
+            .primaryLanguage(repo.getLanguageName())
+            .stargazersCount(repo.getStargazerCount())
+            .forksCount(repo.getForkCount())
+            .collectedAt(now);
     }
 
     private void storeUserInfoInContext(ChunkContext chunkContext, String login, String token, String nodeId) {
