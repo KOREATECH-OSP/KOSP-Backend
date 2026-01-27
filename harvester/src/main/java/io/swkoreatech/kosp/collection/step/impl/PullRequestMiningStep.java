@@ -20,6 +20,9 @@ import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse.PullRequestNode;
 import io.swkoreatech.kosp.collection.document.PullRequestDocument;
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +57,8 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private void execute(ChunkContext chunkContext) {
-        ExecutionContext context = getExecutionContext(chunkContext);
-        Long userId = extractUserId(chunkContext);
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
         String login = context.getString("githubLogin");
         String token = context.getString("githubToken");
 
@@ -68,20 +71,6 @@ public class PullRequestMiningStep implements StepProvider {
         log.info("Mined {} PRs for user {}", totalPrs, userId);
     }
 
-    private ExecutionContext getExecutionContext(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobExecution()
-            .getExecutionContext();
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
-    }
-
     private int fetchAllPullRequests(Long userId, String login, String token) {
         int saved = 0;
         String cursor = null;
@@ -89,8 +78,7 @@ public class PullRequestMiningStep implements StepProvider {
 
         do {
             GraphQLResponse<UserPullRequestsResponse> response = fetchPullRequestsPage(login, cursor, token);
-            if (response == null || response.hasErrors()) {
-                logErrors(response, login);
+            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
                 break;
             }
 
@@ -109,20 +97,7 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private GraphQLResponse<UserPullRequestsResponse> fetchPullRequestsPage(String login, String cursor, String token) {
-        return graphQLClient.getUserPullRequests(login, cursor, token, createResponseType()).block();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<GraphQLResponse<UserPullRequestsResponse>> createResponseType() {
-        return (Class<GraphQLResponse<UserPullRequestsResponse>>) (Class<?>) GraphQLResponse.class;
-    }
-
-    private void logErrors(GraphQLResponse<UserPullRequestsResponse> response, String login) {
-        if (response == null) {
-            log.warn("No response from GraphQL for user {}", login);
-            return;
-        }
-        log.error("GraphQL errors for user {}: {}", login, response.getErrors());
+        return graphQLClient.getUserPullRequests(login, cursor, token, GraphQLTypeFactory.<UserPullRequestsResponse>responseType()).block();
     }
 
     private int savePullRequests(Long userId, List<PullRequestNode> prs, Instant now) {
