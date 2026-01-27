@@ -14,21 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserSignupEventListener {
 
-    private static final String CHANNEL = "github_collection_trigger";
-
     private final JdbcTemplate jdbcTemplate;
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserSignup(UserSignupEvent event) {
-        log.info("Received UserSignupEvent for user {} (GitHub: {})",
-            event.getUserId(), event.getGithubLogin());
+        Long userId = event.getUserId();
+        log.info("UserSignupEvent for user {} (GitHub: {})", userId, event.getGithubLogin());
 
-        publishCollectionTrigger(event.getUserId());
-    }
-
-    private void publishCollectionTrigger(Long userId) {
-        String payload = String.valueOf(userId);
-        jdbcTemplate.execute("NOTIFY " + CHANNEL + ", '" + payload + "'");
-        log.info("Published NOTIFY to channel '{}' for user {}", CHANNEL, userId);
+        jdbcTemplate.update(
+            "INSERT INTO collection_trigger_queue (user_id) VALUES (?)",
+            userId
+        );
+        log.info("Queued collection trigger for user {}", userId);
     }
 }
