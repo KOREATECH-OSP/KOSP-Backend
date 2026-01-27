@@ -117,29 +117,59 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-        int saved = 0;
-        String cursor = null;
-        Instant now = Instant.now();
+        return paginateCommits(userId, owner, name, nodeId, token, Instant.now(), null, 0);
+    }
 
-        do {
-            GraphQLResponse<RepositoryCommitsResponse> response = fetchCommitsPage(owner, name, nodeId, cursor, token);
-            if (response == null || response.hasErrors()) {
-                logErrors(response, owner, name);
-                break;
-            }
+    private int paginateCommits(
+        Long userId,
+        String owner,
+        String name,
+        String nodeId,
+        String token,
+        Instant now,
+        String cursor,
+        int saved
+    ) {
+        FetchResult result = processCommitsPage(userId, owner, name, nodeId, cursor, token, now);
+        saved += result.saved;
+        if (!result.hasNextPage) {
+            return saved;
+        }
+        return paginateCommits(userId, owner, name, nodeId, token, now, result.nextCursor, saved);
+    }
 
-            RepositoryCommitsResponse data = response.getDataAs(RepositoryCommitsResponse.class);
-            List<CommitNode> commits = data.getCommits();
-            saved += saveCommits(userId, owner, name, commits, now);
+    private FetchResult processCommitsPage(
+        Long userId,
+        String owner,
+        String name,
+        String nodeId,
+        String cursor,
+        String token,
+        Instant now
+    ) {
+        GraphQLResponse<RepositoryCommitsResponse> response = fetchCommitsPage(owner, name, nodeId, cursor, token);
+        if (response == null || response.hasErrors()) {
+            logErrors(response, owner, name);
+            return new FetchResult(0, false, null);
+        }
+        RepositoryCommitsResponse data = response.getDataAs(RepositoryCommitsResponse.class);
+        int saved = saveCommits(userId, owner, name, data.getCommits(), now);
+        PageInfo pageInfo = data.getPageInfo();
+        boolean hasNextPage = pageInfo != null && pageInfo.isHasNextPage();
+        String nextCursor = hasNextPage ? pageInfo.getEndCursor() : null;
+        return new FetchResult(saved, hasNextPage, nextCursor);
+    }
 
-            PageInfo pageInfo = data.getPageInfo();
-            if (pageInfo == null || !pageInfo.isHasNextPage()) {
-                break;
-            }
-            cursor = pageInfo.getEndCursor();
-        } while (cursor != null);
+    private static class FetchResult {
+        final int saved;
+        final boolean hasNextPage;
+        final String nextCursor;
 
-        return saved;
+        FetchResult(int saved, boolean hasNextPage, String nextCursor) {
+            this.saved = saved;
+            this.hasNextPage = hasNextPage;
+            this.nextCursor = nextCursor;
+        }
     }
 
     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
@@ -180,19 +210,47 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private CommitDocument buildDocument(Long userId, String owner, String name, CommitNode commit, Instant now) {
-        return CommitDocument.builder()
+        CommitDocument.CommitDocumentBuilder builder = CommitDocument.builder();
+        builder = buildBasicFields(builder, userId, owner, name, commit);
+        builder = buildAuthorFields(builder, commit);
+        builder = buildStatisticsFields(builder, commit, now);
+        return builder.build();
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildBasicFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        Long userId,
+        String owner,
+        String name,
+        CommitNode commit
+    ) {
+        return builder
             .userId(userId)
             .sha(commit.getOid())
             .message(commit.getMessage())
             .repositoryName(name)
-            .repositoryOwner(owner)
+            .repositoryOwner(owner);
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildAuthorFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        CommitNode commit
+    ) {
+        return builder
             .authorName(commit.getAuthorName())
             .authorEmail(commit.getAuthorEmail())
-            .authoredAt(commit.getAuthoredDate())
+            .authoredAt(commit.getAuthoredDate());
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildStatisticsFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        CommitNode commit,
+        Instant now
+    ) {
+        return builder
             .additions(commit.getAdditions())
             .deletions(commit.getDeletions())
             .changedFiles(commit.getChangedFiles())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }
