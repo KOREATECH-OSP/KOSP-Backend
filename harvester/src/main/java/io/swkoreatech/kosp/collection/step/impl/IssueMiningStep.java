@@ -140,17 +140,33 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private IssueDocument buildDocument(Long userId, IssueNode issue, Instant now) {
-        return IssueDocument.builder()
+        IssueDocument.IssueDocumentBuilder builder = IssueDocument.builder();
+        builder = buildBasicFields(builder, userId, issue);
+        builder = buildMetadataFields(builder, issue, now);
+        return builder.build();
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildBasicFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            Long userId,
+            IssueNode issue) {
+        return builder
             .userId(userId)
             .issueNumber(issue.getNumber())
             .title(issue.getTitle())
             .state(issue.getState())
             .repositoryName(issue.getRepoName())
-            .repositoryOwner(issue.getRepoOwner())
+            .repositoryOwner(issue.getRepoOwner());
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildMetadataFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            IssueNode issue,
+            Instant now) {
+        return builder
             .commentsCount(issue.getCommentsCount())
             .createdAt(issue.getCreatedAt())
             .closedAt(issue.getClosedAt())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }
