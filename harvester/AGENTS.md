@@ -110,6 +110,47 @@ launcher.launch(job, params, Priority.HIGH);
 
 ---
 
+## Utility Classes (Phase 3 - DRY Refactoring)
+
+Located in `harvester/collection/util/`, these utilities eliminate code duplication across Step files:
+
+### StepContextHelper
+```java
+// Extract execution context
+ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+
+// Extract userId from job parameters
+Long userId = StepContextHelper.extractUserId(chunkContext);
+```
+
+### NullSafeGetters
+```java
+// Null-safe Integer to int
+int additions = NullSafeGetters.intOrZero(commit.getAdditions());
+
+// Null-safe Long to long
+long stars = NullSafeGetters.longOrZero(repo.getStargazersCount());
+```
+
+### GraphQLErrorHandler
+```java
+// Log errors and check if response has errors
+if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+    return; // has errors
+}
+```
+
+### GraphQLTypeFactory
+```java
+// Generic type factory for GraphQL responses
+Class<GraphQLResponse<UserReposResponse>> type = 
+    GraphQLTypeFactory.<UserReposResponse>responseType();
+```
+
+**LOC Impact**: -144 lines across 7 Step files (10% reduction)
+
+---
+
 ## Where to Look
 
 | Task | Location |
@@ -118,3 +159,4 @@ launcher.launch(job, params, Priority.HIGH);
 | Modify score calculation | `ScoreCalculationStep` |
 | Adjust Redis communication | `trigger/CollectionTriggerListener` |
 | Change GitHub queries | `resources/graphql/*.graphql` |
+| Use utility helpers | `collection/util/` (StepContextHelper, NullSafeGetters, etc.) |
