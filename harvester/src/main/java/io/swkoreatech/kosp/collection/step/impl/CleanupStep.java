@@ -80,20 +80,19 @@ public class CleanupStep implements StepProvider {
 
     private void updateCollectionMetadata(Long userId) {
         CollectionMetadataDocument metadata = metadataRepository.getByUserId(userId);
+        CollectionMetadataDocument updated = buildUpdatedMetadata(metadata, userId);
+        metadataRepository.save(updated);
+    }
 
-        CollectionMetadataDocument updated = CollectionMetadataDocument.builder()
-            .id(metadata.getId())
-            .userId(userId)
-            .lastFullCollection(Instant.now())
+    private CollectionMetadataDocument buildUpdatedMetadata(CollectionMetadataDocument metadata, Long userId) {
+        Instant now = Instant.now();
+        return CollectionMetadataDocument.builder()
+            .id(metadata.getId()).userId(userId).lastFullCollection(now)
             .lastIncrementalCollection(metadata.getLastIncrementalCollection())
             .lastCommitCursor(metadata.getLastCommitCursor())
             .lastPrCursor(metadata.getLastPrCursor())
             .lastIssueCursor(metadata.getLastIssueCursor())
-            .createdAt(metadata.getCreatedAt())
-            .updatedAt(Instant.now())
-            .build();
-
-        metadataRepository.save(updated);
+            .createdAt(metadata.getCreatedAt()).updatedAt(now).build();
     }
 
     private void clearExecutionContext(ChunkContext chunkContext) {
