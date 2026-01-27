@@ -107,6 +107,7 @@ public class AdminMemberService {
         }
     }
 
+    @Transactional
     public void triggerGithubCollection(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
