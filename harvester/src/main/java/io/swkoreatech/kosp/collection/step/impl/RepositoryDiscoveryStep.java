@@ -23,6 +23,9 @@ import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
@@ -48,7 +51,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
+                Long userId = StepContextHelper.extractUserId(chunkContext);
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
@@ -59,13 +62,6 @@ public class RepositoryDiscoveryStep implements StepProvider {
     @Override
     public String getStepName() {
         return STEP_NAME;
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private void execute(Long userId, ChunkContext chunkContext) {
@@ -80,8 +76,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
         String login = githubUser.getGithubLogin();
 
         GraphQLResponse<ContributedReposResponse> response = fetchContributedRepos(login, token);
-        if (response == null || response.hasErrors()) {
-            logErrors(response, userId);
+        if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
             return;
         }
 
@@ -110,7 +105,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {
         String[] timeRange = calculateTimeRange();
         return graphQLClient
-            .getContributedRepos(login, timeRange[0], timeRange[1], token, createResponseType())
+            .getContributedRepos(login, timeRange[0], timeRange[1], token, GraphQLTypeFactory.responseType())
             .block();
     }
 
@@ -120,21 +115,8 @@ public class RepositoryDiscoveryStep implements StepProvider {
         return new String[] { formatDateTime(oneYearAgo), formatDateTime(now) };
     }
 
-    private void logErrors(GraphQLResponse<ContributedReposResponse> response, Long userId) {
-        if (response == null) {
-            log.warn("No response from GraphQL for user {}", userId);
-            return;
-        }
-        log.error("GraphQL errors for user {}: {}", userId, response.getErrors());
-    }
-
     private String formatDateTime(ZonedDateTime dateTime) {
         return dateTime.format(DateTimeFormatter.ISO_INSTANT);
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<GraphQLResponse<ContributedReposResponse>> createResponseType() {
-        return (Class<GraphQLResponse<ContributedReposResponse>>) (Class<?>) GraphQLResponse.class;
     }
 
     private void saveRepositories(Long userId, String login, Set<RepositoryInfo> repositories) {
