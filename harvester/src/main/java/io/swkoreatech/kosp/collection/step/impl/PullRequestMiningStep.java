@@ -140,25 +140,48 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private PullRequestDocument buildDocument(Long userId, PullRequestNode pr, Instant now) {
-        return PullRequestDocument.builder()
+        PullRequestDocument.PullRequestDocumentBuilder builder = PullRequestDocument.builder();
+        builder = buildBasicFields(builder, userId, pr);
+        builder = buildStatisticsFields(builder, pr);
+        builder = buildMetadataFields(builder, pr, now);
+        return builder.build();
+    }
+
+    private PullRequestDocument.PullRequestDocumentBuilder buildBasicFields(
+            PullRequestDocument.PullRequestDocumentBuilder builder,
+            Long userId,
+            PullRequestNode pr) {
+        return builder
             .userId(userId)
             .prNumber(pr.getNumber())
             .title(pr.getTitle())
             .state(pr.getState())
             .repositoryName(pr.getRepoName())
-            .repositoryOwner(pr.getRepoOwner())
+            .repositoryOwner(pr.getRepoOwner());
+    }
+
+    private PullRequestDocument.PullRequestDocumentBuilder buildStatisticsFields(
+            PullRequestDocument.PullRequestDocumentBuilder builder,
+            PullRequestNode pr) {
+        return builder
             .additions(pr.getAdditions())
             .deletions(pr.getDeletions())
             .changedFiles(pr.getChangedFiles())
             .commitsCount(pr.getCommitsCount())
             .repoStarCount(pr.getRepoStarCount())
-            .closedIssuesCount(pr.getClosedIssuesCount())
+            .closedIssuesCount(pr.getClosedIssuesCount());
+    }
+
+    private PullRequestDocument.PullRequestDocumentBuilder buildMetadataFields(
+            PullRequestDocument.PullRequestDocumentBuilder builder,
+            PullRequestNode pr,
+            Instant now) {
+        return builder
             .merged(pr.isMerged())
             .isCrossRepository(pr.isCrossRepository())
             .mergedAt(pr.getMergedAt())
             .createdAt(pr.getCreatedAt())
             .closedAt(pr.getClosedAt())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }
