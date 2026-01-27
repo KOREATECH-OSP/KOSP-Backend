@@ -22,6 +22,8 @@ import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentReposito
 import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.NullSafeGetters;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.job.StepCompletionListener;
@@ -55,7 +57,7 @@ public class StatisticsAggregationStep implements StepProvider {
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
+                Long userId = StepContextHelper.extractUserId(chunkContext);
                 execute(userId);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
@@ -66,13 +68,6 @@ public class StatisticsAggregationStep implements StepProvider {
     @Override
     public String getStepName() {
         return STEP_NAME;
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private void execute(Long userId) {
@@ -200,35 +195,7 @@ public class StatisticsAggregationStep implements StepProvider {
              .orElse(null);
      }
 
-     private int getAdditionsOrZero(CommitDocument commit) {
-         if (commit.getAdditions() == null) {
-             return 0;
-         }
-         return commit.getAdditions();
-     }
-
-     private int getDeletionsOrZero(CommitDocument commit) {
-         if (commit.getDeletions() == null) {
-             return 0;
-         }
-         return commit.getDeletions();
-     }
-
-     private int getStargazersCountOrZero(ContributedRepoDocument repo) {
-         if (repo.getStargazersCount() == null) {
-             return 0;
-         }
-         return repo.getStargazersCount();
-     }
-
-     private int getForksCountOrZero(ContributedRepoDocument repo) {
-         if (repo.getForksCount() == null) {
-             return 0;
-         }
-         return repo.getForksCount();
-     }
-
-     private CalculationResults calculateAllMetrics(List<CommitDocument> commits, List<ContributedRepoDocument> repos) {
+      private CalculationResults calculateAllMetrics(List<CommitDocument> commits, List<ContributedRepoDocument> repos) {
          int totalAdditions = calculateTotalAdditions(commits);
          int totalDeletions = calculateTotalDeletions(commits);
          int nightCommits = calculateNightCommits(commits);
@@ -238,17 +205,17 @@ public class StatisticsAggregationStep implements StepProvider {
          return new CalculationResults(totalAdditions, totalDeletions, nightCommits, ownedRepos, totalStars, totalForks);
      }
 
-     private int calculateTotalAdditions(List<CommitDocument> commits) {
-         return commits.stream()
-             .mapToInt(this::getAdditionsOrZero)
-             .sum();
-     }
+      private int calculateTotalAdditions(List<CommitDocument> commits) {
+          return commits.stream()
+              .mapToInt(c -> NullSafeGetters.intOrZero(c.getAdditions()))
+              .sum();
+      }
 
-     private int calculateTotalDeletions(List<CommitDocument> commits) {
-         return commits.stream()
-             .mapToInt(this::getDeletionsOrZero)
-             .sum();
-     }
+      private int calculateTotalDeletions(List<CommitDocument> commits) {
+          return commits.stream()
+              .mapToInt(c -> NullSafeGetters.intOrZero(c.getDeletions()))
+              .sum();
+      }
 
      private int calculateNightCommits(List<CommitDocument> commits) {
          return (int) commits.stream()
@@ -262,19 +229,19 @@ public class StatisticsAggregationStep implements StepProvider {
              .count();
      }
 
-     private int calculateTotalStars(List<ContributedRepoDocument> repos) {
-         return repos.stream()
-             .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
-             .mapToInt(this::getStargazersCountOrZero)
-             .sum();
-     }
+      private int calculateTotalStars(List<ContributedRepoDocument> repos) {
+          return repos.stream()
+              .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
+              .mapToInt(r -> NullSafeGetters.intOrZero(r.getStargazersCount()))
+              .sum();
+      }
 
-     private int calculateTotalForks(List<ContributedRepoDocument> repos) {
-         return repos.stream()
-             .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
-             .mapToInt(this::getForksCountOrZero)
-             .sum();
-     }
+      private int calculateTotalForks(List<ContributedRepoDocument> repos) {
+          return repos.stream()
+              .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
+              .mapToInt(r -> NullSafeGetters.intOrZero(r.getForksCount()))
+              .sum();
+      }
 
      private AggregatedStats buildAggregatedStats(
          List<CommitDocument> commits,
