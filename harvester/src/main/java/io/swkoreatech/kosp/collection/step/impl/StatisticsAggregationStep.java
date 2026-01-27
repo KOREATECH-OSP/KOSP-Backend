@@ -13,8 +13,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.collection.document.CommitDocument;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.collection.document.IssueDocument;
@@ -24,6 +22,8 @@ import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentReposito
 import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.user.User;
@@ -86,60 +86,22 @@ public class StatisticsAggregationStep implements StepProvider {
         String githubId = String.valueOf(githubUser.getGithubId());
 
         AggregatedStats stats = aggregateFromMongoDB(userId);
-        saveToMySQL(githubId, stats);
+        saveToDB(githubId, stats);
         updateContributedRepoStats(userId);
 
         log.info("Aggregated statistics for user {}: {} commits, {} PRs, {} issues",
             userId, stats.totalCommits, stats.totalPrs, stats.totalIssues);
     }
 
-    private AggregatedStats aggregateFromMongoDB(Long userId) {
-        List<CommitDocument> commits = commitDocumentRepository.findByUserId(userId);
-        List<PullRequestDocument> prs = prDocumentRepository.findByUserId(userId);
-        List<IssueDocument> issues = issueDocumentRepository.findByUserId(userId);
-        List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
+     private AggregatedStats aggregateFromMongoDB(Long userId) {
+         List<CommitDocument> commits = commitDocumentRepository.findByUserId(userId);
+         List<PullRequestDocument> prs = prDocumentRepository.findByUserId(userId);
+         List<IssueDocument> issues = issueDocumentRepository.findByUserId(userId);
+         List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
 
-        int totalAdditions = commits.stream()
-            .mapToInt(c -> c.getAdditions() != null ? c.getAdditions() : 0)
-            .sum();
-
-        int totalDeletions = commits.stream()
-            .mapToInt(c -> c.getDeletions() != null ? c.getDeletions() : 0)
-            .sum();
-
-        int nightCommits = (int) commits.stream()
-            .filter(this::isNightCommit)
-            .count();
-
-        int ownedRepos = (int) repos.stream()
-            .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
-            .count();
-
-        int totalStars = repos.stream()
-            .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
-            .mapToInt(r -> r.getStargazersCount() != null ? r.getStargazersCount() : 0)
-            .sum();
-
-        int totalForks = repos.stream()
-            .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
-            .mapToInt(r -> r.getForksCount() != null ? r.getForksCount() : 0)
-            .sum();
-
-        return new AggregatedStats(
-            commits.size(),
-            totalAdditions + totalDeletions,
-            totalAdditions,
-            totalDeletions,
-            prs.size(),
-            issues.size(),
-            ownedRepos,
-            repos.size(),
-            totalStars,
-            totalForks,
-            nightCommits,
-            commits.size() - nightCommits
-        );
-    }
+         CalculationResults results = calculateAllMetrics(commits, repos);
+         return buildAggregatedStats(commits, prs, issues, repos, results);
+     }
 
     private boolean isNightCommit(CommitDocument commit) {
         if (commit.getAuthoredAt() == null) {
@@ -149,46 +111,53 @@ public class StatisticsAggregationStep implements StepProvider {
         return hour >= NIGHT_START_HOUR || hour < NIGHT_END_HOUR;
     }
 
-    private void saveToMySQL(String githubId, AggregatedStats stats) {
+    private void saveToDB(String githubId, AggregatedStats stats) {
         GithubUserStatistics statistics = statisticsRepository.getOrCreate(githubId);
+        updateStatisticsFields(statistics, stats);
+        updateDataPeriod(statistics);
+        statisticsRepository.save(statistics);
+    }
 
-        statistics.updateStatistics(
-            stats.totalCommits,
-            stats.totalLines,
-            stats.totalAdditions,
-            stats.totalDeletions,
-            stats.totalPrs,
-            stats.totalIssues,
-            stats.ownedReposCount,
-            stats.contributedReposCount,
-            stats.totalStarsReceived,
-            stats.totalForksReceived,
-            stats.nightCommits,
-            stats.dayCommits
-        );
+    private void updateStatisticsFields(GithubUserStatistics statistics, AggregatedStats stats) {
+        statistics.updateStatistics(stats.totalCommits, stats.totalLines, stats.totalAdditions,
+            stats.totalDeletions, stats.totalPrs, stats.totalIssues, stats.ownedReposCount,
+            stats.contributedReposCount, stats.totalStarsReceived, stats.totalForksReceived,
+            stats.nightCommits, stats.dayCommits);
+    }
 
+    private void updateDataPeriod(GithubUserStatistics statistics) {
         statistics.updateDataPeriod(
             LocalDate.now().minusYears(1),
             LocalDate.now()
         );
-
-        statisticsRepository.save(statistics);
     }
 
-    private void updateContributedRepoStats(Long userId) {
-        List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
-        List<CommitDocument> commits = commitDocumentRepository.findByUserId(userId);
-        List<PullRequestDocument> prs = prDocumentRepository.findByUserId(userId);
-        List<IssueDocument> issues = issueDocumentRepository.findByUserId(userId);
+     private void updateContributedRepoStats(Long userId) {
+         UserActivityData data = fetchAllUserData(userId);
+         updateAllRepos(data.repos, data.commits, data.prs, data.issues);
+         repoDocumentRepository.saveAll(data.repos);
+     }
 
-        for (ContributedRepoDocument repo : repos) {
-            updateSingleRepoStats(repo, commits, prs, issues);
-        }
+     private UserActivityData fetchAllUserData(Long userId) {
+         List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
+         List<CommitDocument> commits = commitDocumentRepository.findByUserId(userId);
+         List<PullRequestDocument> prs = prDocumentRepository.findByUserId(userId);
+         List<IssueDocument> issues = issueDocumentRepository.findByUserId(userId);
+         return new UserActivityData(repos, commits, prs, issues);
+     }
 
-        repoDocumentRepository.saveAll(repos);
-    }
+     private void updateAllRepos(
+         List<ContributedRepoDocument> repos,
+         List<CommitDocument> commits,
+         List<PullRequestDocument> prs,
+         List<IssueDocument> issues
+     ) {
+         for (ContributedRepoDocument repo : repos) {
+             updateSingleRepoStats(repo, commits, prs, issues);
+         }
+     }
 
-    private void updateSingleRepoStats(
+     private void updateSingleRepoStats(
         ContributedRepoDocument repo,
         List<CommitDocument> allCommits,
         List<PullRequestDocument> allPrs,
@@ -222,16 +191,119 @@ public class StatisticsAggregationStep implements StepProvider {
             .count();
     }
 
-    private Instant findLastCommitDate(List<CommitDocument> commits, String repoFullName) {
-        return commits.stream()
-            .filter(c -> repoFullName.equals(c.getRepositoryOwner() + "/" + c.getRepositoryName()))
-            .map(CommitDocument::getAuthoredAt)
-            .filter(Objects::nonNull)
-            .max(Instant::compareTo)
-            .orElse(null);
-    }
+     private Instant findLastCommitDate(List<CommitDocument> commits, String repoFullName) {
+         return commits.stream()
+             .filter(c -> repoFullName.equals(c.getRepositoryOwner() + "/" + c.getRepositoryName()))
+             .map(CommitDocument::getAuthoredAt)
+             .filter(Objects::nonNull)
+             .max(Instant::compareTo)
+             .orElse(null);
+     }
 
-    private record AggregatedStats(
+     private int getAdditionsOrZero(CommitDocument commit) {
+         if (commit.getAdditions() == null) {
+             return 0;
+         }
+         return commit.getAdditions();
+     }
+
+     private int getDeletionsOrZero(CommitDocument commit) {
+         if (commit.getDeletions() == null) {
+             return 0;
+         }
+         return commit.getDeletions();
+     }
+
+     private int getStargazersCountOrZero(ContributedRepoDocument repo) {
+         if (repo.getStargazersCount() == null) {
+             return 0;
+         }
+         return repo.getStargazersCount();
+     }
+
+     private int getForksCountOrZero(ContributedRepoDocument repo) {
+         if (repo.getForksCount() == null) {
+             return 0;
+         }
+         return repo.getForksCount();
+     }
+
+     private CalculationResults calculateAllMetrics(List<CommitDocument> commits, List<ContributedRepoDocument> repos) {
+         int totalAdditions = calculateTotalAdditions(commits);
+         int totalDeletions = calculateTotalDeletions(commits);
+         int nightCommits = calculateNightCommits(commits);
+         int ownedRepos = calculateOwnedReposCount(repos);
+         int totalStars = calculateTotalStars(repos);
+         int totalForks = calculateTotalForks(repos);
+         return new CalculationResults(totalAdditions, totalDeletions, nightCommits, ownedRepos, totalStars, totalForks);
+     }
+
+     private int calculateTotalAdditions(List<CommitDocument> commits) {
+         return commits.stream()
+             .mapToInt(this::getAdditionsOrZero)
+             .sum();
+     }
+
+     private int calculateTotalDeletions(List<CommitDocument> commits) {
+         return commits.stream()
+             .mapToInt(this::getDeletionsOrZero)
+             .sum();
+     }
+
+     private int calculateNightCommits(List<CommitDocument> commits) {
+         return (int) commits.stream()
+             .filter(this::isNightCommit)
+             .count();
+     }
+
+     private int calculateOwnedReposCount(List<ContributedRepoDocument> repos) {
+         return (int) repos.stream()
+             .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
+             .count();
+     }
+
+     private int calculateTotalStars(List<ContributedRepoDocument> repos) {
+         return repos.stream()
+             .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
+             .mapToInt(this::getStargazersCountOrZero)
+             .sum();
+     }
+
+     private int calculateTotalForks(List<ContributedRepoDocument> repos) {
+         return repos.stream()
+             .filter(r -> Boolean.TRUE.equals(r.getIsOwner()))
+             .mapToInt(this::getForksCountOrZero)
+             .sum();
+     }
+
+     private AggregatedStats buildAggregatedStats(
+         List<CommitDocument> commits,
+         List<PullRequestDocument> prs,
+         List<IssueDocument> issues,
+         List<ContributedRepoDocument> repos,
+         CalculationResults results
+     ) {
+         int dayCommits = commits.size() - results.nightCommits;
+         return new AggregatedStats(commits.size(), results.totalAdditions + results.totalDeletions, results.totalAdditions, results.totalDeletions, prs.size(), issues.size(), results.ownedRepos, repos.size(), results.totalStars, results.totalForks, results.nightCommits, dayCommits);
+     }
+
+      private record CalculationResults(
+          int totalAdditions,
+          int totalDeletions,
+          int nightCommits,
+          int ownedRepos,
+          int totalStars,
+          int totalForks
+      ) {}
+
+      private record UserActivityData(
+          List<ContributedRepoDocument> repos,
+          List<CommitDocument> commits,
+          List<PullRequestDocument> prs,
+          List<IssueDocument> issues
+      ) {}
+
+      private record AggregatedStats(
         int totalCommits,
         int totalLines,
         int totalAdditions,
