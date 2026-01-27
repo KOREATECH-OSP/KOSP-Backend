@@ -10,15 +10,18 @@ Harvester 코드베이스에서 중복 코드를 유틸리티로 추출하여 DR
 **코드 중복 분석 결과**:
 - 총 7개 Step 파일: 1,498 LOC
 - 발견된 중복 패턴: 7가지
-- 추출 가능한 LOC: 184줄 (12.3% 감소 가능)
-- 예상 결과: 1,314 LOC
+- 추출 가능한 LOC: 184줄 (원래 목표)
+- **Phase 3 범위**: 149줄 (PaginationHelper 제외, 보수적 접근)
+- 예상 결과: 1,349 LOC (10% 감소)
 
-**중복 패턴 Top 5**:
+**Phase 3 추출 패턴** (PaginationHelper 제외):
 1. ExecutionContext 추출 (6파일, 42줄)
 2. GraphQL 에러 처리 (4파일, 28줄)
 3. GraphQL 타입 캐스팅 (4파일, 16줄)
-4. 페이지네이션 로직 (3파일, 35줄)
-5. Null-Safe Getter (2파일, 24줄)
+4. Null-Safe Getter (2파일, 24줄)
+
+**제외된 패턴** (Phase 3C로 연기):
+5. 페이지네이션 로직 (3파일, 35줄) - 복잡도 높음, 별도 PR 예정
 
 ---
 
@@ -28,14 +31,13 @@ Harvester 코드베이스에서 중복 코드를 유틸리티로 추출하여 DR
 중복 코드를 유틸리티 클래스로 추출하여 유지보수성 향상 및 코드 품질 개선
 
 ### Concrete Deliverables
-1. **5개 유틸리티 클래스 생성**:
+1. **4개 유틸리티 클래스 생성** (PaginationHelper 제외):
    - StepContextHelper.java
    - NullSafeGetters.java
    - GraphQLErrorHandler.java
    - GraphQLTypeFactory.java
-   - PaginationHelper.java
 
-2. **7개 Step 파일 리팩토링**:
+2. **7개 Step 파일 리팩토링** (페이지네이션 로직은 그대로 유지):
    - CommitMiningStep.java
    - RepositoryDiscoveryStep.java
    - PullRequestMiningStep.java
@@ -44,15 +46,18 @@ Harvester 코드베이스에서 중복 코드를 유틸리티로 추출하여 DR
    - ScoreCalculationStep.java
    - StatisticsAggregationStep.java
 
-3. **유틸리티 단위 테스트**: 5개 테스트 클래스
+3. **테스트**:
+   - 유틸리티 단위 테스트: 4개 클래스
+   - 통합 테스트: Step 파일 동작 검증
 
 ### Definition of Done
-- [ ] 5개 유틸리티 클래스 생성 완료
-- [ ] 7개 Step 파일에서 중복 코드 제거 완료
-- [ ] 유틸리티 테스트 작성 완료
+- [ ] 4개 유틸리티 클래스 생성 완료 (PaginationHelper 제외)
+- [ ] 7개 Step 파일에서 중복 코드 제거 완료 (페이지네이션 제외)
+- [ ] 유틸리티 단위 테스트 작성 완료
+- [ ] 통합 테스트 추가 (Step 동작 검증)
 - [ ] 전체 빌드 성공 (common, harvester, backend)
-- [ ] LOC 감소: 최소 150줄 이상 (목표: 184줄)
-- [ ] 기존 기능 동작 유지 (회귀 없음)
+- [ ] LOC 감소: 최소 140줄 이상 (목표: 149줄, PaginationHelper 제외)
+- [ ] 기존 기능 동작 유지 (회귀 없음, 통합 테스트로 검증)
 
 ### Must Have
 - 유틸리티는 `harvester/collection/util/` 패키지에 위치
@@ -107,13 +112,15 @@ git diff --stat refactor/kosp-compliance-phase2..HEAD
 ```
 Task 0 (Setup)
   ↓
-Task 1-5 (Create Utilities) ← Can be parallelized
+Task 1-4 (Create 4 Utilities) ← Can be parallelized (PaginationHelper 제외)
   ↓
-Task 6-12 (Refactor Step Files) ← Sequential (one by one)
+Task 5-11 (Refactor 7 Step Files) ← Sequential (one by one)
   ↓
-Task 13 (Add Tests)
+Task 11 (Add Unit Tests)
   ↓
-Task 14 (Final Verification)
+Task 12 (Add Integration Tests) ← 통합 테스트 추가
+  ↓
+Task 13 (Final Verification)
 ```
 
 ---
@@ -307,49 +314,10 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 5. Create PaginationHelper utility (Most Complex)
-
-  **What to do**:
-  Create `PaginationHelper.java` with generic pagination support:
-  - `<T, R> paginate(FetchFunction<T> fetcher, PageInfoExtractor<T> pageInfoExtractor, ItemProcessor<T> processor)`
-  - Support for both recursive and iterative pagination
-  - Built-in error handling integration with GraphQLErrorHandler
-
-  **Pattern to extract**:
-  ```java
-  // FROM: 3 different implementations
-  // CommitMiningStep: Recursive with FetchResult
-  // PullRequestMiningStep: Do-while loop
-  // IssueMiningStep: Do-while loop
-  
-  // TO:
-  PaginationHelper.paginate(
-      cursor -> graphQLClient.fetch(cursor),
-      response -> response.getPageInfo(),
-      items -> processAndSave(items)
-  );
-  ```
-
-  **Parallelizable**: YES (with Task 1-4)
-
-  **References**:
-  - CommitMiningStep.java:119-139 (fetchAllCommits + paginateCommits)
-  - PullRequestMiningStep.java:85-109 (fetchAllPullRequests)
-  - IssueMiningStep.java:85-109 (fetchAllIssues)
-
-  **Acceptance Criteria**:
-  - [ ] File created: `harvester/collection/util/PaginationHelper.java`
-  - [ ] Functional interfaces defined (FetchFunction, PageInfoExtractor, ItemProcessor)
-  - [ ] Pagination method implemented
-  - [ ] Error handling integrated
-  - [ ] Compilation succeeds
-
-  **Commit**: YES
-  - Message: `feat(harvester): add PaginationHelper utility for GraphQL pagination`
-
+- [ ] ~~5. Create PaginationHelper utility~~ (EXCLUDED - Phase 3C로 연기, 복잡도 높음)
 ---
 
-- [ ] 6. Refactor CommitMiningStep (uses all 5 utilities)
+- [ ] 5. Refactor CommitMiningStep (uses 4 utilities (pagination 제외))
 
   **What to do**:
   - Replace getExecutionContext() with StepContextHelper
@@ -361,7 +329,7 @@ Task 14 (Final Verification)
   **Parallelizable**: NO (must verify each step individually)
 
   **References**:
-  - Task 1-5 utilities
+  - Task 1-4 utilities
 
   **Acceptance Criteria**:
   - [ ] All utility imports added
@@ -374,7 +342,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 7. Refactor PullRequestMiningStep
+- [ ] 6. Refactor PullRequestMiningStep
 
   **What to do**:
   - Replace getExecutionContext() with StepContextHelper
@@ -396,7 +364,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 8. Refactor IssueMiningStep
+- [ ] 7. Refactor IssueMiningStep
 
   **What to do**:
   - Replace getExecutionContext() with StepContextHelper
@@ -418,7 +386,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 9. Refactor RepositoryDiscoveryStep
+- [ ] 8. Refactor RepositoryDiscoveryStep
 
   **What to do**:
   - Replace extractUserId() with StepContextHelper
@@ -438,7 +406,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 10. Refactor ScoreCalculationStep
+- [ ] 9. Refactor ScoreCalculationStep
 
   **What to do**:
   - Replace extractUserId() with StepContextHelper
@@ -457,7 +425,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 11. Refactor StatisticsAggregationStep
+- [ ] 10. Refactor StatisticsAggregationStep
 
   **What to do**:
   - Replace extractUserId() with StepContextHelper
@@ -476,7 +444,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 12. Refactor CleanupStep
+- [ ] 11. Refactor CleanupStep
 
   **What to do**:
   - Replace extractUserId() with StepContextHelper
@@ -494,7 +462,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 13. Add unit tests for utilities
+- [ ] 12. Add unit tests for utilities
 
   **What to do**:
   Create test classes:
@@ -518,7 +486,7 @@ Task 14 (Final Verification)
 
 ---
 
-- [ ] 14. Final Verification and Documentation
+- [ ] 13. Final Verification and Documentation
 
   **What to do**:
   
@@ -592,3 +560,34 @@ Task 14 (Final Verification)
 - [ ] Utility usage documented in AGENTS.md
 - [ ] Phase 3 marked complete in refactoring-issues.md
 - [ ] Completion summary created
+
+---
+
+## Phase 3C: Future Work (PaginationHelper)
+
+**Status**: Deferred to separate PR
+
+### Scope
+- Create PaginationHelper utility
+- Refactor pagination in 3 Step files:
+  - CommitMiningStep (recursive → helper)
+  - PullRequestMiningStep (do-while → helper)
+  - IssueMiningStep (do-while → helper)
+
+### Expected Impact
+- Additional LOC reduction: ~35 lines
+- Complexity: 3/5 (requires generic callback pattern)
+- Risk: Medium (3 different implementations to unify)
+
+### Prerequisites
+- Phase 3 (current) must be complete and stable
+- All Step files tested and verified
+- Utilities proven in production
+
+### Recommendation
+Execute Phase 3C only after Phase 3 has been:
+- Merged to main
+- Running in production for 1+ week
+- No regressions detected
+
+**Rationale**: Pagination is complex and critical. Safe approach is to defer until current utilities are proven stable.
