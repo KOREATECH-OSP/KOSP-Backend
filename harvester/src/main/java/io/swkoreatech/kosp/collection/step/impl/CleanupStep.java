@@ -13,6 +13,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.GithubUserRepository;
@@ -39,7 +40,7 @@ public class CleanupStep implements StepProvider {
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
+                Long userId = StepContextHelper.extractUserId(chunkContext);
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
@@ -50,13 +51,6 @@ public class CleanupStep implements StepProvider {
     @Override
     public String getStepName() {
         return STEP_NAME;
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private void execute(Long userId, ChunkContext chunkContext) {
