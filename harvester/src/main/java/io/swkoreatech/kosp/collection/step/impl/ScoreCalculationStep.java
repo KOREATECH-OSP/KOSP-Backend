@@ -22,6 +22,8 @@ import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.NullSafeGetters;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.user.User;
@@ -53,7 +55,7 @@ public class ScoreCalculationStep implements StepProvider {
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
+                Long userId = StepContextHelper.extractUserId(chunkContext);
                 execute(userId);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
@@ -64,13 +66,6 @@ public class ScoreCalculationStep implements StepProvider {
     @Override
     public String getStepName() {
         return STEP_NAME;
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private void execute(Long userId) {
@@ -207,23 +202,16 @@ public class ScoreCalculationStep implements StepProvider {
          return BigDecimal.valueOf(1.5);
      }
 
-     private BigDecimal calculateClosedIssuesBonus(List<PullRequestDocument> prs) {
-         int totalClosedIssues = prs.stream()
-             .filter(pr -> Boolean.TRUE.equals(pr.getMerged()))
-             .mapToInt(this::getClosedIssuesCountOrZero)
-             .sum();
- 
-         return getClosedIssuesBonus(totalClosedIssues);
-     }
+      private BigDecimal calculateClosedIssuesBonus(List<PullRequestDocument> prs) {
+          int totalClosedIssues = prs.stream()
+              .filter(pr -> Boolean.TRUE.equals(pr.getMerged()))
+              .mapToInt(pr -> NullSafeGetters.intOrZero(pr.getClosedIssuesCount()))
+              .sum();
+  
+          return getClosedIssuesBonus(totalClosedIssues);
+      }
 
-     private int getClosedIssuesCountOrZero(PullRequestDocument pr) {
-         if (pr.getClosedIssuesCount() == null) {
-             return 0;
-         }
-         return pr.getClosedIssuesCount();
-     }
-
-     private BigDecimal getClosedIssuesBonus(int totalClosedIssues) {
+      private BigDecimal getClosedIssuesBonus(int totalClosedIssues) {
          if (totalClosedIssues < CLOSED_ISSUES_THRESHOLD) {
              return BigDecimal.ZERO;
          }

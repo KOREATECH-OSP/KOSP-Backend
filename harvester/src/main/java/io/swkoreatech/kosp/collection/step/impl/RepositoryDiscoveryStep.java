@@ -105,7 +105,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {
         String[] timeRange = calculateTimeRange();
         return graphQLClient
-            .getContributedRepos(login, timeRange[0], timeRange[1], token, GraphQLTypeFactory.responseType())
+            .getContributedRepos(login, timeRange[0], timeRange[1], token, GraphQLTypeFactory.<ContributedReposResponse>responseType())
             .block();
     }
 
