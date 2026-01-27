@@ -156,7 +156,10 @@ public class CommitMiningStep implements StepProvider {
         int saved = saveCommits(userId, owner, name, data.getCommits(), now);
         PageInfo pageInfo = data.getPageInfo();
         boolean hasNextPage = pageInfo != null && pageInfo.isHasNextPage();
-        String nextCursor = hasNextPage ? pageInfo.getEndCursor() : null;
+        String nextCursor = null;
+        if (hasNextPage) {
+            nextCursor = pageInfo.getEndCursor();
+        }
         return new FetchResult(saved, hasNextPage, nextCursor);
     }
 
