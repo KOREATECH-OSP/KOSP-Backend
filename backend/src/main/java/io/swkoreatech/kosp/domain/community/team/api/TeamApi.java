@@ -62,6 +62,13 @@ public interface TeamApi {
         @RequestBody @Valid TeamUpdateRequest request
     );
 
+    @Operation(summary = "팀 삭제", description = "팀장이 팀을 삭제합니다. 팀의 모든 멤버와 초대도 함께 삭제됩니다.")
+    @DeleteMapping("/v1/teams/{teamId}")
+    ResponseEntity<Void> deleteTeam(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId
+    );
+
     @Operation(summary = "팀원 초대", description = "팀장이 새로운 팀원을 이메일로 초대합니다.")
     @PostMapping("/v1/teams/{teamId}/invites")
     ResponseEntity<Void> inviteMember(

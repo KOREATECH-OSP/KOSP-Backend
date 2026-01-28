@@ -62,6 +62,13 @@ public class TeamController implements TeamApi {
     }
 
     @Override
+    @Permit(name = "team:delete", description = "팀 삭제")
+    public ResponseEntity<Void> deleteTeam(@AuthUser User user, Long teamId) {
+        teamService.deleteTeam(teamId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
     @Permit(name = "team:invite", description = "팀원 초대")
     public ResponseEntity<Void> inviteMember(@AuthUser User user, Long teamId, TeamInviteRequest request, @ClientURL String clientUrl) {
         teamService.inviteMember(teamId, user, request, clientUrl);
