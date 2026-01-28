@@ -43,10 +43,13 @@ public class RecruitApply extends BaseEntity {
     @Column(nullable = false)
     private String reason;
 
-    @Column(name = "portfolio_url")
-    private String portfolioUrl;
+     @Column(name = "portfolio_url")
+     private String portfolioUrl;
 
-    public enum ApplyStatus {
+     @Column(name = "decision_reason", nullable = false, length = 500)
+     private String decisionReason;
+
+     public enum ApplyStatus {
         PENDING, ACCEPTED, REJECTED
     }
 
@@ -59,7 +62,15 @@ public class RecruitApply extends BaseEntity {
         this.portfolioUrl = portfolioUrl;
     }
 
-    public void updateStatus(ApplyStatus status) {
-        this.status = status;
-    }
+     public void updateStatus(ApplyStatus status) {
+         this.status = status;
+     }
+
+     public void updateDecisionReason(String reason) {
+         if (reason == null || reason.isBlank()) {
+             this.decisionReason = "사유 미입력";
+             return;
+         }
+         this.decisionReason = reason;
+     }
 }

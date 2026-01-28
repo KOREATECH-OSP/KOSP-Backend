@@ -12,6 +12,9 @@ import org.springframework.data.repository.Repository;
 public interface CommentRepository extends Repository<Comment, Long> {
 
     Comment save(Comment comment);
+
+    Optional<Comment> findById(Long id);
+
     Optional<Comment> findByIdAndIsDeletedFalse(Long id);
 
     default Comment getById(Long id) {

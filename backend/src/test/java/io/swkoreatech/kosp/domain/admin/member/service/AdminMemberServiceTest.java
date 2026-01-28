@@ -253,7 +253,9 @@ class AdminMemberServiceTest {
         void throwsException_whenUserNotFound() {
             // given
             given(userRepository.findById(999L)).willReturn(Optional.empty());
-            AdminUserUpdateRequest request = new AdminUserUpdateRequest("새이름", "소개", null);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "홍길동", "2024123456", "test@koreatech.ac.kr", null, null
+            );
 
             // when & then
             assertThatThrownBy(() -> adminMemberService.updateUser(999L, request))
@@ -261,76 +263,123 @@ class AdminMemberServiceTest {
         }
 
         @Test
-        @DisplayName("사용자 이름과 소개를 성공적으로 수정한다")
-        void updatesNameAndIntroduction() {
+        @DisplayName("kutId가 다른 사용자와 중복되면 예외가 발생한다")
+        void throwsException_whenKutIdAlreadyExists() {
             // given
-            User user = createUser(1L, "홍길동");
+            User user = createUser(1L, "사용자A");
             given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            AdminUserUpdateRequest request = new AdminUserUpdateRequest("새이름", "새 소개글", null);
+            given(userRepository.existsByKutIdAndIdNot("2024000002", 1L)).willReturn(true);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "사용자A", "2024000002", "usera@koreatech.ac.kr", null, null
+            );
+
+            // when & then
+            assertThatThrownBy(() -> adminMemberService.updateUser(1L, request))
+                .isInstanceOf(GlobalException.class);
+        }
+
+        @Test
+        @DisplayName("kutEmail이 다른 사용자와 중복되면 예외가 발생한다")
+        void throwsException_whenKutEmailAlreadyExists() {
+            // given
+            User user = createUser(1L, "사용자A");
+            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.existsByKutEmailAndIdNot("userb@koreatech.ac.kr", 1L)).willReturn(true);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "사용자A", "2024000001", "userb@koreatech.ac.kr", null, null
+            );
+
+            // when & then
+            assertThatThrownBy(() -> adminMemberService.updateUser(1L, request))
+                .isInstanceOf(GlobalException.class);
+        }
+
+        @Test
+        @DisplayName("자기 자신의 kutId와 kutEmail로 수정하면 성공한다")
+        void successfullyUpdates_withSameKutIdAndKutEmail() {
+            // given
+            User user = createUser(1L, "사용자A");
+            ReflectionTestUtils.setField(user, "kutId", "2024000001");
+            ReflectionTestUtils.setField(user, "kutEmail", "usera@koreatech.ac.kr");
+            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.existsByKutIdAndIdNot("2024000001", 1L)).willReturn(false);
+            given(userRepository.existsByKutEmailAndIdNot("usera@koreatech.ac.kr", 1L)).willReturn(false);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "사용자A", "2024000001", "usera@koreatech.ac.kr", "새 소개", null
+            );
+
+            // when
+            adminMemberService.updateUser(1L, request);
+
+            // then
+            assertThat(user.getKutId()).isEqualTo("2024000001");
+            assertThat(user.getKutEmail()).isEqualTo("usera@koreatech.ac.kr");
+            assertThat(user.getIntroduction()).isEqualTo("새 소개");
+        }
+
+        @Test
+        @DisplayName("kutEmail 대소문자 차이만 있어도 중복으로 감지한다")
+        void throwsException_whenKutEmailDiffersByCaseOnly() {
+            // given
+            User user = createUser(1L, "사용자A");
+            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.existsByKutEmailAndIdNot("userb@koreatech.ac.kr", 1L)).willReturn(true);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "사용자A", "2024000001", "USERB@koreatech.ac.kr", null, null
+            );
+
+            // when & then
+            assertThatThrownBy(() -> adminMemberService.updateUser(1L, request))
+                .isInstanceOf(GlobalException.class);
+        }
+
+        @Test
+        @DisplayName("모든 필드를 성공적으로 수정한다")
+        void successfullyUpdatesAllFields() {
+            // given
+            User user = createUser(1L, "사용자A");
+            GithubUser githubUser = GithubUser.builder()
+                .githubId(12345L)
+                .githubLogin("usera")
+                .githubAvatarUrl("https://old.url")
+                .build();
+            ReflectionTestUtils.setField(user, "githubUser", githubUser);
+            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.existsByKutIdAndIdNot("2024999999", 1L)).willReturn(false);
+            given(userRepository.existsByKutEmailAndIdNot("newemail@koreatech.ac.kr", 1L)).willReturn(false);
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "새이름", "2024999999", "newemail@koreatech.ac.kr", "새 소개", "https://new.url"
+            );
 
             // when
             adminMemberService.updateUser(1L, request);
 
             // then
             assertThat(user.getName()).isEqualTo("새이름");
-            assertThat(user.getIntroduction()).isEqualTo("새 소개글");
-        }
-
-        @Test
-        @DisplayName("GithubUser가 있으면 프로필 이미지 URL을 수정한다")
-        void updatesProfileImageUrl_whenGithubUserExists() {
-            // given
-            User user = createUser(1L, "홍길동");
-            GithubUser githubUser = GithubUser.builder()
-                .githubId(12345L)
-                .githubLogin("honggildong")
-                .githubAvatarUrl("https://old.url")
-                .build();
-            ReflectionTestUtils.setField(user, "githubUser", githubUser);
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            AdminUserUpdateRequest request = new AdminUserUpdateRequest("새이름", "소개", "https://new.url");
-
-            // when
-            adminMemberService.updateUser(1L, request);
-
-            // then
+            assertThat(user.getKutId()).isEqualTo("2024999999");
+            assertThat(user.getKutEmail()).isEqualTo("newemail@koreatech.ac.kr");
+            assertThat(user.getIntroduction()).isEqualTo("새 소개");
             assertThat(user.getGithubUser().getGithubAvatarUrl()).isEqualTo("https://new.url");
         }
 
         @Test
-        @DisplayName("GithubUser가 없으면 프로필 이미지 URL 수정을 무시한다")
-        void ignoresProfileImageUrl_whenNoGithubUser() {
+        @DisplayName("Null 필드는 업데이트하지 않는다")
+        void doesNotUpdate_whenFieldsAreNull() {
             // given
-            User user = createUser(1L, "홍길동");
+            User user = createUser(1L, "사용자A");
+            ReflectionTestUtils.setField(user, "kutId", "2024000001");
+            ReflectionTestUtils.setField(user, "kutEmail", "usera@koreatech.ac.kr");
+            ReflectionTestUtils.setField(user, "introduction", "기존 소개");
             given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            AdminUserUpdateRequest request = new AdminUserUpdateRequest("새이름", "소개", "https://new.url");
+            AdminUserUpdateRequest request = new AdminUserUpdateRequest(
+                "사용자A", "2024000001", "usera@koreatech.ac.kr", null, null
+            );
 
             // when
             adminMemberService.updateUser(1L, request);
 
             // then
-            assertThat(user.getGithubUser()).isNull();
-        }
-
-        @Test
-        @DisplayName("profileImageUrl이 null이면 프로필 이미지를 수정하지 않는다")
-        void doesNotUpdateProfileImage_whenUrlIsNull() {
-            // given
-            User user = createUser(1L, "홍길동");
-            GithubUser githubUser = GithubUser.builder()
-                .githubId(12345L)
-                .githubLogin("honggildong")
-                .githubAvatarUrl("https://old.url")
-                .build();
-            ReflectionTestUtils.setField(user, "githubUser", githubUser);
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
-            AdminUserUpdateRequest request = new AdminUserUpdateRequest("새이름", "소개", null);
-
-            // when
-            adminMemberService.updateUser(1L, request);
-
-            // then
-            assertThat(user.getGithubUser().getGithubAvatarUrl()).isEqualTo("https://old.url");
+            assertThat(user.getIntroduction()).isEqualTo("기존 소개");
         }
     }
 }

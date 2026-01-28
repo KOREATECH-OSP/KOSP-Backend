@@ -1,13 +1,14 @@
 package io.swkoreatech.kosp.domain.user.eventlistener;
 
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
-import org.springframework.data.redis.connection.stream.StreamRecords;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import java.time.Instant;
+import java.util.UUID;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
+import io.swkoreatech.kosp.common.queue.JobQueueService;
+import io.swkoreatech.kosp.common.queue.Priority;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,27 +18,16 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserSignupEventListener {
 
-    private final StringRedisTemplate redisTemplate;
+    private final JobQueueService jobQueueService;
 
-    @Value("${harvester.redis.collection-trigger-stream:github:collection:trigger}")
-    private String streamKey;
-
-    @EventListener
+    @Async
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserSignup(UserSignupEvent event) {
-        log.info("Received UserSignupEvent for user {} (GitHub: {})", 
-            event.getUserId(), event.getGithubLogin());
+        Long userId = event.getUserId();
+        log.info("UserSignupEvent for user {} (GitHub: {})", userId, event.getGithubLogin());
 
-        publishCollectionTrigger(event.getUserId());
-    }
-
-    private void publishCollectionTrigger(Long userId) {
-        Map<String, String> payload = Map.of(
-            "userId", String.valueOf(userId)
-        );
-
-        var record = StreamRecords.string(payload).withStreamKey(streamKey);
-        redisTemplate.opsForStream().add(record);
-
-        log.info("Published collection trigger to Harvester for user {}", userId);
+        String runId = UUID.randomUUID().toString();
+        jobQueueService.enqueue(userId, runId, Instant.now(), Priority.HIGH);
+        log.info("Enqueued collection job for user {} with runId {}", userId, runId);
     }
 }

@@ -159,7 +159,7 @@ class AdminContentServiceTest {
             adminContentService.deleteComment(1L);
 
             // then
-            verify(commentRepository).delete(comment);
+            assertThat(comment.isDeleted()).isTrue();
         }
     }
 

@@ -33,6 +33,13 @@ public class AdminContentController implements AdminContentApi {
     }
 
     @Override
+    @Permit(name = "admin:comments:delete", description = "댓글 삭제")
+    public ResponseEntity<Void> deleteComment(Long commentId) {
+        adminContentService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
     @Permit(name = "admin:notices:create", description = "공지사항 작성")
     public ResponseEntity<Void> createNotice(User user, NoticeCreateRequest request) {
         adminContentService.createNotice(user, request);

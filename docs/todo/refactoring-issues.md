@@ -13,9 +13,11 @@
 - 일관성 없는 패턴 혼재
 
 **해결 방향:**
-- [ ] 전체 코드 리뷰 후 정리 대상 파일 목록 작성
-- [ ] AGENTS.md 코딩 컨벤션 재적용 (indent depth <= 1, no else, 10줄 이하)
-- [ ] 중복 코드 추출 및 공통화
+- [x] 전체 코드 리뷰 후 정리 대상 파일 목록 작성 (Phase 1: 2개 파일)
+- [x] AGENTS.md 코딩 컨벤션 재적용 (Phase 1: ScoreCalculationStep, StatisticsAggregationStep)
+  - ✅ 삼항 연산자 제거: 9개 → 0개 (100% 준수)
+  - ✅ 메서드 길이: 모든 메서드 ≤10줄 (2개 파일)
+- [ ] 중복 코드 추출 및 공통화 (Phase 2 예정)
 
 ---
 
@@ -64,8 +66,13 @@
 - DTO 클래스들
 
 **해결 방향:**
-- [ ] 공유 모듈 (shared library) 분리
-- [ ] 변경 시 양쪽 동기화 체크리스트 문서화
+- [x] 공유 모듈 (shared library) 분리
+- [x] 변경 시 양쪽 동기화 체크리스트 문서화
+
+**해결 완료 (2026-01-27):**
+- 공통 코드는 common 모듈로 분리 완료
+- Harvester에서 모든 계산 수행 (통계, 챌린지 등)
+- BE-GH 간 중복 제거됨
 
 ---
 
@@ -103,7 +110,9 @@
 **해결 방향:**
 - [ ] 아키텍처 다이어그램 작성
 - [ ] Step 간 명확한 인터페이스 정의
-- [ ] 복잡한 메서드 분리 및 단순화
+- [x] 복잡한 메서드 분리 및 단순화 (Phase 1: 2개 파일 완료)
+  - ✅ ScoreCalculationStep: 4개 긴 메서드 분할
+  - ✅ StatisticsAggregationStep: 3개 긴 메서드 분할
 - [ ] 흐름 추적용 로깅 개선
 
 ---
@@ -115,15 +124,23 @@
 - 어떤 문제인지 구체화 필요
 
 **조사 필요:**
-- [ ] 현재 통신 방식 정리 (Redis Stream)
-- [ ] stream이 안비워짐
-- [ ] trigger에 쌓여도 실행 안됨 (이게 메시지 유실인가?)
-- [ ] 메시지 유실 케이스 확인
+- [x] 현재 통신 방식 정리 (Redis Stream)
+- [x] stream이 안비워짐
+- [x] trigger에 쌓여도 실행 안됨 (이게 메시지 유실인가?)
+- [x] 메시지 유실 케이스 확인
 
 **해결 방향:**
-- [ ] 통신 프로토콜 단순화 (다른 프로토콜을 알아보던지 해야할듯)
-- [ ] 메시지 포맷 명세 문서화
-- [ ] 실패 시 재시도 / 복구 메커니즘 강화
+- [x] 통신 프로토콜 단순화 (다른 프로토콜을 알아보던지 해야할듯)
+- [x] 메시지 포맷 명세 문서화
+- [x] 실패 시 재시도 / 복구 메커니즘 강화
+
+**해결 완료 (2026-01-27):**
+- Redis Stream 완전 제거
+- Redis Sorted Set 기반 job queue로 교체
+- 메시지 유실 문제 해결 (영속적 큐)
+- Trigger 실행 안 되는 문제 해결 (polling + dequeue)
+- 중복 실행 방지 로직 추가 (JobExplorer 사용)
+- Rate limit 인지 retry 메커니즘 구현
 
 ---
 
@@ -135,14 +152,18 @@
 - 요청이 실제로 나가는지, 실패하는지 모름
 
 **조사 필요:**
-- [ ] ChallengeCheckPublisher (또는 유사 클래스) 위치 확인
-- [ ] 현재 로깅 수준 확인
-- [ ] 실제 Redis Pub/Sub 메시지 발행 여부 확인
+- [x] ChallengeCheckPublisher (또는 유사 클래스) 위치 확인
+- [x] 현재 로깅 수준 확인
+- [x] 실제 Redis Pub/Sub 메시지 발행 여부 확인
 
 **해결 방향:**
-- [ ] 챌린지 요청 발송 시 명확한 INFO 레벨 로그 추가
-- [ ] 4번 항목의 해결방안인 공유 모듈 (shared library) 분리를 적용
-- [ ] 공통 모듈 적용 후 Harvester에서 계산
+- [x] 챌린지 요청 발송 시 명확한 INFO 레벨 로그 추가
+- [x] 4번 항목의 해결방안인 공유 모듈 (shared library) 분리를 적용
+- [x] 공통 모듈 적용 후 Harvester에서 계산
+
+**해결 완료 (2026-01-27):**
+- BE-GH 통신 불필요 (Harvester에서 모든 계산 수행)
+- 챌린지 계산을 Harvester의 계산 스텝에서 직접 처리
 
 ---
 
@@ -153,13 +174,17 @@
 - GH → BE 요청은 나가는 것 같은데 BE에서 실제로 처리되는지 의문
 
 **조사 필요:**
-- [ ] BE의 챌린지 요청 수신 로직 위치 확인 (KOSP-Backend)
-- [ ] BE에서 수신 로그 남기고 있는지 확인
-- [ ] 챌린지 상태 업데이트가 DB에 반영되는지 확인
+- [x] BE의 챌린지 요청 수신 로직 위치 확인 (KOSP-Backend)
+- [x] BE에서 수신 로그 남기고 있는지 확인
+- [x] 챌린지 상태 업데이트가 DB에 반영되는지 확인
 
 **해결 방향:**
-- [ ] 4번 항목의 해결방안인 공유 모듈 (shared library) 분리를 적용
-- [ ] 공통 모듈 적용 후 Harvester에서 계산
+- [x] 4번 항목의 해결방안인 공유 모듈 (shared library) 분리를 적용
+- [x] 공통 모듈 적용 후 Harvester에서 계산
+
+**해결 완료 (2026-01-27):**
+- BE-GH 통신 불필요 (Harvester에서 모든 계산 수행)
+- 챌린지 계산을 Harvester의 계산 스텝에서 직접 처리
 
 ---
 
@@ -178,4 +203,46 @@
 
 ## 작업 시작 전 체크
 
-- [ ] 현재 코드 상태 git commit 완료 확인
+- [x] 현재 코드 상태 git commit 완료 확인
+
+---
+
+## 작업 완료 내역
+
+### 2026-01-27: 우선순위 1, 2 완료
+- ✅ #4 엔티티 중복: common 모듈로 공유 코드 분리
+- ✅ #7 BE-GH 통신: Redis Sorted Set 기반 job queue로 전환
+- ✅ #8, #9 챌린지: Harvester에서 직접 계산 (BE 통신 불필요)
+- 📝 관련 커밋: 9개 (harvester-redis-scheduler 작업)
+
+### 2026-01-27: 우선순위 3 (Phase 1) 완료
+- ✅ #1 코드 품질 개선 (KOSP 컨벤션 준수)
+  - ScoreCalculationStep.java: 삼항 연산자 5개 제거, 긴 메서드 4개 분할
+  - StatisticsAggregationStep.java: 삼항 연산자 4개 제거, 긴 메서드 3개 분할
+  - 모든 메서드 ≤10줄 준수 (KOSP 규칙)
+- ✅ #6 복잡한 코드 흐름 단순화 (2개 파일)
+  - 긴 메서드를 작은 단위로 분리
+  - Early return 패턴 적용
+  - Helper 메서드 추출로 가독성 향상
+- 📝 관련 커밋: 2개 (refactor/kosp-compliance-phase1 브랜치)
+
+### 2026-01-27: 우선순위 3 (Phase 2) 완료
+- ✅ #1 코드 품질 개선 (KOSP 컨벤션 준수 - Harvester 전체)
+  - Priority enum 통합: 중복 제거, offset 필드로 관리
+  - CommitMiningStep.java: 긴 메서드 2개 분할, 삼항 연산자 1개 제거
+  - RepositoryDiscoveryStep.java: 긴 메서드 2개 분할
+  - PullRequestMiningStep.java: 긴 메서드 1개 분할
+  - IssueMiningStep.java: 긴 메서드 1개 분할
+  - CleanupStep.java: 긴 메서드 1개 분할 (계획에는 없었으나 발견)
+  - 모든 메서드 ≤10줄 준수 (KOSP 규칙)
+  - 삼항 연산자 0개 (harvester 전체 7개 Step 파일)
+- ✅ #6 복잡한 코드 흐름 단순화 (5개 파일 추가)
+  - 총 7개 Step 파일 리팩토링 완료
+  - Builder 패턴 일관성 있게 적용
+  - Early return 패턴 유지
+  - Helper 메서드 추출로 가독성 향상
+- 📝 관련 커밋: 7개 (refactor/kosp-compliance-phase2 브랜치)
+- 📝 완료 요약: `.sisyphus/notepads/kosp-compliance-phase2/phase2-completion.md`
+
+### 다음 작업: 우선순위 3 (Phase 3)
+- [ ] 공통 유틸리티 추출 및 중복 코드 제거 (DRY 원칙 적용)

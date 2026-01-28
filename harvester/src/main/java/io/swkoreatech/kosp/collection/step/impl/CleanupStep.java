@@ -10,10 +10,11 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.GithubUserRepository;
 import io.swkoreatech.kosp.user.User;
@@ -39,7 +40,7 @@ public class CleanupStep implements StepProvider {
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
             .tasklet((contribution, chunkContext) -> {
-                Long userId = extractUserId(chunkContext);
+                Long userId = StepContextHelper.extractUserId(chunkContext);
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
@@ -50,13 +51,6 @@ public class CleanupStep implements StepProvider {
     @Override
     public String getStepName() {
         return STEP_NAME;
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private void execute(Long userId, ChunkContext chunkContext) {
@@ -80,20 +74,19 @@ public class CleanupStep implements StepProvider {
 
     private void updateCollectionMetadata(Long userId) {
         CollectionMetadataDocument metadata = metadataRepository.getByUserId(userId);
+        CollectionMetadataDocument updated = buildUpdatedMetadata(metadata, userId);
+        metadataRepository.save(updated);
+    }
 
-        CollectionMetadataDocument updated = CollectionMetadataDocument.builder()
-            .id(metadata.getId())
-            .userId(userId)
-            .lastFullCollection(Instant.now())
+    private CollectionMetadataDocument buildUpdatedMetadata(CollectionMetadataDocument metadata, Long userId) {
+        Instant now = Instant.now();
+        return CollectionMetadataDocument.builder()
+            .id(metadata.getId()).userId(userId).lastFullCollection(now)
             .lastIncrementalCollection(metadata.getLastIncrementalCollection())
             .lastCommitCursor(metadata.getLastCommitCursor())
             .lastPrCursor(metadata.getLastPrCursor())
             .lastIssueCursor(metadata.getLastIssueCursor())
-            .createdAt(metadata.getCreatedAt())
-            .updatedAt(Instant.now())
-            .build();
-
-        metadataRepository.save(updated);
+            .createdAt(metadata.getCreatedAt()).updatedAt(now).build();
     }
 
     private void clearExecutionContext(ChunkContext chunkContext) {

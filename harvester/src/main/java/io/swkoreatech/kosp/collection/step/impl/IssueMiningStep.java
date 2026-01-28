@@ -20,6 +20,10 @@ import io.swkoreatech.kosp.client.dto.UserIssuesResponse.PageInfo;
 import io.swkoreatech.kosp.collection.document.IssueDocument;
 import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +58,8 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private void execute(ChunkContext chunkContext) {
-        ExecutionContext context = getExecutionContext(chunkContext);
-        Long userId = extractUserId(chunkContext);
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
         String login = context.getString("githubLogin");
         String token = context.getString("githubToken");
 
@@ -68,61 +72,20 @@ public class IssueMiningStep implements StepProvider {
         log.info("Mined {} issues for user {}", totalIssues, userId);
     }
 
-    private ExecutionContext getExecutionContext(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobExecution()
-            .getExecutionContext();
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
-    }
-
     private int fetchAllIssues(Long userId, String login, String token) {
-        int saved = 0;
-        String cursor = null;
         Instant now = Instant.now();
-
-        do {
-            GraphQLResponse<UserIssuesResponse> response = fetchIssuesPage(login, cursor, token);
-            if (response == null || response.hasErrors()) {
-                logErrors(response, login);
-                break;
-            }
-
-            UserIssuesResponse data = response.getDataAs(UserIssuesResponse.class);
-            List<IssueNode> issues = data.getIssues();
-            saved += saveIssues(userId, issues, now);
-
-            PageInfo pageInfo = data.getPageInfo();
-            if (pageInfo == null || !pageInfo.isHasNextPage()) {
-                break;
-            }
-            cursor = pageInfo.getEndCursor();
-        } while (cursor != null);
-
-        return saved;
+        return PaginationHelper.paginate(
+            cursor -> fetchIssuesPage(login, cursor, token),
+            UserIssuesResponse::getPageInfo,
+            (data, cursor) -> saveIssues(userId, data.getIssues(), now),
+            "user",
+            login,
+            UserIssuesResponse.class
+        );
     }
 
     private GraphQLResponse<UserIssuesResponse> fetchIssuesPage(String login, String cursor, String token) {
-        return graphQLClient.getUserIssues(login, cursor, token, createResponseType()).block();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<GraphQLResponse<UserIssuesResponse>> createResponseType() {
-        return (Class<GraphQLResponse<UserIssuesResponse>>) (Class<?>) GraphQLResponse.class;
-    }
-
-    private void logErrors(GraphQLResponse<UserIssuesResponse> response, String login) {
-        if (response == null) {
-            log.warn("No response from GraphQL for user {}", login);
-            return;
-        }
-        log.error("GraphQL errors for user {}: {}", login, response.getErrors());
+        return graphQLClient.getUserIssues(login, cursor, token, GraphQLTypeFactory.<UserIssuesResponse>responseType()).block();
     }
 
     private int saveIssues(Long userId, List<IssueNode> issues, Instant now) {
@@ -140,17 +103,33 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private IssueDocument buildDocument(Long userId, IssueNode issue, Instant now) {
-        return IssueDocument.builder()
+        IssueDocument.IssueDocumentBuilder builder = IssueDocument.builder();
+        builder = buildBasicFields(builder, userId, issue);
+        builder = buildMetadataFields(builder, issue, now);
+        return builder.build();
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildBasicFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            Long userId,
+            IssueNode issue) {
+        return builder
             .userId(userId)
             .issueNumber(issue.getNumber())
             .title(issue.getTitle())
             .state(issue.getState())
             .repositoryName(issue.getRepoName())
-            .repositoryOwner(issue.getRepoOwner())
+            .repositoryOwner(issue.getRepoOwner());
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildMetadataFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            IssueNode issue,
+            Instant now) {
+        return builder
             .commentsCount(issue.getCommentsCount())
             .createdAt(issue.getCreatedAt())
             .closedAt(issue.getClosedAt())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }
