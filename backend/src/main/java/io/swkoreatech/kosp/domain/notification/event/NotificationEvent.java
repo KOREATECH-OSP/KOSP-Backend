@@ -43,4 +43,27 @@ public class NotificationEvent {
             commentId
         );
     }
+    
+    public static NotificationEvent pointEarned(Long userId, Integer amount, String reason) {
+        String message = createPointMessage(amount, reason);
+        
+        return new NotificationEvent(
+            userId,
+            NotificationType.POINT_EARNED,
+            "포인트 변경",
+            message,
+            null
+        );
+    }
+    
+    private static String createPointMessage(Integer amount, String reason) {
+        if (amount > 0) {
+            return formatPointMessage(amount, reason, "획득했습니다");
+        }
+        return formatPointMessage(Math.abs(amount), reason, "차감되었습니다");
+    }
+    
+    private static String formatPointMessage(Integer absAmount, String reason, String action) {
+        return String.format("%d포인트를 %s. (%s)", absAmount, action, reason);
+    }
 }
