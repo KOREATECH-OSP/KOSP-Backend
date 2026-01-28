@@ -22,6 +22,7 @@ import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
@@ -106,62 +107,19 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-        return paginateCommits(userId, owner, name, nodeId, token, Instant.now(), null, 0);
+        Instant now = Instant.now();
+        return PaginationHelper.paginate(
+            cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token),
+            RepositoryCommitsResponse::getPageInfo,
+            (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
+            "repo",
+            owner + "/" + name,
+            RepositoryCommitsResponse.class
+        );
     }
 
-    private int paginateCommits(
-        Long userId,
-        String owner,
-        String name,
-        String nodeId,
-        String token,
-        Instant now,
-        String cursor,
-        int saved
-    ) {
-        FetchResult result = processCommitsPage(userId, owner, name, nodeId, cursor, token, now);
-        saved += result.saved;
-        if (!result.hasNextPage) {
-            return saved;
-        }
-        return paginateCommits(userId, owner, name, nodeId, token, now, result.nextCursor, saved);
-    }
 
-    private FetchResult processCommitsPage(
-        Long userId,
-        String owner,
-        String name,
-        String nodeId,
-        String cursor,
-        String token,
-        Instant now
-    ) {
-     GraphQLResponse<RepositoryCommitsResponse> response = fetchCommitsPage(owner, name, nodeId, cursor, token);
-         if (GraphQLErrorHandler.logAndCheckErrors(response, "repo", owner + "/" + name)) {
-             return new FetchResult(0, false, null);
-         }
-        RepositoryCommitsResponse data = response.getDataAs(RepositoryCommitsResponse.class);
-        int saved = saveCommits(userId, owner, name, data.getCommits(), now);
-        PageInfo pageInfo = data.getPageInfo();
-        boolean hasNextPage = pageInfo != null && pageInfo.isHasNextPage();
-        String nextCursor = null;
-        if (hasNextPage) {
-            nextCursor = pageInfo.getEndCursor();
-        }
-        return new FetchResult(saved, hasNextPage, nextCursor);
-    }
 
-    private static class FetchResult {
-        final int saved;
-        final boolean hasNextPage;
-        final String nextCursor;
-
-        FetchResult(int saved, boolean hasNextPage, String nextCursor) {
-            this.saved = saved;
-            this.hasNextPage = hasNextPage;
-            this.nextCursor = nextCursor;
-        }
-    }
 
      private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
          String owner,
