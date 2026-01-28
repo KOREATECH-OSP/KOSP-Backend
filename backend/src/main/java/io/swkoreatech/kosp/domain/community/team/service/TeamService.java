@@ -90,6 +90,25 @@ public class TeamService {
     }
 
     @Transactional
+    public void deleteTeam(Long teamId, User user) {
+        Team team = teamRepository.getById(teamId);
+        validateLeader(team, user);
+        deleteAllTeamMembers(team);
+        deleteAllTeamInvites(team);
+        team.delete();
+    }
+
+    private void deleteAllTeamMembers(Team team) {
+        List<TeamMember> members = teamMemberRepository.findAllByTeam(team);
+        members.forEach(TeamMember::delete);
+    }
+
+    private void deleteAllTeamInvites(Team team) {
+        List<TeamInvite> invites = teamInviteRepository.findAllByTeam(team);
+        invites.forEach(TeamInvite::delete);
+    }
+
+    @Transactional
     public void inviteMember(Long teamId, User user, TeamInviteRequest request, String clientUrl) {
         Team team = teamRepository.getById(teamId);
         validateLeader(team, user);
