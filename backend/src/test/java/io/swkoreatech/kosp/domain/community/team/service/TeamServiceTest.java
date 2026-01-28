@@ -443,31 +443,145 @@ class TeamServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("acceptInvite - already joined 메서드")
-    class AcceptInviteAlreadyJoinedTest {
+     @Nested
+     @DisplayName("acceptInvite - already joined 메서드")
+     class AcceptInviteAlreadyJoinedTest {
 
-        @Test
-        @DisplayName("이미 팀에 가입된 경우 초대만 삭제된다")
-        void deletesInvite_whenAlreadyJoined() {
-            // given
-            User invitee = createUser(1L, "초대받은자");
-            Team team = createTeam(1L, "테스트팀");
-            TeamInvite invite = TeamInvite.builder()
-                .team(team)
-                .invitee(invitee)
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-            ReflectionTestUtils.setField(invite, "id", 1L);
-            
-            given(teamInviteRepository.findById(1L)).willReturn(Optional.of(invite));
-            given(teamMemberRepository.existsByTeamAndUser(team, invitee)).willReturn(true);
+         @Test
+         @DisplayName("이미 팀에 가입된 경우 초대만 삭제된다")
+         void deletesInvite_whenAlreadyJoined() {
+             // given
+             User invitee = createUser(1L, "초대받은자");
+             Team team = createTeam(1L, "테스트팀");
+             TeamInvite invite = TeamInvite.builder()
+                 .team(team)
+                 .invitee(invitee)
+                 .expiresAt(Instant.now().plusSeconds(3600))
+                 .build();
+             ReflectionTestUtils.setField(invite, "id", 1L);
+             
+             given(teamInviteRepository.findById(1L)).willReturn(Optional.of(invite));
+             given(teamMemberRepository.existsByTeamAndUser(team, invitee)).willReturn(true);
 
-            // when
-            teamService.acceptInvite(1L, invitee);
+             // when
+             teamService.acceptInvite(1L, invitee);
 
-            // then
-            verify(teamInviteRepository).delete(invite);
-        }
-    }
+             // then
+             verify(teamInviteRepository).delete(invite);
+         }
+     }
+
+     @Nested
+     @DisplayName("deleteTeam 메서드")
+     class DeleteTeamTest {
+
+         @Test
+         @DisplayName("리더가 팀 삭제 → 성공")
+         void deleteTeam_byLeader_success() {
+             // given
+             User leader = createUser(1L, "리더");
+             Team team = createTeam(1L, "테스트팀");
+             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
+             
+             given(teamRepository.getById(1L)).willReturn(team);
+             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
+             given(teamMemberRepository.findAllByTeam(team)).willReturn(List.of(leaderMember));
+             given(teamInviteRepository.findAllByTeam(team)).willReturn(List.of());
+
+             // when
+             teamService.deleteTeam(1L, leader);
+
+             // then
+             verify(team).delete();
+             verify(leaderMember).delete();
+         }
+
+         @Test
+         @DisplayName("일반 멤버가 팀 삭제 → FORBIDDEN")
+         void deleteTeam_byMember_throwsForbidden() {
+             // given
+             User leader = createUser(1L, "리더");
+             User member = createUser(2L, "멤버");
+             Team team = createTeam(1L, "테스트팀");
+             TeamMember memberRole = createTeamMember(2L, team, member, TeamRole.MEMBER);
+             
+             given(teamRepository.getById(1L)).willReturn(team);
+             given(teamMemberRepository.findByTeamAndUser(team, member)).willReturn(Optional.of(memberRole));
+
+             // when & then
+             assertThatThrownBy(() -> teamService.deleteTeam(1L, member))
+                 .isInstanceOf(GlobalException.class);
+         }
+
+         @Test
+         @DisplayName("팀 삭제 시 모든 TeamMember + TeamInvite soft delete")
+         void deleteTeam_cascadesSoftDelete_toMembersAndInvites() {
+             // given
+             User leader = createUser(1L, "리더");
+             User member2 = createUser(2L, "멤버2");
+             User member3 = createUser(3L, "멤버3");
+             User invitee = createUser(4L, "초대받은자");
+             
+             Team team = createTeam(1L, "테스트팀");
+             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
+             TeamMember member2Role = createTeamMember(2L, team, member2, TeamRole.MEMBER);
+             TeamMember member3Role = createTeamMember(3L, team, member3, TeamRole.MEMBER);
+             
+             TeamInvite invite1 = TeamInvite.builder()
+                 .team(team)
+                 .invitee(invitee)
+                 .expiresAt(Instant.now().plusSeconds(3600))
+                 .build();
+             ReflectionTestUtils.setField(invite1, "id", 1L);
+             
+             TeamInvite invite2 = TeamInvite.builder()
+                 .team(team)
+                 .invitee(invitee)
+                 .expiresAt(Instant.now().plusSeconds(3600))
+                 .build();
+             ReflectionTestUtils.setField(invite2, "id", 2L);
+             
+             given(teamRepository.getById(1L)).willReturn(team);
+             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
+             given(teamMemberRepository.findAllByTeam(team)).willReturn(List.of(leaderMember, member2Role, member3Role));
+             given(teamInviteRepository.findAllByTeam(team)).willReturn(List.of(invite1, invite2));
+
+             // when
+             teamService.deleteTeam(1L, leader);
+
+             // then
+             verify(team).delete();
+             verify(leaderMember).delete();
+             verify(member2Role).delete();
+             verify(member3Role).delete();
+             verify(invite1).delete();
+             verify(invite2).delete();
+         }
+
+         @Test
+         @DisplayName("삭제된 팀은 목록에 미노출")
+         void deletedTeam_notInList() {
+             // given
+             User leader = createUser(1L, "리더");
+             Team team = createTeam(1L, "테스트팀");
+             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
+             
+             given(teamRepository.getById(1L)).willReturn(team);
+             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
+             given(teamMemberRepository.findAllByTeam(team)).willReturn(List.of(leaderMember));
+             given(teamInviteRepository.findAllByTeam(team)).willReturn(List.of());
+             
+             Pageable pageable = PageRequest.of(0, 10);
+             Page<Team> emptyPage = new PageImpl<>(List.of(), pageable, 0);
+             given(teamRepository.findByNameContaining("테스트", pageable)).willReturn(emptyPage);
+
+             // when
+             teamService.deleteTeam(1L, leader);
+             TeamListResponse result = teamService.getList("테스트", pageable);
+
+             // then
+             verify(team).delete();
+             assertThat(result.teams()).isEmpty();
+         }
+     }
 }
