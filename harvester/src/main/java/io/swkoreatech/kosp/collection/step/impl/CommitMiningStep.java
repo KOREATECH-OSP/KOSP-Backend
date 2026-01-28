@@ -16,10 +16,12 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
 import io.swkoreatech.kosp.collection.document.CommitDocument;
 import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +56,8 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private void execute(ChunkContext chunkContext) {
-        ExecutionContext context = getExecutionContext(chunkContext);
-        Long userId = extractUserId(chunkContext);
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
         String token = context.getString("githubToken");
         String nodeId = context.getString("githubNodeId");
 
@@ -72,20 +74,6 @@ public class CommitMiningStep implements StepProvider {
 
         int totalCommits = mineCommitsFromRepos(userId, repos, nodeId, token);
         log.info("Mined {} commits across {} repos for user {}", totalCommits, repos.length, userId);
-    }
-
-    private ExecutionContext getExecutionContext(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobExecution()
-            .getExecutionContext();
-    }
-
-    private Long extractUserId(ChunkContext chunkContext) {
-        return chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobParameters()
-            .getLong("userId");
     }
 
     private String[] getDiscoveredRepos(ExecutionContext context) {
@@ -117,29 +105,15 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-        int saved = 0;
-        String cursor = null;
         Instant now = Instant.now();
-
-        do {
-            GraphQLResponse<RepositoryCommitsResponse> response = fetchCommitsPage(owner, name, nodeId, cursor, token);
-            if (response == null || response.hasErrors()) {
-                logErrors(response, owner, name);
-                break;
-            }
-
-            RepositoryCommitsResponse data = response.getDataAs(RepositoryCommitsResponse.class);
-            List<CommitNode> commits = data.getCommits();
-            saved += saveCommits(userId, owner, name, commits, now);
-
-            PageInfo pageInfo = data.getPageInfo();
-            if (pageInfo == null || !pageInfo.isHasNextPage()) {
-                break;
-            }
-            cursor = pageInfo.getEndCursor();
-        } while (cursor != null);
-
-        return saved;
+        return PaginationHelper.paginate(
+            cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token),
+            RepositoryCommitsResponse::getPageInfo,
+            (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
+            "repo",
+            owner + "/" + name,
+            RepositoryCommitsResponse.class
+        );
     }
 
     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
@@ -149,20 +123,7 @@ public class CommitMiningStep implements StepProvider {
         String cursor,
         String token
     ) {
-        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, createResponseType()).block();
-    }
-
-    @SuppressWarnings("unchecked")
-    private Class<GraphQLResponse<RepositoryCommitsResponse>> createResponseType() {
-        return (Class<GraphQLResponse<RepositoryCommitsResponse>>) (Class<?>) GraphQLResponse.class;
-    }
-
-    private void logErrors(GraphQLResponse<RepositoryCommitsResponse> response, String owner, String name) {
-        if (response == null) {
-            log.warn("No response from GraphQL for repo {}/{}", owner, name);
-            return;
-        }
-        log.error("GraphQL errors for repo {}/{}: {}", owner, name, response.getErrors());
+        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
     }
 
     private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
