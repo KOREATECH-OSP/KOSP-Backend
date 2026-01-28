@@ -3,16 +3,17 @@ package io.swkoreatech.kosp.global.exception.handler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.security.core.AuthenticationException;
 
 import io.swkoreatech.kosp.global.dto.ErrorResponse;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
+import jakarta.servlet.http.HttpServletRequest;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -30,9 +31,22 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(GlobalException.class)
-    public ResponseEntity<ErrorResponse> handleGlobalException(GlobalException ex) {
+    public ResponseEntity<?> handleGlobalException(
+        GlobalException ex,
+        HttpServletRequest request
+    ) {
+        String accept = request.getHeader("Accept");
+        
+        // SSE 요청: 빈 응답 반환
+        if (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
+            return ResponseEntity.status(ex.getStatus()).build();
+        }
+        
+        // 일반 REST API: JSON 에러 응답
         ErrorResponse response = ErrorResponse.of(ex.getMessage(), ex.getStatus().value());
-        return ResponseEntity.status(ex.getStatus()).body(response);
+        return ResponseEntity.status(ex.getStatus())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(response);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -44,8 +58,24 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(AuthenticationException.class)
-    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
-        ErrorResponse response = ErrorResponse.of(ExceptionMessage.AUTHENTICATION.getMessage(), ExceptionMessage.AUTHENTICATION.getStatus().value());
-        return ResponseEntity.status(ExceptionMessage.AUTHENTICATION.getStatus()).body(response);
+    public ResponseEntity<?> handleAuthenticationException(
+        AuthenticationException ex,
+        HttpServletRequest request
+    ) {
+        String accept = request.getHeader("Accept");
+        
+        // SSE 요청: 빈 응답 반환
+        if (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
+        // 일반 REST API: JSON 에러 응답
+        ErrorResponse response = ErrorResponse.of(
+            ExceptionMessage.AUTHENTICATION.getMessage(),
+            ExceptionMessage.AUTHENTICATION.getStatus().value()
+        );
+        return ResponseEntity.status(ExceptionMessage.AUTHENTICATION.getStatus())
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(response);
     }
 }
