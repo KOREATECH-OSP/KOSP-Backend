@@ -31,6 +31,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     boolean existsByKutEmail(String kutEmail);
     boolean existsByKutId(String kutId);
     boolean existsByKutIdAndIsDeletedFalse(String kutId);
+    boolean existsByKutIdAndIdNot(String kutId, Long id);
+    boolean existsByKutEmailAndIdNot(String kutEmail, Long id);
     boolean existsByRoles_Name(String roleName);
 
     java.util.List<User> findByNameContaining(String keyword);
