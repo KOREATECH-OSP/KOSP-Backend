@@ -16,9 +16,11 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
 import io.swkoreatech.kosp.collection.document.CommitDocument;
 import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
@@ -56,8 +58,8 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private void execute(ChunkContext chunkContext) {
-        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
-        Long userId = StepContextHelper.extractUserId(chunkContext);
+         ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+         Long userId = StepContextHelper.extractUserId(chunkContext);
         String token = context.getString("githubToken");
         String nodeId = context.getString("githubNodeId");
 
@@ -116,17 +118,20 @@ public class CommitMiningStep implements StepProvider {
         );
     }
 
-    private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
-        String owner,
-        String name,
-        String nodeId,
-        String cursor,
-        String token
-    ) {
-        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
-    }
 
-    private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
+
+
+     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
+         String owner,
+         String name,
+         String nodeId,
+         String cursor,
+         String token
+     ) {
+         return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
+     }
+
+     private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
         int saved = 0;
         for (CommitNode commit : commits) {
             if (commitDocumentRepository.existsByUserIdAndSha(userId, commit.getOid())) {
@@ -141,19 +146,47 @@ public class CommitMiningStep implements StepProvider {
     }
 
     private CommitDocument buildDocument(Long userId, String owner, String name, CommitNode commit, Instant now) {
-        return CommitDocument.builder()
+        CommitDocument.CommitDocumentBuilder builder = CommitDocument.builder();
+        builder = buildBasicFields(builder, userId, owner, name, commit);
+        builder = buildAuthorFields(builder, commit);
+        builder = buildStatisticsFields(builder, commit, now);
+        return builder.build();
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildBasicFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        Long userId,
+        String owner,
+        String name,
+        CommitNode commit
+    ) {
+        return builder
             .userId(userId)
             .sha(commit.getOid())
             .message(commit.getMessage())
             .repositoryName(name)
-            .repositoryOwner(owner)
+            .repositoryOwner(owner);
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildAuthorFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        CommitNode commit
+    ) {
+        return builder
             .authorName(commit.getAuthorName())
             .authorEmail(commit.getAuthorEmail())
-            .authoredAt(commit.getAuthoredDate())
+            .authoredAt(commit.getAuthoredDate());
+    }
+
+    private CommitDocument.CommitDocumentBuilder buildStatisticsFields(
+        CommitDocument.CommitDocumentBuilder builder,
+        CommitNode commit,
+        Instant now
+    ) {
+        return builder
             .additions(commit.getAdditions())
             .deletions(commit.getDeletions())
             .changedFiles(commit.getChangedFiles())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }

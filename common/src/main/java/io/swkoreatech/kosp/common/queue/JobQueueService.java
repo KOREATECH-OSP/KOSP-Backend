@@ -10,8 +10,6 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class JobQueueService {
     private static final String QUEUE_KEY = "job:queue";
-    private static final long HIGH_PRIORITY_OFFSET = 0L;
-    private static final long LOW_PRIORITY_OFFSET = 1_000_000_000L;
 
     private final StringRedisTemplate redisTemplate;
 
@@ -34,8 +32,7 @@ public class JobQueueService {
     }
 
     private double calculateScore(Instant scheduledAt, Priority priority) {
-        long offset = priority == Priority.HIGH ? HIGH_PRIORITY_OFFSET : LOW_PRIORITY_OFFSET;
-        return offset + scheduledAt.getEpochSecond();
+        return priority.getOffset() + scheduledAt.getEpochSecond();
     }
 
     private String formatMember(Long userId, String runId) {

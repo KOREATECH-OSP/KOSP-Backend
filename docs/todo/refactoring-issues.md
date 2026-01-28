@@ -13,9 +13,11 @@
 - 일관성 없는 패턴 혼재
 
 **해결 방향:**
-- [ ] 전체 코드 리뷰 후 정리 대상 파일 목록 작성
-- [ ] AGENTS.md 코딩 컨벤션 재적용 (indent depth <= 1, no else, 10줄 이하)
-- [ ] 중복 코드 추출 및 공통화
+- [x] 전체 코드 리뷰 후 정리 대상 파일 목록 작성 (Phase 1: 2개 파일)
+- [x] AGENTS.md 코딩 컨벤션 재적용 (Phase 1: ScoreCalculationStep, StatisticsAggregationStep)
+  - ✅ 삼항 연산자 제거: 9개 → 0개 (100% 준수)
+  - ✅ 메서드 길이: 모든 메서드 ≤10줄 (2개 파일)
+- [ ] 중복 코드 추출 및 공통화 (Phase 2 예정)
 
 ---
 
@@ -108,7 +110,9 @@
 **해결 방향:**
 - [ ] 아키텍처 다이어그램 작성
 - [ ] Step 간 명확한 인터페이스 정의
-- [ ] 복잡한 메서드 분리 및 단순화
+- [x] 복잡한 메서드 분리 및 단순화 (Phase 1: 2개 파일 완료)
+  - ✅ ScoreCalculationStep: 4개 긴 메서드 분할
+  - ✅ StatisticsAggregationStep: 3개 긴 메서드 분할
 - [ ] 흐름 추적용 로깅 개선
 
 ---
@@ -211,6 +215,34 @@
 - ✅ #8, #9 챌린지: Harvester에서 직접 계산 (BE 통신 불필요)
 - 📝 관련 커밋: 9개 (harvester-redis-scheduler 작업)
 
-### 다음 작업: 우선순위 3
-- [ ] #1 코드 품질 개선
-- [ ] #6 복잡한 코드 흐름 단순화
+### 2026-01-27: 우선순위 3 (Phase 1) 완료
+- ✅ #1 코드 품질 개선 (KOSP 컨벤션 준수)
+  - ScoreCalculationStep.java: 삼항 연산자 5개 제거, 긴 메서드 4개 분할
+  - StatisticsAggregationStep.java: 삼항 연산자 4개 제거, 긴 메서드 3개 분할
+  - 모든 메서드 ≤10줄 준수 (KOSP 규칙)
+- ✅ #6 복잡한 코드 흐름 단순화 (2개 파일)
+  - 긴 메서드를 작은 단위로 분리
+  - Early return 패턴 적용
+  - Helper 메서드 추출로 가독성 향상
+- 📝 관련 커밋: 2개 (refactor/kosp-compliance-phase1 브랜치)
+
+### 2026-01-27: 우선순위 3 (Phase 2) 완료
+- ✅ #1 코드 품질 개선 (KOSP 컨벤션 준수 - Harvester 전체)
+  - Priority enum 통합: 중복 제거, offset 필드로 관리
+  - CommitMiningStep.java: 긴 메서드 2개 분할, 삼항 연산자 1개 제거
+  - RepositoryDiscoveryStep.java: 긴 메서드 2개 분할
+  - PullRequestMiningStep.java: 긴 메서드 1개 분할
+  - IssueMiningStep.java: 긴 메서드 1개 분할
+  - CleanupStep.java: 긴 메서드 1개 분할 (계획에는 없었으나 발견)
+  - 모든 메서드 ≤10줄 준수 (KOSP 규칙)
+  - 삼항 연산자 0개 (harvester 전체 7개 Step 파일)
+- ✅ #6 복잡한 코드 흐름 단순화 (5개 파일 추가)
+  - 총 7개 Step 파일 리팩토링 완료
+  - Builder 패턴 일관성 있게 적용
+  - Early return 패턴 유지
+  - Helper 메서드 추출로 가독성 향상
+- 📝 관련 커밋: 7개 (refactor/kosp-compliance-phase2 브랜치)
+- 📝 완료 요약: `.sisyphus/notepads/kosp-compliance-phase2/phase2-completion.md`
+
+### 다음 작업: 우선순위 3 (Phase 3)
+- [ ] 공통 유틸리티 추출 및 중복 코드 제거 (DRY 원칙 적용)
