@@ -171,12 +171,9 @@ public class AuthService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
 
         AccessToken newAccessToken = AccessToken.from(user);
-        RefreshToken newRefreshToken = RefreshToken.from(user);
 
-        // Redis 업데이트
-        refreshTokenRepository.save(newRefreshToken);
-
-        return new AuthTokenResponse(newAccessToken.toString(), newRefreshToken.toString());
+        // RefreshToken은 재발급하지 않고 기존 토큰 유지
+        return new AuthTokenResponse(newAccessToken.toString(), refreshToken.toString());
     }
 
     @Transactional
