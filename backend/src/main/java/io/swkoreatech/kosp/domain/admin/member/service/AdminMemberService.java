@@ -98,10 +98,30 @@ public class AdminMemberService {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
 
-        // Update User info (name, introduction)
+        if (request.kutId() != null) {
+            boolean kutIdExists = userRepository.existsByKutIdAndIdNot(request.kutId(), userId);
+            if (kutIdExists) {
+                throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
+            }
+        }
+
+        if (request.kutEmail() != null) {
+            String normalizedEmail = request.kutEmail().toLowerCase();
+            boolean kutEmailExists = userRepository.existsByKutEmailAndIdNot(normalizedEmail, userId);
+            if (kutEmailExists) {
+                throw new GlobalException(ExceptionMessage.USER_ALREADY_EXISTS);
+            }
+        }
+
         user.updateInfo(request.name(), request.introduction());
 
-        // Update GithubUser info (profileImage) if exists and requested
+        if (request.kutId() != null) {
+            user.updateKutId(request.kutId());
+        }
+        if (request.kutEmail() != null) {
+            user.updateKutEmail(request.kutEmail());
+        }
+
         if (request.profileImageUrl() != null && user.getGithubUser() != null) {
             user.getGithubUser().updateAvatarUrl(request.profileImageUrl());
         }

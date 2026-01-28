@@ -16,9 +16,11 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.UserIssuesResponse;
 import io.swkoreatech.kosp.client.dto.UserIssuesResponse.IssueNode;
+import io.swkoreatech.kosp.client.dto.UserIssuesResponse.PageInfo;
 import io.swkoreatech.kosp.collection.document.IssueDocument;
 import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
@@ -76,7 +78,7 @@ public class IssueMiningStep implements StepProvider {
             cursor -> fetchIssuesPage(login, cursor, token),
             UserIssuesResponse::getPageInfo,
             (data, cursor) -> saveIssues(userId, data.getIssues(), now),
-            "issue",
+            "user",
             login,
             UserIssuesResponse.class
         );
@@ -101,17 +103,33 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private IssueDocument buildDocument(Long userId, IssueNode issue, Instant now) {
-        return IssueDocument.builder()
+        IssueDocument.IssueDocumentBuilder builder = IssueDocument.builder();
+        builder = buildBasicFields(builder, userId, issue);
+        builder = buildMetadataFields(builder, issue, now);
+        return builder.build();
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildBasicFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            Long userId,
+            IssueNode issue) {
+        return builder
             .userId(userId)
             .issueNumber(issue.getNumber())
             .title(issue.getTitle())
             .state(issue.getState())
             .repositoryName(issue.getRepoName())
-            .repositoryOwner(issue.getRepoOwner())
+            .repositoryOwner(issue.getRepoOwner());
+    }
+
+    private IssueDocument.IssueDocumentBuilder buildMetadataFields(
+            IssueDocument.IssueDocumentBuilder builder,
+            IssueNode issue,
+            Instant now) {
+        return builder
             .commentsCount(issue.getCommentsCount())
             .createdAt(issue.getCreatedAt())
             .closedAt(issue.getClosedAt())
-            .collectedAt(now)
-            .build();
+            .collectedAt(now);
     }
 }
