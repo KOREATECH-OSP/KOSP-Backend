@@ -22,6 +22,7 @@ import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
@@ -72,28 +73,15 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private int fetchAllPullRequests(Long userId, String login, String token) {
-        int saved = 0;
-        String cursor = null;
         Instant now = Instant.now();
-
-        do {
-            GraphQLResponse<UserPullRequestsResponse> response = fetchPullRequestsPage(login, cursor, token);
-            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
-                break;
-            }
-
-            UserPullRequestsResponse data = response.getDataAs(UserPullRequestsResponse.class);
-            List<PullRequestNode> prs = data.getPullRequests();
-            saved += savePullRequests(userId, prs, now);
-
-            PageInfo pageInfo = data.getPageInfo();
-            if (pageInfo == null || !pageInfo.isHasNextPage()) {
-                break;
-            }
-            cursor = pageInfo.getEndCursor();
-        } while (cursor != null);
-
-        return saved;
+        return PaginationHelper.paginate(
+            cursor -> fetchPullRequestsPage(login, cursor, token),
+            UserPullRequestsResponse::getPageInfo,
+            (data, c) -> savePullRequests(userId, data.getPullRequests(), now),
+            "user",
+            login,
+            UserPullRequestsResponse.class
+        );
     }
 
     private GraphQLResponse<UserPullRequestsResponse> fetchPullRequestsPage(String login, String cursor, String token) {
