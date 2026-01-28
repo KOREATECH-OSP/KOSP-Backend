@@ -98,10 +98,13 @@ public class RecruitApplyService {
         }
 
         apply.updateStatus(request.status());
+        apply.updateDecisionReason(request.decisionReason());
 
         if (request.status() == ApplyStatus.ACCEPTED) {
             addMemberToTeam(apply.getRecruit().getTeam(), apply.getUser());
         }
+
+        recruitApplyRepository.save(apply);
     }
 
     private void addMemberToTeam(Team team, User user) {
