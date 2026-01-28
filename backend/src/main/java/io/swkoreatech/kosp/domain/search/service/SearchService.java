@@ -42,7 +42,7 @@ public class SearchService {
         List<TeamSummary> teams = searchTeams(keyword, effectiveFilters);
         List<ChallengeSummary> challenges = searchChallenges(keyword, effectiveFilters);
 
-        return new GlobalSearchResponse(articles, recruits, teams, challenges);
+        return new GlobalSearchResponse(articles, recruits, teams, challenges, Collections.emptyList(), null);
     }
 
     private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
