@@ -13,6 +13,7 @@ public record MyApplicationResponse(
     String reason,
     String portfolioUrl,
     LocalDateTime appliedAt,
+    String decisionReason,
     RecruitSummary recruit
 ) {
     public static MyApplicationResponse from(RecruitApply apply) {
@@ -22,6 +23,7 @@ public record MyApplicationResponse(
             .reason(apply.getReason())
             .portfolioUrl(apply.getPortfolioUrl())
             .appliedAt(apply.getCreatedAt())
+            .decisionReason(apply.getDecisionReason())
             .recruit(RecruitSummary.from(apply.getRecruit()))
             .build();
     }
