@@ -18,7 +18,7 @@ public record ChallengeRequest(
     @Positive(message = "티어는 양수여야 합니다.")
     Integer tier,
     
-    String imageUrl,
+    String icon,
     
     @NotNull(message = "포인트는 필수입니다.")
     @Positive(message = "포인트는 양수여야 합니다.")

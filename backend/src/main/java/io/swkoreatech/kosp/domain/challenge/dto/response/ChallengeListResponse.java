@@ -13,7 +13,7 @@ public record ChallengeListResponse(
         String category,
         Integer progress,
         Boolean isCompleted,
-        String imageUrl,
+        String icon,
         Integer tier,
         Integer point
     ) {}
