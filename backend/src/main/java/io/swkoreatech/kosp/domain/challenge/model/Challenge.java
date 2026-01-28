@@ -34,28 +34,28 @@ public class Challenge extends BaseEntity {
     @Column(nullable = false)
     private Integer tier;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @Column(name = "icon")
+    private String icon;
 
     @Column(nullable = false)
     private Integer point;
 
     @Builder
-    private Challenge(String name, String description, String condition, Integer tier, String imageUrl, Integer point) {
+    private Challenge(String name, String description, String condition, Integer tier, String icon, Integer point) {
         this.name = name;
         this.description = description;
         this.condition = condition;
         this.tier = tier;
-        this.imageUrl = imageUrl;
+        this.icon = icon;
         this.point = point;
     }
 
-    public void update(String name, String description, String condition, Integer tier, String imageUrl, Integer point) {
+    public void update(String name, String description, String condition, Integer tier, String icon, Integer point) {
         this.name = name;
         this.description = description;
         this.condition = condition;
         this.tier = tier;
-        this.imageUrl = imageUrl;
+        this.icon = icon;
         this.point = point;
     }
 }
