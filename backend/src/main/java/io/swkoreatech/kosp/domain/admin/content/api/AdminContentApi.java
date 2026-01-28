@@ -32,6 +32,11 @@ public interface AdminContentApi {
     @DeleteMapping("/notices/{noticeId}")
     ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId);
 
+    @Operation(summary = "댓글 삭제", description = "관리자 권한으로 댓글을 삭제(Soft Delete)합니다.")
+    @ApiResponse(responseCode = "204", description = "삭제 성공")
+    @DeleteMapping("/comments/{commentId}")
+    ResponseEntity<Void> deleteComment(@PathVariable Long commentId);
+
     @Operation(summary = "공지사항 작성", description = "관리자 권한으로 공지사항을 작성합니다.")
     @ApiResponse(responseCode = "201", description = "작성 성공")
     @PostMapping("/notices")
