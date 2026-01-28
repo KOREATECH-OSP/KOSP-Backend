@@ -52,7 +52,7 @@ public class ChallengeService {
                 challenge.getDescription(),
                 challenge.getCondition(),
                 challenge.getTier(),
-                challenge.getImageUrl(),
+                challenge.getIcon(),
                 challenge.getPoint()
             ))
             .toList();
@@ -69,7 +69,7 @@ public class ChallengeService {
             challenge.getDescription(),
             challenge.getCondition(),
             challenge.getTier(),
-            challenge.getImageUrl(),
+            challenge.getIcon(),
             challenge.getPoint()
         );
     }
@@ -84,7 +84,7 @@ public class ChallengeService {
             .description(request.description())
             .condition(request.condition())
             .tier(request.tier())
-            .imageUrl(request.imageUrl())
+            .icon(request.icon())
             .point(request.point())
             .build();
 
@@ -117,7 +117,7 @@ public class ChallengeService {
             request.description(),
             request.condition(),
             request.tier(),
-            request.imageUrl(),
+            request.icon(),
             request.point()
         );
         log.info("Updated challenge: {}", challengeId);
@@ -156,7 +156,7 @@ public class ChallengeService {
                     "general",
                     progress,
                     isCompleted,
-                    challenge.getImageUrl(),
+                    challenge.getIcon(),
                     challenge.getTier(),
                     challenge.getPoint()
                 );
