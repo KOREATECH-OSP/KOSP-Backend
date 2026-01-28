@@ -147,7 +147,25 @@ Class<GraphQLResponse<UserReposResponse>> type =
     GraphQLTypeFactory.<UserReposResponse>responseType();
 ```
 
-**LOC Impact**: -144 lines across 7 Step files (10% reduction)
+### PaginationHelper
+```java
+// Generic pagination handler for cursor-based GraphQL queries
+private int fetchAllPullRequests(Long userId, String login, String token) {
+    Instant now = Instant.now();
+    return PaginationHelper.paginate(
+        cursor -> fetchPullRequestsPage(login, cursor, token),
+        UserPullRequestsResponse::getPageInfo,
+        (data, cursor) -> savePullRequests(userId, data.getPullRequests(), now),
+        "user",
+        login,
+        UserPullRequestsResponse.class
+    );
+}
+```
+
+**LOC Impact**: 
+- **Phase 3**: -144 lines across 7 Step files (10% reduction)
+- **Phase 3C**: -67 lines across 3 Step files (pagination logic unified)
 
 ---
 
