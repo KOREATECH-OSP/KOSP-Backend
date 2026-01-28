@@ -22,6 +22,7 @@ import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
@@ -72,28 +73,15 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private int fetchAllIssues(Long userId, String login, String token) {
-        int saved = 0;
-        String cursor = null;
         Instant now = Instant.now();
-
-        do {
-            GraphQLResponse<UserIssuesResponse> response = fetchIssuesPage(login, cursor, token);
-            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
-                break;
-            }
-
-            UserIssuesResponse data = response.getDataAs(UserIssuesResponse.class);
-            List<IssueNode> issues = data.getIssues();
-            saved += saveIssues(userId, issues, now);
-
-            PageInfo pageInfo = data.getPageInfo();
-            if (pageInfo == null || !pageInfo.isHasNextPage()) {
-                break;
-            }
-            cursor = pageInfo.getEndCursor();
-        } while (cursor != null);
-
-        return saved;
+        return PaginationHelper.paginate(
+            cursor -> fetchIssuesPage(login, cursor, token),
+            UserIssuesResponse::getPageInfo,
+            (data, cursor) -> saveIssues(userId, data.getIssues(), now),
+            "user",
+            login,
+            UserIssuesResponse.class
+        );
     }
 
     private GraphQLResponse<UserIssuesResponse> fetchIssuesPage(String login, String cursor, String token) {
