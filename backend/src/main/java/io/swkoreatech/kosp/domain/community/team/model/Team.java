@@ -38,6 +38,9 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team")
     private List<TeamMember> members = new ArrayList<>();
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @Builder
     private Team(String name, String description, String imageUrl) {
         this.name = name;
@@ -49,5 +52,9 @@ public class Team extends BaseEntity {
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

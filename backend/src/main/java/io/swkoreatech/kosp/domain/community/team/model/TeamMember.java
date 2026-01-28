@@ -40,10 +40,17 @@ public class TeamMember extends BaseEntity {
     @Column(nullable = false)
     private TeamRole role;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @Builder
     private TeamMember(Team team, User user, TeamRole role) {
         this.team = team;
         this.user = user;
         this.role = role;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

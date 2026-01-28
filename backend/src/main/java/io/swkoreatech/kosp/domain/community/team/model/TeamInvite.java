@@ -52,6 +52,9 @@ public class TeamInvite extends BaseEntity {
     @Column(nullable = false)
     private Instant expiresAt;
 
+    @Column(name = "is_deleted", nullable = false)
+    private boolean isDeleted = false;
+
     @Builder
     private TeamInvite(Team team, User inviter, User invitee, Instant expiresAt) {
         this.team = team;
@@ -62,5 +65,9 @@ public class TeamInvite extends BaseEntity {
 
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }

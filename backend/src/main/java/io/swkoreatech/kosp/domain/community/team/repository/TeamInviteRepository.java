@@ -16,7 +16,15 @@ public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
 
     Optional<TeamInvite> findById(Long id);
 
+    Optional<TeamInvite> findByIdAndIsDeletedFalse(Long id);
+
     Optional<TeamInvite> findByTeamAndInvitee(Team team, User invitee);
 
+    Optional<TeamInvite> findByTeamAndInviteeAndIsDeletedFalse(Team team, User invitee);
+
     boolean existsByTeamAndInvitee(Team team, User invitee);
+
+    boolean existsByTeamAndInviteeAndIsDeletedFalse(Team team, User invitee);
+
+    java.util.List<TeamInvite> findAllByTeam(Team team);
 }
