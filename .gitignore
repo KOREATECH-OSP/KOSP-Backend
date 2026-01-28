@@ -255,3 +255,5 @@ gradle-app.setting
 
 references/
 docs/coverage/
+.sisyphus
+**/AGENTS.md
