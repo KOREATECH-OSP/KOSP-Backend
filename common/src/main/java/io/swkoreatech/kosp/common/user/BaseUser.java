@@ -56,6 +56,14 @@ public abstract class BaseUser extends BaseEntity {
         this.name = name;
     }
 
+    public void updateKutId(String kutId) {
+        if (kutId != null) this.kutId = kutId;
+    }
+
+    public void updateKutEmail(String kutEmail) {
+        if (kutEmail != null) this.kutEmail = kutEmail.toLowerCase();
+    }
+
     public void updateGithubUser(GithubUser githubUser) {
         this.githubUser = githubUser;
     }
