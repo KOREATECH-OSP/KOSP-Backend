@@ -17,6 +17,7 @@ import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
@@ -52,6 +53,7 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final AuthService authService;
     private final ApplicationEventPublisher eventPublisher;
+    private final EmailVerificationService emailVerificationService;
 
     @Transactional
     public AuthTokenResponse signup(UserSignupRequest request, SignupToken token) {
@@ -100,13 +102,15 @@ public class UserService {
 
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
         
-        // 6. GitHub 데이터 수집 이벤트 발행
-        if (githubUser.getGithubLogin() != null) {
-            eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
-            log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
-        }
-        
-        return authService.createTokensForUser(user);
+         // 6. GitHub 데이터 수집 이벤트 발행
+         if (githubUser.getGithubLogin() != null) {
+             eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
+             log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
+         }
+         
+         emailVerificationService.completeSignupVerification(kutEmail);
+         log.info("✅ Redis cleanup completed for email: {}", kutEmail);
+         return authService.createTokensForUser(user);
     }
 
     @Transactional
