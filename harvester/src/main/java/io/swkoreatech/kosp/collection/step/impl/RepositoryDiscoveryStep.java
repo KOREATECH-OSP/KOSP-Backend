@@ -22,16 +22,28 @@ import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.job.ContextValidationListener;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Discovers repositories contributed to by the user within the past year.
+ *
+ * @StepContract
+ * REQUIRES: (none - initial step in pipeline)
+ * PROVIDES: githubLogin, githubToken, githubNodeId, discoveredRepos
+ * PURPOSE: Queries GitHub for all repositories the user has contributed to,
+ *          stores repository metadata in MongoDB, and populates ExecutionContext
+ *          with credentials and repository list for downstream steps.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -46,6 +58,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final StepCompletionListener stepCompletionListener;
+    private final ContextValidationListener contextValidationListener;
 
     @Override
     public Step getStep() {
@@ -55,6 +68,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
                 execute(userId, chunkContext);
                 return RepeatStatus.FINISHED;
             }, transactionManager)
+            .listener(contextValidationListener)
             .listener(stepCompletionListener)
             .build();
     }
@@ -158,9 +172,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
             .getJobExecution()
             .getExecutionContext();
 
-        context.putString("githubLogin", login);
-        context.putString("githubToken", token);
-        context.putString("githubNodeId", nodeId);
+        context.putString(StepContextKeys.GITHUB_LOGIN, login);
+        context.putString(StepContextKeys.GITHUB_TOKEN, token);
+        context.putString(StepContextKeys.GITHUB_NODE_ID, nodeId);
     }
 
     private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories) {
@@ -172,6 +186,6 @@ public class RepositoryDiscoveryStep implements StepProvider {
             .getStepExecution()
             .getJobExecution()
             .getExecutionContext()
-            .put("discoveredRepos", repoFullNames);
+            .put(StepContextKeys.DISCOVERED_REPOS, repoFullNames);
     }
 }

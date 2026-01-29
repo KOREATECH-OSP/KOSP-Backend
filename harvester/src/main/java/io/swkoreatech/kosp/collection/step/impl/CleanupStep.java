@@ -12,6 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
@@ -21,6 +22,15 @@ import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+/**
+ * Cleans up temporary execution context data after job completion.
+ *
+ * @StepContract
+ * REQUIRES: discoveredRepos (for cleanup tracking)
+ * PROVIDES: (none - final cleanup step)
+ * PURPOSE: Removes sensitive credentials and temporary data from ExecutionContext,
+ *          logs final job statistics, ensures clean state for next execution.
+ */
 
 @Slf4j
 @Component
@@ -90,10 +100,10 @@ public class CleanupStep implements StepProvider {
     }
 
     private void clearExecutionContext(ChunkContext chunkContext) {
-        chunkContext.getStepContext()
-            .getStepExecution()
-            .getJobExecution()
-            .getExecutionContext()
-            .remove("discoveredRepos");
-    }
+         chunkContext.getStepContext()
+             .getStepExecution()
+             .getJobExecution()
+             .getExecutionContext()
+             .remove(StepContextKeys.DISCOVERED_REPOS);
+     }
 }
