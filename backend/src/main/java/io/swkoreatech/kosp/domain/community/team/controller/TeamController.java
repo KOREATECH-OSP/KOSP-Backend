@@ -28,8 +28,8 @@ public class TeamController implements TeamApi {
 
     @Override
     @Permit(permitAll = true, name = "teams:list", description = "팀 목록 조회")
-    public ResponseEntity<TeamListResponse> getList(String search, Pageable pageable) {
-        TeamListResponse response = teamService.getList(search, pageable);
+    public ResponseEntity<TeamListResponse> getList(String search, String rsql, Pageable pageable) {
+        TeamListResponse response = teamService.getList(search, rsql, pageable);
         return ResponseEntity.ok(response);
     }
 
