@@ -67,8 +67,9 @@ public class RecruitService {
         
         boolean isLiked = isLiked(user, recruit);
         boolean isBookmarked = isBookmarked(user, recruit);
+        boolean userCanApply = canApply(user, recruit);
         
-        return RecruitResponse.from(recruit, isLiked, isBookmarked);
+        return RecruitResponse.from(recruit, isLiked, isBookmarked, userCanApply);
     }
 
     public RecruitListResponse getList(Board board, Pageable pageable, User user, String rsql) {
@@ -92,7 +93,12 @@ public class RecruitService {
 
     private List<RecruitResponse> mapToResponses(Page<Recruit> page, User user) {
         return page.getContent().stream()
-            .map(recruit -> RecruitResponse.from(recruit, isLiked(user, recruit), isBookmarked(user, recruit)))
+            .map(recruit -> RecruitResponse.from(
+                recruit, 
+                isLiked(user, recruit), 
+                isBookmarked(user, recruit),
+                canApply(user, recruit)
+            ))
             .toList();
     }
 

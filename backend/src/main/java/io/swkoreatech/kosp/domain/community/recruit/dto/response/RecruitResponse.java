@@ -25,9 +25,11 @@ public record RecruitResponse(
     LocalDateTime startDate,
     LocalDateTime endDate,
     Boolean isLiked,
-    Boolean isBookmarked
+    Boolean isBookmarked,
+    Boolean canApply,
+    Boolean isDeleted
 ) {
-    public static RecruitResponse from(Recruit recruit, boolean isLiked, boolean isBookmarked) {
+    public static RecruitResponse from(Recruit recruit, boolean isLiked, boolean isBookmarked, boolean canApply) {
         return RecruitResponse.builder()
             .id(recruit.getId())
             .boardId(recruit.getBoardId())
@@ -44,6 +46,8 @@ public record RecruitResponse(
             .endDate(recruit.getEndDate())
             .isLiked(isLiked)
             .isBookmarked(isBookmarked)
+            .canApply(canApply)
+            .isDeleted(recruit.isDeleted())
             .build();
     }
 }
