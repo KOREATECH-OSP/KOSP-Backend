@@ -7,7 +7,8 @@ public enum SearchFilter {
     articles,
     recruits,
     teams,
-    challenges;
+    challenges,
+    repositories;
 
     @JsonValue
     public String getValue() {
