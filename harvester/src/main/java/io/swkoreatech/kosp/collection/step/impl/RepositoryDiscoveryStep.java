@@ -163,7 +163,16 @@ public class RepositoryDiscoveryStep implements StepProvider {
             .primaryLanguage(repo.getLanguageName())
             .stargazersCount(repo.getStargazerCount())
             .forksCount(repo.getForkCount())
+            .watchersCount(repo.getWatchersCount())
+            .repoCreatedAt(parseDateTime(repo.getCreatedAt()))
             .collectedAt(now);
+    }
+
+    private Instant parseDateTime(String dateTimeString) {
+        if (dateTimeString == null) {
+            return null;
+        }
+        return Instant.parse(dateTimeString);
     }
 
     private void storeUserInfoInContext(ChunkContext chunkContext, String login, String token, String nodeId) {

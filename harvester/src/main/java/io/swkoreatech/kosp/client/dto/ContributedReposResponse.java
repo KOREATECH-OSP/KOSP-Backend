@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.client.dto;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,7 +52,11 @@ public class ContributedReposResponse {
         private List<RepoContribution> issueContributionsByRepository;
 
         public Set<RepositoryInfo> collectAllRepositories() {
-            return collectFromList(commitContributionsByRepository);
+            Set<RepositoryInfo> allRepos = new HashSet<>();
+            allRepos.addAll(collectFromList(commitContributionsByRepository));
+            allRepos.addAll(collectFromList(pullRequestContributionsByRepository));
+            allRepos.addAll(collectFromList(issueContributionsByRepository));
+            return allRepos;
         }
 
         private Set<RepositoryInfo> collectFromList(List<RepoContribution> contributions) {
@@ -100,26 +105,32 @@ public class ContributedReposResponse {
         private int totalCount;
     }
 
-    @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class RepositoryInfo {
-        private String name;
-        private String description;
-        private Owner owner;
-        private String nameWithOwner;
-        private boolean isFork;
-        private boolean isPrivate;
-        private PrimaryLanguage primaryLanguage;
-        private int stargazerCount;
-        private int forkCount;
+     @Getter
+     @JsonIgnoreProperties(ignoreUnknown = true)
+     public static class RepositoryInfo {
+         private String name;
+         private String description;
+         private Owner owner;
+         private String nameWithOwner;
+         private boolean isFork;
+         private boolean isPrivate;
+         private PrimaryLanguage primaryLanguage;
+         private int stargazerCount;
+         private int forkCount;
+         private String createdAt;
+         private WatchersInfo watchers;
 
-        public String getOwnerLogin() {
-            return owner != null ? owner.getLogin() : null;
-        }
+         public String getOwnerLogin() {
+             return owner != null ? owner.getLogin() : null;
+         }
 
-        public String getLanguageName() {
-            return primaryLanguage != null ? primaryLanguage.getName() : null;
-        }
+         public String getLanguageName() {
+             return primaryLanguage != null ? primaryLanguage.getName() : null;
+         }
+
+         public Integer getWatchersCount() {
+             return watchers != null ? watchers.getTotalCount() : 0;
+         }
 
         @Override
         public boolean equals(Object o) {
@@ -138,15 +149,21 @@ public class ContributedReposResponse {
         }
     }
 
-    @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Owner {
-        private String login;
-    }
+     @Getter
+     @JsonIgnoreProperties(ignoreUnknown = true)
+     public static class WatchersInfo {
+         private int totalCount;
+     }
 
-    @Getter
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class PrimaryLanguage {
-        private String name;
-    }
+     @Getter
+     @JsonIgnoreProperties(ignoreUnknown = true)
+     public static class Owner {
+         private String login;
+     }
+
+     @Getter
+     @JsonIgnoreProperties(ignoreUnknown = true)
+     public static class PrimaryLanguage {
+         private String name;
+     }
 }

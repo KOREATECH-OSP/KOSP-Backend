@@ -32,6 +32,8 @@ public class ContributedRepoDocument {
     private String primaryLanguage;
     private Integer stargazersCount;
     private Integer forksCount;
+    private Integer watchersCount;
+    private Instant repoCreatedAt;
 
     private Integer userCommitCount;
     private Integer userPrCount;
