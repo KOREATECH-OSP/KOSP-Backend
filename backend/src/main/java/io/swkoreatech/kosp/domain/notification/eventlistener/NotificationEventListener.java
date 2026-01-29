@@ -19,7 +19,8 @@ public class NotificationEventListener {
     @Async
     @EventListener
     public void handleNotificationEvent(NotificationEvent event) {
-        log.info("Received NotificationEvent for user {}: {}", event.getUserId(), event.getTitle());
+        log.info("Received NotificationEvent for user {}, type: {}", 
+            event.getUserId(), event.getType());
         notificationService.createAndSend(event);
     }
 }

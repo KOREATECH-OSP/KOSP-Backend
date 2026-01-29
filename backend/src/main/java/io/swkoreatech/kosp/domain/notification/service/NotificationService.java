@@ -50,26 +50,45 @@ public class NotificationService {
 
     @Transactional
     public void createAndSend(NotificationEvent event) {
-        User user = userRepository.findById(event.getUserId())
-            .orElse(null);
-
+        User user = findUser(event.getUserId());
         if (user == null) {
-            log.warn("User not found for notification: {}", event.getUserId());
             return;
         }
 
-        Notification notification = Notification.builder()
+        Notification notification = buildNotification(user, event);
+        notificationRepository.save(notification);
+        
+        logNotificationCreation(user, notification);
+        sendSseNotification(user.getId(), notification);
+    }
+
+    private User findUser(Long userId) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            log.warn("User not found for notification: {}", userId);
+        }
+        return user;
+    }
+
+    private Notification buildNotification(User user, NotificationEvent event) {
+        String title = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
+            .buildTitle(event.getType(), event.getPayload());
+        String message = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
+            .buildMessage(event.getType(), event.getPayload());
+        Long referenceId = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
+            .extractReferenceId(event.getType(), event.getPayload());
+
+        return Notification.builder()
             .user(user)
             .type(event.getType())
-            .title(event.getTitle())
-            .message(event.getMessage())
-            .referenceId(event.getReferenceId())
+            .title(title)
+            .message(message)
+            .referenceId(referenceId)
             .build();
+    }
 
-        notificationRepository.save(notification);
-        log.info("Created notification for user {}: {}", user.getId(), event.getTitle());
-
-        sendSseNotification(user.getId(), notification);
+    private void logNotificationCreation(User user, Notification notification) {
+        log.info("Created notification for user {}: {}", user.getId(), notification.getTitle());
     }
 
     private void sendSseNotification(Long userId, Notification notification) {
