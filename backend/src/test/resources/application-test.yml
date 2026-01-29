@@ -8,6 +8,7 @@ aws:
   region: ap-northeast-2
   s3:
     bucket: test-kosp
+    custom_domain: test-domain.example.com
 
 jwt:
   secret-key: testsecretkey1234567890testsecretkey1234567890testsecretkey1234567890
@@ -34,8 +35,8 @@ spring:
       ddl-auto: create-drop
     properties:
       hibernate:
-        format_sql: true
-        show_sql: true
+        format_sql: false
+        show_sql: false
         dialect: org.hibernate.dialect.H2Dialect
   thymeleaf:
     prefix: "classpath:/mail/"
