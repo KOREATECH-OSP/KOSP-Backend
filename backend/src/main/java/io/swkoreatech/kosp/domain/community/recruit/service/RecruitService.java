@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,12 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResp
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
+import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.dto.PageMeta;
@@ -32,6 +38,8 @@ public class RecruitService {
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final TeamRepository teamRepository;
+    private final RecruitApplyRepository recruitApplyRepository;
+    private final TeamMemberRepository teamMemberRepository;
 
     @Transactional
     public Long create(User author, Board board, RecruitRequest request) {
@@ -109,5 +117,22 @@ public class RecruitService {
 
     private boolean isBookmarked(User user, Recruit recruit) {
         return user != null && articleBookmarkRepository.existsByUserAndArticle(user, recruit);
+    }
+
+    boolean canApply(User user, Recruit recruit) {
+        if (user == null) return false;
+        
+        Optional<RecruitApply> application = recruitApplyRepository.findByRecruitAndUser(recruit, user);
+        if (application.isPresent() && isActiveApplication(application.get())) return false;
+        
+        Team team = recruit.getTeam();
+        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user)) return false;
+        
+        return true;
+    }
+
+    private boolean isActiveApplication(RecruitApply apply) {
+        ApplyStatus status = apply.getStatus();
+        return status == ApplyStatus.PENDING || status == ApplyStatus.ACCEPTED;
     }
 }
