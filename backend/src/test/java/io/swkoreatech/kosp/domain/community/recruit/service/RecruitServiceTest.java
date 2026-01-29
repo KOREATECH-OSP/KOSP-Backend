@@ -395,6 +395,48 @@ class RecruitServiceTest {
     class GetOneLikeBookmarkTest {
 
         @Test
+        @DisplayName("RecruitResponse에 canApply 포함")
+        void getOne_returnsCanApplyField() {
+            // given
+            User author = createUser(1L, "작성자");
+            User viewer = createUser(2L, "조회자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitRepository.getById(1L)).willReturn(recruit);
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, viewer))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, viewer))
+                .willReturn(false);
+            
+            // when
+            RecruitResponse response = recruitService.getOne(1L, viewer);
+            
+            // then
+            assertThat(response.canApply()).isTrue();
+        }
+
+        @Test
+        @DisplayName("RecruitResponse에 isDeleted 포함")
+        void getOne_returnsIsDeletedField() {
+            // given
+            User author = createUser(1L, "작성자");
+            User viewer = createUser(2L, "조회자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitRepository.getById(1L)).willReturn(recruit);
+            
+            // when
+            RecruitResponse response = recruitService.getOne(1L, viewer);
+            
+            // then
+            assertThat(response.isDeleted()).isFalse();
+        }
+
+        @Test
         @DisplayName("로그인한 사용자가 좋아요와 북마크를 한 경우")
         void returnsWithLikeAndBookmark() {
             // given
