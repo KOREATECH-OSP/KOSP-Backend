@@ -41,7 +41,8 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
-            .cors(cors -> cors.configurationSource(corsConfigurationSource));
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
+            .securityContext(context -> context.requireExplicitSave(false));
 
         http.addFilterBefore(
             new JwtAuthenticationFilter(userRepository, tokenHeaderResolver),
