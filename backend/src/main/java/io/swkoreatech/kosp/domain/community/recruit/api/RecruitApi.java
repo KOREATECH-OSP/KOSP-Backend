@@ -29,11 +29,12 @@ import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 @Tag(name = "Recruit", description = "모집 공고 관리 API")
 public interface RecruitApi {
 
-    @Operation(summary = "모집 공고 목록 조회", description = "전체 모집 공고 목록을 조회합니다.")
+    @Operation(summary = "모집 공고 목록 조회", description = "전체 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: isDeleted==false, status==OPEN)")
     @GetMapping
     ResponseEntity<RecruitListResponse> getList(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestParam Long boardId,
+        @Parameter(description = "RSQL 필터 (예: isDeleted==false, status==OPEN)") @RequestParam(required = false) String rsql,
         @Parameter(hidden = true) Pageable pageable
     );
 

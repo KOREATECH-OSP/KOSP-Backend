@@ -50,10 +50,11 @@ public class RecruitController implements RecruitApi {
     public ResponseEntity<RecruitListResponse> getList(
         @AuthUser User user,
         @RequestParam Long boardId,
+        @RequestParam(required = false) String rsql,
         Pageable pageable
     ) {
         Board board = boardService.getBoard(boardId);
-        RecruitListResponse response = recruitService.getList(board, pageable, user);
+        RecruitListResponse response = recruitService.getList(board, pageable, user, rsql);
         return ResponseEntity.ok(response);
     }
 

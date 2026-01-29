@@ -4,7 +4,9 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -68,12 +71,29 @@ public class RecruitService {
         return RecruitResponse.from(recruit, isLiked, isBookmarked);
     }
 
-    public RecruitListResponse getList(Board board, Pageable pageable, User user) {
-        Page<Recruit> page = recruitRepository.findByBoard(board, pageable);
-        List<RecruitResponse> recruits = page.getContent().stream()
+    public RecruitListResponse getList(Board board, Pageable pageable, User user, String rsql) {
+        Pageable validatedPageable = validatePageSize(pageable);
+        Specification<Recruit> spec = createSpecification(board, rsql);
+        Page<Recruit> page = recruitRepository.findAll(spec, validatedPageable);
+        List<RecruitResponse> recruits = mapToResponses(page, user);
+        return new RecruitListResponse(recruits, PageMeta.from(page));
+    }
+
+    private Pageable validatePageSize(Pageable pageable) {
+        int size = Math.min(pageable.getPageSize(), 100);
+        return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
+    }
+
+    private Specification<Recruit> createSpecification(Board board, String rsql) {
+        Specification<Recruit> boardSpec = (root, query, builder) -> 
+            builder.equal(root.get("board"), board);
+        return RsqlUtils.toSpecification(rsql, boardSpec);
+    }
+
+    private List<RecruitResponse> mapToResponses(Page<Recruit> page, User user) {
+        return page.getContent().stream()
             .map(recruit -> RecruitResponse.from(recruit, isLiked(user, recruit), isBookmarked(user, recruit)))
             .toList();
-        return new RecruitListResponse(recruits, PageMeta.from(page));
     }
 
     @Transactional
