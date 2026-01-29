@@ -17,7 +17,11 @@
 - [x] AGENTS.md 코딩 컨벤션 재적용 (Phase 1: ScoreCalculationStep, StatisticsAggregationStep)
   - ✅ 삼항 연산자 제거: 9개 → 0개 (100% 준수)
   - ✅ 메서드 길이: 모든 메서드 ≤10줄 (2개 파일)
-- [ ] 중복 코드 추출 및 공통화 (Phase 2 예정)
+- [x] 중복 코드 추출 및 공통화 (Phase 3 완료 - 2026-01-27~28)
+  - ✅ Phase 3 Core: 4개 유틸리티 클래스 생성 (StepContextHelper, NullSafeGetters, GraphQLErrorHandler, GraphQLTypeFactory)
+  - ✅ Phase 3C: PaginationHelper 유틸리티 생성
+  - ✅ 총 211 lines 중복 코드 제거 (-144 LOC Phase 3, -67 LOC Phase 3C)
+  - ✅ 63개 테스트 추가 (모두 통과)
 
 ---
 
@@ -110,9 +114,10 @@
 **해결 방향:**
 - [ ] 아키텍처 다이어그램 작성
 - [ ] Step 간 명확한 인터페이스 정의
-- [x] 복잡한 메서드 분리 및 단순화 (Phase 1: 2개 파일 완료)
-  - ✅ ScoreCalculationStep: 4개 긴 메서드 분할
-  - ✅ StatisticsAggregationStep: 3개 긴 메서드 분할
+- [x] 복잡한 메서드 분리 및 단순화 (Phase 1~3: 7개 파일 완료)
+  - ✅ Phase 1: ScoreCalculationStep (4개 메서드), StatisticsAggregationStep (3개 메서드)
+  - ✅ Phase 2: CommitMiningStep, RepositoryDiscoveryStep, PullRequestMiningStep, IssueMiningStep, CleanupStep
+  - ✅ Phase 3: 유틸리티 클래스 추출로 모든 Step 파일 단순화 완료
 - [ ] 흐름 추적용 로깅 개선
 
 ---
@@ -196,8 +201,9 @@
 | 2  | #7 BE-GH 통신 | 시스템 안정성 |
 | 3  | #1, #6 코드 품질 | 장기적 생산성 |
 | 4  | #8, #9 챌린지 요청 검증 | 기능 동작 확인 불가 |
-| 5  | #5 대형 레포 타임아웃 | 데이터 손실 |
-| 6  | #2, #3 데이터 수집 누락 | 핵심 기능 문제 |
+| 5  | #2, #3 데이터 수집 누락 | 핵심 기능 문제 (우선순위 상승) |
+| 6  | #5 대형 레포 타임아웃 | 데이터 손실 (우선순위 하락) |
+| 7  | 아키텍처 다이어그램 | 문서화 (신규 우선순위) |
 
 ---
 
@@ -244,5 +250,55 @@
 - 📝 관련 커밋: 7개 (refactor/kosp-compliance-phase2 브랜치)
 - 📝 완료 요약: `.sisyphus/notepads/kosp-compliance-phase2/phase2-completion.md`
 
-### 다음 작업: 우선순위 3 (Phase 3)
-- [ ] 공통 유틸리티 추출 및 중복 코드 제거 (DRY 원칙 적용)
+### 2026-01-27~28: 우선순위 3 (Phase 3) 완료 ✅
+- ✅ #1 코드 품질 개선 (DRY 원칙 적용 - 중복 코드 제거)
+  - **Phase 3 Core (2026-01-27)**
+    - StepContextHelper.java (69 LOC): Spring Batch context 추출
+    - NullSafeGetters.java (38 LOC): Null-safe primitive 변환
+    - GraphQLErrorHandler.java (35 LOC): GraphQL 에러 로깅
+    - GraphQLTypeFactory.java (30 LOC): Generic type factory
+    - 7개 Step 파일 리팩토링: -144 LOC 중복 제거
+    - 52개 테스트 추가 (모두 통과)
+  - **Phase 3C (2026-01-28)**
+    - PaginationHelper.java (166 LOC): Cursor 기반 pagination 통합
+    - CommitMiningStep: -42 LOC (234→192, FetchResult 내부 클래스 제거)
+    - PullRequestMiningStep: -13 LOC (163→150)
+    - IssueMiningStep: -12 LOC (147→135)
+    - 11개 테스트 추가 (PaginationHelperTest)
+- ✅ #6 복잡한 코드 흐름 단순화
+  - 총 7개 Step 파일 메서드 분리 완료
+  - 5개 유틸리티 클래스로 공통 로직 추출
+  - 모든 메서드 ≤10줄 준수 (KOSP 규칙)
+- 📝 관련 커밋: 21개 (refactor/dry-phase3, refactor/dry-phase3c 브랜치)
+- 📝 완료 요약: 
+  - `.sisyphus/notepads/dry-refactoring-phase3/completion-summary.md`
+  - `.sisyphus/notepads/dry-refactoring-phase3c/learnings.md`
+- 📊 최종 메트릭:
+  - 생성된 유틸리티: 5개 (338 LOC)
+  - 제거된 중복 코드: 211 lines
+  - 총 테스트: 63개 (모두 통과)
+  - 빌드 상태: ✅ SUCCESS
+
+### 다음 작업: 우선순위 3 (나머지 작업) - 2개 계획으로 분리 ✅
+
+**2026-01-29: 작업 계획 완료**
+- ✅ Step 간 명확한 인터페이스 정의 → `.sisyphus/plans/step-interface-clarity.md`
+  - StepContextKeys interface로 magic string 제거 (4개 상수)
+  - ContextValidationListener로 precondition 검증
+  - @StepContract Javadoc으로 step 계약 문서화
+  - 예상 영향: Zero magic strings, compile-time safety, ~10% LOC 증가
+- ✅ 흐름 추적용 로깅 개선 → `.sisyphus/plans/logging-improvement.md`
+  - BatchMdcListener로 MDC 기반 correlation 추가
+  - StepMetricsListener로 자동 step 메트릭 로깅
+  - LoggingConstants로 표준화된 로그 메시지
+  - Mining steps에 saved/skipped count 구분
+  - 예상 영향: 47→60 로그 문 (+28%), 2배 observability 향상
+
+**다음 단계**: `/start-work` 실행하여 계획된 작업 진행
+
+### 다음 작업: 우선순위 5, 6
+- [ ] #2, #3 데이터 수집 누락 조사 및 해결 (우선순위 5로 상승)
+- [ ] #5 대형 레포 타임아웃 조사 및 해결 (우선순위 6으로 하락)
+
+### 다음 작업: 우선순위 7 (신규)
+- [ ] 아키텍처 다이어그램 작성 (문서화 작업)
