@@ -19,11 +19,14 @@ import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ChallengeSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.RecruitSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.TeamSummary;
+import io.swkoreatech.kosp.domain.search.dto.response.RepositorySummary;
 import io.swkoreatech.kosp.domain.search.dto.response.UserSummary;
 import io.swkoreatech.kosp.domain.search.model.SearchFilter;
 import io.swkoreatech.kosp.domain.user.model.User;
@@ -44,6 +47,7 @@ public class SearchService {
     private final TeamRepository teamRepository;
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
+    private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
 
     public GlobalSearchResponse search(String keyword) {
         return search(keyword, null, null, Pageable.unpaged());
@@ -61,10 +65,11 @@ public class SearchService {
         List<TeamSummary> teams = searchTeams(keyword, effectiveFilters, rsql, pageable);
         List<ChallengeSummary> challenges = searchChallenges(keyword, effectiveFilters, rsql, pageable);
         List<UserSummary> users = searchUsers(keyword, effectiveFilters, rsql, pageable);
+        List<RepositorySummary> repositories = searchRepositories(keyword, effectiveFilters, rsql, pageable);
 
-        PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users);
+         PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories);
 
-        return new GlobalSearchResponse(articles, recruits, teams, challenges, users, meta);
+         return new GlobalSearchResponse(articles, recruits, teams, challenges, users, repositories, meta);
     }
 
     private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
@@ -253,10 +258,47 @@ public class SearchService {
         };
     }
 
+    private List<RepositorySummary> searchRepositories(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+        if (!filters.contains(SearchFilter.repositories)) {
+            return Collections.emptyList();
+        }
+
+        Specification<GithubRepositoryStatistics> spec = createRepositorySpec(keyword, rsql);
+        Page<GithubRepositoryStatistics> page = repositoryStatisticsRepository.findAll(spec, pageable);
+
+        return page.getContent().stream()
+            .map(RepositorySummary::from)
+            .toList();
+    }
+
+    private Specification<GithubRepositoryStatistics> createRepositorySpec(String keyword, String rsql) {
+        Specification<GithubRepositoryStatistics> baseSpec = createRepositoryBaseSpec();
+        Specification<GithubRepositoryStatistics> keywordSpec = createRepositoryKeywordSpec(keyword);
+        Specification<GithubRepositoryStatistics> rsqlSpec = RsqlUtils.toSpecification(rsql);
+
+        return baseSpec.and(keywordSpec).and(rsqlSpec);
+    }
+
+    private Specification<GithubRepositoryStatistics> createRepositoryBaseSpec() {
+        return (root, query, cb) -> cb.conjunction();
+    }
+
+    private Specification<GithubRepositoryStatistics> createRepositoryKeywordSpec(String keyword) {
+        if (keyword == null || keyword.isBlank()) {
+            return (root, query, cb) -> cb.conjunction();
+        }
+
+        String pattern = "%" + keyword.toLowerCase() + "%";
+        return (root, query, cb) -> cb.or(
+            cb.like(cb.lower(root.get("repoName")), pattern),
+            cb.like(cb.lower(root.get("description")), pattern)
+        );
+    }
+
     private PageMeta createPageMeta(List<ArticleSummary> articles, List<RecruitSummary> recruits, 
                                      List<TeamSummary> teams, List<ChallengeSummary> challenges, 
-                                     List<UserSummary> users) {
-        long totalItems = articles.size() + recruits.size() + teams.size() + challenges.size() + users.size();
+                                     List<UserSummary> users, List<RepositorySummary> repositories) {
+        long totalItems = articles.size() + recruits.size() + teams.size() + challenges.size() + users.size() + repositories.size();
         return new PageMeta(0, 1, totalItems);
     }
 }
