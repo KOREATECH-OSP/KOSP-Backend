@@ -161,7 +161,7 @@ class TeamServiceTest {
             given(teamRepository.findByNameContaining("테스트", pageable)).willReturn(page);
 
             // when
-            TeamListResponse result = teamService.getList("테스트", pageable);
+            TeamListResponse result = teamService.getList("테스트", null, pageable);
 
             // then
             assertThat(result.teams()).hasSize(1);
@@ -577,7 +577,7 @@ class TeamServiceTest {
 
              // when
              teamService.deleteTeam(1L, leader);
-             TeamListResponse result = teamService.getList("테스트", pageable);
+             TeamListResponse result = teamService.getList("테스트", null, pageable);
 
              // then
              verify(team).delete();

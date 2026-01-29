@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.global.util.RsqlUtils;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.TeamInviteSendEvent;
 import lombok.RequiredArgsConstructor;
 
@@ -65,12 +67,23 @@ public class TeamService {
         return TeamDetailResponse.from(team);
     }
 
-     public TeamListResponse getList(String search, Pageable pageable) {
-         Page<Team> page = teamRepository.findByNameContaining(search, pageable);
+    public TeamListResponse getList(String search, String rsql, Pageable pageable) {
+        Specification<Team> spec = createSpecification(search, rsql);
+        Page<Team> page = teamRepository.findAll(spec, pageable);
         List<TeamResponse> teams = page.getContent().stream()
             .map(team -> TeamResponse.from(team, getLeader(team)))
             .toList();
         return new TeamListResponse(teams, PageMeta.from(page));
+    }
+
+    private Specification<Team> createSpecification(String search, String rsql) {
+        Specification<Team> searchSpec = (root, query, builder) -> {
+            if (search == null || search.isBlank()) {
+                return null;
+            }
+            return builder.like(root.get("name"), "%" + search + "%");
+        };
+        return RsqlUtils.toSpecification(rsql, searchSpec);
     }
 
     private User getLeader(Team team) {

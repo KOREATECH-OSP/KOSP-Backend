@@ -15,6 +15,7 @@ public record GlobalSearchResponse(
     List<TeamSummary> teams,
     List<ChallengeSummary> challenges,
     List<UserSummary> users,
+    List<RepositorySummary> repositories,
     PageMeta meta
 ) {
     public record ArticleSummary(

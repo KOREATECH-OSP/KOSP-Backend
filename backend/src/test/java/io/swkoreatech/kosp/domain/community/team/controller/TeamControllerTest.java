@@ -1,7 +1,11 @@
 package io.swkoreatech.kosp.domain.community.team.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.HashSet;
@@ -20,6 +24,7 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
@@ -29,6 +34,9 @@ class TeamControllerTest extends IntegrationTestSupport {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private GithubUserRepository githubUserRepository;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -58,7 +66,8 @@ class TeamControllerTest extends IntegrationTestSupport {
             .password(passwordEncoder.encode(getValidPassword()))
             .roles(new HashSet<>())
             .build();
-        ReflectionTestUtils.setField(leader, "githubId", 2001L);
+        leader = userRepository.save(leader);
+        ReflectionTestUtils.setField(leader, "githubUser", githubUserRepository.getByGithubId(2001L));
         leader = userRepository.save(leader);
 
         member = User.builder()
@@ -68,7 +77,8 @@ class TeamControllerTest extends IntegrationTestSupport {
             .password(passwordEncoder.encode(getValidPassword()))
             .roles(new HashSet<>())
             .build();
-        ReflectionTestUtils.setField(member, "githubId", 2002L);
+        member = userRepository.save(member);
+        ReflectionTestUtils.setField(member, "githubUser", githubUserRepository.getByGithubId(2002L));
         member = userRepository.save(member);
 
         team = Team.builder()
@@ -157,7 +167,8 @@ class TeamControllerTest extends IntegrationTestSupport {
             .password(passwordEncoder.encode(getValidPassword()))
             .roles(new HashSet<>())
             .build();
-        ReflectionTestUtils.setField(invitee, "githubId", 2003L);
+        invitee = userRepository.save(invitee);
+        ReflectionTestUtils.setField(invitee, "githubUser", githubUserRepository.getByGithubId(2003L));
         invitee = userRepository.save(invitee);
 
         TeamInvite invite1 = TeamInvite.builder()
@@ -187,4 +198,55 @@ class TeamControllerTest extends IntegrationTestSupport {
         assertThat(allInvites).hasSize(2);
         assertThat(allInvites).allMatch(TeamInvite::isDeleted);
     }
+
+    @Test
+    @DisplayName("rsql로 활성 팀만 필터링")
+    void getList_withRsqlFilterActiveTeams_returnsOnlyActiveTeams() throws Exception {
+        Team deletedTeam = Team.builder()
+            .name("삭제된팀")
+            .description("삭제된 팀")
+            .build();
+        ReflectionTestUtils.setField(deletedTeam, "isDeleted", true);
+        teamRepository.save(deletedTeam);
+
+        mockMvc.perform(get("/v1/teams")
+                .param("rsql", "isDeleted==false"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.teams[*].isDeleted").value(everyItem(is(false))));
+    }
+
+    @Test
+    @DisplayName("rsql로 삭제된 팀만 필터링")
+    void getList_withRsqlFilterDeletedTeams_returnsOnlyDeletedTeams() throws Exception {
+        Team deletedTeam = Team.builder()
+            .name("삭제된팀")
+            .description("삭제된 팀")
+            .build();
+        ReflectionTestUtils.setField(deletedTeam, "isDeleted", true);
+        teamRepository.save(deletedTeam);
+
+        mockMvc.perform(get("/v1/teams")
+                .param("rsql", "isDeleted==true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.teams[*].isDeleted").value(everyItem(is(true))));
+    }
+
+    @Test
+    @DisplayName("검색과 rsql이 AND로 결합")
+    void getList_withSearchAndRsql_combinesWithAnd() throws Exception {
+        Team deletedTeam = Team.builder()
+            .name("삭제테스트팀")
+            .description("삭제된 팀")
+            .build();
+        ReflectionTestUtils.setField(deletedTeam, "isDeleted", true);
+        teamRepository.save(deletedTeam);
+
+        mockMvc.perform(get("/v1/teams")
+                .param("search", "삭제테스트팀")
+                .param("rsql", "isDeleted==false"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.teams[*].isDeleted").value(everyItem(is(false))))
+            .andExpect(jsonPath("$.teams[*].name").value(everyItem(is("삭제테스트팀"))));
+    }
+
 }
