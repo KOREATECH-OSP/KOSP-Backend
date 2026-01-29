@@ -128,6 +128,7 @@ public class RecruitService {
     public void delete(User author, Long id) {
         Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, author.getId());
+        recruit.updateStatus(RecruitStatus.CLOSED);
         recruit.delete();
     }
 

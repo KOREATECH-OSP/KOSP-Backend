@@ -245,6 +245,7 @@ class RecruitServiceTest {
             recruitService.delete(author, 1L);
 
             // then
+            assertThat(recruit.getStatus()).isEqualTo(RecruitStatus.CLOSED);
             verify(recruitRepository).delete(recruit);
         }
     }
