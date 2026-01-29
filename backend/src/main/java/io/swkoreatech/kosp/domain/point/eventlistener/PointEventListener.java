@@ -34,7 +34,7 @@ public class PointEventListener {
     }
 
     private void publishNotification(PointChangeEvent event) {
-        String title = "포인트 변경";
+        String title = event.source().getTitle();
         String message = buildPointMessage(event.amount(), event.reason());
         
         eventPublisher.publishEvent(
