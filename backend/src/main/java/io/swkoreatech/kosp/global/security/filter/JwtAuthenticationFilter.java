@@ -43,7 +43,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         
         try {
+            String uri = request.getRequestURI();
+            String method = request.getMethod();
+            boolean hasAuthHeader = request.getHeader("Authorization") != null;
+            log.info("🔐 [AUTH] {} {} | Auth header: {}", method, uri, hasAuthHeader);
+            
             String tokenString = extractFromHeader(request);
+            
+            if (tokenString.isBlank()) {
+                log.info("🔐 [AUTH] {} {} | No token found", method, uri);
+            } else {
+                log.info("🔐 [AUTH] {} {} | Token extracted (length: {})", method, uri, tokenString.length());
+            }
             
             if (!tokenString.isBlank()) {
                 // ✅ JwtToken.from()으로 검증
@@ -51,11 +62,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 
                 // SecurityContext 설정
                 authenticateUser(token);
+                log.info("🔐 [AUTH] {} {} | Authenticated user ID: {}", method, uri, token.getUserId());
             }
 
             filterChain.doFilter(request, response);
         } catch (Exception e) {
-            log.debug("Authentication failed: {}", e.getMessage());
+            String uri = request.getRequestURI();
+            String method = request.getMethod();
+            log.warn("🔐 [AUTH] {} {} | Authentication failed: {}", method, uri, e.getMessage(), e);
             filterChain.doFilter(request, response);
         } finally {
             SecurityContextHolder.clearContext();
