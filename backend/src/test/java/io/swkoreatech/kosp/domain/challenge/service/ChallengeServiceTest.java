@@ -55,7 +55,6 @@ class ChallengeServiceTest {
             .description(name + " 설명")
             .condition("T(Math).min(totalCommits * 100 / 10, 100)")
             .tier(tier)
-            .imageUrl("https://image.url/" + id)
             .point(100)
             .build();
         ReflectionTestUtils.setField(challenge, "id", id);

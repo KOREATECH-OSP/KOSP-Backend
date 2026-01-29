@@ -23,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PermissionResponse;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
 import io.swkoreatech.kosp.domain.auth.model.Permission;
 import io.swkoreatech.kosp.domain.auth.model.Policy;
@@ -118,7 +119,7 @@ class PolicyAdminServiceTest {
             given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
 
             // when
-            PolicyResponse result = policyAdminService.getPolicy("POLICY_READ");
+            PolicyDetailResponse result = policyAdminService.getPolicy("POLICY_READ");
 
             // then
             assertThat(result.name()).isEqualTo("POLICY_READ");
