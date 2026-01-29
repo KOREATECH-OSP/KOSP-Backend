@@ -13,7 +13,9 @@ import io.swkoreatech.kosp.domain.notification.service.NotificationService;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 public class NotificationController implements NotificationApi {
@@ -23,6 +25,12 @@ public class NotificationController implements NotificationApi {
     @Override
     @Permit(name = "notification:subscribe", description = "SSE 알림 구독")
     public SseEmitter subscribe(User user) {
+        if (user == null) {
+            log.warn("📢 [SSE] subscribe() called but user is null");
+        } else {
+            log.info("📢 [SSE] User {} (ID: {}) subscribing to notifications", 
+                user.getName(), user.getId());
+        }
         return notificationService.subscribe(user.getId());
     }
 
