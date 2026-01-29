@@ -17,6 +17,10 @@ query GetContributedRepositories($login: String!, $from: DateTime!, $to: DateTim
           }
           stargazerCount
           forkCount
+          createdAt
+          watchers {
+            totalCount
+          }
         }
         contributions {
           totalCount
@@ -29,6 +33,10 @@ query GetContributedRepositories($login: String!, $from: DateTime!, $to: DateTim
             login
           }
           nameWithOwner
+          createdAt
+          watchers {
+            totalCount
+          }
         }
         contributions {
           totalCount
@@ -41,6 +49,10 @@ query GetContributedRepositories($login: String!, $from: DateTime!, $to: DateTim
             login
           }
           nameWithOwner
+          createdAt
+          watchers {
+            totalCount
+          }
         }
         contributions {
           totalCount
