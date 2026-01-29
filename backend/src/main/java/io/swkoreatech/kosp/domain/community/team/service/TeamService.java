@@ -205,9 +205,15 @@ public class TeamService {
         }
     }
 
-     public List<TeamDetailResponse> getMyTeams(User user) {
-         return teamMemberRepository.findAllByUserAndIsDeletedFalse(user).stream()
-             .map(member -> TeamDetailResponse.from(member.getTeam()))
-             .toList();
-     }
+      public List<TeamDetailResponse> getMyTeams(User user) {
+          return teamMemberRepository.findAllByUserAndIsDeletedFalse(user).stream()
+              .map(member -> TeamDetailResponse.from(member.getTeam()))
+              .toList();
+      }
+
+      public TeamDetailResponse getMyTeam(User user) {
+          TeamMember member = teamMemberRepository.findByUser(user)
+              .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+          return TeamDetailResponse.from(member.getTeam());
+      }
 }

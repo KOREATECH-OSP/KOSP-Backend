@@ -3,17 +3,20 @@ package io.swkoreatech.kosp.domain.community.recruit.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +24,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
@@ -30,9 +34,13 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.GlobalException;
@@ -55,6 +63,12 @@ class RecruitServiceTest {
 
     @Mock
     private TeamRepository teamRepository;
+
+    @Mock
+    private RecruitApplyRepository recruitApplyRepository;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
 
     private User createUser(Long id, String name) {
         User user = User.builder()
@@ -231,6 +245,7 @@ class RecruitServiceTest {
             recruitService.delete(author, 1L);
 
             // then
+            assertThat(recruit.getStatus()).isEqualTo(RecruitStatus.CLOSED);
             verify(recruitRepository).delete(recruit);
         }
     }
@@ -250,10 +265,10 @@ class RecruitServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Recruit> page = new PageImpl<>(List.of(recruit), pageable, 1);
             
-            given(recruitRepository.findByBoard(board, pageable)).willReturn(page);
+            given(recruitRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(page);
 
             // when
-            RecruitListResponse result = recruitService.getList(board, pageable, author);
+            RecruitListResponse result = recruitService.getList(board, pageable, author, null);
 
             // then
             assertThat(result.recruits()).hasSize(1);
@@ -270,13 +285,65 @@ class RecruitServiceTest {
             Pageable pageable = PageRequest.of(0, 10);
             Page<Recruit> page = new PageImpl<>(List.of(recruit), pageable, 1);
             
-            given(recruitRepository.findByBoard(board, pageable)).willReturn(page);
+            given(recruitRepository.findAll(any(Specification.class), any(Pageable.class))).willReturn(page);
 
             // when
-            RecruitListResponse result = recruitService.getList(board, pageable, null);
+            RecruitListResponse result = recruitService.getList(board, pageable, null, null);
 
             // then
             assertThat(result.recruits()).hasSize(1);
+        }
+
+        @Test
+        @DisplayName("RSQL 필터로 삭제된 모집 필터링")
+        void getList_withRsqlFilter_returnsFilteredRecruits() {
+            // given
+            User author = createUser(1L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            
+            Recruit activeRecruit = createRecruit(1L, author, board, team);
+            Recruit deletedRecruit = createRecruit(2L, author, board, team);
+            ReflectionTestUtils.setField(deletedRecruit, "isDeleted", true);
+            
+            Pageable pageable = PageRequest.of(0, 10);
+            String rsql = "isDeleted==false";
+            
+            // Mock the Specification-based query
+            given(recruitRepository.findAll(any(Specification.class), any(Pageable.class)))
+                .willReturn(new PageImpl<>(List.of(activeRecruit), pageable, 1));
+            
+            // when
+            RecruitListResponse result = recruitService.getList(board, pageable, author, rsql);
+            
+            // then
+            assertThat(result.recruits()).hasSize(1);
+            assertThat(result.recruits().get(0).title()).isEqualTo("모집 공고");
+        }
+
+        @Test
+        @DisplayName("페이지 크기가 100으로 제한된다")
+        void getList_withLargePageSize_capsAt100() {
+            // given
+            User author = createUser(1L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            Pageable largePage = PageRequest.of(0, 999);
+            Pageable cappedPage = PageRequest.of(0, 100);
+            Page<Recruit> page = new PageImpl<>(List.of(recruit), cappedPage, 1);
+            
+            ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
+            given(recruitRepository.findAll(any(Specification.class), pageableCaptor.capture()))
+                .willReturn(page);
+            
+            // when
+            recruitService.getList(board, largePage, author, null);
+            
+            // then
+            Pageable capturedPageable = pageableCaptor.getValue();
+            assertThat(capturedPageable.getPageSize()).isEqualTo(100);
         }
     }
 
@@ -329,6 +396,48 @@ class RecruitServiceTest {
     class GetOneLikeBookmarkTest {
 
         @Test
+        @DisplayName("RecruitResponse에 canApply 포함")
+        void getOne_returnsCanApplyField() {
+            // given
+            User author = createUser(1L, "작성자");
+            User viewer = createUser(2L, "조회자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitRepository.getById(1L)).willReturn(recruit);
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, viewer))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, viewer))
+                .willReturn(false);
+            
+            // when
+            RecruitResponse response = recruitService.getOne(1L, viewer);
+            
+            // then
+            assertThat(response.canApply()).isTrue();
+        }
+
+        @Test
+        @DisplayName("RecruitResponse에 isDeleted 포함")
+        void getOne_returnsIsDeletedField() {
+            // given
+            User author = createUser(1L, "작성자");
+            User viewer = createUser(2L, "조회자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitRepository.getById(1L)).willReturn(recruit);
+            
+            // when
+            RecruitResponse response = recruitService.getOne(1L, viewer);
+            
+            // then
+            assertThat(response.isDeleted()).isFalse();
+        }
+
+        @Test
         @DisplayName("로그인한 사용자가 좋아요와 북마크를 한 경우")
         void returnsWithLikeAndBookmark() {
             // given
@@ -367,6 +476,128 @@ class RecruitServiceTest {
             // then
             assertThat(response.isLiked()).isFalse();
             assertThat(response.isBookmarked()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("canApply 메서드")
+    class CanApplyTest {
+
+        @Test
+        @DisplayName("사용자가 이미 지원한 경우 false 반환")
+        void returnsFalse_whenUserAlreadyApplied() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            RecruitApply pendingApply = RecruitApply.builder()
+                .recruit(recruit)
+                .user(user)
+                .reason("지원합니다")
+                .portfolioUrl("https://github.com/user")
+                .build();
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.of(pendingApply));
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("사용자가 팀 멤버인 경우 false 반환")
+        void returnsFalse_whenUserIsTeamMember() {
+            // given
+            User user = createUser(1L, "팀원");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(true);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("사용자가 거절당한 경우 true 반환")
+        void returnsTrue_whenUserWasRejected() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            RecruitApply rejectedApply = RecruitApply.builder()
+                .recruit(recruit)
+                .user(user)
+                .reason("지원합니다")
+                .portfolioUrl("https://github.com/user")
+                .build();
+            rejectedApply.updateStatus(RecruitApply.ApplyStatus.REJECTED);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.of(rejectedApply));
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(false);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("사용자가 지원하지 않고 멤버도 아닌 경우 true 반환")
+        void returnsTrue_whenUserEligible() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(false);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("익명 사용자는 false 반환")
+        void returnsFalse_whenUserIsAnonymous() {
+            // given
+            User author = createUser(1L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+
+            // when
+            boolean result = recruitService.canApply(null, recruit);
+
+            // then
+            assertThat(result).isFalse();
         }
     }
 }
