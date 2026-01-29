@@ -33,8 +33,8 @@ public class PolicyAdminService {
             .toList();
     }
 
-    public PolicyResponse getPolicy(String name) {
-        return PolicyResponse.from(findPolicy(name));
+    public PolicyDetailResponse getPolicy(String name) {
+        return PolicyDetailResponse.from(findPolicy(name));
     }
 
     @Transactional
