@@ -32,6 +32,15 @@ import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+/**
+ * Aggregates platform-wide statistics from collected GitHub data.
+ *
+ * @StepContract
+ * REQUIRES: (none - reads from MongoDB collections)
+ * PROVIDES: (none - writes to MongoDB statistics collection)
+ * PURPOSE: Calculates aggregate metrics across all users including total commits,
+ *          PRs, issues, and repository counts for platform analytics dashboard.
+ */
 
 @Slf4j
 @Component

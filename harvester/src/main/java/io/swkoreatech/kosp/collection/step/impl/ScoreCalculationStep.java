@@ -23,6 +23,15 @@ import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentReposito
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.NullSafeGetters;
+/**
+ * Calculates contribution scores for the user based on collected data.
+ *
+ * @StepContract
+ * REQUIRES: (none - reads from MongoDB collections)
+ * PROVIDES: (none - updates User entity in MySQL)
+ * PURPOSE: Computes weighted scores from commits, PRs, and issues using configured
+ *          weights, updates user contribution score in database for ranking.
+ */
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
