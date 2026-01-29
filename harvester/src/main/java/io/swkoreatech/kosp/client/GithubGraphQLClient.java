@@ -112,6 +112,15 @@ public class GithubGraphQLClient {
         return query(userIssuesQuery, variables, token, responseType);
     }
 
+    public <T> Mono<T> getUserBasicInfo(
+        String login,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = Map.of("login", login);
+        return query(userBasicInfoQuery, variables, token, responseType);
+    }
+
     public <T> Mono<T> getRepositoryCommits(
         String owner,
         String name,
