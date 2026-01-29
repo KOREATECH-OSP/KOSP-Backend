@@ -3,22 +3,24 @@ package io.swkoreatech.kosp.domain.notification.event;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import lombok.Getter;
 
-import java.util.Map;
-
 @Getter
 public class NotificationEvent {
 
     private final Long userId;
     private final NotificationType type;
-    private final Map<String, Object> payload;
+    private final String title;
+    private final String message;
+    private final Long referenceId;
 
-    private NotificationEvent(Long userId, NotificationType type, Map<String, Object> payload) {
+    private NotificationEvent(Long userId, NotificationType type, String title, String message, Long referenceId) {
         this.userId = userId;
         this.type = type;
-        this.payload = payload;
+        this.title = title;
+        this.message = message;
+        this.referenceId = referenceId;
     }
 
-    public static NotificationEvent of(Long userId, NotificationType type, Map<String, Object> payload) {
-        return new NotificationEvent(userId, type, payload);
+    public static NotificationEvent of(Long userId, NotificationType type, String title, String message, Long referenceId) {
+        return new NotificationEvent(userId, type, title, message, referenceId);
     }
 }
