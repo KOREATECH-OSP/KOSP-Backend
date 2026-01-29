@@ -30,7 +30,7 @@ public class AdminPolicyController implements AdminPolicyApi {
 
     @Override
     @Permit(name = "admin:policies:read", description = "정책 단일 조회")
-    public ResponseEntity<PolicyDetailResponse> getPolicy(String policyName) {
+    public ResponseEntity<PolicyResponse> getPolicy(String policyName) {
         return ResponseEntity.ok(policyAdminService.getPolicy(policyName));
     }
 

@@ -24,4 +24,10 @@ public interface CommentRepository extends Repository<Comment, Long> {
     Page<Comment> findByArticleIdAndIsDeletedFalse(Long articleId, Pageable pageable);
     
     Page<Comment> findByAuthorIdAndIsDeletedFalse(Long authorId, Pageable pageable);
+    
+    void delete(Comment comment);
+    
+    default Page<Comment> findByArticleId(Long articleId, Pageable pageable) {
+        return findByArticleIdAndIsDeletedFalse(articleId, pageable);
+    }
 }

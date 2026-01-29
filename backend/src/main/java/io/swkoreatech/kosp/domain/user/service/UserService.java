@@ -176,6 +176,10 @@ public class UserService {
         );
     }
 
+    public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
+        return getMyApplications(user, null, pageable);
+    }
+
     public MyPointHistoryResponse getMyPointHistory(User user, Pageable pageable) {
         Page<PointTransaction> transactions = pointTransactionRepository.findByUserOrderByCreatedAtDesc(user, pageable);
         return MyPointHistoryResponse.from(user, transactions);
