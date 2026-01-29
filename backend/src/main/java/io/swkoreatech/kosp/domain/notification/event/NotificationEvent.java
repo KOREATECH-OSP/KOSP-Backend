@@ -23,24 +23,4 @@ public class NotificationEvent {
     public static NotificationEvent of(Long userId, NotificationType type, String title, String message, Long referenceId) {
         return new NotificationEvent(userId, type, title, message, referenceId);
     }
-
-    public static NotificationEvent articleReported(Long userId, Long articleId) {
-        return new NotificationEvent(
-            userId,
-            NotificationType.ARTICLE_REPORTED,
-            "게시글 신고 접수",
-            "회원님의 게시글이 신고되었습니다.",
-            articleId
-        );
-    }
-
-    public static NotificationEvent commentReported(Long userId, Long commentId) {
-        return new NotificationEvent(
-            userId,
-            NotificationType.COMMENT_REPORTED,
-            "댓글 신고 접수",
-            "회원님의 댓글이 신고되었습니다.",
-            commentId
-        );
-    }
 }

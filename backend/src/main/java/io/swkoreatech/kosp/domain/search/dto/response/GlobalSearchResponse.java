@@ -7,12 +7,15 @@ import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.global.dto.PageMeta;
 
 public record GlobalSearchResponse(
     List<ArticleSummary> articles,
     List<RecruitSummary> recruits,
     List<TeamSummary> teams,
-    List<ChallengeSummary> challenges
+    List<ChallengeSummary> challenges,
+    List<UserSummary> users,
+    PageMeta meta
 ) {
     public record ArticleSummary(
         Long id,

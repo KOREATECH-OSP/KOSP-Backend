@@ -111,17 +111,26 @@ public class PermissionInitializer implements CommandLineRunner {
     }
     
     private void initSuperuserRole() {
-        if (roleRepository.existsByName("ROLE_SUPERUSER")) {
-            return;
-        }
-        
-        Role superuserRole = roleRepository.save(
+        roleRepository.findByName("ROLE_SUPERUSER")
+            .ifPresentOrElse(
+                this::updateRoleAccessAdmin,
+                this::createSuperuserRole
+            );
+    }
+    
+    private void updateRoleAccessAdmin(Role role) {
+        role.updateCanAccessAdmin(true);
+        roleRepository.save(role);
+    }
+    
+    private void createSuperuserRole() {
+        roleRepository.save(
             Role.builder()
                 .name("ROLE_SUPERUSER")
                 .description("슈퍼유저 (모든 권한 보유, 수정 불가)")
+                .canAccessAdmin(true)
                 .build()
         );
-        
         log.info("Initialized ROLE_SUPERUSER (immutable)");
     }
 
@@ -150,11 +159,33 @@ public class PermissionInitializer implements CommandLineRunner {
         // policy.updatePermissions(permissions);
         // policyRepository.save(policy);
 
-        if (roleRepository.existsByName(roleName)) {
+        roleRepository.findByName(roleName)
+            .ifPresentOrElse(
+                role -> updateAdminRoleIfNeeded(roleName, role),
+                () -> createNewRole(roleName, roleDesc, policy)
+            );
+    }
+    
+    private void updateAdminRoleIfNeeded(String name, Role role) {
+        if (!"ROLE_ADMIN".equals(name)) {
             return;
         }
-        createRole(roleName, roleDesc, policy);
-        log.info("Initialized {}.", roleName);
+        role.updateCanAccessAdmin(true);
+        roleRepository.save(role);
+    }
+    
+    private void createNewRole(String name, String description, Policy policy) {
+        Role.RoleBuilder builder = Role.builder()
+            .name(name)
+            .description(description)
+            .policies(Set.of(policy));
+        
+        if ("ROLE_ADMIN".equals(name)) {
+            builder.canAccessAdmin(true);
+        }
+        
+        roleRepository.save(builder.build());
+        log.info("Initialized {}.", name);
     }
 
     private Policy createPolicy(String name, String description, Set<Permission> permissions) {
@@ -163,16 +194,6 @@ public class PermissionInitializer implements CommandLineRunner {
                 .name(name)
                 .description(description)
                 .permissions(permissions)
-                .build()
-        );
-    }
-
-    private void createRole(String name, String description, Policy policy) {
-        roleRepository.save(
-            Role.builder()
-                .name(name)
-                .description(description)
-                .policies(Set.of(policy))
                 .build()
         );
     }

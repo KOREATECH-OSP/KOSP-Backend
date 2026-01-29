@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.search.controller;
 
 import java.util.Set;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,7 +21,7 @@ public class SearchController implements SearchApi {
 
     @Override
     @Permit(name = "global:search", permitAll = true, description = "통합 검색")
-    public ResponseEntity<GlobalSearchResponse> search(String keyword, Set<SearchFilter> filter) {
-        return ResponseEntity.ok(searchService.search(keyword, filter));
+    public ResponseEntity<GlobalSearchResponse> search(String keyword, Set<SearchFilter> filter, String rsql, Pageable pageable) {
+        return ResponseEntity.ok(searchService.search(keyword, filter, rsql, pageable));
     }
 }
