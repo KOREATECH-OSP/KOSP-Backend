@@ -23,7 +23,20 @@ public interface SearchApi {
 
     @Operation(
         summary = "통합 검색",
-        description = "키워드로 게시글, 모집글, 팀, 챌린지, 사용자를 통합 검색합니다. RSQL 필터 및 페이지네이션 지원."
+        description = """
+            키워드로 게시글, 모집글, 팀, 챌린지, 사용자, 레포지토리를 통합 검색합니다. RSQL 필터 및 페이지네이션 지원.
+            
+            **RSQL 필터 지원 필드 (repositories):**
+            - 숫자: stargazersCount, forksCount, watchersCount
+            - 문자열: primaryLanguage, repoName, repoOwner, contributorGithubId
+            - 날짜: lastCommitDate
+            
+            **RSQL 예시:**
+            - stargazersCount>100
+            - primaryLanguage==Java
+            - forksCount>=50;primaryLanguage==Python
+            - lastCommitDate>2024-01-01
+            """
     )
     @ApiResponse(responseCode = "200", description = "검색 성공")
     @GetMapping
@@ -31,10 +44,17 @@ public interface SearchApi {
         @Parameter(description = "검색 키워드", required = true)
         @RequestParam String keyword,
 
-        @Parameter(description = "검색 필터 (articles, recruits, teams, challenges, users). 미지정시 전체 검색")
+        @Parameter(description = """
+            검색 필터 (articles, recruits, teams, challenges, users, repositories).
+            미지정시 전체 검색.
+            repositories: GitHub 레포지토리 통계 검색.
+            """)
         @RequestParam(required = false) Set<SearchFilter> filter,
 
-        @Parameter(description = "RSQL 필터 (예: title==*test*;status==OPEN)")
+        @Parameter(description = """
+            RSQL 필터 (예: title==*test*;status==OPEN)
+            레포지토리 검색시: stargazersCount>100, primaryLanguage==Java 등 사용 가능
+            """)
         @RequestParam(required = false) String rsql,
 
         @Parameter(description = "페이지네이션 (page, size, sort)")
