@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -30,9 +31,13 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.exception.GlobalException;
@@ -55,6 +60,12 @@ class RecruitServiceTest {
 
     @Mock
     private TeamRepository teamRepository;
+
+    @Mock
+    private RecruitApplyRepository recruitApplyRepository;
+
+    @Mock
+    private TeamMemberRepository teamMemberRepository;
 
     private User createUser(Long id, String name) {
         User user = User.builder()
@@ -367,6 +378,128 @@ class RecruitServiceTest {
             // then
             assertThat(response.isLiked()).isFalse();
             assertThat(response.isBookmarked()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("canApply 메서드")
+    class CanApplyTest {
+
+        @Test
+        @DisplayName("사용자가 이미 지원한 경우 false 반환")
+        void returnsFalse_whenUserAlreadyApplied() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            RecruitApply pendingApply = RecruitApply.builder()
+                .recruit(recruit)
+                .user(user)
+                .reason("지원합니다")
+                .portfolioUrl("https://github.com/user")
+                .build();
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.of(pendingApply));
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("사용자가 팀 멤버인 경우 false 반환")
+        void returnsFalse_whenUserIsTeamMember() {
+            // given
+            User user = createUser(1L, "팀원");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(true);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isFalse();
+        }
+
+        @Test
+        @DisplayName("사용자가 거절당한 경우 true 반환")
+        void returnsTrue_whenUserWasRejected() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            RecruitApply rejectedApply = RecruitApply.builder()
+                .recruit(recruit)
+                .user(user)
+                .reason("지원합니다")
+                .portfolioUrl("https://github.com/user")
+                .build();
+            rejectedApply.updateStatus(RecruitApply.ApplyStatus.REJECTED);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.of(rejectedApply));
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(false);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("사용자가 지원하지 않고 멤버도 아닌 경우 true 반환")
+        void returnsTrue_whenUserEligible() {
+            // given
+            User user = createUser(1L, "지원자");
+            User author = createUser(2L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+            
+            given(recruitApplyRepository.findByRecruitAndUser(recruit, user))
+                .willReturn(Optional.empty());
+            given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user))
+                .willReturn(false);
+
+            // when
+            boolean result = recruitService.canApply(user, recruit);
+
+            // then
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        @DisplayName("익명 사용자는 false 반환")
+        void returnsFalse_whenUserIsAnonymous() {
+            // given
+            User author = createUser(1L, "작성자");
+            Board board = createBoard(1L, "모집게시판");
+            Team team = createTeam(1L, "테스트팀");
+            Recruit recruit = createRecruit(1L, author, board, team);
+
+            // when
+            boolean result = recruitService.canApply(null, recruit);
+
+            // then
+            assertThat(result).isFalse();
         }
     }
 }
