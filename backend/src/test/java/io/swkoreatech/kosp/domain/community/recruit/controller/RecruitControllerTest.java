@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.community.recruit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -214,5 +216,73 @@ class RecruitControllerTest extends IntegrationTestSupport {
 
         assertThat(response.applications()).hasSize(1);
         assertThat(response.applications().get(0).decisionReason()).isEqualTo(expectedReason);
+    }
+
+    @Test
+    @DisplayName("비로그인 사용자는 canApply가 false")
+    @Sql("classpath:data/recruit-can-apply-test.sql")
+    void getList_anonymousUser_returnsCanApplyFalse() throws Exception {
+        mockMvc.perform(get("/v1/community/recruits")
+                .param("boardId", "1")
+                .param("page", "0")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.recruits[0].canApply").value(false));
+    }
+
+    @Test
+    @DisplayName("이미 지원한 사용자는 canApply가 false")
+    @Sql("classpath:data/recruit-can-apply-test.sql")
+    void getList_userAlreadyApplied_returnsCanApplyFalse() throws Exception {
+        String token = loginAndGetToken("user-has-applied@koreatech.ac.kr", getValidPassword());
+
+        mockMvc.perform(get("/v1/community/recruits")
+                .header("Authorization", "Bearer " + token)
+                .param("boardId", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.recruits[?(@.id==200)].canApply").value(false));
+    }
+
+    @Test
+    @DisplayName("지원 가능한 사용자는 canApply가 true")
+    @Sql("classpath:data/recruit-can-apply-test.sql")
+    void getList_eligibleUser_returnsCanApplyTrue() throws Exception {
+        String token = loginAndGetToken("user-can-apply@koreatech.ac.kr", getValidPassword());
+
+        mockMvc.perform(get("/v1/community/recruits")
+                .header("Authorization", "Bearer " + token)
+                .param("boardId", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.recruits[?(@.id==200)].canApply").value(true));
+    }
+
+    @Test
+    @DisplayName("잘못된 RSQL 문법은 400 에러")
+    void getList_malformedRsql_returns400() throws Exception {
+        mockMvc.perform(get("/v1/community/recruits")
+                .param("boardId", "1")
+                .param("rsql", "invalid==syntax==error"))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("페이지 크기는 100으로 제한")
+    void getList_largePageSize_cappedAt100() throws Exception {
+        mockMvc.perform(get("/v1/community/recruits")
+                .param("boardId", "1")
+                .param("size", "999"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.meta.size").value(lessThanOrEqualTo(100)));
+    }
+
+    @Test
+    @DisplayName("삭제된 모집공고는 isDeleted가 true")
+    @Sql("classpath:data/recruit-can-apply-test.sql")
+    void getList_deletedRecruit_returnsIsDeletedTrue() throws Exception {
+        mockMvc.perform(get("/v1/community/recruits")
+                .param("boardId", "1")
+                .param("rsql", "id==201"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.recruits[0].isDeleted").value(true));
     }
 }
