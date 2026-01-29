@@ -17,8 +17,6 @@ import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Map;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -73,10 +71,11 @@ public class ReportService {
 
     private void publishNotification(Article article, Long articleId) {
         Long authorId = article.getAuthor().getId();
-        Map<String, Object> payload = Map.of("articleId", articleId);
+        String title = "게시글 신고 접수";
+        String message = "회원님의 게시글이 신고되었습니다.";
         
         eventPublisher.publishEvent(
-            NotificationEvent.of(authorId, NotificationType.ARTICLE_REPORTED, payload)
+            NotificationEvent.of(authorId, NotificationType.ARTICLE_REPORTED, title, message, articleId)
         );
     }
 }

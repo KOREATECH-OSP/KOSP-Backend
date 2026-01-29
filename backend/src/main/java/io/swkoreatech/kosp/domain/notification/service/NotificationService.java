@@ -71,19 +71,12 @@ public class NotificationService {
     }
 
     private Notification buildNotification(User user, NotificationEvent event) {
-        String title = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
-            .buildTitle(event.getType(), event.getPayload());
-        String message = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
-            .buildMessage(event.getType(), event.getPayload());
-        Long referenceId = io.swkoreatech.kosp.domain.notification.util.NotificationMessageBuilder
-            .extractReferenceId(event.getType(), event.getPayload());
-
         return Notification.builder()
             .user(user)
             .type(event.getType())
-            .title(title)
-            .message(message)
-            .referenceId(referenceId)
+            .title(event.getTitle())
+            .message(event.getMessage())
+            .referenceId(event.getReferenceId())
             .build();
     }
 

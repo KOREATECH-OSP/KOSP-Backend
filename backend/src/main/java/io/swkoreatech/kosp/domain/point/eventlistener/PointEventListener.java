@@ -12,8 +12,6 @@ import io.swkoreatech.kosp.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Map;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,18 +34,25 @@ public class PointEventListener {
     }
 
     private void publishNotification(PointChangeEvent event) {
-        Map<String, Object> payload = createPayload(event);
+        String title = "포인트 변경";
+        String message = buildPointMessage(event.amount(), event.reason());
         
         eventPublisher.publishEvent(
-            NotificationEvent.of(event.user().getId(), NotificationType.POINT_EARNED, payload)
+            NotificationEvent.of(event.user().getId(), NotificationType.POINT_EARNED, title, message, null)
         );
     }
 
-    private Map<String, Object> createPayload(PointChangeEvent event) {
-        return Map.of(
-            "amount", event.amount(),
-            "reason", event.reason()
-        );
+    private String buildPointMessage(Integer amount, String reason) {
+        if (amount > 0) {
+            return formatPointMessage(amount, reason, "획득했습니다");
+        }
+        return formatPointMessage(Math.abs(amount), reason, "차감되었습니다");
+    }
+
+    private String formatPointMessage(Integer absAmount, String reason, String action) {
+        if (reason == null || reason.isBlank()) {
+            return String.format("%d포인트를 %s.", absAmount, action);
+        }
+        return String.format("%d포인트를 %s. (%s)", absAmount, action, reason);
     }
 }
-
