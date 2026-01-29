@@ -32,6 +32,7 @@ public interface TeamApi {
     @GetMapping("/v1/teams")
     ResponseEntity<TeamListResponse> getList(
         @RequestParam(required = false, defaultValue = "") String search,
+        @Parameter(description = "RSQL 필터 (예: isDeleted==false, name==*test*)") @RequestParam(required = false) String rsql,
         @Parameter(hidden = true) Pageable pageable
     );
 
