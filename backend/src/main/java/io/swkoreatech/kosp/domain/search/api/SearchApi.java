@@ -58,6 +58,6 @@ public interface SearchApi {
         @RequestParam(required = false) String rsql,
 
         @Parameter(description = "페이지네이션 (page, size, sort)")
-        @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+        @PageableDefault(size = 50, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
     );
 }
