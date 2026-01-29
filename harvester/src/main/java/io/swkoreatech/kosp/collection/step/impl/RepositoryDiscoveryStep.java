@@ -4,6 +4,8 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.batch.core.Step;
@@ -20,13 +22,17 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
+import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
+import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepContextKeys;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
 import io.swkoreatech.kosp.job.ContextValidationListener;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.user.User;
@@ -57,6 +63,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final GithubGraphQLClient graphQLClient;
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
+    private final CollectionMetadataRepository metadataRepository;
     private final StepCompletionListener stepCompletionListener;
     private final ContextValidationListener contextValidationListener;
 
@@ -89,19 +96,68 @@ public class RepositoryDiscoveryStep implements StepProvider {
         String token = decryptToken(githubUser.getGithubToken());
         String login = githubUser.getGithubLogin();
 
-        GraphQLResponse<ContributedReposResponse> response = fetchContributedRepos(login, token);
-        if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
-            return;
+        CollectionMetadataDocument metadata = metadataRepository.findByUserId(userId)
+            .orElse(null);
+
+        ZonedDateTime startDate;
+        if (metadata == null || metadata.getLastFullCollection() == null) {
+            log.info("First collection for user {}: starting from account creation date", userId);
+            startDate = fetchUserCreatedAt(login, token);
+        } else {
+            log.info("Incremental collection for user {}: starting from {}", 
+                     userId, metadata.getLastFullCollection());
+            startDate = ZonedDateTime.ofInstant(
+                metadata.getLastFullCollection(),
+                ZoneOffset.UTC
+            );
         }
 
-        ContributedReposResponse data = response.getDataAs(ContributedReposResponse.class);
-        Set<RepositoryInfo> repositories = data.collectAllRepositories();
-        String userNodeId = data.getUserNodeId();
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 
-        saveRepositories(userId, login, repositories);
+        List<TimeChunkGenerator.TimeChunk> chunks = 
+            TimeChunkGenerator.generateMonthlyChunks(startDate, now);
+
+        log.info("Collection range: {} to {} ({} chunks)", startDate, now, chunks.size());
+
+        Set<RepositoryInfo> allRepositories = new HashSet<>();
+        String userNodeId = null;
+
+        for (TimeChunkGenerator.TimeChunk chunk : chunks) {
+            log.info("Collecting chunk: {} to {}", chunk.start(), chunk.end());
+
+            GraphQLResponse<ContributedReposResponse> response = 
+                fetchContributedReposInRange(
+                    login, 
+                    chunk.getStartFormatted(), 
+                    chunk.getEndFormatted(), 
+                    token
+                );
+
+            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+                continue;
+            }
+
+            ContributedReposResponse data = response.getDataAs(ContributedReposResponse.class);
+            if (userNodeId == null) {
+                userNodeId = data.getUserNodeId();
+            }
+
+            Set<RepositoryInfo> repos = data.collectAllRepositories();
+            allRepositories.addAll(repos);
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+
+        saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
-        storeReposInContext(chunkContext, repositories);
-        log.info("Discovered {} repositories for user {}", repositories.size(), userId);
+        storeReposInContext(chunkContext, allRepositories);
+
+        log.info("Collection complete: {} repositories discovered from {} chunks", 
+                 allRepositories.size(), chunks.size());
     }
 
     private String decryptToken(String encryptedToken) {
@@ -109,24 +165,46 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private Set<RepositoryInfo> discoverRepositories(String login, String token) {
-        GraphQLResponse<ContributedReposResponse> response = fetchContributedRepos(login, token);
+        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
+        ZonedDateTime fiveYearsAgo = now.minusYears(5);
+        
+        GraphQLResponse<ContributedReposResponse> response = fetchContributedReposInRange(
+            login,
+            formatDateTime(fiveYearsAgo),
+            formatDateTime(now),
+            token
+        );
+        
         if (response == null || response.hasErrors()) {
             return Set.of();
         }
         return response.getDataAs(ContributedReposResponse.class).collectAllRepositories();
     }
 
-    private GraphQLResponse<ContributedReposResponse> fetchContributedRepos(String login, String token) {
-        String[] timeRange = calculateTimeRange();
-        return graphQLClient
-            .getContributedRepos(login, timeRange[0], timeRange[1], token, GraphQLTypeFactory.<ContributedReposResponse>responseType())
+    private ZonedDateTime fetchUserCreatedAt(String login, String token) {
+        GraphQLResponse<UserBasicInfoResponse> response = 
+            graphQLClient.getUserBasicInfo(login, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
             .block();
+
+        if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+            return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
+        }
+
+        UserBasicInfoResponse data = response.getDataAs(UserBasicInfoResponse.class);
+        String createdAtStr = data.getUser().getCreatedAt();
+        return ZonedDateTime.parse(createdAtStr);
     }
 
-    private String[] calculateTimeRange() {
-        ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
-        ZonedDateTime oneYearAgo = now.minusYears(1);
-        return new String[] { formatDateTime(oneYearAgo), formatDateTime(now) };
+    private GraphQLResponse<ContributedReposResponse> fetchContributedReposInRange(
+        String login,
+        String from,
+        String to,
+        String token
+    ) {
+        return graphQLClient.getContributedRepos(
+            login, from, to, token,
+            GraphQLTypeFactory.<ContributedReposResponse>responseType()
+        ).block();
     }
 
     private String formatDateTime(ZonedDateTime dateTime) {

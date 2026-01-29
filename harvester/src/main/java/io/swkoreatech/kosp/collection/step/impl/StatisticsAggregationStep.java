@@ -2,6 +2,8 @@ package io.swkoreatech.kosp.collection.step.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Objects;
 
@@ -17,8 +19,10 @@ import io.swkoreatech.kosp.collection.document.CommitDocument;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
 import io.swkoreatech.kosp.collection.document.IssueDocument;
 import io.swkoreatech.kosp.collection.document.PullRequestDocument;
+import io.swkoreatech.kosp.collection.entity.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
+import io.swkoreatech.kosp.collection.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.collection.repository.IssueDocumentRepository;
 import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepProvider;
@@ -60,6 +64,7 @@ public class StatisticsAggregationStep implements StepProvider {
     private final IssueDocumentRepository issueDocumentRepository;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final GithubRepositoryStatisticsRepository repoStatsRepository;
     private final StepCompletionListener stepCompletionListener;
 
     @Override
@@ -92,6 +97,7 @@ public class StatisticsAggregationStep implements StepProvider {
         AggregatedStats stats = aggregateFromMongoDB(userId);
         saveToDB(githubId, stats);
         updateContributedRepoStats(userId);
+        saveRepositoriesToPostgreSQL(userId, githubId);
 
         log.info("Aggregated statistics for user {}: {} commits, {} PRs, {} issues",
             userId, stats.totalCommits, stats.totalPrs, stats.totalIssues);
@@ -261,6 +267,63 @@ public class StatisticsAggregationStep implements StepProvider {
      ) {
          int dayCommits = commits.size() - results.nightCommits;
          return new AggregatedStats(commits.size(), results.totalAdditions + results.totalDeletions, results.totalAdditions, results.totalDeletions, prs.size(), issues.size(), results.ownedRepos, repos.size(), results.totalStars, results.totalForks, results.nightCommits, dayCommits);
+     }
+
+     private void saveRepositoriesToPostgreSQL(Long userId, String githubId) {
+         List<ContributedRepoDocument> repos = repoDocumentRepository.findByUserId(userId);
+         
+         for (ContributedRepoDocument repo : repos) {
+             saveOrUpdateRepoStats(repo, githubId);
+         }
+         
+         log.info("Saved {} repositories to PostgreSQL for user {}", repos.size(), userId);
+     }
+
+     private void saveOrUpdateRepoStats(ContributedRepoDocument repo, String githubId) {
+         GithubRepositoryStatistics stats = repoStatsRepository
+             .findByRepoOwnerAndRepoNameAndContributorGithubId(
+                 repo.getRepositoryOwner(),
+                 repo.getRepositoryName(),
+                 githubId
+             )
+             .orElse(GithubRepositoryStatistics.create(
+                 repo.getRepositoryOwner(),
+                 repo.getRepositoryName(),
+                 githubId
+             ));
+         
+         stats.updateRepositoryInfo(
+             defaultToZero(repo.getStargazersCount()),
+             defaultToZero(repo.getForksCount()),
+             defaultToZero(repo.getWatchersCount()),
+             repo.getDescription(),
+             repo.getPrimaryLanguage(),
+             convertToLocalDateTime(repo.getRepoCreatedAt())
+         );
+         
+         stats.updateOwnership(repo.getIsOwner());
+         
+         stats.updateUserContributions(
+             defaultToZero(repo.getUserCommitCount()),
+             defaultToZero(repo.getUserPrCount()),
+             defaultToZero(repo.getUserIssueCount()),
+             convertToLocalDateTime(repo.getLastContributedAt())
+         );
+         
+         stats.updateTotalCounts(0, 0, 0);
+         
+         repoStatsRepository.save(stats);
+     }
+
+     private LocalDateTime convertToLocalDateTime(Instant instant) {
+         if (instant == null) {
+             return null;
+         }
+         return LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+     }
+
+     private Integer defaultToZero(Integer value) {
+         return value != null ? value : 0;
      }
 
       private record CalculationResults(
