@@ -25,11 +25,26 @@ public class PermissionAspect {
 
     @Before("@annotation(permit)")
     public void checkPermission(JoinPoint joinPoint, Permit permit) {
+        log.info("🔒 [PERMIT] Checking permission for: {} | permitAll: {} | permission: {}", 
+            joinPoint.getSignature().toShortString(), permit.permitAll(), permit.name());
+        
         if (permit.permitAll()) {
             return;
         }
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        if (authentication == null) {
+            log.info("🔒 [PERMIT] Authentication is NULL in SecurityContext");
+        } else if (!authentication.isAuthenticated()) {
+            log.info("🔒 [PERMIT] Authentication exists but not authenticated");
+        } else if ("anonymousUser".equals(authentication.getPrincipal())) {
+            log.info("🔒 [PERMIT] Authentication is anonymousUser");
+        } else {
+            log.info("🔒 [PERMIT] Authenticated: {} ({})", 
+                authentication.getPrincipal().getClass().getSimpleName(),
+                authentication.isAuthenticated());
+        }
 
         if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new GlobalException(ExceptionMessage.UNAUTHORIZED);
