@@ -20,7 +20,7 @@ server {
     }
 
     location /v1/notifications/subscribe {
-        proxy_pass http://host.docker.internal:8080;
+        proxy_pass http://host.docker.internal:8081;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
         proxy_set_header Host $host;
