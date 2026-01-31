@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(projects.common)
+    implementation(projects.infra.rabbitmq)
 
     implementation(libs.spring.boot.starter.actuator)
 
@@ -15,6 +16,8 @@ dependencies {
     implementation(libs.spring.boot.starter.webflux)
 
     implementation(libs.spring.boot.starter.batch)
+    
+    implementation(libs.spring.boot.starter.amqp)
 
     implementation(libs.spring.security.crypto)
 
