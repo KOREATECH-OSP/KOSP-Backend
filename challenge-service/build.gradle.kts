@@ -7,9 +7,21 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(project(":infra:rabbitmq"))
+    implementation(project(":backend"))
+    
+    implementation(libs.spring.boot.starter.data.jpa)
+    implementation(libs.spring.boot.starter.amqp)
+    implementation(libs.spring.boot.starter.security)
+    
+    implementation(libs.postgresql)
+    
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
+    
+    testImplementation(libs.spring.boot.starter.test)
 }
 
 tasks {
-    bootJar { enabled = false }
-    jar { enabled = true }
+    bootJar { enabled = true }
+    jar { enabled = false }
 }
