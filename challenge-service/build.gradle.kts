@@ -19,6 +19,7 @@ dependencies {
     annotationProcessor(libs.lombok)
     
     testImplementation(libs.spring.boot.starter.test)
+    testImplementation("com.fasterxml.jackson.core:jackson-databind")
 }
 
 tasks {
