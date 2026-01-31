@@ -37,3 +37,22 @@ services:
       - ${MONGO_VOLUME_PATH2}:/data/configdb
     command: ["mongod", "--auth", "--bind_ip_all"]
     restart: "unless-stopped"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-kosp-compose
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+    ports:
+      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    volumes:
+      - ${RABBITMQ_VOLUME_PATH:-./rabbitmq-data}:/var/lib/rabbitmq
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    restart: "unless-stopped"
