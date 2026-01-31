@@ -12,6 +12,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
@@ -32,6 +33,7 @@ public class ChallengeEvaluator {
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ChallengeEventPublisher challengeEventPublisher;
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
@@ -127,6 +129,13 @@ public class ChallengeEvaluator {
             .build();
 
         challengeHistoryRepository.save(history);
+
+        challengeEventPublisher.publishChallengeCompleted(
+            user.getId(), 
+            challenge.getId(), 
+            challenge.getName(), 
+            challenge.getPoint()
+        );
     }
 
     private void handleEvaluationError(User user, Challenge challenge, Exception e) {
