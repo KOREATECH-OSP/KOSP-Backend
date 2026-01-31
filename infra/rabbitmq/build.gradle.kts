@@ -7,6 +7,10 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(libs.spring.boot.starter.amqp)
+    implementation(libs.spring.boot.starter.web)
+    
+    compileOnly(libs.lombok)
+    annotationProcessor(libs.lombok)
 }
 
 tasks {
