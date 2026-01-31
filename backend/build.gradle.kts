@@ -56,6 +56,11 @@ dependencies {
 	testRuntimeOnly(libs.junit.platform.launcher)
 }
 
+tasks {
+    bootJar { enabled = true }
+    jar { enabled = false }
+}
+
 tasks.clean {
     delete(file("src/main/generated"))
 }
