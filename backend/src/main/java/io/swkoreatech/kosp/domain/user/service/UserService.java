@@ -1,7 +1,10 @@
 package io.swkoreatech.kosp.domain.user.service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
@@ -36,6 +40,7 @@ import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +59,7 @@ public class UserService {
     private final AuthService authService;
     private final ApplicationEventPublisher eventPublisher;
     private final EmailVerificationService emailVerificationService;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public AuthTokenResponse signup(UserSignupRequest request, SignupToken token) {
@@ -103,14 +109,16 @@ public class UserService {
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
         
          // 6. GitHub 데이터 수집 이벤트 발행
-         if (githubUser.getGithubLogin() != null) {
-             eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
-             log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
-         }
-         
-         emailVerificationService.completeSignupVerification(kutEmail);
-         log.info("✅ Redis cleanup completed for email: {}", kutEmail);
-         return authService.createTokensForUser(user);
+          if (githubUser.getGithubLogin() != null) {
+              eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
+              log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
+          }
+          
+          publishChallengeEvaluation(user.getId());
+          
+          emailVerificationService.completeSignupVerification(kutEmail);
+          log.info("✅ Redis cleanup completed for email: {}", kutEmail);
+          return authService.createTokensForUser(user);
     }
 
     @Transactional
@@ -204,5 +212,18 @@ public class UserService {
 
         user.encodePassword(passwordEncoder);
         return user;
+    }
+
+    private void publishChallengeEvaluation(Long userId) {
+        String messageId = UUID.randomUUID().toString();
+        ChallengeEvaluationRequest request = new ChallengeEvaluationRequest(
+            userId,
+            messageId,
+            LocalDateTime.now()
+        );
+
+        rabbitTemplate.convertAndSend(QueueNames.CHALLENGE_EVALUATION, request);
+        log.info("Published ChallengeEvaluationRequest to RabbitMQ: userId={}, messageId={}",
+            userId, messageId);
     }
 }

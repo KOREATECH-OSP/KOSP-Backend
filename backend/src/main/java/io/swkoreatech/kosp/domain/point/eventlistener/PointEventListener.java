@@ -1,14 +1,19 @@
 package io.swkoreatech.kosp.domain.point.eventlistener;
 
+import java.util.UUID;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.event.PointChangedEvent;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
 import io.swkoreatech.kosp.domain.point.service.PointService;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +24,7 @@ public class PointEventListener {
 
     private final PointService pointService;
     private final ApplicationEventPublisher eventPublisher;
+    private final RabbitTemplate rabbitTemplate;
 
     @EventListener
     @Transactional
@@ -26,6 +32,7 @@ public class PointEventListener {
         logPointChange(event);
         pointService.changePoint(event.user(), event.amount(), event.reason(), event.source());
         publishNotification(event);
+        publishToRabbitMQ(event);
     }
 
     private void logPointChange(PointChangeEvent event) {
@@ -54,5 +61,20 @@ public class PointEventListener {
             return String.format("%d포인트를 %s.", absAmount, action);
         }
         return String.format("%d포인트를 %s. (%s)", absAmount, action, reason);
+    }
+
+    private void publishToRabbitMQ(PointChangeEvent event) {
+        String messageId = UUID.randomUUID().toString();
+        PointChangedEvent rabbitEvent = new PointChangedEvent(
+            event.user().getId(),
+            event.amount(),
+            event.reason(),
+            event.source().name(),
+            messageId
+        );
+
+        rabbitTemplate.convertAndSend(QueueNames.POINT_CHANGED, rabbitEvent);
+        log.info("Published PointChangedEvent to RabbitMQ: userId={}, amount={}, messageId={}",
+            event.user().getId(), event.amount(), messageId);
     }
 }

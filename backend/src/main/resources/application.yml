@@ -64,6 +64,12 @@ spring:
       auto-index-creation: false
       uuid-representation: standard
 
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD}
+
 encryption:
   password: ${ENCRYPTION_PASSWORD}
   salt: ${ENCRYPTION_SALT}

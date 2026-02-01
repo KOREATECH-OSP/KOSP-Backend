@@ -16,15 +16,9 @@ public class TeamInviteService {
     private final TeamMemberRepository teamMemberRepository;
 
     public TeamInviteResponse getInvite(Long inviteId) {
-        TeamInvite invite = findInviteById(inviteId);
+        TeamInvite invite = teamInviteRepository.getById(inviteId);
         int memberCount = countActiveMembers(invite);
         return TeamInviteResponse.from(invite, memberCount);
-    }
-
-    private TeamInvite findInviteById(Long inviteId) {
-        return teamInviteRepository.findById(inviteId)
-            .orElseThrow(() -> new io.swkoreatech.kosp.global.exception.GlobalException(
-                io.swkoreatech.kosp.global.exception.ExceptionMessage.NOT_FOUND));
     }
 
     private int countActiveMembers(TeamInvite invite) {

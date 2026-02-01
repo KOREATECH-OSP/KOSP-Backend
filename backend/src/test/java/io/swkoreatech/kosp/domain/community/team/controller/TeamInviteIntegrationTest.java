@@ -129,14 +129,13 @@ class TeamInviteIntegrationTest extends IntegrationTestSupport {
         }
 
         @Test
-        @DisplayName("삭제된 초대도 조회 가능")
+        @DisplayName("삭제된 초대는 조회 불가")
         void getInvite_deleted() throws Exception {
             invite.delete();
             teamInviteRepository.save(invite);
 
             mockMvc.perform(get("/v1/teams/invites/{inviteId}", invite.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(invite.getId()));
+                .andExpect(status().isNotFound());
         }
     }
 }

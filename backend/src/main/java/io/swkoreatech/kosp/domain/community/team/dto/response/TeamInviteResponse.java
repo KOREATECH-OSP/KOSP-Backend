@@ -31,7 +31,7 @@ public record TeamInviteResponse(
                 invite.getTeam().getId(),
                 invite.getTeam().getName(),
                 invite.getTeam().getImageUrl(),
-                0
+                invite.getTeam().getMembers().size()
             ),
             AuthorResponse.from(invite.getInviter()),
             AuthorResponse.from(invite.getInvitee()),
