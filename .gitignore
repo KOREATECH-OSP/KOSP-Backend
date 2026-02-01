@@ -257,3 +257,10 @@ references/
 docs/coverage/
 .sisyphus
 **/AGENTS.md
+
+# Logs
+logs/
+*.log
+
+# RabbitMQ data
+rabbitmq-data/
