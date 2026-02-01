@@ -58,7 +58,7 @@ dependencies {
 
 tasks {
     bootJar { enabled = true }
-    jar { enabled = false }
+    jar { enabled = true }
 }
 
 tasks.clean {
