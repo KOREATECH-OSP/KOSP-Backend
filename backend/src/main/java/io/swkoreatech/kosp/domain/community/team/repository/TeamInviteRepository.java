@@ -7,6 +7,8 @@ import org.springframework.data.repository.Repository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.global.exception.ExceptionMessage;
+import io.swkoreatech.kosp.global.exception.GlobalException;
 
 public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
 
@@ -27,4 +29,9 @@ public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
     boolean existsByTeamAndInviteeAndIsDeletedFalse(Team team, User invitee);
 
     java.util.List<TeamInvite> findAllByTeam(Team team);
+
+    default TeamInvite getById(Long id) {
+        return findByIdAndIsDeletedFalse(id)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    }
 }
