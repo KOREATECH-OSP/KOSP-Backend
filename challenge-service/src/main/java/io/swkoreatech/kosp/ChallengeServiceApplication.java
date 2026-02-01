@@ -5,13 +5,7 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(
-    scanBasePackages = {
-        "io.swkoreatech.kosp.challenge",
-        "io.swkoreatech.kosp.common",
-        "io.swkoreatech.kosp.infra.rabbitmq"
-    }
-)
+@SpringBootApplication
 @EnableScheduling
 public class ChallengeServiceApplication {
     public static void main(String[] args) {
