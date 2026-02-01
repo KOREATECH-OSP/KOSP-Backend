@@ -8,5 +8,6 @@ spring:
 logging:
   level:
     root: INFO
+    org.springframework.security: DEBUG
     io.swkoreatech.kosp.harvester: DEBUG
     org.springframework.batch: INFO

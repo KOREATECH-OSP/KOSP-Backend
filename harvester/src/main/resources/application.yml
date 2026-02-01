@@ -1,13 +1,15 @@
 spring:
-  main:
-    web-application-type: none
   config:
     import: optional:file:.env.${spring.profiles.active}[.properties]
+  main:
+    web-application-type: none
+  flyway:
+    enabled: false
   jpa:
     open-in-view: false
     properties:
       hibernate:
-        show_sql: false
+        show_sql: true
         format_sql: true
     hibernate:
       ddl-auto: validate
