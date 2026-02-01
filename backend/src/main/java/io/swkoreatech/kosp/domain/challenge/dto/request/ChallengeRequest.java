@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.dto.request;
 
+import io.swkoreatech.kosp.domain.challenge.model.ImageResourceType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -18,7 +19,9 @@ public record ChallengeRequest(
     @Positive(message = "티어는 양수여야 합니다.")
     Integer tier,
     
-    String icon,
+    String imageResource,
+    
+    ImageResourceType imageResourceType,
     
     @NotNull(message = "포인트는 필수입니다.")
     @Positive(message = "포인트는 양수여야 합니다.")
