@@ -12,7 +12,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import io.swkoreatech.kosp.collection.step.StepProvider;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

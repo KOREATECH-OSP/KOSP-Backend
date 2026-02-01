@@ -34,7 +34,7 @@ import io.swkoreatech.kosp.collection.util.NullSafeGetters;
  */
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.statistics.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.user.User;
 import io.swkoreatech.kosp.user.UserRepository;
 import lombok.RequiredArgsConstructor;
