@@ -6,6 +6,7 @@ plugins {
 
 dependencies {
     implementation(projects.common)
+    implementation(projects.infra.rabbitmq)
 
     implementation(libs.spring.boot.devtools)
     implementation(libs.spring.boot.starter.actuator)
@@ -21,6 +22,7 @@ dependencies {
     implementation(libs.spring.boot.starter.webflux) // GitHub API Client
     implementation(libs.springdoc.openapi.starter.webmvc.ui)
     implementation(libs.spring.boot.starter.batch)
+    implementation(libs.spring.boot.starter.amqp)
     implementation(libs.postgresql)
 
     implementation(libs.jjwt.api)
