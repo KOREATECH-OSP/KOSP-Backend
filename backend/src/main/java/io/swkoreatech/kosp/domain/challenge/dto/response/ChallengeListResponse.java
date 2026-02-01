@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.dto.response;
 
+import io.swkoreatech.kosp.domain.challenge.model.ImageResourceType;
 import java.util.List;
 
 public record ChallengeListResponse(
@@ -13,7 +14,8 @@ public record ChallengeListResponse(
         String category,
         Integer progress,
         Boolean isCompleted,
-        String icon,
+        String imageResource,
+        ImageResourceType imageResourceType,
         Integer tier,
         Integer point
     ) {}
