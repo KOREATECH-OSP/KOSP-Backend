@@ -25,4 +25,9 @@ dependencies {
 tasks {
     bootJar { enabled = true }
     jar { enabled = false }
+    
+    bootRun {
+        systemProperties = System.getProperties().toMap() as Map<String, Any>
+        environment = System.getenv()
+    }
 }
