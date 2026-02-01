@@ -5,12 +5,9 @@ import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
 import io.swkoreatech.kosp.common.event.PointChangedEvent;
-import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,14 +19,13 @@ public class ChallengeEventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void handlePointChange(PointChangeEvent event) {
+    public void publishPointChange(Long userId, Integer amount, String reason, String source) {
         try {
             PointChangedEvent rabbitEvent = new PointChangedEvent(
-                event.user().getId(),
-                event.amount(),
-                event.reason(),
-                event.source().name(),
+                userId,
+                amount,
+                reason,
+                source,
                 UUID.randomUUID().toString()
             );
 
@@ -39,7 +35,7 @@ public class ChallengeEventPublisher {
             );
 
             log.info("Published PointChangedEvent to RabbitMQ: userId={}, points={}", 
-                event.user().getId(), event.amount());
+                userId, amount);
         } catch (Exception e) {
             log.error("Failed to publish PointChangedEvent", e);
         }
