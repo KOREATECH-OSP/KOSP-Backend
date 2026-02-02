@@ -56,14 +56,6 @@ public class RabbitMQConfig {
     }
     
     @Bean
-    public Queue challengeCompletedQueue() {
-        return QueueBuilder.durable("challenge-completed-queue")
-            .withArgument("x-dead-letter-exchange", "")
-            .withArgument("x-dead-letter-routing-key", "challenge-completed-queue.dlq")
-            .build();
-    }
-    
-    @Bean
     public Queue pointChangedQueue() {
         return QueueBuilder.durable("point-changed-queue")
             .withArgument("x-dead-letter-exchange", "")
@@ -74,11 +66,6 @@ public class RabbitMQConfig {
     @Bean
     public Queue challengeEvaluationDLQ() {
         return QueueBuilder.durable("challenge-evaluation-queue.dlq").build();
-    }
-    
-    @Bean
-    public Queue challengeCompletedDLQ() {
-        return QueueBuilder.durable("challenge-completed-queue.dlq").build();
     }
     
     @Bean

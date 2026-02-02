@@ -132,12 +132,6 @@ public class ChallengeEvaluator {
 
         challengeHistoryRepository.save(history);
 
-        challengeEventPublisher.publishChallengeCompleted(
-            user.getId(), 
-            challenge.getId(), 
-            challenge.getName(), 
-            challenge.getPoint()
-        );
     }
 
     private void handleEvaluationError(User user, Challenge challenge, Exception e) {
