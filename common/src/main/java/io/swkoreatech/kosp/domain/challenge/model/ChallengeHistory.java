@@ -58,4 +58,8 @@ public class ChallengeHistory extends BaseEntity {
         this.isAchieved = true;
         this.achievedAt = LocalDateTime.now();
     }
+
+    public void updateProgress(int progress) {
+        this.progressAtAchievement = progress;
+    }
 }
