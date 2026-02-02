@@ -12,8 +12,8 @@ import io.swkoreatech.kosp.common.queue.JobQueueEntry;
 import io.swkoreatech.kosp.common.queue.JobQueueService;
 import io.swkoreatech.kosp.common.queue.Priority;
 import io.swkoreatech.kosp.launcher.PriorityJobLauncher;
-import io.swkoreatech.kosp.user.User;
-import io.swkoreatech.kosp.user.UserRepository;
+import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
