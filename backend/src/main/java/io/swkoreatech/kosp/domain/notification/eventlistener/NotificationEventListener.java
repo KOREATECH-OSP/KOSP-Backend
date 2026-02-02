@@ -5,6 +5,7 @@ import io.swkoreatech.kosp.common.entity.ProcessedMessage;
 import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
 import io.swkoreatech.kosp.common.event.PointChangedEvent;
 import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
@@ -30,6 +31,7 @@ public class NotificationEventListener {
 
     private final NotificationService notificationService;
     private final ProcessedMessageRepository processedMessageRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Async
     @EventListener
@@ -61,7 +63,7 @@ public class NotificationEventListener {
                     event.challengeName(), event.pointsAwarded()),
                 event.challengeId()
             );
-            notificationService.createAndSend(notificationEvent);
+            eventPublisher.publishEvent(notificationEvent);
             
             processedMessageRepository.save(
                 new ProcessedMessage(event.messageId(), "ChallengeCompletedEvent")
@@ -95,7 +97,7 @@ public class NotificationEventListener {
                 String.format("%d포인트를 획득했습니다. (%s)", event.amount(), event.reason()),
                 null
             );
-            notificationService.createAndSend(notificationEvent);
+            eventPublisher.publishEvent(notificationEvent);
             
             processedMessageRepository.save(
                 new ProcessedMessage(event.messageId(), "PointChangedEvent")
