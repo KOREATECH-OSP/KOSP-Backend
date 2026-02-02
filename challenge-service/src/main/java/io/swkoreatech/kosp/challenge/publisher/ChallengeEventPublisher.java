@@ -1,10 +1,12 @@
 package io.swkoreatech.kosp.challenge.publisher;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
 import io.swkoreatech.kosp.common.event.PointChangedEvent;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
@@ -39,4 +41,26 @@ public class ChallengeEventPublisher {
         }
     }
 
+    public void publishChallengeCompleted(Long userId, Long challengeId, String challengeName, Integer pointsAwarded) {
+        try {
+            ChallengeCompletedEvent event = new ChallengeCompletedEvent(
+                userId,
+                challengeId,
+                challengeName,
+                pointsAwarded,
+                LocalDateTime.now(),
+                UUID.randomUUID().toString()
+            );
+
+            rabbitTemplate.convertAndSend(
+                QueueNames.CHALLENGE_COMPLETED,
+                event
+            );
+
+            log.info("Published ChallengeCompletedEvent to RabbitMQ: userId={}, challengeId={}", 
+                userId, challengeId);
+        } catch (Exception e) {
+            log.error("Failed to publish ChallengeCompletedEvent", e);
+        }
+    }
 }
