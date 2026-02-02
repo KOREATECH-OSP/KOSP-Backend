@@ -5,6 +5,10 @@ import io.swkoreatech.kosp.common.entity.ProcessedMessage;
 import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
 import io.swkoreatech.kosp.common.event.PointChangedEvent;
 import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
+import io.swkoreatech.kosp.domain.point.model.PointSource;
+import io.swkoreatech.kosp.domain.point.service.PointService;
+import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
@@ -32,6 +36,8 @@ public class NotificationEventListener {
     private final NotificationService notificationService;
     private final ProcessedMessageRepository processedMessageRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final PointService pointService;
+    private final UserRepository userRepository;
 
     @Async
     @EventListener
@@ -59,8 +65,7 @@ public class NotificationEventListener {
                 event.userId(),
                 NotificationType.CHALLENGE_ACHIEVED,
                 "챌린지 완료",
-                String.format("%s 챌린지를 완료했습니다. %d포인트를 획득했습니다.", 
-                    event.challengeName(), event.pointsAwarded()),
+                String.format("%s 챌린지를 완료했습니다.", event.challengeName()),
                 event.challengeId()
             );
             eventPublisher.publishEvent(notificationEvent);
@@ -90,6 +95,9 @@ public class NotificationEventListener {
         }
         
         try {
+            User user = userRepository.getById(event.userId());
+            pointService.changePoint(user, event.amount(), event.reason(), PointSource.valueOf(event.source()));
+            
             NotificationEvent notificationEvent = NotificationEvent.of(
                 event.userId(),
                 NotificationType.POINT_EARNED,
