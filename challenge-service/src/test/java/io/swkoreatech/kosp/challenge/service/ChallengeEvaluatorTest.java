@@ -55,6 +55,12 @@ public class ChallengeEvaluatorTest {
     @Autowired
     private UserRepository userRepository;
 
+    private void updateStats(User user, int commits) {
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        GithubUserStatistics stats = statisticsRepository.findByGithubId(githubId).orElseThrow();
+        stats.updateStatistics(commits, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+    }
+
     @Nested
     @DisplayName("SpEL 평가 테스트")
     class SpELEvaluationTest {
@@ -221,8 +227,8 @@ public class ChallengeEvaluatorTest {
         }
 
         @Test
-        @DisplayName("진행도 100% 미만인 Challenge는 ChallengeHistory 미저장")
-        void evaluate_progressUnder100_shouldNotSaveHistory() {
+        @DisplayName("진행도 100% 미만인 Challenge도 ChallengeHistory에 저장됨")
+        void evaluate_progressUnder100_shouldSaveHistory() {
             // given
             GithubUserStatistics stats = GithubUserStatistics.builder()
                 .githubId("67890")
@@ -255,7 +261,10 @@ public class ChallengeEvaluatorTest {
 
             // then
             List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
-            assertThat(histories).isEmpty();
+            assertThat(histories).hasSize(1);
+            assertThat(histories.get(0).isAchieved()).isFalse();
+            assertThat(histories.get(0).getProgressAtAchievement()).isEqualTo(50);
+            assertThat(histories.get(0).getAchievedAt()).isNull();
         }
 
         @Test
@@ -299,6 +308,148 @@ public class ChallengeEvaluatorTest {
             // then
             long secondCount = challengeHistoryRepository.findAllByUserId(user.getId()).size();
             assertThat(secondCount).isEqualTo(firstCount);
+        }
+
+        @Test
+        @DisplayName("미달성 Challenge를 재평가하면 progress 업데이트")
+        void evaluate_unachievedTwice_shouldUpdateProgress() {
+            // given
+            GithubUserStatistics stats = GithubUserStatistics.builder()
+                .githubId("55555")
+                .totalCommits(50)
+                .calculatedAt(LocalDateTime.now())
+                .build();
+            statisticsRepository.save(stats);
+
+            GithubUser githubUser = GithubUser.builder()
+                .githubId(55555L)
+                .githubLogin("unachieveduser")
+                .build();
+
+            User user = User.builder()
+                .kutEmail("unachieved@koreatech.ac.kr")
+                .password("password")
+                .githubUser(githubUser)
+                .build();
+            userRepository.save(user);
+
+            Challenge challenge = Challenge.builder()
+                .name("커밋 100개")
+                .condition("T(Math).min(totalCommits * 100 / 100, 100)")  // 50 * 100 / 100 = 50
+                .point(50)
+                .build();
+            challengeRepository.save(challenge);
+
+            // when: First evaluation
+            challengeEvaluator.evaluate(user);
+
+            // then: Record created with progress=50
+            List<ChallengeHistory> histories1 = challengeHistoryRepository.findAllByUserId(user.getId());
+            assertThat(histories1).hasSize(1);
+            assertThat(histories1.get(0).getProgressAtAchievement()).isEqualTo(50);
+            assertThat(histories1.get(0).isAchieved()).isFalse();
+
+            // given: Update stats
+            updateStats(user, 60);
+
+            // when: Second evaluation
+            challengeEvaluator.evaluate(user);
+
+            // then: Same record updated with progress=60
+            List<ChallengeHistory> histories2 = challengeHistoryRepository.findAllByUserId(user.getId());
+            assertThat(histories2).hasSize(1);  // Still 1 record
+            assertThat(histories2.get(0).getProgressAtAchievement()).isEqualTo(60);  // Updated
+            assertThat(histories2.get(0).isAchieved()).isFalse();
+        }
+
+        @Test
+        @DisplayName("미달성 → 달성 전이 시 기존 레코드 업데이트")
+        void evaluate_fromUnachievedToAchieved_shouldUpdateRecord() {
+            // given
+            GithubUserStatistics stats = GithubUserStatistics.builder()
+                .githubId("44444")
+                .totalCommits(50)
+                .calculatedAt(LocalDateTime.now())
+                .build();
+            statisticsRepository.save(stats);
+
+            GithubUser githubUser = GithubUser.builder()
+                .githubId(44444L)
+                .githubLogin("transitionuser")
+                .build();
+
+            User user = User.builder()
+                .kutEmail("transition@koreatech.ac.kr")
+                .password("password")
+                .githubUser(githubUser)
+                .build();
+            userRepository.save(user);
+
+            Challenge challenge = Challenge.builder()
+                .name("커밋 100개")
+                .condition("T(Math).min(totalCommits * 100 / 100, 100)")  // 50 * 100 / 100 = 50
+                .point(50)
+                .build();
+            challengeRepository.save(challenge);
+
+            // when: First evaluation (unachieved)
+            challengeEvaluator.evaluate(user);
+
+            // then: Unachieved record created
+            List<ChallengeHistory> histories1 = challengeHistoryRepository.findAllByUserId(user.getId());
+            assertThat(histories1).hasSize(1);
+            assertThat(histories1.get(0).isAchieved()).isFalse();
+            assertThat(histories1.get(0).getAchievedAt()).isNull();
+
+            // given: Update stats to achieve
+            updateStats(user, 100);
+
+            // when: Second evaluation (achieved)
+            challengeEvaluator.evaluate(user);
+
+            // then: Same record updated to achieved
+            List<ChallengeHistory> histories2 = challengeHistoryRepository.findAllByUserId(user.getId());
+            assertThat(histories2).hasSize(1);  // Still 1 record
+            assertThat(histories2.get(0).isAchieved()).isTrue();  // Updated
+            assertThat(histories2.get(0).getAchievedAt()).isNotNull();  // Set
+            assertThat(histories2.get(0).getProgressAtAchievement()).isEqualTo(100);
+        }
+
+        @Test
+        @DisplayName("미달성 Challenge는 RabbitMQ 이벤트 발행 안함")
+        void evaluate_unachieved_shouldNotPublishEvent() {
+            // given
+            GithubUserStatistics stats = GithubUserStatistics.builder()
+                .githubId("33333")
+                .totalCommits(50)
+                .calculatedAt(LocalDateTime.now())
+                .build();
+            statisticsRepository.save(stats);
+
+            GithubUser githubUser = GithubUser.builder()
+                .githubId(33333L)
+                .githubLogin("noeventuser")
+                .build();
+
+            User user = User.builder()
+                .kutEmail("noevent@koreatech.ac.kr")
+                .password("password")
+                .githubUser(githubUser)
+                .build();
+            userRepository.save(user);
+
+            Challenge challenge = Challenge.builder()
+                .name("커밋 100개")
+                .condition("T(Math).min(totalCommits * 100 / 100, 100)")  // 50 * 100 / 100 = 50
+                .point(50)
+                .build();
+            challengeRepository.save(challenge);
+
+            // when
+            challengeEvaluator.evaluate(user);
+
+            // then
+            assertThat(challengeHistoryRepository.findAllByUserId(user.getId())).hasSize(1);
         }
     }
 
