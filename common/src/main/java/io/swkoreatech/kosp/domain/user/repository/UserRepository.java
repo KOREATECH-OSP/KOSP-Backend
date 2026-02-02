@@ -4,7 +4,6 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -43,6 +42,9 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
 
     Optional<User> findByGithubUser_GithubIdAndIsDeletedFalse(Long githubId);
     Optional<User> findByGithubUser_GithubLogin(String githubLogin);
+
+    @Query("SELECT u.id FROM User u WHERE u.isDeleted = false AND u.githubUser IS NOT NULL")
+    java.util.List<Long> findActiveUserIds();
 
     void deleteById(Long id);
 
