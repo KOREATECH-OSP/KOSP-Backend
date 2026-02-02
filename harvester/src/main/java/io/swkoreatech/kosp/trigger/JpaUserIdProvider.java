@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import io.swkoreatech.kosp.user.UserRepository;
+import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Component
