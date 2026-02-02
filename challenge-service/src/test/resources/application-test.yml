@@ -1,6 +1,8 @@
 spring:
   application:
     name: challenge-service-test
+  main:
+    allow-bean-definition-overriding: true
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
