@@ -144,4 +144,27 @@ public class ChallengeEvaluator {
         log.error("Failed to evaluate challenge {} for user {}. Condition: {}",
             challenge.getId(), user.getId(), challenge.getCondition(), e);
     }
+
+    private void saveOrUpdateHistory(User user, Challenge challenge, int progress, boolean isAchieved) {
+        Optional<ChallengeHistory> existing = challengeHistoryRepository.findByUserAndChallenge(user, challenge);
+
+        if (existing.isPresent()) {
+            ChallengeHistory history = existing.get();
+            history.updateProgress(progress);
+
+            if (isAchieved && !history.isAchieved()) {
+                history.achieve();
+            }
+        } else {
+            ChallengeHistory history = ChallengeHistory.builder()
+                .user(user)
+                .challenge(challenge)
+                .isAchieved(isAchieved)
+                .achievedAt(isAchieved ? LocalDateTime.now() : null)
+                .progressAtAchievement(progress)
+                .build();
+
+            challengeHistoryRepository.save(history);
+        }
+    }
 }
