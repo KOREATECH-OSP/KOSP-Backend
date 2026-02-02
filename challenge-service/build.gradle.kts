@@ -19,11 +19,16 @@ dependencies {
     
     testImplementation(libs.spring.boot.starter.test)
     testImplementation("com.fasterxml.jackson.core:jackson-databind")
+    testRuntimeOnly("com.h2database:h2")
 }
 
 tasks {
     bootJar { enabled = true }
     jar { enabled = false }
+    
+    test {
+        useJUnitPlatform()
+    }
     
     bootRun {
         systemProperties = System.getProperties().toMap() as Map<String, Any>
