@@ -86,6 +86,8 @@ public class ChallengeEvaluator {
             int progress = calculateProgress(challenge, context);
             boolean isAchieved = progress >= 100;
 
+            saveOrUpdateHistory(user, challenge, progress, isAchieved);
+
             if (isAchieved) {
                 grantReward(user, challenge, progress);
             }
@@ -123,16 +125,6 @@ public class ChallengeEvaluator {
             reason,
             "CHALLENGE"
         );
-
-        ChallengeHistory history = ChallengeHistory.builder()
-            .user(user)
-            .challenge(challenge)
-            .isAchieved(true)
-            .achievedAt(LocalDateTime.now())
-            .progressAtAchievement(progress)
-            .build();
-
-        challengeHistoryRepository.save(history);
 
         challengeEventPublisher.publishChallengeCompleted(
             user.getId(), 
