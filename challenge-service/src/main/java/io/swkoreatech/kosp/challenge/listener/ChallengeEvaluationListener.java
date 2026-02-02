@@ -6,7 +6,6 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.rabbitmq.client.Channel;
 
@@ -29,7 +28,6 @@ public class ChallengeEvaluationListener {
     private final ProcessedMessageRepository processedMessageRepository;
     
     @RabbitListener(queues = QueueNames.CHALLENGE_EVALUATION, concurrency = "5")
-    @Transactional
     public void handleEvaluationRequest(
             ChallengeEvaluationRequest request,
             @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
