@@ -76,7 +76,9 @@ public class ChallengeEvaluator {
     }
 
     private boolean isAlreadyAchieved(User user, Challenge challenge) {
-        return challengeHistoryRepository.existsByUserAndChallenge(user, challenge);
+        return challengeHistoryRepository.findByUserAndChallenge(user, challenge)
+            .map(ChallengeHistory::isAchieved)
+            .orElse(false);
     }
 
     private void evaluateAndReward(User user, Challenge challenge, StandardEvaluationContext context) {
