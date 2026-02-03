@@ -1,14 +1,47 @@
 services:
-  nginx:
-    build: .
-    container_name: nginx-proxy
-    restart: always
+  backend:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+    container_name: kosp-backend
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ${NGINX_VOLUME_PATH}:/etc/nginx/conf.d
-      - ${CERTBOT_VOLUME_PATH}/certbot/conf:/etc/letsencrypt
-      - ${CERTBOT_VOLUME_PATH}/certbot/www:/var/www/certbot
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "8080:8080"
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - MONGODB_HOST=${MONGODB_HOST}
+      - MONGODB_PORT=${MONGODB_PORT}
+      - MONGODB_DATABASE=${MONGODB_DATABASE}
+      - MONGODB_AUTHENTICATION_DATABASE=${MONGODB_AUTHENTICATION_DATABASE}
+      - MONGODB_USERNAME=${MONGODB_USERNAME}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+      - RABBITMQ_HOST=${RABBITMQ_HOST}
+      - RABBITMQ_USER=${RABBITMQ_USER}
+      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
+      - RABBITMQ_AMQP_PORT=${RABBITMQ_AMQP_PORT}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_EXPIRATION_ACCESS=${JWT_EXPIRATION_ACCESS}
+      - JWT_EXPIRATION_REFRESH=${JWT_EXPIRATION_REFRESH}
+      - JWT_EXPIRATION_SIGNUP=${JWT_EXPIRATION_SIGNUP}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_S3_CUSTOM_DOMAIN=${AWS_S3_CUSTOM_DOMAIN}
+      - ENCRYPTION_PASSWORD=${ENCRYPTION_PASSWORD}
+      - ENCRYPTION_SALT=${ENCRYPTION_SALT}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
