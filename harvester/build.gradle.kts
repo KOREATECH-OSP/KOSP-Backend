@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(projects.common)
     implementation(projects.rabbitmq)
+    implementation(projects.flyway)
 
     implementation(libs.spring.boot.starter.actuator)
 
