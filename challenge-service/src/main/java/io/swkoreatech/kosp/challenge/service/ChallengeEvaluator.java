@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.challenge.service;
 
+import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,24 @@ public class ChallengeEvaluator {
     private StandardEvaluationContext createEvaluationContext(GithubUserStatistics stats) {
         StandardEvaluationContext context = new StandardEvaluationContext(stats);
         context.setVariable("stats", stats);
+        
+        try {
+            context.registerFunction("min", 
+                Math.class.getMethod("min", int.class, int.class));
+            context.registerFunction("progress", 
+                ChallengeEvaluator.class.getMethod("calculateProgressPercentage", int.class, int.class));
+        } catch (NoSuchMethodException e) {
+            log.error("Failed to register helper functions for SpEL", e);
+        }
+        
         return context;
+    }
+
+    public static int calculateProgressPercentage(int current, int target) {
+        if (target <= 0) {
+            return 100;
+        }
+        return Math.min(current * 100 / target, 100);
     }
 
     private void tryEvaluate(User user, Challenge challenge, StandardEvaluationContext context) {
