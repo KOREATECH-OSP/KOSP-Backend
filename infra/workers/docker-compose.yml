@@ -1,7 +1,6 @@
 services:
   harvester:
     build:
-      context: ../..
       dockerfile: harvester/Dockerfile
     container_name: kosp-harvester
     env_file:
@@ -10,7 +9,6 @@ services:
 
   challenge-service:
     build:
-      context: ../..
       dockerfile: challenge-service/Dockerfile
     container_name: kosp-challenge-service
     env_file:
