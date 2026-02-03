@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation(project(":rabbitmq"))
+    implementation(project(":flyway"))
     
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.amqp)
