@@ -2,11 +2,14 @@ package io.swkoreatech.kosp.domain.auth.oauth2.service;
 
 import static io.swkoreatech.kosp.global.constants.AuthConstants.*;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -16,12 +19,16 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -30,6 +37,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
     private final TextEncryptor textEncryptor;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
@@ -41,6 +49,10 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
         updateOrSaveGithubUser(userOptional, oAuth2User, githubAccessToken, githubId);
+
+        if (userOptional.isPresent()) {
+            publishChallengeEvaluation(userOptional.get().getId());
+        }
 
         Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
 
@@ -110,6 +122,19 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         attributes.put(IS_REGISTERED_ATTR, true);
         attributes.put(USER_ATTR, user);
         return attributes;
+    }
+
+    private void publishChallengeEvaluation(Long userId) {
+        String messageId = UUID.randomUUID().toString();
+        ChallengeEvaluationRequest request = new ChallengeEvaluationRequest(
+            userId,
+            messageId,
+            LocalDateTime.now()
+        );
+
+        rabbitTemplate.convertAndSend(QueueNames.CHALLENGE_EVALUATION, request);
+        log.info("Published ChallengeEvaluationRequest to RabbitMQ: userId={}, messageId={}",
+            userId, messageId);
     }
 
 }

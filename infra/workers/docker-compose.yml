@@ -1,0 +1,18 @@
+services:
+  harvester:
+    build:
+      context: ../..
+      dockerfile: harvester/Dockerfile
+    container_name: kosp-harvester
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  challenge-service:
+    build:
+      context: ../..
+      dockerfile: challenge-service/Dockerfile
+    container_name: kosp-challenge-service
+    env_file:
+      - .env
+    restart: unless-stopped

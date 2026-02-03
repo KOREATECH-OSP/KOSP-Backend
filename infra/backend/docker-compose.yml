@@ -1,14 +1,16 @@
 services:
-  nginx:
-    build: .
-    container_name: nginx-proxy
-    restart: always
+  backend:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+    container_name: kosp-backend
     ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ${NGINX_VOLUME_PATH}:/etc/nginx/conf.d
-      - ${CERTBOT_VOLUME_PATH}/certbot/conf:/etc/letsencrypt
-      - ${CERTBOT_VOLUME_PATH}/certbot/www:/var/www/certbot
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "8080:8080"
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5

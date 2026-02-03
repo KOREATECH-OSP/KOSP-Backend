@@ -25,6 +25,8 @@ import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
@@ -149,6 +151,14 @@ public class TeamService {
             user.getName(),
             invite.getId(),
             clientUrl
+        ));
+
+        eventPublisher.publishEvent(NotificationEvent.of(
+            invitee.getId(),
+            NotificationType.TEAM_INVITED,
+            team.getName() + " 팀에 초대되었습니다",
+            user.getName() + "님이 " + team.getName() + " 팀에 초대했습니다",
+            invite.getId()
         ));
     }
 

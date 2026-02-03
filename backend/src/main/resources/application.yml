@@ -8,6 +8,7 @@ spring:
     enabled: true
     baseline-on-migrate: true
     locations: classpath:db/migration
+    validate-on-migrate: false
   jpa:
     open-in-view: false
     properties:
@@ -62,6 +63,15 @@ spring:
       database: ${MONGODB_DATABASE}
       auto-index-creation: false
       uuid-representation: standard
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:admin}
+    password: ${RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: manual
 
 encryption:
   password: ${ENCRYPTION_PASSWORD}

@@ -24,6 +24,9 @@ cors:
 spring:
   config:
     import: optional:file:.env[.properties]
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.amqp.RabbitAutoConfiguration
   web:
     resources:
       add-mappings: false

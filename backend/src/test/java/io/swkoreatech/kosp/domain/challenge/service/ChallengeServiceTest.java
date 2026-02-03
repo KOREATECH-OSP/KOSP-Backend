@@ -162,6 +162,7 @@ class ChallengeServiceTest {
                 "T(Math).min(totalCommits * 100 / 10, 100)",
                 1,
                 "https://image.url",
+                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 
@@ -182,6 +183,7 @@ class ChallengeServiceTest {
                 "((( invalid spel",
                 1,
                 "https://image.url",
+                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 
@@ -230,7 +232,7 @@ class ChallengeServiceTest {
         void throwsException_whenChallengeNotFound() {
             // given
             given(challengeRepository.findById(999L)).willReturn(Optional.empty());
-            ChallengeRequest request = new ChallengeRequest("수정", "설명", "T(Math).min(totalCommits * 100 / 10, 100)", 1, null, 100);
+            ChallengeRequest request = new ChallengeRequest("수정", "설명", "T(Math).min(totalCommits * 100 / 10, 100)", 1, null, null, 100);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(999L, request))
@@ -243,7 +245,7 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalCommits * 100 / 10, 100)", 2, null, 200);
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalCommits * 100 / 10, 100)", 2, null, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
@@ -260,7 +262,7 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalPrs * 100 / 5, 100)", 2, null, 200);
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalPrs * 100 / 5, 100)", 2, null, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
@@ -275,7 +277,7 @@ class ChallengeServiceTest {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
             given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "((( invalid", 2, null, 200);
+            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "((( invalid", 2, null, null, 200);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(1L, request))
