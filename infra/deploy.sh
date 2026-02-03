@@ -34,7 +34,7 @@ sudo docker compose -f "${COMPOSE_FILE}" up -d --build
 
 echo "=========================================="
 echo "${MODULE} 시작 완료!"
-echo "로그 확인: docker-compose -f ${COMPOSE_FILE} logs -f"
+echo "로그 확인: sudo docker compose -f ${COMPOSE_FILE} logs -f"
 echo "=========================================="
 
 sudo docker compose -f "${COMPOSE_FILE}" logs -f
