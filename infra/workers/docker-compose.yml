@@ -4,28 +4,8 @@ services:
       context: ../..
       dockerfile: harvester/Dockerfile
     container_name: kosp-harvester
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - MONGODB_HOST=${MONGODB_HOST}
-      - MONGODB_PORT=${MONGODB_PORT}
-      - MONGODB_DATABASE=${MONGODB_DATABASE}
-      - MONGODB_AUTHENTICATION_DATABASE=${MONGODB_AUTHENTICATION_DATABASE}
-      - MONGODB_USERNAME=${MONGODB_USERNAME}
-      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
-      - RABBITMQ_HOST=${RABBITMQ_HOST}
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - RABBITMQ_AMQP_PORT=${RABBITMQ_AMQP_PORT}
-      - GITHUB_API_TOKEN=${GITHUB_API_TOKEN}
-      - ENCRYPTION_PASSWORD=${ENCRYPTION_PASSWORD}
-      - ENCRYPTION_SALT=${ENCRYPTION_SALT}
+    env_file:
+      - .env
     restart: unless-stopped
 
   challenge-service:
@@ -33,25 +13,6 @@ services:
       context: ../..
       dockerfile: challenge-service/Dockerfile
     container_name: kosp-challenge-service
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - MONGODB_HOST=${MONGODB_HOST}
-      - MONGODB_PORT=${MONGODB_PORT}
-      - MONGODB_DATABASE=${MONGODB_DATABASE}
-      - MONGODB_AUTHENTICATION_DATABASE=${MONGODB_AUTHENTICATION_DATABASE}
-      - MONGODB_USERNAME=${MONGODB_USERNAME}
-      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
-      - RABBITMQ_HOST=${RABBITMQ_HOST}
-      - RABBITMQ_USER=${RABBITMQ_USER}
-      - RABBITMQ_PASSWORD=${RABBITMQ_PASSWORD}
-      - RABBITMQ_AMQP_PORT=${RABBITMQ_AMQP_PORT}
-      - ENCRYPTION_PASSWORD=${ENCRYPTION_PASSWORD}
-      - ENCRYPTION_SALT=${ENCRYPTION_SALT}
+    env_file:
+      - .env
     restart: unless-stopped
