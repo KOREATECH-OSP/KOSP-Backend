@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     implementation(project(":common"))
-    implementation(project(":infra:rabbitmq"))
+    implementation(project(":rabbitmq"))
     
     implementation(libs.spring.boot.starter.data.jpa)
     implementation(libs.spring.boot.starter.amqp)
