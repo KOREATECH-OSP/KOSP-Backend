@@ -36,9 +36,9 @@ spring:
           max-wait: 2000ms
 
   rabbitmq:
-    host: ${RABBITMQ_HOST:localhost}
-    port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USER:admin}
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USER}
     password: ${RABBITMQ_PASSWORD}
     listener:
       simple:
