@@ -41,7 +41,10 @@ public class NotificationService {
 
         emitter.onCompletion(() -> emitters.remove(userId));
         emitter.onTimeout(() -> emitters.remove(userId));
-        emitter.onError(e -> emitters.remove(userId));
+        emitter.onError(e -> {
+            log.error("SSE emitter error for user {}: {}", userId, e.getMessage(), e);
+            emitters.remove(userId);
+        });
 
         sendToClient(emitter, "connect", "SSE 연결 성공");
 
@@ -87,23 +90,25 @@ public class NotificationService {
     private void sendSseNotification(Long userId, Notification notification) {
         SseEmitter emitter = emitters.get(userId);
 
-        if (emitter == null) {
-            return;
-        }
+         if (emitter == null) {
+             log.debug("No active SSE connection for user {}", userId);
+             return;
+         }
 
         NotificationResponse response = NotificationResponse.from(notification);
         sendToClient(emitter, "notification", response);
     }
 
-    private void sendToClient(SseEmitter emitter, String eventName, Object data) {
-        try {
-            emitter.send(SseEmitter.event()
-                .name(eventName)
-                .data(data));
-        } catch (IOException e) {
-            log.warn("Failed to send SSE event: {}", e.getMessage());
-        }
-    }
+     private void sendToClient(SseEmitter emitter, String eventName, Object data) {
+         try {
+             emitter.send(SseEmitter.event()
+                 .name(eventName)
+                 .data(data));
+         } catch (IOException e) {
+             log.error("Failed to send SSE event, removing dead connection: {}", e.getMessage(), e);
+             emitters.values().remove(emitter);
+         }
+     }
 
     public NotificationListResponse getNotifications(User user, Pageable pageable) {
         Page<Notification> page = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);

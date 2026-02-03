@@ -2,7 +2,6 @@ package io.swkoreatech.kosp.domain.user.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
@@ -13,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
@@ -40,7 +38,6 @@ import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -112,11 +109,9 @@ public class UserService {
           if (githubUser.getGithubLogin() != null) {
               eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
               log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
-          }
-          
-          publishChallengeEvaluation(user.getId());
-          
-          emailVerificationService.completeSignupVerification(kutEmail);
+           }
+           
+           emailVerificationService.completeSignupVerification(kutEmail);
           log.info("✅ Redis cleanup completed for email: {}", kutEmail);
           return authService.createTokensForUser(user);
     }
@@ -212,18 +207,5 @@ public class UserService {
 
         user.encodePassword(passwordEncoder);
         return user;
-    }
-
-    private void publishChallengeEvaluation(Long userId) {
-        String messageId = UUID.randomUUID().toString();
-        ChallengeEvaluationRequest request = new ChallengeEvaluationRequest(
-            userId,
-            messageId,
-            LocalDateTime.now()
-        );
-
-        rabbitTemplate.convertAndSend(QueueNames.CHALLENGE_EVALUATION, request);
-        log.info("Published ChallengeEvaluationRequest to RabbitMQ: userId={}, messageId={}",
-            userId, messageId);
     }
 }
