@@ -36,10 +36,18 @@ else
 fi
 
 echo "[4/5] 기존 컨테이너 중지 및 제거 중..."
-sudo docker compose -f "${COMPOSE_FILE}" down || true
+if [[ "${DEPLOY_TARGET}" == "backend" ]]; then
+  sudo docker compose -f "${COMPOSE_FILE}" down backend || true
+else
+  sudo docker compose -f "${COMPOSE_FILE}" down || true
+fi
 
-echo "[5/5] Docker 컨테이너 시작 중..."
-sudo docker compose -f "${COMPOSE_FILE}" up -d --build
+echo "[5/5] ${DEPLOY_TARGET} 컨테이너 시작 중..."
+if [[ "${DEPLOY_TARGET}" == "backend" ]]; then
+  sudo docker compose -f "${COMPOSE_FILE}" up -d --build backend
+else
+  sudo docker compose -f "${COMPOSE_FILE}" up -d --build
+fi
 
 echo "=========================================="
 echo "${DEPLOY_TARGET} 시작 완료!"
