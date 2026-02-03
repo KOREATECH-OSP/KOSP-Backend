@@ -1,12 +1,12 @@
-FROM eclipse-temurin:17-jre-alpine AS builder
+FROM eclipse-temurin:17-jre AS builder
 WORKDIR /builder
-ARG JAR_FILE=build/libs/*.jar
+ARG JAR_FILE=backend/build/libs/*.jar
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre
 
-RUN addgroup -S spring && adduser -S spring -G spring
+RUN groupadd -r spring && useradd -r -g spring spring
 
 WORKDIR /application
 
