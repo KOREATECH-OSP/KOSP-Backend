@@ -40,16 +40,16 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq-kosp-compose
+    container_name: rabbitmq-kosp-stage-compose
     hostname: rabbitmq
     environment:
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-admin}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
-      - "${RABBITMQ_AMQP_PORT:-5672}:5672"
-      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+      - "${RABBITMQ_AMQP_PORT}:5672"
+      - "${RABBITMQ_MGMT_PORT}:15672"
     volumes:
-      - ${RABBITMQ_VOLUME_PATH:-./rabbitmq-data}:/var/lib/rabbitmq
+      - ${RABBITMQ_VOLUME_PATH}:/var/lib/rabbitmq
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 30s
