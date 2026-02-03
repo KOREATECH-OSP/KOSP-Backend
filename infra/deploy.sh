@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MODULE="backend"
+MODULES=("backend")
 BRANCH="develop"
 PROFILE="dev"
 
 PROJECT_DIR="KOSP-Backend"
 
-BUILD_MODULES=("backend" "harvester" "challenge-service")
-
 cd "$(dirname "$0")" || exit 1
 
+DEPLOY_TARGET="${MODULES[0]}"
+
 echo "=========================================="
-echo "${MODULE} 배포 시작 (branch: ${BRANCH}, profile: ${PROFILE})"
+echo "${DEPLOY_TARGET} 배포 시작 (branch: ${BRANCH}, profile: ${PROFILE})"
 echo "=========================================="
 
 echo "[1/5] 소스 업데이트 중..."
@@ -21,13 +21,13 @@ git pull origin "${BRANCH}" || exit 1
 
 echo "[2/5] JAR 파일 빌드 중..."
 BUILD_TASKS="clean"
-for mod in "${BUILD_MODULES[@]}"; do
+for mod in "${MODULES[@]}"; do
   BUILD_TASKS="${BUILD_TASKS} :${mod}:bootJar"
 done
 ./gradlew ${BUILD_TASKS} || exit 1
 
 echo "[3/5] .env 파일 복사 중..."
-if [[ "$MODULE" == "backend" ]]; then
+if [[ "${DEPLOY_TARGET}" == "backend" ]]; then
   cp "../.env.${PROFILE}" "infra/backend/.env" || exit 1
   COMPOSE_FILE="infra/backend/docker-compose.yml"
 else
@@ -36,13 +36,13 @@ else
 fi
 
 echo "[4/5] 기존 컨테이너 중지 및 제거 중..."
-sudo  docker compose -f "${COMPOSE_FILE}" down || true
+sudo docker compose -f "${COMPOSE_FILE}" down || true
 
 echo "[5/5] Docker 컨테이너 시작 중..."
 sudo docker compose -f "${COMPOSE_FILE}" up -d --build
 
 echo "=========================================="
-echo "${MODULE} 시작 완료!"
+echo "${DEPLOY_TARGET} 시작 완료!"
 echo "로그 확인: sudo docker compose -f ${COMPOSE_FILE} logs -f"
 echo "=========================================="
 
