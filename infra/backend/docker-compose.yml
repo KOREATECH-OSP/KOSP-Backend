@@ -15,7 +15,6 @@ services:
 
   backend:
     build:
-      context: ../..
       dockerfile: backend/Dockerfile
     container_name: kosp-backend
     ports:
