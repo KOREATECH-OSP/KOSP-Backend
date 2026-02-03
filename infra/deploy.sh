@@ -18,7 +18,7 @@ cd "./${PROJECT_DIR}" || exit 1
 git pull origin "${BRANCH}" || exit 1
 
 echo "[2/5] JAR 파일 빌드 중..."
-./gradlew clean bootJar || exit 1
+./gradlew clean ":${MODULE}:bootJar" || exit 1
 
 echo "[3/5] .env 파일 복사 중..."
 if [[ "$MODULE" == "backend" ]]; then
