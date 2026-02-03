@@ -27,14 +27,14 @@ else
 fi
 
 echo "[3/4] 기존 컨테이너 중지 및 제거 중..."
-docker-compose -f "${COMPOSE_FILE}" down || true
+sudo  docker compose -f "${COMPOSE_FILE}" down || true
 
 echo "[4/4] Docker 컨테이너 시작 중..."
-docker-compose -f "${COMPOSE_FILE}" up -d --build
+sudo docker compose -f "${COMPOSE_FILE}" up -d --build
 
 echo "=========================================="
 echo "${MODULE} 시작 완료!"
-echo "로그 확인: docker-compose -f ${COMPOSE_FILE} logs -f"
+echo "로그 확인: sudo docker compose -f ${COMPOSE_FILE} logs -f"
 echo "=========================================="
 
-docker-compose -f "${COMPOSE_FILE}" logs -f
+sudo docker compose -f "${COMPOSE_FILE}" logs -f
