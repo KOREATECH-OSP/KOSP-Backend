@@ -68,7 +68,9 @@ public class ChallengeEvaluator {
         
         try {
             context.registerFunction("min", 
-                Math.class.getMethod("min", int.class, int.class));
+                ChallengeEvaluator.class.getMethod("min", int[].class));
+            context.registerFunction("max", 
+                ChallengeEvaluator.class.getMethod("max", int[].class));
             context.registerFunction("progress", 
                 ChallengeEvaluator.class.getMethod("calculateProgressPercentage", int.class, int.class));
         } catch (NoSuchMethodException e) {
@@ -83,6 +85,28 @@ public class ChallengeEvaluator {
             return 100;
         }
         return Math.min(current * 100 / target, 100);
+    }
+
+    public static int min(int... values) {
+        if (values.length == 0) {
+            throw new IllegalArgumentException("At least one value required");
+        }
+        int result = values[0];
+        for (int i = 1; i < values.length; i++) {
+            result = Math.min(result, values[i]);
+        }
+        return result;
+    }
+
+    public static int max(int... values) {
+        if (values.length == 0) {
+            throw new IllegalArgumentException("At least one value required");
+        }
+        int result = values[0];
+        for (int i = 1; i < values.length; i++) {
+            result = Math.max(result, values[i]);
+        }
+        return result;
     }
 
     private void tryEvaluate(User user, Challenge challenge, StandardEvaluationContext context) {
