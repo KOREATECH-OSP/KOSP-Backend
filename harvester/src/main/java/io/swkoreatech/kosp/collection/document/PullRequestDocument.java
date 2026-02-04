@@ -13,6 +13,7 @@ import lombok.Getter;
 @Builder
 @Document(collection = "github_pull_requests")
 @CompoundIndex(name = "user_repo_idx", def = "{'userId': 1, 'repositoryName': 1}")
+@CompoundIndex(name = "unique_pr_idx", def = "{'userId': 1, 'repositoryName': 1, 'prNumber': 1}", unique = true)
 public class PullRequestDocument {
 
     @Id
