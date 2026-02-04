@@ -13,6 +13,7 @@ import lombok.Getter;
 @Builder
 @Document(collection = "github_commits")
 @CompoundIndex(name = "user_repo_idx", def = "{'userId': 1, 'repositoryName': 1}")
+@CompoundIndex(name = "unique_commit_idx", def = "{'userId': 1, 'repositoryName': 1, 'sha': 1}", unique = true)
 public class CommitDocument {
 
     @Id
