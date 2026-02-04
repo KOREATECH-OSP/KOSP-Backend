@@ -13,4 +13,6 @@ public interface IssueDocumentRepository extends MongoRepository<IssueDocument, 
     List<IssueDocument> findByUserIdAndRepositoryName(Long userId, String repositoryName);
 
     boolean existsByUserIdAndIssueNumber(Long userId, Long issueNumber);
+
+    boolean existsByUserIdAndRepositoryNameAndIssueNumber(Long userId, String repositoryName, Long issueNumber);
 }
