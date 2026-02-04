@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -46,7 +47,7 @@ public class NotificationService {
             emitters.remove(userId);
         });
 
-        sendToClient(emitter, "connect", "SSE 연결 성공");
+        sendToClient(userId, emitter, "connect", "SSE 연결 성공");
 
         return emitter;
     }
@@ -96,17 +97,17 @@ public class NotificationService {
          }
 
         NotificationResponse response = NotificationResponse.from(notification);
-        sendToClient(emitter, "notification", response);
+        sendToClient(userId, emitter, "notification", response);
     }
 
-     private void sendToClient(SseEmitter emitter, String eventName, Object data) {
+     private void sendToClient(Long userId, SseEmitter emitter, String eventName, Object data) {
          try {
              emitter.send(SseEmitter.event()
                  .name(eventName)
                  .data(data));
          } catch (IOException e) {
              log.error("Failed to send SSE event, removing dead connection: {}", e.getMessage(), e);
-             emitters.values().remove(emitter);
+             emitters.remove(userId);
          }
      }
 
@@ -154,5 +155,16 @@ public class NotificationService {
         if (!notification.getUser().getId().equals(user.getId())) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
+    }
+
+    @Scheduled(fixedRate = 30000)
+    public void sendHeartbeat() {
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event().comment("heartbeat"));
+            } catch (IOException e) {
+                emitters.remove(userId);
+            }
+        });
     }
 }
