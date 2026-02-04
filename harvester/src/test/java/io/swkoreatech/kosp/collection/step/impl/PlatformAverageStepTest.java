@@ -83,7 +83,7 @@ class PlatformAverageStepTest {
         void doesNotRecompute_whenDeltaBelowThreshold() throws Exception {
             PlatformStatistics platformStats = createPlatformStats(100);
             when(statisticsRepository.count()).thenReturn(105L);
-            when(platformStatisticsRepository.getOrCreate("GLOBAL")).thenReturn(platformStats);
+            when(platformStatisticsRepository.getOrCreate("global")).thenReturn(platformStats);
 
             invokeExecute();
 
@@ -95,7 +95,7 @@ class PlatformAverageStepTest {
         void recomputes_whenDeltaAboveThreshold() throws Exception {
             PlatformStatistics platformStats = createPlatformStats(100);
             when(statisticsRepository.count()).thenReturn(110L);
-            when(platformStatisticsRepository.getOrCreate("GLOBAL")).thenReturn(platformStats);
+            when(platformStatisticsRepository.getOrCreate("global")).thenReturn(platformStats);
             when(statisticsRepository.findAverageCommits()).thenReturn(BigDecimal.valueOf(50));
             when(statisticsRepository.findAveragePrs()).thenReturn(BigDecimal.valueOf(10));
             when(statisticsRepository.findAverageIssues()).thenReturn(BigDecimal.valueOf(5));
@@ -121,7 +121,7 @@ class PlatformAverageStepTest {
             BigDecimal avgStars = BigDecimal.valueOf(150.2);
 
             when(statisticsRepository.count()).thenReturn(100L);
-            when(platformStatisticsRepository.getOrCreate("GLOBAL")).thenReturn(platformStats);
+            when(platformStatisticsRepository.getOrCreate("global")).thenReturn(platformStats);
             when(statisticsRepository.findAverageCommits()).thenReturn(avgCommits);
             when(statisticsRepository.findAveragePrs()).thenReturn(avgPrs);
             when(statisticsRepository.findAverageIssues()).thenReturn(avgIssues);
@@ -143,7 +143,7 @@ class PlatformAverageStepTest {
             PlatformStatistics platformStats = createPlatformStats(50);
 
             when(statisticsRepository.count()).thenReturn(100L);
-            when(platformStatisticsRepository.getOrCreate("GLOBAL")).thenReturn(platformStats);
+            when(platformStatisticsRepository.getOrCreate("global")).thenReturn(platformStats);
             when(statisticsRepository.findAverageCommits()).thenReturn(null);
             when(statisticsRepository.findAveragePrs()).thenReturn(null);
             when(statisticsRepository.findAverageIssues()).thenReturn(null);
@@ -166,7 +166,7 @@ class PlatformAverageStepTest {
     }
 
     private PlatformStatistics createPlatformStats(int totalUserCount) {
-        PlatformStatistics stats = PlatformStatistics.create("GLOBAL");
+        PlatformStatistics stats = PlatformStatistics.create("global");
         stats.updateAverages(
             BigDecimal.ZERO,
             BigDecimal.ZERO,
