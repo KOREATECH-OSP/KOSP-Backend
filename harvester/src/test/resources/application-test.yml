@@ -1,6 +1,8 @@
 spring:
   main:
     web-application-type: none
+  flyway:
+    enabled: false
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;CASE_INSENSITIVE_IDENTIFIERS=TRUE
@@ -23,6 +25,15 @@ spring:
       host: localhost
       port: 27017
       database: kosp_harvester_test
+      username: root
+      password: root
+      authentication-database: admin
+      auto-index-creation: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
   batch:
     jdbc:
       initialize-schema: always
