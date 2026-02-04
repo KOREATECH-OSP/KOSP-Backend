@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PlatformAverageStep implements StepProvider {
 
     private static final String STEP_NAME = "platformAverageStep";
-    private static final String STAT_KEY = "GLOBAL";
+    private static final String STAT_KEY = "global";
     private static final int RECOMPUTE_THRESHOLD = 10;
 
     private final JobRepository jobRepository;

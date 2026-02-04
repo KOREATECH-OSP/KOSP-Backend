@@ -110,11 +110,11 @@ public class IssueMiningStep implements StepProvider {
     }
 
     private int saveIssues(Long userId, List<IssueNode> issues, Instant now) {
-        int saved = 0;
-        for (IssueNode issue : issues) {
-            if (issueDocumentRepository.existsByUserIdAndIssueNumber(userId, issue.getNumber())) {
-                continue;
-            }
+         int saved = 0;
+         for (IssueNode issue : issues) {
+             if (issueDocumentRepository.existsByUserIdAndRepositoryNameAndIssueNumber(userId, issue.getRepoName(), issue.getNumber())) {
+                 continue;
+             }
 
             IssueDocument document = buildDocument(userId, issue, now);
             issueDocumentRepository.save(document);

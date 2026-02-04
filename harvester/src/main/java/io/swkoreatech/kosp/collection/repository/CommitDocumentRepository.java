@@ -13,4 +13,6 @@ public interface CommitDocumentRepository extends MongoRepository<CommitDocument
     List<CommitDocument> findByUserIdAndRepositoryName(Long userId, String repositoryName);
 
     boolean existsByUserIdAndSha(Long userId, String sha);
+
+    boolean existsByUserIdAndRepositoryNameAndSha(Long userId, String repositoryName, String sha);
 }

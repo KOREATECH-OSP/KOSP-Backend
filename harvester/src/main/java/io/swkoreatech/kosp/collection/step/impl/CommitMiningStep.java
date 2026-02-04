@@ -150,7 +150,7 @@ public class CommitMiningStep implements StepProvider {
       private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
          int saved = 0;
          for (CommitNode commit : commits) {
-             if (commitDocumentRepository.existsByUserIdAndSha(userId, commit.getOid())) {
+              if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
                  totalSkippedCount++;
                  continue;
              }

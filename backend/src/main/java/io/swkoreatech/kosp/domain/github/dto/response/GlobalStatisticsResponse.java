@@ -1,8 +1,9 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import io.swkoreatech.kosp.domain.github.model.GithubGlobalStatistics;
+import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -17,7 +18,7 @@ public class GlobalStatisticsResponse {
     private Integer totalUsers;
     private LocalDateTime calculatedAt;
 
-    public static GlobalStatisticsResponse from(GithubGlobalStatistics stats) {
+    public static GlobalStatisticsResponse from(PlatformStatistics stats) {
         if (stats == null) {
             return GlobalStatisticsResponse.builder()
                 .avgCommitCount(0.0)
@@ -29,11 +30,11 @@ public class GlobalStatisticsResponse {
                 .build();
         }
         return GlobalStatisticsResponse.builder()
-            .avgCommitCount(stats.getAvgCommitCount())
-            .avgStarCount(stats.getAvgStarCount())
-            .avgPrCount(stats.getAvgPrCount())
-            .avgIssueCount(stats.getAvgIssueCount())
-            .totalUsers(stats.getTotalUsers())
+            .avgCommitCount(stats.getAvgCommitCount().doubleValue())
+            .avgStarCount(stats.getAvgStarCount().doubleValue())
+            .avgPrCount(stats.getAvgPrCount().doubleValue())
+            .avgIssueCount(stats.getAvgIssueCount().doubleValue())
+            .totalUsers(stats.getTotalUserCount())
             .calculatedAt(stats.getCalculatedAt())
             .build();
     }

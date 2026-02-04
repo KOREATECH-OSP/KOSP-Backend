@@ -114,10 +114,15 @@ public class GithubGraphQLClient {
 
     public <T> Mono<T> getUserBasicInfo(
         String login,
+        String cursor,
         String token,
         Class<T> responseType
     ) {
-        Map<String, Object> variables = Map.of("login", login);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("login", login);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
         return query(userBasicInfoQuery, variables, token, responseType);
     }
 
