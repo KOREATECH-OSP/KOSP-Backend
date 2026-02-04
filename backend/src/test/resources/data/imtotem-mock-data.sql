@@ -66,43 +66,8 @@ INSERT INTO github_user_statistics (
 -- 4. GithubMonthlyStatistics (월별 활동)
 -- ============================================
 
-INSERT INTO github_monthly_statistics (
-    github_id, `year`, `month`,
-    commits_count, lines_count, additions_count, deletions_count,
-    prs_count, issues_count, created_repos_count, contributed_repos_count,
-    calculated_at
-) VALUES
--- 2024년 데이터 (최근 12개월)
-('ImTotem', 2024, 1, 68, 2800, 1800, 1000, 5, 2, 0, 2, NOW()),
-('ImTotem', 2024, 2, 72, 3100, 2000, 1100, 6, 3, 1, 2, NOW()),
-('ImTotem', 2024, 3, 85, 3600, 2300, 1300, 7, 4, 0, 3, NOW()),
-('ImTotem', 2024, 4, 62, 2500, 1600, 900, 4, 2, 0, 1, NOW()),
-('ImTotem', 2024, 5, 95, 4200, 2800, 1400, 8, 5, 2, 3, NOW()),
-('ImTotem', 2024, 6, 58, 2200, 1400, 800, 3, 1, 0, 2, NOW()),
-('ImTotem', 2024, 7, 102, 4500, 3000, 1500, 9, 6, 1, 4, NOW()),
-('ImTotem', 2024, 8, 78, 3300, 2100, 1200, 6, 3, 0, 2, NOW()),
-('ImTotem', 2024, 9, 88, 3800, 2500, 1300, 7, 4, 1, 3, NOW()),
-('ImTotem', 2024, 10, 65, 2600, 1700, 900, 4, 2, 0, 1, NOW()),
-('ImTotem', 2024, 11, 92, 3900, 2600, 1300, 8, 3, 1, 2, NOW()),
-('ImTotem', 2024, 12, 85, 3500, 2200, 1300, 7, 2, 0, 3, NOW());
 
 -- ============================================
--- 5. GithubContributionPattern (기여 패턴)
--- ============================================
-
-INSERT INTO github_contribution_pattern (
-    github_id,
-    night_owl_score,
-    night_commits,
-    day_commits,
-    initiator_score,
-    early_contributions,
-    independent_score,
-    solo_projects,
-    total_projects,
-    total_coworkers,
-    hourly_distribution,
-    calculated_at
 ) VALUES (
     'ImTotem',
     33,     -- Night Owl 점수 (33%)
