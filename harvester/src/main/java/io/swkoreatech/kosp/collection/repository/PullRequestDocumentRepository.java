@@ -13,4 +13,6 @@ public interface PullRequestDocumentRepository extends MongoRepository<PullReque
     List<PullRequestDocument> findByUserIdAndRepositoryName(Long userId, String repositoryName);
 
     boolean existsByUserIdAndPrNumber(Long userId, Long prNumber);
+
+    boolean existsByUserIdAndRepositoryNameAndPrNumber(Long userId, String repositoryName, Long prNumber);
 }
