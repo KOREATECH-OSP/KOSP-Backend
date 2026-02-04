@@ -152,6 +152,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
             }
         }
 
+        Set<RepositoryInfo> ownedRepos = fetchOwnedRepositories(login, token);
+        allRepositories.addAll(ownedRepos);
+
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
         storeReposInContext(chunkContext, allRepositories);
@@ -183,7 +186,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
     private ZonedDateTime fetchUserCreatedAt(String login, String token) {
         GraphQLResponse<UserBasicInfoResponse> response = 
-            graphQLClient.getUserBasicInfo(login, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
+            graphQLClient.getUserBasicInfo(login, null, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
             .block();
 
         if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
@@ -209,6 +212,124 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
     private String formatDateTime(ZonedDateTime dateTime) {
         return dateTime.format(DateTimeFormatter.ISO_INSTANT);
+    }
+
+    private Set<RepositoryInfo> fetchOwnedRepositories(String login, String token) {
+        Set<RepositoryInfo> ownedRepos = new HashSet<>();
+        String cursor = null;
+        boolean hasNextPage = true;
+
+        while (hasNextPage) {
+            GraphQLResponse<UserBasicInfoResponse> response = 
+                graphQLClient.getUserBasicInfo(login, cursor, token, 
+                    GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
+                .block();
+
+            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+                break;
+            }
+
+            UserBasicInfoResponse data = response.getDataAs(UserBasicInfoResponse.class);
+            if (data == null || data.getUser() == null) {
+                break;
+            }
+
+            UserBasicInfoResponse.RepositoriesData repos = data.getUser().getRepositories();
+            if (repos == null || repos.getNodes() == null) {
+                break;
+            }
+
+            for (UserBasicInfoResponse.RepositoryNode node : repos.getNodes()) {
+                RepositoryInfo repoInfo = convertToRepositoryInfo(node);
+                ownedRepos.add(repoInfo);
+            }
+
+            hasNextPage = repos.getPageInfo() != null && repos.getPageInfo().isHasNextPage();
+            cursor = repos.getPageInfo() != null ? repos.getPageInfo().getEndCursor() : null;
+
+            if (hasNextPage) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        return ownedRepos;
+    }
+
+    private RepositoryInfo convertToRepositoryInfo(UserBasicInfoResponse.RepositoryNode node) {
+        RepositoryInfo repoInfo = new RepositoryInfo();
+        setRepositoryField(repoInfo, "name", node.getName());
+        setRepositoryField(repoInfo, "nameWithOwner", node.getNameWithOwner());
+        setRepositoryField(repoInfo, "description", node.getDescription());
+        setRepositoryField(repoInfo, "isFork", node.isFork());
+        setRepositoryField(repoInfo, "isPrivate", node.isPrivate());
+        setRepositoryField(repoInfo, "stargazerCount", node.getStargazerCount());
+        setRepositoryField(repoInfo, "forkCount", node.getForkCount());
+        setRepositoryField(repoInfo, "createdAt", node.getCreatedAt());
+        
+        if (node.getOwner() != null) {
+            ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+            setOwnerField(owner, "login", node.getOwner().getLogin());
+            setRepositoryField(repoInfo, "owner", owner);
+        }
+        
+        if (node.getPrimaryLanguage() != null) {
+            ContributedReposResponse.PrimaryLanguage language = new ContributedReposResponse.PrimaryLanguage();
+            setLanguageField(language, "name", node.getPrimaryLanguage().getName());
+            setRepositoryField(repoInfo, "primaryLanguage", language);
+        }
+        
+        if (node.getWatchers() != null) {
+            ContributedReposResponse.WatchersInfo watchers = new ContributedReposResponse.WatchersInfo();
+            setWatchersField(watchers, "totalCount", node.getWatchers().getTotalCount());
+            setRepositoryField(repoInfo, "watchers", watchers);
+        }
+        
+        return repoInfo;
+    }
+
+    private void setRepositoryField(RepositoryInfo target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = RepositoryInfo.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            log.warn("Failed to set field {} on RepositoryInfo", fieldName, e);
+        }
+    }
+
+    private void setOwnerField(ContributedReposResponse.Owner target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = ContributedReposResponse.Owner.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            log.warn("Failed to set field {} on Owner", fieldName, e);
+        }
+    }
+
+    private void setLanguageField(ContributedReposResponse.PrimaryLanguage target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = ContributedReposResponse.PrimaryLanguage.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            log.warn("Failed to set field {} on PrimaryLanguage", fieldName, e);
+        }
+    }
+
+    private void setWatchersField(ContributedReposResponse.WatchersInfo target, String fieldName, Object value) {
+        try {
+            java.lang.reflect.Field field = ContributedReposResponse.WatchersInfo.class.getDeclaredField(fieldName);
+            field.setAccessible(true);
+            field.set(target, value);
+        } catch (Exception e) {
+            log.warn("Failed to set field {} on WatchersInfo", fieldName, e);
+        }
     }
 
     private void saveRepositories(Long userId, String login, Set<RepositoryInfo> repositories) {

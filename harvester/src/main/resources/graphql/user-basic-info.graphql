@@ -1,4 +1,4 @@
-query GetUserBasicInfo($login: String!) {
+query GetUserBasicInfo($login: String!, $after: String) {
   user(login: $login) {
     login
     name
@@ -14,15 +14,28 @@ query GetUserBasicInfo($login: String!) {
     following {
       totalCount
     }
-    repositories(first: 100, ownerAffiliations: OWNER) {
+    repositories(first: 100, ownerAffiliations: OWNER, after: $after) {
       totalCount
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
       nodes {
         name
+        nameWithOwner
         description
-        stargazerCount
-        forkCount
+        owner {
+          login
+        }
+        isFork
+        isPrivate
         primaryLanguage {
           name
+        }
+        stargazerCount
+        forkCount
+        watchers {
+          totalCount
         }
         createdAt
         updatedAt
