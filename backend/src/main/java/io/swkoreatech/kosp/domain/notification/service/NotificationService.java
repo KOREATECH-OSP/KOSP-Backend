@@ -43,7 +43,11 @@ public class NotificationService {
         emitter.onCompletion(() -> emitters.remove(userId));
         emitter.onTimeout(() -> emitters.remove(userId));
         emitter.onError(e -> {
-            log.error("SSE emitter error for user {}: {}", userId, e.getMessage(), e);
+            if (isDisconnectError(e)) {
+                log.debug("Client disconnected: user {}", userId);
+            } else {
+                log.error("SSE emitter error for user {}: {}", userId, e.getMessage(), e);
+            }
             emitters.remove(userId);
         });
 
@@ -100,16 +104,17 @@ public class NotificationService {
         sendToClient(userId, emitter, "notification", response);
     }
 
-     private void sendToClient(Long userId, SseEmitter emitter, String eventName, Object data) {
-         try {
-             emitter.send(SseEmitter.event()
-                 .name(eventName)
-                 .data(data));
-         } catch (IOException e) {
-             log.error("Failed to send SSE event, removing dead connection: {}", e.getMessage(), e);
-             emitters.remove(userId);
-         }
-     }
+      private void sendToClient(Long userId, SseEmitter emitter, String eventName, Object data) {
+          // Note: emitter.send() is async - errors are handled by onError() callback
+          // try-catch here only catches synchronous errors (rare)
+          try {
+              emitter.send(SseEmitter.event()
+                  .name(eventName)
+                  .data(data));
+          } catch (IOException e) {
+              throw new RuntimeException(e);
+          }
+      }
 
     public NotificationListResponse getNotifications(User user, Pageable pageable) {
         Page<Notification> page = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
@@ -157,13 +162,32 @@ public class NotificationService {
         }
     }
 
+    private boolean isDisconnectError(Throwable error) {
+        if (error == null) {
+            return false;
+        }
+        
+        String className = error.getClass().getName();
+        if (className.contains("AsyncRequestNotUsableException")) {
+            return true;
+        }
+        
+        if (error instanceof IOException) {
+            return true;
+        }
+        
+        // Check cause chain recursively
+        return isDisconnectError(error.getCause());
+    }
+
     @Scheduled(fixedRate = 30000)
     public void sendHeartbeat() {
+        // Errors are handled by onError() callback (async)
         emitters.forEach((userId, emitter) -> {
             try {
                 emitter.send(SseEmitter.event().comment("heartbeat"));
             } catch (IOException e) {
-                emitters.remove(userId);
+                throw new RuntimeException(e);
             }
         });
     }
