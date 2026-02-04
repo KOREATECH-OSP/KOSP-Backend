@@ -11,12 +11,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@EnableScheduling
 @EnableRedisRepositories
 @RequiredArgsConstructor
 public class RedisConfig {
