@@ -29,12 +29,10 @@
 - 점수 세분화 (main_repo_score, other_repo_score, pr_issue_score, reputation_score)
 - 시간대 분석 (night_commits, day_commits)
 
-#### `github_monthly_statistics` (30 records)
 - `octocat`: 2024년 전체 12개월 데이터
 - `torvalds`, `gaearon`: 최근 6개월 데이터
 - 월별 활동 추이 분석 가능
 
-#### `github_contribution_pattern` (4 records)
 - 시간대 패턴 (hourly_distribution JSON)
 - 프로젝트 패턴 (initiator_score, solo_projects)
 - 협업 패턴 (total_coworkers)
@@ -90,9 +88,7 @@ src/test/resources/db/migration/V999__insert_mock_data.sql
 -- 각 테이블의 레코드 수 확인
 SELECT 'github_user_statistics' as table_name, COUNT(*) as count FROM github_user_statistics
 UNION ALL
-SELECT 'github_monthly_statistics', COUNT(*) FROM github_monthly_statistics
 UNION ALL
-SELECT 'github_contribution_pattern', COUNT(*) FROM github_contribution_pattern
 UNION ALL
 SELECT 'github_repository_statistics', COUNT(*) FROM github_repository_statistics
 UNION ALL
@@ -109,7 +105,6 @@ ORDER BY total_score DESC;
 
 -- 월별 활동 추이
 SELECT github_id, `year`, `month`, commits_count
-FROM github_monthly_statistics
 WHERE github_id = 'octocat'
 ORDER BY `year`, `month`;
 ```
