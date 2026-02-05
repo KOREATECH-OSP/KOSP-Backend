@@ -1,6 +1,5 @@
 package io.swkoreatech.kosp.domain.user.service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -19,9 +18,9 @@ import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
-import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
+import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
 import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
@@ -81,7 +80,7 @@ public class UserService {
                 .createdAt(java.time.LocalDateTime.now())
                 .updatedAt(java.time.LocalDateTime.now())
                 .build());
-        
+
         // GitHub 정보 업데이트 (암호화된 토큰 그대로 저장)
         githubUser.updateProfile(githubLogin, githubName, githubAvatarUrl, encryptedGithubToken);
         githubUserRepository.save(githubUser);
@@ -104,16 +103,16 @@ public class UserService {
         user.getRoles().add(role);
 
         log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
-        
-         // 6. GitHub 데이터 수집 이벤트 발행
-          if (githubUser.getGithubLogin() != null) {
-              eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
-              log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
-           }
-           
-           emailVerificationService.completeSignupVerification(kutEmail);
-          log.info("✅ Redis cleanup completed for email: {}", kutEmail);
-          return authService.createTokensForUser(user);
+
+        // 6. GitHub 데이터 수집 이벤트 발행
+        if (githubUser.getGithubLogin() != null) {
+            eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
+            log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
+        }
+
+        emailVerificationService.completeSignupVerification(kutEmail);
+        log.info("✅ Redis cleanup completed for email: {}", kutEmail);
+        return authService.createTokensForUser(user);
     }
 
     @Transactional
@@ -126,6 +125,7 @@ public class UserService {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
     }
+
     @Transactional
     public void delete(Long userId) {
         User user = userRepository.getById(userId);
@@ -142,15 +142,16 @@ public class UserService {
 
         user.changePassword(newPassword, passwordEncoder);
     }
+
     @Transactional(readOnly = true)
     public CheckMemberIdResponse checkMemberIdAvailability(String memberId) {
         boolean exists = userRepository.existsByKutIdAndIsDeletedFalse(memberId);
         String label = extractMemberLabel(memberId);
         String message = buildAvailabilityMessage(exists, label);
-        
+
         return new CheckMemberIdResponse(
-            true, 
-            !exists, 
+            true,
+            !exists,
             message
         );
     }
