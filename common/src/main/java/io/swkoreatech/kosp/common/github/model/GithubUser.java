@@ -10,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,6 +46,9 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
     @Column(name = "rate_limit_reset_at")
     private Instant rateLimitResetAt;
 
+    @Transient
+    private Integer rateLimitRemaining;
+
     public void updateLastCrawling() {
         this.lastCrawling = LocalDateTime.now();
     }
@@ -60,8 +64,9 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
         this.githubAvatarUrl = githubAvatarUrl;
     }
 
-    public void updateRateLimitResetTime(Instant resetAt) {
+    public void updateRateLimit(Instant resetAt, Integer remaining) {
         this.rateLimitResetAt = resetAt;
+        this.rateLimitRemaining = remaining;
     }
 
     public boolean isRateLimitExpired() {
@@ -69,6 +74,10 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
             return true;
         }
         return Instant.now().isAfter(rateLimitResetAt);
+    }
+
+    public Integer getRemainingOrDefault() {
+        return rateLimitRemaining != null ? rateLimitRemaining : 5000;
     }
 
     @Override
