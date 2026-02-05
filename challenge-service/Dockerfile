@@ -16,6 +16,7 @@ WORKDIR /application
 COPY --from=builder --chown=spring:spring /builder/extracted/dependencies/ ./
 COPY --from=builder --chown=spring:spring /builder/extracted/snapshot-dependencies/ ./
 COPY --from=builder --chown=spring:spring /builder/extracted/application/ ./
+RUN mkdir -p /application/logs && chown spring:spring /application/logs
 
 USER spring:spring
 
