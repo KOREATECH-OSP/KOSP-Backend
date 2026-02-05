@@ -31,6 +31,24 @@ public class RateLimitManager {
                 return Mono.empty();
             }
 
+            int remaining = githubUser.getRemainingOrDefault();
+            if (remaining <= threshold) {
+                Instant resetTime = githubUser.getRateLimitResetAt();
+                
+                if (resetTime == null) {
+                    return Mono.empty();
+                }
+
+                Duration waitTime = Duration.between(Instant.now(), resetTime);
+                
+                log.warn("Rate limit threshold reached for user {}. Remaining: {}, Threshold: {}", 
+                    userId, remaining, threshold);
+                return Mono.error(new RateLimitException(
+                    "Rate limit threshold reached. Reset at: " + resetTime,
+                    waitTime
+                ));
+            }
+
             if (githubUser.isRateLimitExpired()) {
                 return Mono.empty();
             }
@@ -70,7 +88,7 @@ public class RateLimitManager {
         return Mono.delay(waitTime).then();
     }
 
-    public void updateRateLimitFromHeaders(Long userId, long resetTime) {
+    public void updateRateLimitFromHeaders(Long userId, long resetTime, int remaining) {
         User user = userRepository.getById(userId);
         GithubUser githubUser = user.getGithubUser();
 
@@ -80,10 +98,10 @@ public class RateLimitManager {
         }
 
         Instant resetAt = Instant.ofEpochMilli(resetTime);
-        githubUser.updateRateLimitResetTime(resetAt);
+        githubUser.updateRateLimit(resetAt, remaining);
         githubUserRepository.save(githubUser);
 
-        log.debug("Rate limit updated for user {}: reset={}", userId, resetAt);
+        log.debug("Rate limit updated for user {}: reset={}, remaining={}", userId, resetAt, remaining);
     }
 
     public Instant getResetTime(Long userId) {
