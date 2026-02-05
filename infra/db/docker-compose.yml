@@ -9,7 +9,7 @@ services:
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
-      - ${POSTGRES_VOLUME_PATH}:/var/lib/postgresql/data
+      - ${POSTGRES_VOLUME_PATH}:/var/lib/postgresql
     restart: "unless-stopped"
 
   redis:
