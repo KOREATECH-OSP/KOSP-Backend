@@ -70,7 +70,7 @@ class RateLimitPersistenceIntegrationTest {
             
             when(userRepository.getById(user.getId())).thenReturn(user);
 
-            rateLimitManager.updateRateLimitFromHeaders(user.getId(), resetTimeMillis);
+            rateLimitManager.updateRateLimitFromHeaders(user.getId(), resetTimeMillis, 5000);
 
             GithubUser githubUser = user.getGithubUser();
             assertThat(githubUser.getRateLimitResetAt()).isNotNull();
@@ -85,7 +85,7 @@ class RateLimitPersistenceIntegrationTest {
             Instant expectedResetTime = Instant.now().plus(30, ChronoUnit.MINUTES);
 
             GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimitResetTime(expectedResetTime);
+            githubUser.updateRateLimit(expectedResetTime, null);
             
             when(userRepository.getById(user.getId())).thenReturn(user);
 
@@ -184,7 +184,7 @@ class RateLimitPersistenceIntegrationTest {
             Instant futureResetTime = Instant.now().plus(1, ChronoUnit.HOURS);
 
             GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimitResetTime(futureResetTime);
+            githubUser.updateRateLimit(futureResetTime, null);
 
             when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user.getId()));
             when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -201,7 +201,7 @@ class RateLimitPersistenceIntegrationTest {
             Instant futureResetTime = Instant.now().plus(30, ChronoUnit.MINUTES);
 
             GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimitResetTime(futureResetTime);
+            githubUser.updateRateLimit(futureResetTime, null);
 
             boolean isExpired = githubUser.isRateLimitExpired();
 
@@ -215,7 +215,7 @@ class RateLimitPersistenceIntegrationTest {
             Instant pastResetTime = Instant.now().minus(10, ChronoUnit.MINUTES);
 
             GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimitResetTime(pastResetTime);
+            githubUser.updateRateLimit(pastResetTime, null);
 
             when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user.getId()));
             when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
@@ -265,7 +265,7 @@ class RateLimitPersistenceIntegrationTest {
 
             when(userRepository.getById(user.getId())).thenReturn(user);
 
-            rateLimitManager.updateRateLimitFromHeaders(user.getId(), resetTimeMillis);
+            rateLimitManager.updateRateLimitFromHeaders(user.getId(), resetTimeMillis, 5000);
 
             GithubUser githubUser = user.getGithubUser();
             assertThat(githubUser.getGithubLogin()).isEqualTo(originalLogin);

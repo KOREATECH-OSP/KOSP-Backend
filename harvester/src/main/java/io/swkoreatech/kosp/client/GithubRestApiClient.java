@@ -109,10 +109,12 @@ public class GithubRestApiClient {
                         if (remaining != null && reset != null) {
                             try {
                                 long resetLong = Long.parseLong(reset) * 1000;
-                                rateLimitManager.updateRateLimitFromHeaders(userId, resetLong);
+                                int remainingCount = Integer.parseInt(remaining);
+                                rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                             } catch (NumberFormatException e) {
                                 log.warn("Failed to parse rate limit headers: remaining={}, reset={}", 
                                     remaining, reset);
+                                rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                             }
                         }
                     }
@@ -172,9 +174,11 @@ public class GithubRestApiClient {
                     if (remaining != null && reset != null) {
                         try {
                             long resetLong = Long.parseLong(reset) * 1000;
-                            rateLimitManager.updateRateLimitFromHeaders(userId, resetLong);
+                            int remainingCount = Integer.parseInt(remaining);
+                            rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                         } catch (NumberFormatException e) {
                             log.warn("Failed to parse rate limit headers", e);
+                            rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                         }
                     }
                 }
