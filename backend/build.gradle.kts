@@ -39,6 +39,9 @@ dependencies {
 
     implementation(libs.jsoup)  // HTML 파싱용
 
+    implementation(libs.logback.slack.appender)
+    implementation(libs.logstash.logback.encoder)
+
     implementation(libs.rsql.jpa.spring.boot.starter)
 
     implementation(libs.flyway.database.postgresql)
@@ -55,7 +58,7 @@ dependencies {
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
-    testImplementation("io.projectreactor:reactor-test")
+    testImplementation(libs.reactor.test)
 	testRuntimeOnly(libs.junit.platform.launcher)
 }
 

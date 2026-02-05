@@ -112,7 +112,7 @@ public class NotificationService {
                   .name(eventName)
                   .data(data));
           } catch (IOException e) {
-              throw new RuntimeException(e);
+              log.debug("IOException in sendToClient for user {}: {}", userId, e.getMessage());
           }
       }
 
@@ -180,15 +180,15 @@ public class NotificationService {
         return isDisconnectError(error.getCause());
     }
 
-    @Scheduled(fixedRate = 30000)
-    public void sendHeartbeat() {
-        // Errors are handled by onError() callback (async)
-        emitters.forEach((userId, emitter) -> {
-            try {
-                emitter.send(SseEmitter.event().comment("heartbeat"));
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        });
-    }
+     @Scheduled(fixedRate = 30000)
+     public void sendHeartbeat() {
+         // Errors are handled by onError() callback (async)
+         emitters.forEach((userId, emitter) -> {
+             try {
+                 emitter.send(SseEmitter.event().comment("heartbeat"));
+             } catch (IOException e) {
+                 log.debug("IOException in sendHeartbeat for user {}: {}", userId, e.getMessage());
+             }
+         });
+     }
 }

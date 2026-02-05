@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.common.github.model;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 import org.springframework.data.domain.Persistable;
@@ -9,6 +10,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -41,6 +43,12 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
     @Column(name = "last_crawling")
     private LocalDateTime lastCrawling = LocalDateTime.now();
 
+    @Column(name = "rate_limit_reset_at")
+    private Instant rateLimitResetAt;
+
+    @Transient
+    private Integer rateLimitRemaining;
+
     public void updateLastCrawling() {
         this.lastCrawling = LocalDateTime.now();
     }
@@ -54,6 +62,22 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
 
     public void updateAvatarUrl(String githubAvatarUrl) {
         this.githubAvatarUrl = githubAvatarUrl;
+    }
+
+    public void updateRateLimit(Instant resetAt, Integer remaining) {
+        this.rateLimitResetAt = resetAt;
+        this.rateLimitRemaining = remaining;
+    }
+
+    public boolean isRateLimitExpired() {
+        if (rateLimitResetAt == null) {
+            return true;
+        }
+        return Instant.now().isAfter(rateLimitResetAt);
+    }
+
+    public Integer getRemainingOrDefault() {
+        return rateLimitRemaining != null ? rateLimitRemaining : 5000;
     }
 
     @Override

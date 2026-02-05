@@ -67,3 +67,8 @@ github:
     graphql-url: https://api.github.com/graphql
     rate-limit:
       threshold: 100
+
+slack:
+  logging:
+    error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL:}
+  event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL:}

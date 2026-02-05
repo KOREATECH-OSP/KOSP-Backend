@@ -24,6 +24,9 @@ dependencies {
 
     implementation(libs.postgresql)
 
+    implementation(libs.logback.slack.appender)
+    implementation(libs.logstash.logback.encoder)
+
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 

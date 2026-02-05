@@ -73,8 +73,8 @@ public class GithubRestApiClient {
         this.rateLimitManager = rateLimitManager;
     }
 
-    public <T> Mono<T> get(String uri, String token, Class<T> responseType) {
-        return rateLimitManager.waitIfNeeded()
+    public <T> Mono<T> get(Long userId, String uri, String token, Class<T> responseType) {
+        return rateLimitManager.waitIfNeeded(userId, 100)
             .then(webClient.get()
                 .uri(uri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -85,7 +85,7 @@ public class GithubRestApiClient {
                     response -> response.bodyToMono(String.class)
                         .flatMap(body -> {
                             log.warn("Rate limit exceeded. Waiting...");
-                            return rateLimitManager.handleRateLimitExceeded()
+                            return rateLimitManager.handleRateLimitExceeded(userId)
                                 .then(Mono.error(new RuntimeException("Rate limit exceeded")));
                         })
                 )
@@ -108,16 +108,16 @@ public class GithubRestApiClient {
                         
                         if (remaining != null && reset != null) {
                             try {
-                                int remainingInt = Integer.parseInt(remaining);
                                 long resetLong = Long.parseLong(reset) * 1000;
-                                rateLimitManager.updateRateLimitFromHeaders(remainingInt, resetLong);
+                                int remainingCount = Integer.parseInt(remaining);
+                                rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                             } catch (NumberFormatException e) {
                                 log.warn("Failed to parse rate limit headers: remaining={}, reset={}", 
                                     remaining, reset);
+                                rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                             }
                         }
                     }
-                    rateLimitManager.recordRequest();
                     log.debug("GET {} - Success", uri);
                 })
                 .doOnError(error -> log.error("GET {} - Error: {}", uri, error.getMessage()))
@@ -132,8 +132,8 @@ public class GithubRestApiClient {
         return entity.getBody();
     }
 
-    public <T> Mono<T> post(String uri, String token, Object body, Class<T> responseType) {
-        return rateLimitManager.waitIfNeeded()
+    public <T> Mono<T> post(Long userId, String uri, String token, Object body, Class<T> responseType) {
+        return rateLimitManager.waitIfNeeded(userId, 100)
             .then(webClient.post()
                 .uri(uri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -142,14 +142,13 @@ public class GithubRestApiClient {
                 .retrieve()
                 .bodyToMono(responseType)
                 .doOnSuccess(response -> {
-                    rateLimitManager.recordRequest();
                     log.debug("POST {} - Success", uri);
                 })
                 .doOnError(error -> log.error("POST {} - Error: {}", uri, error.getMessage()))
             );
     }
 
-    public <T> Mono<T> getBypassingRateLimit(String uri, String token, Class<T> responseType) {
+    public <T> Mono<T> getBypassingRateLimit(Long userId, String uri, String token, Class<T> responseType) {
         return webClient.get()
             .uri(uri)
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
@@ -160,7 +159,7 @@ public class GithubRestApiClient {
                 response -> response.bodyToMono(String.class)
                     .flatMap(body -> {
                         log.warn("Rate limit exceeded (Bypass mode). Waiting...");
-                        return rateLimitManager.handleRateLimitExceeded()
+                        return rateLimitManager.handleRateLimitExceeded(userId)
                             .then(Mono.error(new RuntimeException("Rate limit exceeded")));
                     })
             )
@@ -174,34 +173,36 @@ public class GithubRestApiClient {
                     
                     if (remaining != null && reset != null) {
                         try {
-                            int remainingInt = Integer.parseInt(remaining);
                             long resetLong = Long.parseLong(reset) * 1000;
-                            rateLimitManager.updateRateLimitFromHeaders(remainingInt, resetLong);
+                            int remainingCount = Integer.parseInt(remaining);
+                            rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                         } catch (NumberFormatException e) {
                             log.warn("Failed to parse rate limit headers", e);
+                            rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                         }
                     }
                 }
-                rateLimitManager.recordRequest();
             })
             .map(this::extractBody);
     }
 
     @SuppressWarnings("unchecked")
     public <T> Mono<List<T>> getAllWithPagination(
+        Long userId,
         String uri,
         String token,
         Class<T> itemType
     ) {
         return Mono.defer(() -> {
             List<T> allItems = new ArrayList<>();
-            return collectAllPages(uri, token, itemType, 1, allItems)
+            return collectAllPages(userId, uri, token, itemType, 1, allItems)
                 .thenReturn(allItems);
         });
     }
 
     @SuppressWarnings("unchecked")
     private <T> Mono<Void> collectAllPages(
+        Long userId,
         String uri,
         String token,
         Class<T> itemType,
@@ -210,7 +211,7 @@ public class GithubRestApiClient {
     ) {
         String paginatedUri = buildPaginatedUri(uri, page);
         
-        return get(paginatedUri, token, List.class)
+        return get(userId, paginatedUri, token, List.class)
             .flatMap(items -> {
                 if (items == null || items.isEmpty()) {
                     return Mono.empty();
@@ -222,12 +223,13 @@ public class GithubRestApiClient {
                     return Mono.empty();
                 }
                 
-                return collectAllPages(uri, token, itemType, page + 1, accumulator);
+                return collectAllPages(userId, uri, token, itemType, page + 1, accumulator);
             })
             .then();
     }
 
     public <T> Mono<List<T>> getAllSince(
+        Long userId,
         String uri,
         String token,
         LocalDateTime since,
@@ -235,7 +237,7 @@ public class GithubRestApiClient {
     ) {
         String sinceParam = since.format(DateTimeFormatter.ISO_DATE_TIME);
         String uriWithSince = buildUriWithParam(uri, "since", sinceParam);
-        return getAllWithPagination(uriWithSince, token, itemType);
+        return getAllWithPagination(userId, uriWithSince, token, itemType);
     }
 
     private String buildPaginatedUri(String uri, int page) {

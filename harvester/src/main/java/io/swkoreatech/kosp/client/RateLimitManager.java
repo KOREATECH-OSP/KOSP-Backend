@@ -2,44 +2,49 @@ package io.swkoreatech.kosp.client;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.user.GithubUserRepository;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class RateLimitManager {
 
-    private static final int MAX_REQUESTS_PER_HOUR = 5000;
-    private static final Duration HOUR = Duration.ofHours(1);
+    private final UserRepository userRepository;
+    private final GithubUserRepository githubUserRepository;
 
-    private final int threshold;
-    private final AtomicInteger requestCount = new AtomicInteger(0);
-    private final AtomicReference<LocalDateTime> windowStart = new AtomicReference<>(LocalDateTime.now());
-
-    public RateLimitManager(@Value("${github.api.rate-limit.threshold:100}") int threshold) {
-        this.threshold = threshold;
-    }
-
-    public Mono<Void> waitIfNeeded() {
+    public Mono<Void> waitIfNeeded(Long userId, int threshold) {
         return Mono.defer(() -> {
-            resetWindowIfNeeded();
-            
-            int current = requestCount.get();
-            int remaining = MAX_REQUESTS_PER_HOUR - current;
+            User user = userRepository.getById(userId);
+            GithubUser githubUser = user.getGithubUser();
 
+            if (githubUser == null) {
+                log.warn("User {} has no GitHub account linked", userId);
+                return Mono.empty();
+            }
+
+            int remaining = githubUser.getRemainingOrDefault();
             if (remaining <= threshold) {
-                Duration waitTime = calculateWaitTime();
-                log.warn("Rate limit threshold reached. Remaining: {}. Job will be rescheduled.", remaining);
+                Instant resetTime = githubUser.getRateLimitResetAt();
+                
+                if (resetTime == null) {
+                    return Mono.empty();
+                }
+
+                Duration waitTime = Duration.between(Instant.now(), resetTime);
+                
+                log.warn("Rate limit threshold reached for user {}. Remaining: {}, Threshold: {}", 
+                    userId, remaining, threshold);
                 return Mono.error(new RateLimitException(
-                    "Rate limit threshold reached. Remaining: " + remaining,
+                    "Rate limit threshold reached. Reset at: " + resetTime,
                     waitTime
                 ));
             }
@@ -48,61 +53,50 @@ public class RateLimitManager {
         });
     }
 
-    public void recordRequest() {
-        requestCount.incrementAndGet();
-    }
+    public Mono<Void> handleRateLimitExceeded(Long userId) {
+        User user = userRepository.getById(userId);
+        GithubUser githubUser = user.getGithubUser();
 
-    public Mono<Void> handleRateLimitExceeded() {
-        Duration waitTime = calculateWaitTime();
-        log.error("Rate limit exceeded! Waiting for: {}", waitTime);
+        if (githubUser == null || githubUser.getRateLimitResetAt() == null) {
+            log.error("Rate limit exceeded but no reset time found for user {}", userId);
+            return Mono.delay(Duration.ofMinutes(5)).then();
+        }
+
+        Instant resetTime = githubUser.getRateLimitResetAt();
+        Duration waitTime = Duration.between(Instant.now(), resetTime);
+
+        if (waitTime.isNegative()) {
+            return Mono.empty();
+        }
+
+        log.error("Rate limit exceeded for user {}! Waiting until: {}", userId, resetTime);
         return Mono.delay(waitTime).then();
     }
 
-    private void resetWindowIfNeeded() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = windowStart.get();
+    public void updateRateLimitFromHeaders(Long userId, long resetTime, int remaining) {
+        User user = userRepository.getById(userId);
+        GithubUser githubUser = user.getGithubUser();
 
-        if (Duration.between(start, now).compareTo(HOUR) >= 0) {
-            windowStart.set(now);
-            requestCount.set(0);
-            log.info("Rate limit window reset");
+        if (githubUser == null) {
+            log.warn("User {} has no GitHub account linked", userId);
+            return;
         }
+
+        Instant resetAt = Instant.ofEpochMilli(resetTime);
+        githubUser.updateRateLimit(resetAt, remaining);
+        githubUserRepository.save(githubUser);
+
+        log.debug("Rate limit updated for user {}: reset={}, remaining={}", userId, resetAt, remaining);
     }
 
-    private Duration calculateWaitTime() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime start = windowStart.get();
-        Duration elapsed = Duration.between(start, now);
-        Duration remaining = HOUR.minus(elapsed);
-        
-        if (remaining.isNegative()) {
-            return Duration.ZERO;
+    public Instant getResetTime(Long userId) {
+        User user = userRepository.getById(userId);
+        GithubUser githubUser = user.getGithubUser();
+
+        if (githubUser == null || githubUser.getRateLimitResetAt() == null) {
+            return Instant.now();
         }
-        return remaining;
-    }
 
-    public int getRemainingRequests() {
-        resetWindowIfNeeded();
-        return MAX_REQUESTS_PER_HOUR - requestCount.get();
-    }
-
-    public void updateRateLimitFromHeaders(int remaining, long resetTime) {
-        int used = MAX_REQUESTS_PER_HOUR - remaining;
-        requestCount.set(used);
-        
-        LocalDateTime resetDateTime = LocalDateTime.ofInstant(
-            Instant.ofEpochMilli(resetTime),
-            ZoneId.systemDefault()
-        );
-        windowStart.set(resetDateTime.minusHours(1));
-        
-        log.debug("Rate limit updated from headers: remaining={}, reset={}", 
-            remaining, resetDateTime);
-    }
-
-    public Instant getResetTime() {
-        LocalDateTime start = windowStart.get();
-        LocalDateTime resetTime = start.plusHours(1);
-        return resetTime.atZone(ZoneId.systemDefault()).toInstant();
+        return githubUser.getRateLimitResetAt();
     }
 }

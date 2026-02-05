@@ -43,3 +43,8 @@ spring:
     listener:
       simple:
         acknowledge-mode: manual
+
+slack:
+  logging:
+    error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL:}
+  event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL:}
