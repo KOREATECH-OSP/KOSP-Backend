@@ -39,6 +39,9 @@ dependencies {
 
     implementation(libs.jsoup)  // HTML 파싱용
 
+    implementation("com.github.maricn:logback-slack-appender:1.6.1")
+    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+
     implementation(libs.rsql.jpa.spring.boot.starter)
 
     implementation(libs.flyway.database.postgresql)
