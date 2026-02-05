@@ -15,6 +15,10 @@ dependencies {
     api(libs.spring.boot.starter.security)
     api(libs.spring.security.crypto)
 
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.retry:spring-retry")
+    implementation("org.springframework:spring-aspects") // for @Retryable AOP
+
     api(libs.lombok)
     annotationProcessor(libs.lombok)
 }
