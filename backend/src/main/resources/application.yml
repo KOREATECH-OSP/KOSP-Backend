@@ -95,12 +95,12 @@ jwt:
     signup: ${JWT_EXPIRATION_SIGNUP}
 
 cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:*}
+  allowed-origins: ${CORS_ALLOWED_ORIGINS}
 
 slack:
   logging:
-    error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL:}
-  event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL:}
+    error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL}
+  event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL}
 
 server:
   tomcat:

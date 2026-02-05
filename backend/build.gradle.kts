@@ -39,8 +39,8 @@ dependencies {
 
     implementation(libs.jsoup)  // HTML 파싱용
 
-    implementation("com.github.maricn:logback-slack-appender:1.6.1")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+    implementation(libs.logback.slack.appender)
+    implementation(libs.logstash.logback.encoder)
 
     implementation(libs.rsql.jpa.spring.boot.starter)
 
@@ -58,7 +58,7 @@ dependencies {
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
-    testImplementation("io.projectreactor:reactor-test")
+    testImplementation(libs.reactor.test)
 	testRuntimeOnly(libs.junit.platform.launcher)
 }
 
