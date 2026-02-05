@@ -1,12 +1,6 @@
 -- ============================================
 -- V2: Initialize Default Data
 -- ============================================
--- Purpose: Consolidate default data INSERTs from V1 and V9
--- - banner_setting: Platform banner configuration
--- - platform_statistics: Global platform statistics baseline
--- - board: Default discussion boards
--- All INSERTs use idempotent patterns (WHERE NOT EXISTS)
--- to safely re-run without duplicating data.
 
 -- ============================================
 -- Banner Setting
