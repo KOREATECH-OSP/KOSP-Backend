@@ -4,7 +4,6 @@ import static lombok.AccessLevel.PROTECTED;
 
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.common.model.BaseEntity;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -45,7 +44,7 @@ public abstract class BaseUser extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne
     @JoinColumn(name = "github_id")
     private GithubUser githubUser;
 
