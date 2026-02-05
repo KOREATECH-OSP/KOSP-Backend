@@ -42,9 +42,7 @@ spring:
     mongodb:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
-      database: ${MONGODB_DATABASE}
-      username: ${MONGODB_USERNAME}
-      password: ${MONGODB_PASSWORD}
+      database: ${MONGODB_DATABASE}]
       auto-index-creation: false
       uuid-representation: standard
 
