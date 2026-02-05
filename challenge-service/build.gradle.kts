@@ -15,15 +15,15 @@ dependencies {
     
     implementation(libs.postgresql)
     
-    implementation("com.github.maricn:logback-slack-appender:1.6.1")
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
+    implementation(libs.logback.slack.appender)
+    implementation(libs.logstash.logback.encoder)
     
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
     
     testImplementation(libs.spring.boot.starter.test)
-    testImplementation("com.fasterxml.jackson.core:jackson-databind")
-    testRuntimeOnly("com.h2database:h2")
+    testImplementation(libs.jackson.databind)
+    testRuntimeOnly(libs.h2database)
 }
 
 tasks {
