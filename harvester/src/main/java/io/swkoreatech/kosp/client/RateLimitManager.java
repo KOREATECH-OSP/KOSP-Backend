@@ -49,22 +49,7 @@ public class RateLimitManager {
                 ));
             }
 
-            if (githubUser.isRateLimitExpired()) {
-                return Mono.empty();
-            }
-
-            Instant resetTime = githubUser.getRateLimitResetAt();
-            Duration waitTime = Duration.between(Instant.now(), resetTime);
-
-            if (waitTime.isNegative()) {
-                return Mono.empty();
-            }
-
-            log.warn("Rate limit reached for user {}. Waiting until {}", userId, resetTime);
-            return Mono.error(new RateLimitException(
-                "Rate limit reached. Reset at: " + resetTime,
-                waitTime
-            ));
+            return Mono.empty();
         });
     }
 
