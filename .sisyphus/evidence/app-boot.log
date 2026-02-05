@@ -1,0 +1,1878 @@
+Type-safe project accessors is an incubating feature.
+> Task :backend:processResources UP-TO-DATE
+> Task :rabbitmq:processResources NO-SOURCE
+> Task :flyway:compileJava NO-SOURCE
+> Task :flyway:processResources UP-TO-DATE
+> Task :flyway:classes UP-TO-DATE
+> Task :flyway:jar UP-TO-DATE
+> Task :common:compileJava UP-TO-DATE
+> Task :common:processResources NO-SOURCE
+> Task :common:classes UP-TO-DATE
+> Task :common:jar UP-TO-DATE
+> Task :rabbitmq:compileJava UP-TO-DATE
+> Task :rabbitmq:classes UP-TO-DATE
+> Task :rabbitmq:jar UP-TO-DATE
+> Task :backend:compileJava UP-TO-DATE
+> Task :backend:classes UP-TO-DATE
+> Task :backend:resolveMainClassName UP-TO-DATE
+
+> Task :backend:bootRun
+16:19:27,791 |-WARN in ch.qos.logback.core.joran.action.ConversionRuleAction - [converterClass] attribute is deprecated and replaced by [class]. See element [conversionRule] near line 11
+16:19:27,793 |-WARN in ch.qos.logback.core.joran.action.ConversionRuleAction - [converterClass] attribute is deprecated and replaced by [class]. See element [conversionRule] near line 26
+16:19:27,794 |-WARN in ch.qos.logback.core.joran.action.ConversionRuleAction - [converterClass] attribute is deprecated and replaced by [class]. See element [conversionRule] near line 69
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.7)
+
+[2026-02-05T16:19:27.970] INFO  8990 --- [kground-preinit] o.h.validator.internal.util.Version      : : HV000001: Hibernate Validator 8.0.3.Final
+[2026-02-05T16:19:27.998] INFO  8990 --- [  restartedMain] io.swkoreatech.kosp.KOSPApplication      : : Starting KOSPApplication using Java 17.0.17 with PID 8990 (/Users/sungbin/Documents/KOSP/KOSP-Backend/backend/build/classes/java/main started by sungbin in /Users/sungbin/Documents/KOSP/KOSP-Backend/backend)
+[2026-02-05T16:19:27.998] INFO  8990 --- [  restartedMain] io.swkoreatech.kosp.KOSPApplication      : : No active profile set, falling back to 1 default profile: "default"
+[2026-02-05T16:19:28.023] INFO  8990 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+[2026-02-05T16:19:28.023] INFO  8990 --- [  restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+[2026-02-05T16:19:28.913] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-02-05T16:19:28.914] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2026-02-05T16:19:28.927] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Finished Spring Data repository scanning in 3 ms. Found 0 Redis repository interfaces.
+[2026-02-05T16:19:29.319] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-02-05T16:19:29.319] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+[2026-02-05T16:19:29.442] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data JPA - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository; If you want this repository to be a JPA repository, consider annotating your entities with one of these annotations: jakarta.persistence.Entity, jakarta.persistence.MappedSuperclass (preferred), or consider extending one of the following types with your repository: org.springframework.data.jpa.repository.JpaRepository
+[2026-02-05T16:19:29.445] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data JPA - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository; If you want this repository to be a JPA repository, consider annotating your entities with one of these annotations: jakarta.persistence.Entity, jakarta.persistence.MappedSuperclass (preferred), or consider extending one of the following types with your repository: org.springframework.data.jpa.repository.JpaRepository
+[2026-02-05T16:19:29.475] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Finished Spring Data repository scanning in 152 ms. Found 29 JPA repository interfaces.
+[2026-02-05T16:19:29.481] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-02-05T16:19:29.481] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Bootstrapping Spring Data Reactive MongoDB repositories in DEFAULT mode.
+[2026-02-05T16:19:29.493] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.banner.repository.BannerSettingRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.493] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.contact.repository.AdminContactRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.493] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PermissionRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PolicyRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.RoleRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.board.repository.BoardRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.494] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubYearlyStatisticsRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.notification.repository.NotificationRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.report.repository.ReportRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.495] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.common.repository.ProcessedMessageRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Reactive MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.UserRepository; If you want this repository to be a Reactive MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.ReactiveMongoRepository
+[2026-02-05T16:19:29.496] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Finished Spring Data repository scanning in 14 ms. Found 0 Reactive MongoDB repository interfaces.
+[2026-02-05T16:19:29.499] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-02-05T16:19:29.499] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+[2026-02-05T16:19:29.511] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.banner.repository.BannerSettingRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.511] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.contact.repository.AdminContactRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.511] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PermissionRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.511] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PolicyRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.511] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.RoleRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.board.repository.BoardRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.512] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubYearlyStatisticsRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.notification.repository.NotificationRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.report.repository.ReportRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.common.repository.ProcessedMessageRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.513] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data MongoDB - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.UserRepository; If you want this repository to be a MongoDB repository, consider annotating your entities with one of these annotations: org.springframework.data.mongodb.core.mapping.Document (preferred), or consider extending one of the following types with your repository: org.springframework.data.mongodb.repository.MongoRepository
+[2026-02-05T16:19:29.514] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Finished Spring Data repository scanning in 13 ms. Found 0 MongoDB repository interfaces.
+[2026-02-05T16:19:29.516] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Multiple Spring Data modules found, entering strict repository configuration mode
+[2026-02-05T16:19:29.516] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.banner.repository.BannerSettingRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.admin.contact.repository.AdminContactRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PermissionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.PolicyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.auth.repository.RoleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.528] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.board.repository.BoardRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.community.team.repository.TeamRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubYearlyStatisticsRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.529] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.notification.repository.NotificationRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.report.repository.ReportRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.common.repository.ProcessedMessageRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.530] INFO  8990 --- [  restartedMain] .RepositoryConfigurationExtensionSupport : : Spring Data Redis - Could not safely identify store assignment for repository candidate interface io.swkoreatech.kosp.domain.user.repository.UserRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+[2026-02-05T16:19:29.540] INFO  8990 --- [  restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : : Finished Spring Data repository scanning in 23 ms. Found 2 Redis repository interfaces.
+[2026-02-05T16:19:30.080] INFO  8990 --- [  restartedMain] o.s.b.w.e.tomcat.TomcatWebServer         : : Tomcat initialized with port 8080 (http)
+[2026-02-05T16:19:30.089] INFO  8990 --- [  restartedMain] o.a.coyote.http11.Http11NioProtocol      : : Initializing ProtocolHandler ["http-nio-8080"]
+[2026-02-05T16:19:30.090] INFO  8990 --- [  restartedMain] o.a.catalina.core.StandardService        : : Starting service [Tomcat]
+[2026-02-05T16:19:30.090] INFO  8990 --- [  restartedMain] o.a.catalina.core.StandardEngine         : : Starting Servlet engine: [Apache Tomcat/10.1.48]
+[2026-02-05T16:19:30.119] INFO  8990 --- [  restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : : Initializing Spring embedded WebApplicationContext
+[2026-02-05T16:19:30.119] INFO  8990 --- [  restartedMain] w.s.c.ServletWebServerApplicationContext : : Root WebApplicationContext: initialization completed in 2096 ms
+[2026-02-05T16:19:30.404] INFO  8990 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : : HikariPool-1 - Starting...
+[2026-02-05T16:19:30.539] INFO  8990 --- [  restartedMain] com.zaxxer.hikari.pool.HikariPool        : : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@65d97178
+[2026-02-05T16:19:30.540] INFO  8990 --- [  restartedMain] com.zaxxer.hikari.HikariDataSource       : : HikariPool-1 - Start completed.
+[2026-02-05T16:19:30.559] INFO  8990 --- [  restartedMain] org.flywaydb.core.FlywayExecutor         : : Database: jdbc:postgresql://localhost:5432/kosp (PostgreSQL 18.1)
+[2026-02-05T16:19:30.581] WARN  8990 --- [  restartedMain] o.f.c.i.database.base.Database           : : Flyway upgrade recommended: PostgreSQL 18.1 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+[2026-02-05T16:19:30.646] INFO  8990 --- [  restartedMain] o.f.core.internal.command.DbMigrate      : : Current version of schema "public": 2
+[2026-02-05T16:19:30.651] INFO  8990 --- [  restartedMain] o.f.core.internal.command.DbMigrate      : : Schema "public" is up to date. No migration necessary.
+[2026-02-05T16:19:30.748] INFO  8990 --- [  restartedMain] o.h.jpa.internal.util.LogHelper          : : HHH000204: Processing PersistenceUnitInfo [name: default]
+[2026-02-05T16:19:30.785] INFO  8990 --- [  restartedMain] org.hibernate.Version                    : : HHH000412: Hibernate ORM core version 6.6.33.Final
+[2026-02-05T16:19:30.815] INFO  8990 --- [  restartedMain] o.h.c.i.RegionFactoryInitiator           : : HHH000026: Second-level cache disabled
+[2026-02-05T16:19:31.015] INFO  8990 --- [  restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : : No LoadTimeWeaver setup: ignoring JPA class transformer
+[2026-02-05T16:19:31.090] INFO  8990 --- [  restartedMain] o.hibernate.orm.connections.pooling      : : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 18.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+[2026-02-05T16:19:32.112] INFO  8990 --- [  restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+[2026-02-05T16:19:32.169] INFO  8990 --- [  restartedMain] j.LocalContainerEntityManagerFactoryBean : : Initialized JPA EntityManagerFactory for persistence unit 'default'
+[2026-02-05T16:19:32.425] INFO  8990 --- [  restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : : Hibernate is in classpath; If applicable, HQL parser will be used.
+[2026-02-05T16:19:33.565] INFO  8990 --- [  restartedMain] r$InitializeUserDetailsManagerConfigurer : : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsServiceImpl
+[2026-02-05T16:19:33.677] ERROR 8990 --- [  restartedMain] i.n.r.d.DnsServerAddressStreamProviders  : : Unable to load io.netty.resolver.dns.macos.MacOSDnsServerAddressStreamProvider, fallback to system defaults. This may result in incorrect DNS resolutions on MacOS. Check whether you have a dependency on 'io.netty:netty-resolver-dns-native-macos'. Use DEBUG level to see the full stack: java.lang.UnsatisfiedLinkError: failed to load the required native library
+[2026-02-05T16:19:33.849] INFO  8990 --- [  restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : : LiveReload server is running on port 35729
+[2026-02-05T16:19:36.147] INFO  8990 --- [  restartedMain] org.mongodb.driver.client                : : MongoClient with metadata {"driver": {"name": "mongo-java-driver|reactive-streams|spring-boot", "version": "5.5.2"}, "os": {"type": "Darwin", "name": "Mac OS X", "architecture": "aarch64", "version": "15.7.3"}, "platform": "Java/Amazon.com Inc./17.0.17+10-LTS"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=NettyTransportSettings{eventLoopGroup=io.netty.channel.nio.NioEventLoopGroup@1c409e70, socketChannelClass=null, allocator=null, sslContext=null}, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@731bf8f9], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@43ba4b5a, com.mongodb.Jep395RecordCodecProvider@6d3ee9a1, com.mongodb.KotlinCodecProvider@439a0598]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@38da4db0], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverMonitoringMode=AUTO, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=STANDARD, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null, timeoutMS=null}
+[2026-02-05T16:19:36.173] INFO  8990 --- [  restartedMain] org.mongodb.driver.client                : : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "5.5.2"}, "os": {"type": "Darwin", "name": "Mac OS X", "architecture": "aarch64", "version": "15.7.3"}, "platform": "Java/Amazon.com Inc./17.0.17+10-LTS"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=MongoCredential{mechanism=null, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}, transportSettings=NettyTransportSettings{eventLoopGroup=io.netty.channel.nio.NioEventLoopGroup@13a013e7, socketChannelClass=null, allocator=null, sslContext=null}, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@731bf8f9], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@43ba4b5a, com.mongodb.Jep395RecordCodecProvider@6d3ee9a1, com.mongodb.KotlinCodecProvider@439a0598]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@38da4db0], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverMonitoringMode=AUTO, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=STANDARD, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null, timeoutMS=null}
+[2026-02-05T16:19:36.349] INFO  8990 --- [  restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : : Exposing 1 endpoint beneath base path '/actuator'
+[2026-02-05T16:19:36.442] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=274019000, minRoundTripTimeNanos=0}
+[2026-02-05T16:19:36.444] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=278999792, minRoundTripTimeNanos=0}
+[2026-02-05T16:19:37.028] INFO  8990 --- [  restartedMain] i.g.p.rsql.RSQLJPAAutoConfiguration      : : RSQLJPAAutoConfiguration.rsqlCommonSupport(entityManagerMap:1)
+[2026-02-05T16:19:37.030] INFO  8990 --- [  restartedMain] i.g.p.rsql.RSQLCommonSupport             : : 1 EntityManager bean is found: {jpaSharedEM_AWC_entityManagerFactory=Shared EntityManager proxy for target factory [org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean@48c98e7]}
+[2026-02-05T16:19:37.031] INFO  8990 --- [  restartedMain] i.g.p.rsql.RSQLCommonSupport             : : RSQLCommonSupport [6.0.33]  is initialized
+[2026-02-05T16:19:37.413] INFO  8990 --- [  restartedMain] o.s.b.a.h.H2ConsoleAutoConfiguration     : : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/kosp'
+[2026-02-05T16:19:37.531] INFO  8990 --- [  restartedMain] o.a.coyote.http11.Http11NioProtocol      : : Starting ProtocolHandler ["http-nio-8080"]
+[2026-02-05T16:19:37.540] INFO  8990 --- [  restartedMain] o.s.b.w.e.tomcat.TomcatWebServer         : : Tomcat started on port 8080 (http) with context path '/'
+[2026-02-05T16:19:37.543] INFO  8990 --- [  restartedMain] o.s.a.r.c.CachingConnectionFactory       : : Attempting to connect to: [localhost:5672]
+[2026-02-05T16:19:37.679] INFO  8990 --- [  restartedMain] o.s.a.r.c.CachingConnectionFactory       : : Created new connection: rabbitConnectionFactory#9fe0c55:0/SimpleConnection@41553da1 [delegate=amqp://admin@127.0.0.1:5672/, localPort=57841]
+[2026-02-05T16:19:37.754] INFO  8990 --- [  restartedMain] io.swkoreatech.kosp.KOSPApplication      : : Started KOSPApplication in 10.197 seconds (process running for 10.431)
+[2026-02-05T16:19:37.791] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Scanning for @Permit annotations...
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        permission p1_0
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    insert 
+    into
+        permission
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+[2026-02-05T16:19:38.171] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Discovered and Registered 59 permissions.
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.can_access_admin,
+        r1_0.created_at,
+        r1_0.description,
+        r1_0.name,
+        r1_0.updated_at 
+    from
+        role r1_0 
+    where
+        r1_0.name=?
+Hibernate: 
+    insert 
+    into
+        role
+        (can_access_admin, created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?, ?)
+[2026-02-05T16:19:38.205] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Initialized ROLE_SUPERUSER (immutable)
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        policy p1_0 
+    where
+        p1_0.name=?
+Hibernate: 
+    insert 
+    into
+        policy
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.can_access_admin,
+        r1_0.created_at,
+        r1_0.description,
+        r1_0.name,
+        r1_0.updated_at 
+    from
+        role r1_0 
+    where
+        r1_0.name=?
+Hibernate: 
+    insert 
+    into
+        role
+        (can_access_admin, created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?, ?)
+[2026-02-05T16:19:38.220] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Initialized ROLE_ADMIN.
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        policy p1_0 
+    where
+        p1_0.name=?
+Hibernate: 
+    insert 
+    into
+        policy
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.can_access_admin,
+        r1_0.created_at,
+        r1_0.description,
+        r1_0.name,
+        r1_0.updated_at 
+    from
+        role r1_0 
+    where
+        r1_0.name=?
+Hibernate: 
+    insert 
+    into
+        role
+        (can_access_admin, created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?, ?)
+[2026-02-05T16:19:38.231] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Initialized ROLE_STUDENT.
+Hibernate: 
+    select
+        p1_0.id,
+        p1_0.created_at,
+        p1_0.description,
+        p1_0.name,
+        p1_0.updated_at 
+    from
+        policy p1_0 
+    where
+        p1_0.name=?
+Hibernate: 
+    insert 
+    into
+        policy
+        (created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?)
+Hibernate: 
+    select
+        r1_0.id,
+        r1_0.can_access_admin,
+        r1_0.created_at,
+        r1_0.description,
+        r1_0.name,
+        r1_0.updated_at 
+    from
+        role r1_0 
+    where
+        r1_0.name=?
+Hibernate: 
+    insert 
+    into
+        role
+        (can_access_admin, created_at, description, name, updated_at) 
+    values
+        (?, ?, ?, ?, ?)
+[2026-02-05T16:19:38.241] INFO  8990 --- [  restartedMain] i.s.k.g.init.PermissionInitializer       : : Initialized ROLE_EMPLOYEE.
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        role_policy
+        (role_id, policy_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        role_policy
+        (role_id, policy_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        policy_permission
+        (policy_id, permission_id) 
+    values
+        (?, ?)
+Hibernate: 
+    insert 
+    into
+        role_policy
+        (role_id, policy_id) 
+    values
+        (?, ?)
+[2026-02-05T16:19:38.342] WARN  8990 --- [  restartedMain] o.s.c.events.SpringDocAppInitializer     : : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+[2026-02-05T16:19:38.342] WARN  8990 --- [  restartedMain] o.s.c.events.SpringDocAppInitializer     : : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+[2026-02-05T16:20:15.750] INFO  8990 --- [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : : Initializing Spring DispatcherServlet 'dispatcherServlet'
+[2026-02-05T16:20:15.752] INFO  8990 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : : Initializing Servlet 'dispatcherServlet'
+[2026-02-05T16:20:15.764] INFO  8990 --- [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : : Completed initialization in 12 ms
+[2026-02-05T16:20:16.433] WARN  8990 --- [ntLoopGroup-4-3] o.s.b.a.d.m.MongoReactiveHealthIndicator : : Mongo health check failed
+org.springframework.data.mongodb.UncategorizedMongoDbException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.doTranslateException(MongoExceptionTranslator.java:151)
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.translateExceptionIfPossible(MongoExceptionTranslator.java:74)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.potentiallyConvertRuntimeException(ReactiveMongoTemplate.java:2778)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.lambda$translateException$100(ReactiveMongoTemplate.java:2761)
+	at reactor.core.publisher.Flux.lambda$onErrorMap$28(Flux.java:7318)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:94)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyInner.onError(MonoFlatMapMany.java:256)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241)
+	at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onError(MonoPeekTerminal.java:258)
+	at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205)
+	at com.mongodb.reactivestreams.client.internal.MongoOperationPublisher.lambda$sinkToCallback$38(MongoOperationPublisher.java:601)
+	at com.mongodb.reactivestreams.client.internal.OperationExecutorImpl.lambda$execute$1(OperationExecutorImpl.java:97)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.function.RetryingAsyncCallbackSupplier$RetryingCallback.onResult(RetryingAsyncCallbackSupplier.java:121)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.operation.AsyncOperationHelper.lambda$withAsyncSuppliedResource$3(AsyncOperationHelper.java:134)
+	at com.mongodb.internal.connection.DefaultServer.lambda$getConnectionAsync$0(DefaultServer.java:125)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.DefaultConnectionPool.lambda$getAsync$0(DefaultConnectionPool.java:219)
+	at com.mongodb.internal.connection.DefaultConnectionPool$OpenConcurrencyLimiter.lambda$openWithConcurrencyLimitAsync$0(DefaultConnectionPool.java:1023)
+	at com.mongodb.internal.connection.DefaultConnectionPool$PooledConnection.lambda$openAsync$0(DefaultConnectionPool.java:646)
+	at com.mongodb.internal.connection.UsageTrackingInternalConnection.lambda$openAsync$0(UsageTrackingInternalConnection.java:65)
+	at com.mongodb.internal.connection.InternalStreamConnection$1.lambda$completed$0(InternalStreamConnection.java:274)
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.lambda$finishHandshakeAsync$1(InternalStreamConnectionInitializer.java:129)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$getNextSaslResponseAsync$2(SaslAuthenticator.java:156)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$sendSaslStartAsync$5(SaslAuthenticator.java:261)
+	at com.mongodb.internal.connection.CommandHelper.lambda$executeCommandAsync$0(CommandHelper.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.SingleResultCallback.completeExceptionally(SingleResultCallback.java:71)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$onErrorIf$7(AsyncSupplier.java:187)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:632)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:941)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:904)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:278)
+	at com.mongodb.internal.connection.InternalStreamConnection.readAsync(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.InternalStreamConnection.access$500(InternalStreamConnection.java:103)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:893)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:875)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.handleReadResponse(NettyStream.java:361)
+	at com.mongodb.internal.connection.netty.NettyStream.access$900(NettyStream.java:115)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:437)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:434)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:796)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:732)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.mongodb.MongoSecurityException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at com.mongodb.internal.connection.SaslAuthenticator.wrapException(SaslAuthenticator.java:300)
+	... 44 common frames omitted
+Caused by: com.mongodb.MongoCommandException: Command failed with error 18 (AuthenticationFailed): 'Authentication failed.' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "Authentication failed.", "code": 18, "codeName": "AuthenticationFailed"}
+	at com.mongodb.internal.connection.ProtocolHelper.getCommandFailureException(ProtocolHelper.java:210)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:622)
+	... 34 common frames omitted
+[2026-02-05T16:20:26.450] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=10404625, minRoundTripTimeNanos=0}
+[2026-02-05T16:20:30.198] WARN  8990 --- [ntLoopGroup-4-5] o.s.b.a.d.m.MongoReactiveHealthIndicator : : Mongo health check failed
+org.springframework.data.mongodb.UncategorizedMongoDbException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.doTranslateException(MongoExceptionTranslator.java:151)
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.translateExceptionIfPossible(MongoExceptionTranslator.java:74)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.potentiallyConvertRuntimeException(ReactiveMongoTemplate.java:2778)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.lambda$translateException$100(ReactiveMongoTemplate.java:2761)
+	at reactor.core.publisher.Flux.lambda$onErrorMap$28(Flux.java:7318)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:94)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyInner.onError(MonoFlatMapMany.java:256)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241)
+	at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onError(MonoPeekTerminal.java:258)
+	at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205)
+	at com.mongodb.reactivestreams.client.internal.MongoOperationPublisher.lambda$sinkToCallback$38(MongoOperationPublisher.java:601)
+	at com.mongodb.reactivestreams.client.internal.OperationExecutorImpl.lambda$execute$1(OperationExecutorImpl.java:97)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.function.RetryingAsyncCallbackSupplier$RetryingCallback.onResult(RetryingAsyncCallbackSupplier.java:121)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.operation.AsyncOperationHelper.lambda$withAsyncSuppliedResource$3(AsyncOperationHelper.java:134)
+	at com.mongodb.internal.connection.DefaultServer.lambda$getConnectionAsync$0(DefaultServer.java:125)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.DefaultConnectionPool.lambda$getAsync$0(DefaultConnectionPool.java:219)
+	at com.mongodb.internal.connection.DefaultConnectionPool$OpenConcurrencyLimiter.lambda$openWithConcurrencyLimitAsync$0(DefaultConnectionPool.java:1023)
+	at com.mongodb.internal.connection.DefaultConnectionPool$PooledConnection.lambda$openAsync$0(DefaultConnectionPool.java:646)
+	at com.mongodb.internal.connection.UsageTrackingInternalConnection.lambda$openAsync$0(UsageTrackingInternalConnection.java:65)
+	at com.mongodb.internal.connection.InternalStreamConnection$1.lambda$completed$0(InternalStreamConnection.java:274)
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.lambda$finishHandshakeAsync$1(InternalStreamConnectionInitializer.java:129)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$getNextSaslResponseAsync$2(SaslAuthenticator.java:156)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$sendSaslStartAsync$5(SaslAuthenticator.java:261)
+	at com.mongodb.internal.connection.CommandHelper.lambda$executeCommandAsync$0(CommandHelper.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.SingleResultCallback.completeExceptionally(SingleResultCallback.java:71)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$onErrorIf$7(AsyncSupplier.java:187)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:632)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:941)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:904)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:278)
+	at com.mongodb.internal.connection.InternalStreamConnection.readAsync(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.InternalStreamConnection.access$500(InternalStreamConnection.java:103)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:893)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:875)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.handleReadResponse(NettyStream.java:361)
+	at com.mongodb.internal.connection.netty.NettyStream.access$900(NettyStream.java:115)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:437)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:434)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:796)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:732)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.mongodb.MongoSecurityException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at com.mongodb.internal.connection.SaslAuthenticator.wrapException(SaslAuthenticator.java:300)
+	... 44 common frames omitted
+Caused by: com.mongodb.MongoCommandException: Command failed with error 18 (AuthenticationFailed): 'Authentication failed.' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "Authentication failed.", "code": 18, "codeName": "AuthenticationFailed"}
+	at com.mongodb.internal.connection.ProtocolHelper.getCommandFailureException(ProtocolHelper.java:210)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:622)
+	... 34 common frames omitted
+[2026-02-05T16:20:34.334] INFO  8990 --- [nio-8080-exec-3] org.mongodb.driver.cluster               : : Waiting for server to become available for operation with ID 31. Remaining time: 29992 ms. Selector: ReadPreferenceServerSelector{readPreference=primary}, topology description: {type=UNKNOWN, servers=[{address=localhost:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSecurityException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}}, caused by {com.mongodb.MongoCommandException: Command failed with error 18 (AuthenticationFailed): 'Authentication failed.' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "Authentication failed.", "code": 18, "codeName": "AuthenticationFailed"}}}].
+[2026-02-05T16:20:34.364] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=20235292, minRoundTripTimeNanos=0}
+[2026-02-05T16:20:34.380] WARN  8990 --- [ntLoopGroup-4-7] o.s.b.a.d.m.MongoReactiveHealthIndicator : : Mongo health check failed
+org.springframework.data.mongodb.UncategorizedMongoDbException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.doTranslateException(MongoExceptionTranslator.java:151)
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.translateExceptionIfPossible(MongoExceptionTranslator.java:74)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.potentiallyConvertRuntimeException(ReactiveMongoTemplate.java:2778)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.lambda$translateException$100(ReactiveMongoTemplate.java:2761)
+	at reactor.core.publisher.Flux.lambda$onErrorMap$28(Flux.java:7318)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:94)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyInner.onError(MonoFlatMapMany.java:256)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241)
+	at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onError(MonoPeekTerminal.java:258)
+	at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205)
+	at com.mongodb.reactivestreams.client.internal.MongoOperationPublisher.lambda$sinkToCallback$38(MongoOperationPublisher.java:601)
+	at com.mongodb.reactivestreams.client.internal.OperationExecutorImpl.lambda$execute$1(OperationExecutorImpl.java:97)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.function.RetryingAsyncCallbackSupplier$RetryingCallback.onResult(RetryingAsyncCallbackSupplier.java:121)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.operation.AsyncOperationHelper.lambda$withAsyncSuppliedResource$3(AsyncOperationHelper.java:134)
+	at com.mongodb.internal.connection.DefaultServer.lambda$getConnectionAsync$0(DefaultServer.java:125)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.DefaultConnectionPool.lambda$getAsync$0(DefaultConnectionPool.java:219)
+	at com.mongodb.internal.connection.DefaultConnectionPool$OpenConcurrencyLimiter.lambda$openWithConcurrencyLimitAsync$0(DefaultConnectionPool.java:1023)
+	at com.mongodb.internal.connection.DefaultConnectionPool$PooledConnection.lambda$openAsync$0(DefaultConnectionPool.java:646)
+	at com.mongodb.internal.connection.UsageTrackingInternalConnection.lambda$openAsync$0(UsageTrackingInternalConnection.java:65)
+	at com.mongodb.internal.connection.InternalStreamConnection$1.lambda$completed$0(InternalStreamConnection.java:274)
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.lambda$finishHandshakeAsync$1(InternalStreamConnectionInitializer.java:129)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$getNextSaslResponseAsync$2(SaslAuthenticator.java:156)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$sendSaslStartAsync$5(SaslAuthenticator.java:261)
+	at com.mongodb.internal.connection.CommandHelper.lambda$executeCommandAsync$0(CommandHelper.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.SingleResultCallback.completeExceptionally(SingleResultCallback.java:71)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$onErrorIf$7(AsyncSupplier.java:187)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:632)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:941)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:904)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:278)
+	at com.mongodb.internal.connection.InternalStreamConnection.readAsync(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.InternalStreamConnection.access$500(InternalStreamConnection.java:103)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:893)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:875)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.handleReadResponse(NettyStream.java:361)
+	at com.mongodb.internal.connection.netty.NettyStream.access$900(NettyStream.java:115)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:437)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:434)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:796)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:732)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.mongodb.MongoSecurityException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at com.mongodb.internal.connection.SaslAuthenticator.wrapException(SaslAuthenticator.java:300)
+	... 44 common frames omitted
+Caused by: com.mongodb.MongoCommandException: Command failed with error 18 (AuthenticationFailed): 'Authentication failed.' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "Authentication failed.", "code": 18, "codeName": "AuthenticationFailed"}
+	at com.mongodb.internal.connection.ProtocolHelper.getCommandFailureException(ProtocolHelper.java:210)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:622)
+	... 34 common frames omitted
+[2026-02-05T16:20:44.440] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=43620041, minRoundTripTimeNanos=0}
+[2026-02-05T16:20:50.208] WARN  8990 --- [ntLoopGroup-4-9] o.s.b.a.d.m.MongoReactiveHealthIndicator : : Mongo health check failed
+org.springframework.data.mongodb.UncategorizedMongoDbException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.doTranslateException(MongoExceptionTranslator.java:151)
+	at org.springframework.data.mongodb.core.MongoExceptionTranslator.translateExceptionIfPossible(MongoExceptionTranslator.java:74)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.potentiallyConvertRuntimeException(ReactiveMongoTemplate.java:2778)
+	at org.springframework.data.mongodb.core.ReactiveMongoTemplate.lambda$translateException$100(ReactiveMongoTemplate.java:2761)
+	at reactor.core.publisher.Flux.lambda$onErrorMap$28(Flux.java:7318)
+	at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:94)
+	at reactor.core.publisher.MonoFlatMapMany$FlatMapManyInner.onError(MonoFlatMapMany.java:256)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93)
+	at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241)
+	at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315)
+	at reactor.core.publisher.MonoPeekTerminal$MonoTerminalPeekSubscriber.onError(MonoPeekTerminal.java:258)
+	at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205)
+	at com.mongodb.reactivestreams.client.internal.MongoOperationPublisher.lambda$sinkToCallback$38(MongoOperationPublisher.java:601)
+	at com.mongodb.reactivestreams.client.internal.OperationExecutorImpl.lambda$execute$1(OperationExecutorImpl.java:97)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.function.RetryingAsyncCallbackSupplier$RetryingCallback.onResult(RetryingAsyncCallbackSupplier.java:121)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.async.function.AsyncCallbackSupplier.lambda$whenComplete$1(AsyncCallbackSupplier.java:93)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.operation.AsyncOperationHelper.lambda$withAsyncSuppliedResource$3(AsyncOperationHelper.java:134)
+	at com.mongodb.internal.connection.DefaultServer.lambda$getConnectionAsync$0(DefaultServer.java:125)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.DefaultConnectionPool.lambda$getAsync$0(DefaultConnectionPool.java:219)
+	at com.mongodb.internal.connection.DefaultConnectionPool$OpenConcurrencyLimiter.lambda$openWithConcurrencyLimitAsync$0(DefaultConnectionPool.java:1023)
+	at com.mongodb.internal.connection.DefaultConnectionPool$PooledConnection.lambda$openAsync$0(DefaultConnectionPool.java:646)
+	at com.mongodb.internal.connection.UsageTrackingInternalConnection.lambda$openAsync$0(UsageTrackingInternalConnection.java:65)
+	at com.mongodb.internal.connection.InternalStreamConnection$1.lambda$completed$0(InternalStreamConnection.java:274)
+	at com.mongodb.internal.connection.InternalStreamConnectionInitializer.lambda$finishHandshakeAsync$1(InternalStreamConnectionInitializer.java:129)
+	at com.mongodb.internal.async.ErrorHandlingResultCallback.onResult(ErrorHandlingResultCallback.java:47)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$getNextSaslResponseAsync$2(SaslAuthenticator.java:156)
+	at com.mongodb.internal.connection.SaslAuthenticator.lambda$sendSaslStartAsync$5(SaslAuthenticator.java:261)
+	at com.mongodb.internal.connection.CommandHelper.lambda$executeCommandAsync$0(CommandHelper.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.SingleResultCallback.completeExceptionally(SingleResultCallback.java:71)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$onErrorIf$7(AsyncSupplier.java:187)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.async.AsyncSupplier.lambda$finish$0(AsyncSupplier.java:73)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:632)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:941)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback$MessageCallback.onResult(InternalStreamConnection.java:904)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:278)
+	at com.mongodb.internal.connection.InternalStreamConnection.readAsync(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.InternalStreamConnection.access$500(InternalStreamConnection.java:103)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:893)
+	at com.mongodb.internal.connection.InternalStreamConnection$MessageHeaderCallback.onResult(InternalStreamConnection.java:875)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:738)
+	at com.mongodb.internal.connection.InternalStreamConnection$2.completed(InternalStreamConnection.java:735)
+	at com.mongodb.internal.connection.netty.NettyStream.readAsync(NettyStream.java:334)
+	at com.mongodb.internal.connection.netty.NettyStream.handleReadResponse(NettyStream.java:361)
+	at com.mongodb.internal.connection.netty.NettyStream.access$900(NettyStream.java:115)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:437)
+	at com.mongodb.internal.connection.netty.NettyStream$InboundBufferHandler.channelRead0(NettyStream.java:434)
+	at io.netty.channel.SimpleChannelInboundHandler.channelRead(SimpleChannelInboundHandler.java:99)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412)
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1357)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440)
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420)
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:868)
+	at io.netty.channel.nio.AbstractNioByteChannel$NioByteUnsafe.read(AbstractNioByteChannel.java:166)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:796)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:732)
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:658)
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562)
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998)
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74)
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30)
+	at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: com.mongodb.MongoSecurityException: Exception authenticating MongoCredential{mechanism=SCRAM-SHA-1, userName='root', source='kosp', password=<hidden>, mechanismProperties=<hidden>}
+	at com.mongodb.internal.connection.SaslAuthenticator.wrapException(SaslAuthenticator.java:300)
+	... 44 common frames omitted
+Caused by: com.mongodb.MongoCommandException: Command failed with error 18 (AuthenticationFailed): 'Authentication failed.' on server localhost:27017. The full response is {"ok": 0.0, "errmsg": "Authentication failed.", "code": 18, "codeName": "AuthenticationFailed"}
+	at com.mongodb.internal.connection.ProtocolHelper.getCommandFailureException(ProtocolHelper.java:210)
+	at com.mongodb.internal.connection.InternalStreamConnection.lambda$sendCommandMessageAsync$9(InternalStreamConnection.java:622)
+	... 34 common frames omitted
+[2026-02-05T16:21:00.214] INFO  8990 --- [localhost:27017] org.mongodb.driver.cluster               : : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=25, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=3253875, minRoundTripTimeNanos=0}
