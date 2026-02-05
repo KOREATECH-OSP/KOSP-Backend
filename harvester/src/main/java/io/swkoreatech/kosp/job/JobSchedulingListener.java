@@ -43,7 +43,7 @@ public class JobSchedulingListener implements JobExecutionListener {
         }
 
         if (isRateLimitError(jobExecution)) {
-            scheduleRetry(userId, runId, getResetTimePlus5Min());
+            scheduleRetry(userId, runId, getResetTimePlus5Min(userId));
             return;
         }
 
@@ -68,7 +68,7 @@ public class JobSchedulingListener implements JobExecutionListener {
 
     private void scheduleNextRun(Long userId) {
         String newRunId = UUID.randomUUID().toString();
-        Instant nextRun = getResetTimePlus5Min();
+        Instant nextRun = getResetTimePlus5Min(userId);
         jobQueueService.enqueue(userId, newRunId, nextRun, Priority.LOW);
         log.info("Scheduled next run for user {} at {}", userId, nextRun);
     }
@@ -78,7 +78,7 @@ public class JobSchedulingListener implements JobExecutionListener {
         log.info("Scheduled retry for user {} at {}", userId, scheduledAt);
     }
 
-    private Instant getResetTimePlus5Min() {
-        return rateLimitManager.getResetTime().plus(5, ChronoUnit.MINUTES);
+    private Instant getResetTimePlus5Min(Long userId) {
+        return rateLimitManager.getResetTime(userId).plus(5, ChronoUnit.MINUTES);
     }
 }
