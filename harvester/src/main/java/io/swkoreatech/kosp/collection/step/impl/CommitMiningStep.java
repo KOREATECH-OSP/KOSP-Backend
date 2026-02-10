@@ -127,12 +127,23 @@ public class CommitMiningStep implements StepProvider {
      private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
           Instant now = Instant.now();
           int result = paginateCommits(userId, owner, name, nodeId, token, now, DEFAULT_PAGE_SIZE);
-          if (result >= 0) return result;
-
+          
+          if (result >= 0) {
+              return result;
+          }
+          
+          if (result == -2) {
+              log.warn("Skipping repo {}/{} — non-retryable GraphQL error (pageSize retry won't help)", owner, name);
+              return 0;
+          }
+          
           log.warn("Retrying {}/{} with reduced page size {}", owner, name, RETRY_PAGE_SIZE);
           result = paginateCommits(userId, owner, name, nodeId, token, now, RETRY_PAGE_SIZE);
-          if (result >= 0) return result;
-
+          
+          if (result >= 0) {
+              return result;
+          }
+          
           log.warn("Skipping repo {}/{} after retry failure", owner, name);
           return 0;
       }
