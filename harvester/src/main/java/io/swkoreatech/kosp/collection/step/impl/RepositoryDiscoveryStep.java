@@ -133,7 +133,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
                     token
                 );
 
-            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+            if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
                 continue;
             }
 
@@ -189,7 +189,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
             graphQLClient.getUserBasicInfo(login, null, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
             .block();
 
-        if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+        if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
             return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
         }
 
@@ -225,7 +225,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
                     GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
                 .block();
 
-            if (GraphQLErrorHandler.logAndCheckErrors(response, "user", login)) {
+            if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
                 break;
             }
 
