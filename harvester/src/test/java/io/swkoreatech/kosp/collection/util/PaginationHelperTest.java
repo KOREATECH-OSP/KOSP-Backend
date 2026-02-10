@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -409,6 +411,67 @@ class PaginationHelperTest {
                 when(response.getDataAs(TestResponse.class)).thenReturn(data);
             }
             return response;
+        }
+    }
+
+    @Nested
+    @DisplayName("paginate 메서드 - 에러 타입 처리")
+    class PaginateErrorTypeTest {
+
+        @Test
+        @DisplayName("NON_RETRYABLE 에러 → -2 반환")
+        void nonRetryableError_returnsMinusTwo() {
+            // given
+            GraphQLResponse<TestResponse> response = mock(GraphQLResponse.class);
+            List<Map<String, Object>> errors = List.of(
+                Map.of("message", "Something went wrong")
+            );
+
+            when(fetcher.apply(null)).thenReturn(response);
+            when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
+            when(response.getErrors()).thenReturn(errors);
+
+            // when
+            int result = PaginationHelper.paginate(
+                fetcher,
+                pageInfoExtractor,
+                dataProcessor,
+                "repo",
+                "owner/name",
+                TestResponse.class
+            );
+
+            // then
+            assertThat(result).isEqualTo(-2);
+        }
+
+        @Test
+        @DisplayName("RETRYABLE 에러 → -1 반환")
+        void retryableError_returnsMinusOne() {
+            // given
+            GraphQLResponse<TestResponse> response = mock(GraphQLResponse.class);
+            List<Map<String, Object>> errors = List.of(
+                Map.of("message", "Rate limit exceeded")
+            );
+
+            when(fetcher.apply(null)).thenReturn(response);
+            when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
+            when(response.getErrors()).thenReturn(errors);
+
+            // when
+            int result = PaginationHelper.paginate(
+                fetcher,
+                pageInfoExtractor,
+                dataProcessor,
+                "repo",
+                "owner/name",
+                TestResponse.class
+            );
+
+            // then
+            assertThat(result).isEqualTo(-1);
         }
     }
 
