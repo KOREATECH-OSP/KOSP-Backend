@@ -1,10 +1,13 @@
 package io.swkoreatech.kosp.global.config.redis;
 
+import java.time.Duration;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -36,12 +39,17 @@ public class RedisConfig {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
         redisConfig.setHostName(redisHost);
         redisConfig.setPort(redisPort);
-        redisConfig.setDatabase(redisDatabase);  // Database 설정 추가
+        redisConfig.setDatabase(redisDatabase);
         if (redisPassword != null && !redisPassword.isEmpty()) {
             redisConfig.setPassword(redisPassword);
         }
 
-        return new LettuceConnectionFactory(redisConfig);
+        LettuceClientConfiguration clientConfig = LettuceClientConfiguration.builder()
+            .shutdownTimeout(Duration.ofMillis(5000))
+            .shutdownQuietPeriod(Duration.ofSeconds(1))
+            .build();
+
+        return new LettuceConnectionFactory(redisConfig, clientConfig);
     }
 
     @Bean
