@@ -2,19 +2,29 @@ package io.swkoreatech.kosp.client;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.netty.channel.ChannelOption;
+import io.netty.handler.timeout.ReadTimeoutHandler;
+import io.netty.handler.timeout.WriteTimeoutHandler;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.netty.http.client.HttpClient;
+import reactor.netty.resources.ConnectionProvider;
+import reactor.util.retry.Retry;
 
 @Slf4j
 @Component
@@ -34,12 +44,34 @@ public class GithubGraphQLClient {
         @Value("${github.api.graphql-url}") String graphqlUrl,
         ResourceLoader resourceLoader
     ) {
-        this.webClient = WebClient.builder()
-            .baseUrl(graphqlUrl)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
+        this.webClient = createWebClient(graphqlUrl);
         this.resourceLoader = resourceLoader;
         loadQueries();
+    }
+
+    private WebClient createWebClient(String baseUrl) {
+        ConnectionProvider connectionProvider = ConnectionProvider.builder("graphql-pool")
+            .maxConnections(60)
+            .pendingAcquireMaxCount(500)
+            .pendingAcquireTimeout(Duration.ofSeconds(60))
+            .maxIdleTime(Duration.ofSeconds(30))
+            .maxLifeTime(Duration.ofMinutes(5))
+            .evictInBackground(Duration.ofSeconds(120))
+            .build();
+        
+        HttpClient httpClient = HttpClient.create(connectionProvider)
+            .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
+            .responseTimeout(Duration.ofMinutes(5))
+            .doOnConnected(connection -> {
+                connection.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
+                connection.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+            });
+        
+        return WebClient.builder()
+            .baseUrl(baseUrl)
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
     }
 
     private void loadQueries() {
@@ -65,18 +97,40 @@ public class GithubGraphQLClient {
     }
 
     public <T> Mono<T> query(String query, Map<String, Object> variables, String token, Class<T> responseType) {
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("query", query);
-        if (variables != null && !variables.isEmpty()) {
-            requestBody.put("variables", variables);
-        }
+        Map<String, Object> requestBody = buildRequestBody(query, variables);
 
         return webClient.post()
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .bodyValue(requestBody)
             .retrieve()
             .bodyToMono(responseType)
+            .retryWhen(createRetrySpec())
             .doOnError(error -> log.error("GraphQL query failed: {}", error.getMessage()));
+    }
+
+    private Map<String, Object> buildRequestBody(String query, Map<String, Object> variables) {
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("query", query);
+        if (variables != null && !variables.isEmpty()) {
+            requestBody.put("variables", variables);
+        }
+        return requestBody;
+    }
+
+    private Retry createRetrySpec() {
+        return Retry.backoff(3, Duration.ofSeconds(2))
+            .maxBackoff(Duration.ofSeconds(30))
+            .jitter(0.5)
+            .filter(throwable -> 
+                throwable instanceof WebClientResponseException.BadGateway ||
+                throwable instanceof WebClientResponseException.ServiceUnavailable ||
+                throwable instanceof WebClientResponseException.TooManyRequests ||
+                (throwable.getMessage() != null && (
+                    throwable.getMessage().contains("prematurely closed") ||
+                    throwable.getMessage().contains("Connection reset") ||
+                    throwable.getMessage().contains("Connection refused")
+                ))
+            );
     }
 
     public <T> Mono<T> getContributedRepos(

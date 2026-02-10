@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.collection.util;
 
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -114,7 +115,38 @@ public final class PaginationHelper {
             String cursor,
             Class<T> dataClass
     ) {
-        GraphQLResponse<T> response = fetcher.apply(cursor);
+        GraphQLResponse<T> response;
+        try {
+            response = fetcher.apply(cursor);
+        } catch (Exception exception) {
+            log.warn("HTTP error fetching page for {} {}: {}", entityType, entityId, exception.getMessage());
+            return new PageResult<>(0, null, true);
+        }
+        return processResponse(response, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
+    }
+
+    /**
+     * Processes a GraphQL response after successful fetch.
+     *
+     * @param <T> the data type
+     * @param response the GraphQL response
+     * @param pageInfoExtractor function to extract PageInfo
+     * @param dataProcessor function to process data
+     * @param entityType the entity type
+     * @param entityId the entity ID
+     * @param cursor the current cursor
+     * @param dataClass the Class object for type T
+     * @return page result with saved count and next cursor
+     */
+    private static <T> PageResult<T> processResponse(
+            GraphQLResponse<T> response,
+            Function<T, Object> pageInfoExtractor,
+            BiFunction<T, String, Integer> dataProcessor,
+            String entityType,
+            String entityId,
+            String cursor,
+            Class<T> dataClass
+    ) {
         if (GraphQLErrorHandler.logAndCheckErrors(response, entityType, entityId)) {
             return new PageResult<>(0, null, true);
         }
