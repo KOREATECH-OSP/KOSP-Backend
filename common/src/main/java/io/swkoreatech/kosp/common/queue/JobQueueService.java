@@ -17,13 +17,9 @@ public class JobQueueService {
     private final StringRedisTemplate redisTemplate;
 
     public void enqueue(Long userId, String runId, Instant scheduledAt, Priority priority) {
-        try {
-            String member = formatMember(userId, runId);
-            double score = calculateScore(scheduledAt, priority);
-            redisTemplate.opsForZSet().add(QUEUE_KEY, member, score);
-        } catch (RedisConnectionFailureException | IllegalStateException e) {
-            log.warn("Redis unavailable during enqueue: {}", e.getMessage());
-        }
+        String member = formatMember(userId, runId);
+        double score = calculateScore(scheduledAt, priority);
+        redisTemplate.opsForZSet().add(QUEUE_KEY, member, score);
     }
 
     public Optional<JobQueueEntry> dequeue() {
@@ -37,7 +33,7 @@ public class JobQueueService {
             String member = members.iterator().next();
             redisTemplate.opsForZSet().remove(QUEUE_KEY, member);
             return Optional.of(parseMember(member));
-        } catch (RedisConnectionFailureException | IllegalStateException e) {
+        } catch (RedisConnectionFailureException e) {
             log.warn("Redis unavailable during dequeue: {}", e.getMessage());
             return Optional.empty();
         }
