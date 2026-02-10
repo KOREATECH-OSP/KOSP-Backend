@@ -1,9 +1,9 @@
-query GetRepositoryCommits($owner: String!, $name: String!, $authorId: ID!, $after: String) {
+query GetRepositoryCommits($owner: String!, $name: String!, $authorId: ID!, $after: String, $first: Int = 30) {
   repository(owner: $owner, name: $name) {
     defaultBranchRef {
       target {
         ... on Commit {
-          history(first: 30, after: $after, author: {id: $authorId}) {
+           history(first: $first, after: $after, author: {id: $authorId}) {
             pageInfo {
               hasNextPage
               endCursor
