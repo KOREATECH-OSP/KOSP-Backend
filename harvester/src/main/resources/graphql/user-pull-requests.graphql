@@ -1,6 +1,6 @@
 query GetUserPullRequests($login: String!, $after: String) {
   user(login: $login) {
-    pullRequests(first: 100, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {
+    pullRequests(first: 30, after: $after, orderBy: {field: CREATED_AT, direction: DESC}) {
       pageInfo {
         hasNextPage
         endCursor
