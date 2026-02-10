@@ -159,10 +159,14 @@ public class CommitMiningStep implements StepProvider {
          return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, pageSize, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
      }
 
-      private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
-         int saved = 0;
-         for (CommitNode commit : commits) {
-              if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
+       private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
+          int saved = 0;
+          for (CommitNode commit : commits) {
+               if (commit == null) {
+                   totalSkippedCount++;
+                   continue;
+               }
+               if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
                  totalSkippedCount++;
                  continue;
              }
