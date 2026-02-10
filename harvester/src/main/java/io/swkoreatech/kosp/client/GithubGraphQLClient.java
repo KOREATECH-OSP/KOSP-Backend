@@ -186,12 +186,14 @@ public class GithubGraphQLClient {
         String authorId,
         String cursor,
         String token,
+        int pageSize,
         Class<T> responseType
     ) {
         Map<String, Object> variables = new HashMap<>();
         variables.put("owner", owner);
         variables.put("name", name);
         variables.put("authorId", authorId);
+        variables.put("first", pageSize);
         if (cursor != null) {
             variables.put("after", cursor);
         }
