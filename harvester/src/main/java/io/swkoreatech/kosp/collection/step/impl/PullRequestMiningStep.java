@@ -104,11 +104,15 @@ public class PullRequestMiningStep implements StepProvider {
         return graphQLClient.getUserPullRequests(login, cursor, token, GraphQLTypeFactory.<UserPullRequestsResponse>responseType()).block();
     }
 
-     private int savePullRequests(Long userId, List<PullRequestNode> prs, Instant now) {
-          int saved = 0;
-          int skipped = 0;
-          for (PullRequestNode pr : prs) {
-              if (prDocumentRepository.existsByUserIdAndRepositoryNameAndPrNumber(userId, pr.getRepoName(), pr.getNumber())) {
+      private int savePullRequests(Long userId, List<PullRequestNode> prs, Instant now) {
+           int saved = 0;
+           int skipped = 0;
+           for (PullRequestNode pr : prs) {
+               if (pr == null) {
+                   skipped++;
+                   continue;
+               }
+               if (prDocumentRepository.existsByUserIdAndRepositoryNameAndPrNumber(userId, pr.getRepoName(), pr.getNumber())) {
                   skipped++;
                   continue;
               }
