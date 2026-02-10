@@ -3,7 +3,7 @@ query GetRepositoryCommits($owner: String!, $name: String!, $authorId: ID!, $aft
     defaultBranchRef {
       target {
         ... on Commit {
-          history(first: 100, after: $after, author: {id: $authorId}) {
+          history(first: 30, after: $after, author: {id: $authorId}) {
             pageInfo {
               hasNextPage
               endCursor
