@@ -7,6 +7,8 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import io.swkoreatech.kosp.collection.util.GraphQLErrorType;
+
      /**
       * Utility class for handling GraphQL pagination with generic data types.
       *
@@ -67,7 +69,8 @@ public final class PaginationHelper {
      /**
       * Paginates through GraphQL responses using cursor-based pagination.
       *
-      * <p>Returns -1 if the first page encounters a total error (no data). Callers can use this
+      * <p>Returns -2 if the first page encounters a non-retryable error. Returns -1 if the first
+      * page encounters a retryable error or other total error (no data). Callers can use these
       * to trigger retry with different parameters. For mid-pagination errors (after data has been
       * accumulated), returns the count of items saved so far.
       *
@@ -78,44 +81,62 @@ public final class PaginationHelper {
       * @param entityType the type of entity being queried
       * @param entityId the identifier of the entity
       * @param dataClass the Class object for the data type T
-      * @return total count of items saved across all pages, or -1 if first page encounters total error
+      * @return total count of items saved across all pages, -2 for non-retryable error, or -1 for retryable error
       */
-    public static <T> int paginate(
-            Function<String, GraphQLResponse<T>> fetcher,
-            Function<T, Object> pageInfoExtractor,
-            BiFunction<T, String, Integer> dataProcessor,
-            String entityType,
-            String entityId,
-            Class<T> dataClass
-    ) {
-        int totalSaved = 0;
-        String cursor = null;
-        do {
-            PageResult<T> result = fetchAndProcessPage(fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
-            if (result.hasError) {
-                if (totalSaved == 0) return -1;
-                break;
-            }
-            totalSaved += result.saved;
-            cursor = result.nextCursor;
-        } while (cursor != null);
-        return totalSaved;
-    }
+     public static <T> int paginate(
+             Function<String, GraphQLResponse<T>> fetcher,
+             Function<T, Object> pageInfoExtractor,
+             BiFunction<T, String, Integer> dataProcessor,
+             String entityType,
+             String entityId,
+             Class<T> dataClass
+     ) {
+         int totalSaved = 0;
+         String cursor = null;
+         do {
+             PageResult<T> result = fetchAndProcessPage(fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
+             if (result.hasError) {
+                 if (totalSaved == 0) {
+                     return determineErrorReturnValue(result.errorType, entityType, entityId);
+                 }
+                 break;
+             }
+             totalSaved += result.saved;
+             cursor = result.nextCursor;
+         } while (cursor != null);
+         return totalSaved;
+     }
 
-    /**
-     * Fetches and processes a single page of GraphQL results.
-     *
-     * @param <T> the data type
-     * @param fetcher function to fetch a page
-     * @param pageInfoExtractor function to extract PageInfo
-     * @param dataProcessor function to process data
-     * @param entityType the entity type
-     * @param entityId the entity ID
-     * @param cursor the current cursor
-     * @param dataClass the Class object for type T
-     * @return page result with saved count and next cursor
-     */
-    private static <T> PageResult<T> fetchAndProcessPage(
+     /**
+      * Determines the return value based on error type.
+      *
+      * @param errorType the classified error type
+      * @param entityType the entity type
+      * @param entityId the entity ID
+      * @return -2 for non-retryable errors, -1 for retryable or other errors
+      */
+     private static int determineErrorReturnValue(GraphQLErrorType errorType, String entityType, String entityId) {
+         if (errorType == GraphQLErrorType.NON_RETRYABLE) {
+             log.warn("Skipping {} {} — non-retryable GraphQL error (retry won't help)", entityType, entityId);
+             return -2;
+         }
+         return -1;
+     }
+
+     /**
+      * Fetches and processes a single page of GraphQL results.
+      *
+      * @param <T> the data type
+      * @param fetcher function to fetch a page
+      * @param pageInfoExtractor function to extract PageInfo
+      * @param dataProcessor function to process data
+      * @param entityType the entity type
+      * @param entityId the entity ID
+      * @param cursor the current cursor
+      * @param dataClass the Class object for type T
+      * @return page result with saved count and next cursor
+      */
+     private static <T> PageResult<T> fetchAndProcessPage(
             Function<String, GraphQLResponse<T>> fetcher,
             Function<T, Object> pageInfoExtractor,
             BiFunction<T, String, Integer> dataProcessor,
@@ -147,24 +168,25 @@ public final class PaginationHelper {
      * @param dataClass the Class object for type T
      * @return page result with saved count and next cursor
      */
-    private static <T> PageResult<T> processResponse(
-            GraphQLResponse<T> response,
-            Function<T, Object> pageInfoExtractor,
-            BiFunction<T, String, Integer> dataProcessor,
-            String entityType,
-            String entityId,
-            String cursor,
-            Class<T> dataClass
-    ) {
-        if (GraphQLErrorHandler.logAndCheckErrors(response, entityType, entityId)) {
-            return new PageResult<>(0, null, true);
-        }
-        T data = response.getDataAs(dataClass);
-        int saved = dataProcessor.apply(data, cursor);
-        Object pageInfo = pageInfoExtractor.apply(data);
-        String nextCursor = extractCursor(pageInfo);
-        return new PageResult<>(saved, nextCursor, false);
-    }
+     private static <T> PageResult<T> processResponse(
+             GraphQLResponse<T> response,
+             Function<T, Object> pageInfoExtractor,
+             BiFunction<T, String, Integer> dataProcessor,
+             String entityType,
+             String entityId,
+             String cursor,
+             Class<T> dataClass
+     ) {
+         GraphQLErrorType errorType = GraphQLErrorHandler.classifyErrors(response, entityType, entityId);
+         if (errorType != null) {
+             return new PageResult<>(0, null, true, errorType);
+         }
+         T data = response.getDataAs(dataClass);
+         int saved = dataProcessor.apply(data, cursor);
+         Object pageInfo = pageInfoExtractor.apply(data);
+         String nextCursor = extractCursor(pageInfo);
+         return new PageResult<>(saved, nextCursor, false);
+     }
 
     /**
      * Extracts cursor from PageInfo object.
@@ -188,20 +210,26 @@ public final class PaginationHelper {
         }
     }
 
-    /**
-     * Result of processing a single page.
-     *
-     * @param <T> the data type
-     */
-    private static class PageResult<T> {
-        final int saved;
-        final String nextCursor;
-        final boolean hasError;
+     /**
+      * Result of processing a single page.
+      *
+      * @param <T> the data type
+      */
+     private static class PageResult<T> {
+         final int saved;
+         final String nextCursor;
+         final boolean hasError;
+         final GraphQLErrorType errorType;
 
-        PageResult(int saved, String nextCursor, boolean hasError) {
-            this.saved = saved;
-            this.nextCursor = nextCursor;
-            this.hasError = hasError;
-        }
-    }
+         PageResult(int saved, String nextCursor, boolean hasError, GraphQLErrorType errorType) {
+             this.saved = saved;
+             this.nextCursor = nextCursor;
+             this.hasError = hasError;
+             this.errorType = errorType;
+         }
+
+         PageResult(int saved, String nextCursor, boolean hasError) {
+             this(saved, nextCursor, hasError, null);
+         }
+     }
 }
