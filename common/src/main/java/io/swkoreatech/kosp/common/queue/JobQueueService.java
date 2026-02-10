@@ -3,9 +3,12 @@ package io.swkoreatech.kosp.common.queue;
 import java.time.Instant;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JobQueueService {
@@ -20,15 +23,20 @@ public class JobQueueService {
     }
 
     public Optional<JobQueueEntry> dequeue() {
-        long now = Instant.now().getEpochSecond();
-        var members = redisTemplate.opsForZSet()
-            .rangeByScore(QUEUE_KEY, Double.NEGATIVE_INFINITY, now, 0, 1);
-        if (members == null || members.isEmpty()) {
+        try {
+            long now = Instant.now().getEpochSecond();
+            var members = redisTemplate.opsForZSet()
+                .rangeByScore(QUEUE_KEY, Double.NEGATIVE_INFINITY, now, 0, 1);
+            if (members == null || members.isEmpty()) {
+                return Optional.empty();
+            }
+            String member = members.iterator().next();
+            redisTemplate.opsForZSet().remove(QUEUE_KEY, member);
+            return Optional.of(parseMember(member));
+        } catch (RedisConnectionFailureException e) {
+            log.warn("Redis unavailable during dequeue: {}", e.getMessage());
             return Optional.empty();
         }
-        String member = members.iterator().next();
-        redisTemplate.opsForZSet().remove(QUEUE_KEY, member);
-        return Optional.of(parseMember(member));
     }
 
     private double calculateScore(Instant scheduledAt, Priority priority) {

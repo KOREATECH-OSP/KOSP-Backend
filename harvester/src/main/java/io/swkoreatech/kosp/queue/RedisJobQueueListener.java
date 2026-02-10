@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import io.swkoreatech.kosp.common.queue.JobQueueEntry;
@@ -20,19 +21,37 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedisJobQueueListener {
+public class RedisJobQueueListener implements DisposableBean {
     private final JobQueueService jobQueueService;
     private final PriorityJobLauncher jobLauncher;
     private final UserRepository userRepository;
     private final JobExplorer jobExplorer;
+    private volatile boolean running = true;
+
+    @Override
+    public void destroy() {
+        running = false;
+        log.info("RedisJobQueueListener shutting down, stopping poll loop");
+    }
 
     @Scheduled(fixedDelay = 1000)
     public void poll() {
-        Optional<JobQueueEntry> entry = jobQueueService.dequeue();
-        if (entry.isEmpty()) {
+        if (!running) {
             return;
         }
-        processEntry(entry.get());
+        try {
+            Optional<JobQueueEntry> entry = jobQueueService.dequeue();
+            if (entry.isEmpty()) {
+                return;
+            }
+            processEntry(entry.get());
+        } catch (Exception e) {
+            if (!running) {
+                log.info("Poll interrupted during shutdown: {}", e.getMessage());
+                return;
+            }
+            log.error("Unexpected error during poll", e);
+        }
     }
 
     private void processEntry(JobQueueEntry entry) {
