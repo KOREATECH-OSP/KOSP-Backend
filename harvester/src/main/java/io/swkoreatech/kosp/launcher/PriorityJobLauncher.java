@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.launcher;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import jakarta.annotation.PreDestroy;
 
@@ -44,6 +45,17 @@ public class PriorityJobLauncher {
     
     @PreDestroy
     public void shutdown() {
+        log.info("PriorityJobLauncher shutting down, awaiting task completion");
         executor.shutdown();
+        try {
+            if (!executor.awaitTermination(30, TimeUnit.SECONDS)) {
+                log.warn("Executor did not terminate within 30s, forcing shutdown");
+                executor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            log.warn("Shutdown interrupted, forcing executor termination");
+            executor.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 }

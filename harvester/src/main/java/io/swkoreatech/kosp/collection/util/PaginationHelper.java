@@ -7,38 +7,40 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * Utility class for handling GraphQL pagination with generic data types.
- *
- * <p>This utility abstracts the common pagination pattern used across multiple mining steps
- * (PullRequestMiningStep, IssueMiningStep, CommitMiningStep). It manages cursor-based pagination
- * using a do-while loop and integrates with GraphQLErrorHandler for error checking.
- *
- * <p><b>Generic Type Parameters:</b>
- * <ul>
- *   <li>{@code T} - The data class type extracted from GraphQL response (e.g., UserPullRequestsResponse,
- *       UserIssuesResponse, RepositoryCommitsResponse). Must contain a PageInfo object for pagination metadata.</li>
- *   <li>{@code P} - The PageInfo type (inner class of T, e.g., UserPullRequestsResponse.PageInfo).</li>
- * </ul>
- *
- * <p><b>Parameters:</b>
- * <ul>
- *   <li>{@code fetcher} - Function that fetches a single page of data. Takes cursor (nullable) and returns
- *       GraphQLResponse containing data of type T. Responsible for making the actual GraphQL API call.</li>
- *   <li>{@code pageInfoExtractor} - Function that extracts PageInfo from the data object. Takes the deserialized
- *       data (type T) and returns its PageInfo for determining if more pages exist.</li>
- *   <li>{@code dataProcessor} - BiFunction that processes the fetched data and returns the count of items saved.
- *       Takes the data object (type T) and current cursor, returns count of saved items. Accumulates across pages.</li>
- *   <li>{@code entityType} - String identifier for the entity type being queried (e.g., "user", "repo").
- *       Used in error logging for context.</li>
- *   <li>{@code entityId} - String identifier for the specific entity (e.g., "octocat", "owner/repo").
- *       Used in error logging for context.</li>
- * </ul>
- *
- * <p><b>Return Value:</b>
- * <ul>
- *   <li>Total count of items saved across all pages. Returns 0 if errors occur on first page.</li>
- * </ul>
+     /**
+      * Utility class for handling GraphQL pagination with generic data types.
+      *
+      * <p>This utility abstracts the common pagination pattern used across multiple mining steps
+      * (PullRequestMiningStep, IssueMiningStep, CommitMiningStep). It manages cursor-based pagination
+      * using a do-while loop and integrates with GraphQLErrorHandler for error checking.
+      *
+      * <p><b>Generic Type Parameters:</b>
+      * <ul>
+      *   <li>{@code T} - The data class type extracted from GraphQL response (e.g., UserPullRequestsResponse,
+      *       UserIssuesResponse, RepositoryCommitsResponse). Must contain a PageInfo object for pagination metadata.</li>
+      *   <li>{@code P} - The PageInfo type (inner class of T, e.g., UserPullRequestsResponse.PageInfo).</li>
+      * </ul>
+      *
+      * <p><b>Parameters:</b>
+      * <ul>
+      *   <li>{@code fetcher} - Function that fetches a single page of data. Takes cursor (nullable) and returns
+      *       GraphQLResponse containing data of type T. Responsible for making the actual GraphQL API call.</li>
+      *   <li>{@code pageInfoExtractor} - Function that extracts PageInfo from the data object. Takes the deserialized
+      *       data (type T) and returns its PageInfo for determining if more pages exist.</li>
+      *   <li>{@code dataProcessor} - BiFunction that processes the fetched data and returns the count of items saved.
+      *       Takes the data object (type T) and current cursor, returns count of saved items. Accumulates across pages.</li>
+      *   <li>{@code entityType} - String identifier for the entity type being queried (e.g., "user", "repo").
+      *       Used in error logging for context.</li>
+      *   <li>{@code entityId} - String identifier for the specific entity (e.g., "octocat", "owner/repo").
+      *       Used in error logging for context.</li>
+      * </ul>
+      *
+      * <p><b>Return Value:</b>
+      * <ul>
+      *   <li>Total count of items saved across all pages. Returns -1 if the first page encounters a total error
+      *       (no data), enabling retry logic with different parameters. For mid-pagination errors, returns the count
+      *       of items saved so far.</li>
+      * </ul>
  *
  * <p><b>Example Usage:</b>
  * <pre>{@code
@@ -62,18 +64,22 @@ public final class PaginationHelper {
         throw new AssertionError("Utility class");
     }
 
-    /**
-     * Paginates through GraphQL responses using cursor-based pagination.
-     *
-     * @param <T> the data type contained in the GraphQL response
-     * @param fetcher function to fetch a page of data
-     * @param pageInfoExtractor function to extract PageInfo from data
-     * @param dataProcessor function to process data and return saved count
-     * @param entityType the type of entity being queried
-     * @param entityId the identifier of the entity
-     * @param dataClass the Class object for the data type T
-     * @return total count of items saved across all pages
-     */
+     /**
+      * Paginates through GraphQL responses using cursor-based pagination.
+      *
+      * <p>Returns -1 if the first page encounters a total error (no data). Callers can use this
+      * to trigger retry with different parameters. For mid-pagination errors (after data has been
+      * accumulated), returns the count of items saved so far.
+      *
+      * @param <T> the data type contained in the GraphQL response
+      * @param fetcher function to fetch a page of data
+      * @param pageInfoExtractor function to extract PageInfo from data
+      * @param dataProcessor function to process data and return saved count
+      * @param entityType the type of entity being queried
+      * @param entityId the identifier of the entity
+      * @param dataClass the Class object for the data type T
+      * @return total count of items saved across all pages, or -1 if first page encounters total error
+      */
     public static <T> int paginate(
             Function<String, GraphQLResponse<T>> fetcher,
             Function<T, Object> pageInfoExtractor,
@@ -86,7 +92,10 @@ public final class PaginationHelper {
         String cursor = null;
         do {
             PageResult<T> result = fetchAndProcessPage(fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
-            if (result.hasError) break;
+            if (result.hasError) {
+                if (totalSaved == 0) return -1;
+                break;
+            }
             totalSaved += result.saved;
             cursor = result.nextCursor;
         } while (cursor != null);

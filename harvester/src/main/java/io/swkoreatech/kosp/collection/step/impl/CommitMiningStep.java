@@ -45,6 +45,8 @@ import lombok.extern.slf4j.Slf4j;
 public class CommitMiningStep implements StepProvider {
 
     private static final String STEP_NAME = "commitMiningStep";
+    private static final int DEFAULT_PAGE_SIZE = 30;
+    private static final int RETRY_PAGE_SIZE = 10;
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -122,10 +124,22 @@ public class CommitMiningStep implements StepProvider {
          return fetchAllCommits(userId, owner, name, nodeId, token);
      }
 
-    private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-         Instant now = Instant.now();
+     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
+          Instant now = Instant.now();
+          int result = paginateCommits(userId, owner, name, nodeId, token, now, DEFAULT_PAGE_SIZE);
+          if (result >= 0) return result;
+
+          log.warn("Retrying {}/{} with reduced page size {}", owner, name, RETRY_PAGE_SIZE);
+          result = paginateCommits(userId, owner, name, nodeId, token, now, RETRY_PAGE_SIZE);
+          if (result >= 0) return result;
+
+          log.warn("Skipping repo {}/{} after retry failure", owner, name);
+          return 0;
+      }
+
+     private int paginateCommits(Long userId, String owner, String name, String nodeId, String token, Instant now, int pageSize) {
          return PaginationHelper.paginate(
-             cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token),
+             cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token, pageSize),
              RepositoryCommitsResponse::getPageInfo,
              (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
              "repo",
@@ -134,17 +148,15 @@ public class CommitMiningStep implements StepProvider {
          );
      }
 
-
-
-
      private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
          String owner,
          String name,
          String nodeId,
          String cursor,
-         String token
+         String token,
+         int pageSize
      ) {
-         return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
+         return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, pageSize, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
      }
 
       private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
