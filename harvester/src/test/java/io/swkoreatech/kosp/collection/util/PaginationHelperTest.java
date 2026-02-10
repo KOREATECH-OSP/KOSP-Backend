@@ -126,6 +126,7 @@ class PaginationHelperTest {
 
             when(fetcher.apply(null)).thenReturn(response);
             when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
 
             // when
             int result = PaginationHelper.paginate(
@@ -138,7 +139,7 @@ class PaginationHelperTest {
             );
 
             // then
-            assertThat(result).isZero();
+            assertThat(result).isEqualTo(-1);
             verify(fetcher, times(1)).apply(null);
             verify(dataProcessor, never()).apply(any(), any());
             verify(pageInfoExtractor, never()).apply(any());
