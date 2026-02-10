@@ -6,7 +6,8 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.explore.JobExplorer;
-import org.springframework.beans.factory.DisposableBean;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import io.swkoreatech.kosp.common.queue.JobQueueEntry;
@@ -21,7 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedisJobQueueListener implements DisposableBean {
+public class RedisJobQueueListener implements ApplicationListener<ContextClosedEvent> {
     private final JobQueueService jobQueueService;
     private final PriorityJobLauncher jobLauncher;
     private final UserRepository userRepository;
@@ -29,7 +30,7 @@ public class RedisJobQueueListener implements DisposableBean {
     private volatile boolean running = true;
 
     @Override
-    public void destroy() {
+    public void onApplicationEvent(ContextClosedEvent event) {
         running = false;
         log.info("RedisJobQueueListener shutting down, stopping poll loop");
     }
