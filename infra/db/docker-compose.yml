@@ -39,7 +39,7 @@ services:
     restart: "unless-stopped"
 
   rabbitmq:
-    image: heidiks/rabbitmq-delayed-message-exchange:3.13-management
+    image: heidiks/rabbitmq-delayed-message-exchange:4.2.0-management
     container_name: rabbitmq-kosp-stage-compose
     hostname: rabbitmq
     environment:
