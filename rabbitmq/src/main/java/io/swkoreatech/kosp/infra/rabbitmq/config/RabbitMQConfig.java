@@ -101,9 +101,6 @@ public class RabbitMQConfig {
 
     @Bean
     public CustomExchange githubCollectionExchange() {
-        // TODO: rabbitmq_delayed_message_exchange plugin is deprecated in RabbitMQ 4.3+
-        // (Mnesia-based, will be removed with Mnesia). Migrate to TTL+DLX pattern before
-        // upgrading to RabbitMQ 4.3+. See: https://github.com/rabbitmq/rabbitmq-delayed-message-exchange
         Map<String, Object> args = new HashMap<>();
         args.put("x-delayed-type", "direct");
         return new CustomExchange(GITHUB_COLLECTION_EXCHANGE, "x-delayed-message", true, false, args);
