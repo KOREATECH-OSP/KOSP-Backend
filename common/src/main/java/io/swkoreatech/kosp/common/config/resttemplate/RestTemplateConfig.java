@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.infra.slack.config;
+package io.swkoreatech.kosp.common.config;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -8,7 +8,7 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 @EnableRetry
-public class SlackClientConfig {
+public class RestTemplateConfig {
 
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
