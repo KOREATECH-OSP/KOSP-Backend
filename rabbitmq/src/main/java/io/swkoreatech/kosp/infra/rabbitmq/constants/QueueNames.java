@@ -9,6 +9,9 @@ public final class QueueNames {
     public static final String CHALLENGE_COMPLETED = "challenge-completed-queue";
     public static final String POINT_CHANGED = "point-changed-queue";
 
+    public static final String GITHUB_COLLECTION = "github-collection-queue";
+    public static final String GITHUB_COLLECTION_EXCHANGE = "github-collection-exchange";
+
     private QueueNames() {
     }
 }
