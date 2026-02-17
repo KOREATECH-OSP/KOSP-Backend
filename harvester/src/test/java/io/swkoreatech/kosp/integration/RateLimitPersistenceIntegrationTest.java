@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,8 +8,6 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,16 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.swkoreatech.kosp.client.RateLimitManager;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.common.queue.JobQueueService;
-import io.swkoreatech.kosp.common.queue.Priority;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.trigger.JobSchedulerInitializer;
-import io.swkoreatech.kosp.trigger.UserIdProvider;
 import io.swkoreatech.kosp.user.GithubUserRepository;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Rate Limit Persistence and Auto-Initialization Integration Test")
+@DisplayName("Rate Limit Persistence Integration Test")
 class RateLimitPersistenceIntegrationTest {
 
     @Mock
@@ -42,17 +34,8 @@ class RateLimitPersistenceIntegrationTest {
     @Mock
     private GithubUserRepository githubUserRepository;
 
-    @Mock
-    private JobQueueService jobQueueService;
-
-    @Mock
-    private UserIdProvider userIdProvider;
-
     @InjectMocks
     private RateLimitManager rateLimitManager;
-
-    @InjectMocks
-    private JobSchedulerInitializer jobSchedulerInitializer;
 
     @BeforeEach
     void setUp() {
@@ -110,56 +93,8 @@ class RateLimitPersistenceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("ApplicationReadyEvent 리스너 실행 테스트")
-    class JobSchedulerInitializerTest {
-
-        @Test
-        @DisplayName("서버 시작 시 모든 사용자가 큐에 추가되어야 함")
-        void shouldEnqueueAllUsersOnStartup() {
-            User user1 = createUserWithGithubAccount(2001L);
-            User user2 = createUserWithGithubAccount(2002L);
-            
-            when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user1.getId(), user2.getId()));
-            when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
-            when(userRepository.findById(user2.getId())).thenReturn(Optional.of(user2));
-
-            jobSchedulerInitializer.initializeScheduler();
-
-            verify(jobQueueService, times(2)).enqueue(any(Long.class), any(String.class), any(Instant.class), any(Priority.class));
-        }
-
-        @Test
-        @DisplayName("GitHub 계정 없는 사용자는 큐에 추가되지 않아야 함")
-        void shouldSkipUsersWithoutGithubAccount() {
-            User userWithoutGithub = createUserWithoutGithub(9999L);
-            User userWithGithub = createUserWithGithubAccount(2003L);
-            
-            when(userIdProvider.findActiveUserIds()).thenReturn(List.of(userWithoutGithub.getId(), userWithGithub.getId()));
-            when(userRepository.findById(userWithoutGithub.getId())).thenReturn(Optional.of(userWithoutGithub));
-            when(userRepository.findById(userWithGithub.getId())).thenReturn(Optional.of(userWithGithub));
-
-            jobSchedulerInitializer.initializeScheduler();
-
-            verify(jobQueueService, times(1)).enqueue(any(Long.class), any(String.class), any(Instant.class), any(Priority.class));
-        }
-    }
-
-    @Nested
     @DisplayName("NULL Rate Limit 처리 테스트")
     class NullRateLimitHandlingTest {
-
-        @Test
-        @DisplayName("resetTime이 NULL인 사용자는 즉시 실행 큐에 추가 (HIGH priority)")
-        void shouldEnqueueImmediatelyWhenResetTimeIsNull() {
-            User user = createUserWithGithubAccount(3001L);
-            
-            when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user.getId()));
-            when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
-            jobSchedulerInitializer.initializeScheduler();
-
-            verify(jobQueueService).enqueue(eq(user.getId()), any(String.class), any(Instant.class), eq(Priority.HIGH));
-        }
 
         @Test
         @DisplayName("isRateLimitExpired()는 NULL resetTime일 때 true를 반환해야 함")
@@ -178,23 +113,6 @@ class RateLimitPersistenceIntegrationTest {
     class FutureRateLimitHandlingTest {
 
         @Test
-        @DisplayName("resetTime이 미래인 사용자는 스케줄 큐에 추가 (LOW priority)")
-        void shouldScheduleWhenResetTimeIsFuture() {
-            User user = createUserWithGithubAccount(4001L);
-            Instant futureResetTime = Instant.now().plus(1, ChronoUnit.HOURS);
-
-            GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimit(futureResetTime, null);
-
-            when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user.getId()));
-            when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
-            jobSchedulerInitializer.initializeScheduler();
-
-            verify(jobQueueService).enqueue(eq(user.getId()), any(String.class), any(Instant.class), eq(Priority.LOW));
-        }
-
-        @Test
         @DisplayName("isRateLimitExpired()는 미래 resetTime일 때 false를 반환해야 함")
         void shouldReturnFalseWhenResetTimeIsFuture() {
             User user = createUserWithGithubAccount(4002L);
@@ -206,23 +124,6 @@ class RateLimitPersistenceIntegrationTest {
             boolean isExpired = githubUser.isRateLimitExpired();
 
             assertThat(isExpired).isFalse();
-        }
-
-        @Test
-        @DisplayName("resetTime이 과거인 사용자는 즉시 실행 큐에 추가 (HIGH priority)")
-        void shouldEnqueueImmediatelyWhenResetTimeIsPast() {
-            User user = createUserWithGithubAccount(4003L);
-            Instant pastResetTime = Instant.now().minus(10, ChronoUnit.MINUTES);
-
-            GithubUser githubUser = user.getGithubUser();
-            githubUser.updateRateLimit(pastResetTime, null);
-
-            when(userIdProvider.findActiveUserIds()).thenReturn(List.of(user.getId()));
-            when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
-
-            jobSchedulerInitializer.initializeScheduler();
-
-            verify(jobQueueService).enqueue(eq(user.getId()), any(String.class), any(Instant.class), eq(Priority.HIGH));
         }
     }
 
@@ -294,13 +195,4 @@ class RateLimitPersistenceIntegrationTest {
         return user;
     }
 
-    private User createUserWithoutGithub(Long userId) {
-        return User.builder()
-            .id(userId)
-            .name("User " + userId)
-            .kutId(String.valueOf(userId))
-            .kutEmail("user" + userId + "@koreatech.ac.kr")
-            .password("tempPassword123!")
-            .build();
-    }
 }
