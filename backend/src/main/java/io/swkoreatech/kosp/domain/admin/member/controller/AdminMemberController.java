@@ -53,4 +53,11 @@ public class AdminMemberController implements AdminMemberApi {
         adminMemberService.triggerGithubCollection(userId);
         return ResponseEntity.ok().build();
     }
+
+    @Override
+    @Permit(name = "admin:users:trigger-all-collection", description = "전체 GitHub 수집 트리거")
+    public ResponseEntity<Void> triggerAllGithubCollection() {
+        adminMemberService.triggerAllGithubCollection();
+        return ResponseEntity.ok().build();
+    }
 }

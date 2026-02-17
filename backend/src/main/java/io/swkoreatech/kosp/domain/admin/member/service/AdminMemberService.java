@@ -1,12 +1,15 @@
 package io.swkoreatech.kosp.domain.admin.member.service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
 import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
 import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import io.swkoreatech.kosp.domain.auth.model.Role;
@@ -14,8 +17,9 @@ import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -28,6 +32,7 @@ public class AdminMemberService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public void updateUserRoles(Long userId, Set<String> roleNames) {
@@ -139,6 +144,25 @@ public class AdminMemberService {
         String githubLogin = user.getGithubUser().getGithubLogin();
         eventPublisher.publishEvent(new UserSignupEvent(this, userId, githubLogin));
         log.info("Triggered GitHub collection for user {} (GitHub: {})", userId, githubLogin);
+    }
+
+    public void triggerAllGithubCollection() {
+        List<Long> userIds = userRepository.findActiveUserIds();
+        userIds.forEach(this::publishCollectionRequest);
+        log.info("Triggered GitHub collection for {} users", userIds.size());
+    }
+
+    private void publishCollectionRequest(Long userId) {
+        GithubCollectionRequest dto = new GithubCollectionRequest(userId);
+        rabbitTemplate.convertAndSend(
+            QueueNames.GITHUB_COLLECTION_EXCHANGE,
+            QueueNames.GITHUB_COLLECTION,
+            dto,
+            message -> {
+                message.getMessageProperties().setHeader("x-delay", 0);
+                return message;
+            }
+        );
     }
 
 }

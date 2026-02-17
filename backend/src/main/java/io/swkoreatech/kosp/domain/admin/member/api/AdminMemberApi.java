@@ -59,4 +59,9 @@ public interface AdminMemberApi {
     ResponseEntity<Void> triggerGithubCollection(
         @Parameter(description = "사용자 ID") @PathVariable Long userId
     );
+
+    @Operation(summary = "전체 GitHub 수집 트리거", description = "모든 활성 사용자의 GitHub 데이터 수집을 수동으로 트리거합니다.")
+    @ApiResponse(responseCode = "200", description = "트리거 성공")
+    @PostMapping("/trigger-all-collection")
+    ResponseEntity<Void> triggerAllGithubCollection();
 }
