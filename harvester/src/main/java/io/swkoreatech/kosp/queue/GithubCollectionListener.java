@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import com.rabbitmq.client.Channel;
 
 import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import io.swkoreatech.kosp.launcher.PriorityJobLauncher;
 import lombok.RequiredArgsConstructor;

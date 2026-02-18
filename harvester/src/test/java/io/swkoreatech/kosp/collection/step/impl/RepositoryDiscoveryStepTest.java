@@ -27,7 +27,7 @@ import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.job.ContextValidationListener;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import reactor.core.publisher.Mono;

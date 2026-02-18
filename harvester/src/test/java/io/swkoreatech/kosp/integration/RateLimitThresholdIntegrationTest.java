@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.swkoreatech.kosp.client.RateLimitException;
 import io.swkoreatech.kosp.client.RateLimitManager;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Rate Limit Threshold Behavior Integration Test")
