@@ -18,7 +18,7 @@ import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.user.service.UserService;
 import io.swkoreatech.kosp.global.auth.annotation.Token;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;

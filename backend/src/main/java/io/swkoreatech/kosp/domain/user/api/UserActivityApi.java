@@ -11,7 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "User Activity", description = "사용자 활동 조회 API")

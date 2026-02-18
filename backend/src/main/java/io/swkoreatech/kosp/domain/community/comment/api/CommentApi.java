@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;

@@ -9,7 +9,7 @@ import io.swkoreatech.kosp.domain.admin.point.api.AdminPointApi;
 import io.swkoreatech.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import io.swkoreatech.kosp.domain.admin.point.dto.response.PointHistoryResponse;
 import io.swkoreatech.kosp.domain.admin.point.service.AdminPointService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 

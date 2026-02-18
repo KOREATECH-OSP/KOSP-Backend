@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swkoreatech.kosp.domain.challenge.api.ChallengeApi;
 import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
 import io.swkoreatech.kosp.domain.challenge.service.ChallengeService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;

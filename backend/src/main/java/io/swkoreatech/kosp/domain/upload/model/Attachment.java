@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

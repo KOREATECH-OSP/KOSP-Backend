@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.user.dto.response;
 
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 public record AuthorResponse(
     Long id,

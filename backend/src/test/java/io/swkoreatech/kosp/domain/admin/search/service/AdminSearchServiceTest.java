@@ -22,8 +22,8 @@ import io.swkoreatech.kosp.domain.admin.search.dto.response.AdminSearchResponse;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminSearchService 단위 테스트")

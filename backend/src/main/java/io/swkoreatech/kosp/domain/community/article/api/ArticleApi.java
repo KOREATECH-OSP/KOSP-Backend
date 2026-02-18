@@ -19,7 +19,7 @@ import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Article", description = "게시글 관리 API")

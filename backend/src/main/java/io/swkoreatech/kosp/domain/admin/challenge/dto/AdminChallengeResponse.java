@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.challenge.dto;
 
-import io.swkoreatech.kosp.domain.challenge.model.ImageResourceType;
+import io.swkoreatech.kosp.common.challenge.model.ImageResourceType;
 
 public record AdminChallengeResponse(
     Long id,

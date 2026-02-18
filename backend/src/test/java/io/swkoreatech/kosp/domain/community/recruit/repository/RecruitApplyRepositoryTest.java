@@ -17,7 +17,7 @@ import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 @DataJpaTest
 @ActiveProfiles("test")

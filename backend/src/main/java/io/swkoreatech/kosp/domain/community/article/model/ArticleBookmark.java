@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.community.article.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;

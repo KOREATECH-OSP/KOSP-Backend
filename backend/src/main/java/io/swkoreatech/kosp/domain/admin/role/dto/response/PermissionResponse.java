@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.role.dto.response;
 
-import io.swkoreatech.kosp.domain.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Permission;
 
 public record PermissionResponse(
     Long id,

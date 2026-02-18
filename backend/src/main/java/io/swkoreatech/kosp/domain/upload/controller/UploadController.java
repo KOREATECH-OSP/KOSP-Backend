@@ -7,7 +7,7 @@ import io.swkoreatech.kosp.domain.upload.api.UploadApi;
 import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
 import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
 import io.swkoreatech.kosp.domain.upload.service.UploadService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 

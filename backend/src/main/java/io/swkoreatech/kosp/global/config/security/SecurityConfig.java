@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.resolver.TokenHeaderResolver;
 import io.swkoreatech.kosp.global.security.filter.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

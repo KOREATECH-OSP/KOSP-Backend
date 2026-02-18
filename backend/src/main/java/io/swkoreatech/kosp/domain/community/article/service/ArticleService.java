@@ -21,7 +21,7 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;

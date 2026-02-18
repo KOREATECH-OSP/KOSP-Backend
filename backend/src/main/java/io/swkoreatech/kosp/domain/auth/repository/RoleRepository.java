@@ -2,7 +2,7 @@ package io.swkoreatech.kosp.domain.auth.repository;
 
 import java.util.List;
 import java.util.Optional;
-import io.swkoreatech.kosp.domain.auth.model.Role;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 

@@ -20,7 +20,7 @@ import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.auth.annotation.Token;
 import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.RefreshToken;

@@ -10,7 +10,7 @@ import io.swkoreatech.kosp.domain.notification.api.NotificationApi;
 import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
 import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
 import io.swkoreatech.kosp.domain.notification.service.NotificationService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 

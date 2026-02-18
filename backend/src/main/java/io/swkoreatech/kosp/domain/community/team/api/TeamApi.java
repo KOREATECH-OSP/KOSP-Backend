@@ -21,7 +21,7 @@ import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 

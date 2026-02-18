@@ -13,7 +13,7 @@ import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResp
 import io.swkoreatech.kosp.domain.community.article.service.ArticleService;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;

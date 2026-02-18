@@ -6,7 +6,7 @@ import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportReason;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

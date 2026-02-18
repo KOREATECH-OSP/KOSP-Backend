@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 public record PointHistoryResponse(
     Long userId,

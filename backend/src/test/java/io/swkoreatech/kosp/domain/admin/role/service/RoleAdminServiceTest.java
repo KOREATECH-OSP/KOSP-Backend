@@ -21,11 +21,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
-import io.swkoreatech.kosp.domain.auth.model.Policy;
-import io.swkoreatech.kosp.domain.auth.model.Role;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 

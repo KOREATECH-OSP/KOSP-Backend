@@ -25,10 +25,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
-import io.swkoreatech.kosp.domain.auth.model.Role;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)

@@ -9,10 +9,10 @@ import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreRes
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;

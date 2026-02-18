@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.springframework.data.repository.Repository;
 
-import io.swkoreatech.kosp.domain.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 

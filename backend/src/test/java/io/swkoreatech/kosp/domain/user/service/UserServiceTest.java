@@ -32,8 +32,8 @@ import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 

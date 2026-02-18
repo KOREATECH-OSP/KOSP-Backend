@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.dto.request;
 
-import io.swkoreatech.kosp.domain.challenge.model.ImageResourceType;
+import io.swkoreatech.kosp.common.challenge.model.ImageResourceType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;

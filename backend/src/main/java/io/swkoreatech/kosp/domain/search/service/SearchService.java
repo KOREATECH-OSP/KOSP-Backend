@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.challenge.model.Challenge;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
@@ -29,8 +29,8 @@ import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.TeamS
 import io.swkoreatech.kosp.domain.search.dto.response.RepositorySummary;
 import io.swkoreatech.kosp.domain.search.dto.response.UserSummary;
 import io.swkoreatech.kosp.domain.search.model.SearchFilter;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
 import jakarta.persistence.criteria.Join;

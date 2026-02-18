@@ -9,7 +9,7 @@ import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;

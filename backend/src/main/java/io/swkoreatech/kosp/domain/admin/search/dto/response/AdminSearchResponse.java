@@ -2,7 +2,7 @@ package io.swkoreatech.kosp.domain.admin.search.dto.response;
 
 import java.util.List;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 public record AdminSearchResponse(
     List<UserSummary> users,

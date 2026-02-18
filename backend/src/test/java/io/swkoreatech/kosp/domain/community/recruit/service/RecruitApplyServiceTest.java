@@ -27,7 +27,7 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
 import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RecruitApplyService 단위 테스트")

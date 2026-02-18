@@ -8,7 +8,7 @@ import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResp
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
 import io.swkoreatech.kosp.domain.user.api.UserActivityApi;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.user.service.UserActivityService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;

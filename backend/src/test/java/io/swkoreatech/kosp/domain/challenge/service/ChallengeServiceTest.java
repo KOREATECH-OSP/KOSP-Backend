@@ -25,12 +25,12 @@ import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
 import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import io.swkoreatech.kosp.domain.challenge.model.Challenge;
-import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
@@ -162,7 +162,7 @@ class ChallengeServiceTest {
                 "T(Math).min(totalCommits * 100 / 10, 100)",
                 1,
                 "https://image.url",
-                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
+                io.swkoreatech.kosp.common.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 
@@ -183,7 +183,7 @@ class ChallengeServiceTest {
                 "((( invalid spel",
                 1,
                 "https://image.url",
-                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
+                io.swkoreatech.kosp.common.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 

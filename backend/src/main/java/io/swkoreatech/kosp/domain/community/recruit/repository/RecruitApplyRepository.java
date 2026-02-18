@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 public interface RecruitApplyRepository extends JpaRepository<RecruitApply, Long>, JpaSpecificationExecutor<RecruitApply> {
     Optional<RecruitApply> findByRecruitAndUser(Recruit recruit, User user);

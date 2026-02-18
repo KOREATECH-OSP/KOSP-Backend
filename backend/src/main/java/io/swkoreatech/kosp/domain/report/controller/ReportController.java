@@ -2,7 +2,7 @@ package io.swkoreatech.kosp.domain.report.controller;
 
 import io.swkoreatech.kosp.domain.report.dto.request.ReportRequest;
 import io.swkoreatech.kosp.domain.report.service.ReportService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

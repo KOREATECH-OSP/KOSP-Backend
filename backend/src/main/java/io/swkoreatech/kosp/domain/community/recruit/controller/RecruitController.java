@@ -30,7 +30,7 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResp
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
 import io.swkoreatech.kosp.domain.community.recruit.service.RecruitApplyService;
 import io.swkoreatech.kosp.domain.community.recruit.service.RecruitService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;

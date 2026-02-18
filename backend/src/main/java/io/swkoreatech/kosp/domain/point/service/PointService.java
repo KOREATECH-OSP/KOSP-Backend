@@ -7,7 +7,7 @@ import io.swkoreatech.kosp.domain.point.model.PointSource;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.model.TransactionType;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.global.auth.token;
 
-import io.swkoreatech.kosp.domain.auth.model.Role;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
 import lombok.Builder;
 import lombok.Getter;

@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.domain.admin.search.dto.response.AdminSearchResponse;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
 import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 

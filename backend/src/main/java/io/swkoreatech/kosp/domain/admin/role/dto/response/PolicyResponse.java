@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.role.dto.response;
 
-import io.swkoreatech.kosp.domain.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Policy;
 
 public record PolicyResponse(
     Long id,

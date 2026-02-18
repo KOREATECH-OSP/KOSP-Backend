@@ -6,7 +6,7 @@ import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateReq
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.comment.service.CommentService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;

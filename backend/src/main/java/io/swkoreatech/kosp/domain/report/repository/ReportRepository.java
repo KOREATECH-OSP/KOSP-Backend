@@ -5,7 +5,7 @@ import java.util.Optional;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import org.springframework.data.repository.Repository;
 
 public interface ReportRepository extends Repository<Report, Long> {

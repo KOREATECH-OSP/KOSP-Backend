@@ -16,8 +16,8 @@ import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.notification.model.Notification;
 import io.swkoreatech.kosp.domain.notification.repository.NotificationRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;

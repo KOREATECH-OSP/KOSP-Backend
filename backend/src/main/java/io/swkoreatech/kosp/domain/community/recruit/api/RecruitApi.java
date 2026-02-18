@@ -23,7 +23,7 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyLis
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Recruit", description = "모집 공고 관리 API")

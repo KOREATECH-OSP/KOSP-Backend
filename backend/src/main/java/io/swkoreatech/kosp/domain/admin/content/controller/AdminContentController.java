@@ -8,7 +8,7 @@ import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.content.api.AdminContentApi;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.admin.content.service.AdminContentService;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 

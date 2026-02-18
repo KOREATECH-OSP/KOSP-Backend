@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
 
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 
 public interface PointTransactionRepository extends Repository<PointTransaction, Long> {
 

@@ -15,7 +15,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Admin - Content", description = "관리자 전용 콘텐츠 관리 API")
