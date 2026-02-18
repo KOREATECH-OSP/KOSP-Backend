@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.common.user;
+package io.swkoreatech.kosp.common.user.model;
 
 import static lombok.AccessLevel.PROTECTED;
 

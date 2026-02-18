@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.user.repository;
+package io.swkoreatech.kosp.common.user.repository;
 
 import java.util.Optional;
 
@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
 
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.exception.ExceptionMessage;
 import io.swkoreatech.kosp.global.exception.GlobalException;
 

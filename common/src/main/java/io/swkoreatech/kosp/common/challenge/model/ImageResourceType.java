@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.challenge.model;
+package io.swkoreatech.kosp.common.challenge.model;
 
 public enum ImageResourceType {
     ICON,

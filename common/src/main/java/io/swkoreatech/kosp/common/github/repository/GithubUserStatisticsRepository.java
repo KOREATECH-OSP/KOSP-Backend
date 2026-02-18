@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.github.repository;
+package io.swkoreatech.kosp.common.github.repository;
 
 import java.util.List;
 import java.util.Optional;

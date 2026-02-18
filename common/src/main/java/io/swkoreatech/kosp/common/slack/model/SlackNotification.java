@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.infra.slack.model;
+package io.swkoreatech.kosp.common.slack.model;
 
 import lombok.Builder;
 import lombok.Getter;

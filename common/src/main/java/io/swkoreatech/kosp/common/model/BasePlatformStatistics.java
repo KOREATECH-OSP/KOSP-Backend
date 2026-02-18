@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.common.statistics;
+package io.swkoreatech.kosp.common.model;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

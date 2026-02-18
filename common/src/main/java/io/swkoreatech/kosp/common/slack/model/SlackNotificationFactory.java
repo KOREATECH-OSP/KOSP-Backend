@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.infra.slack.model;
+package io.swkoreatech.kosp.common.slack.model;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

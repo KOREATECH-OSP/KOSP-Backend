@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.auth.model;
+package io.swkoreatech.kosp.common.auth.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -11,8 +11,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.Builder;
@@ -21,11 +19,11 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "policy")
+@Table(name = "permission")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @SuperBuilder
-public class Policy extends BaseEntity {
+public class Permission extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,25 +34,11 @@ public class Policy extends BaseEntity {
 
     private String description;
 
-    @ManyToMany
-    @JoinTable(
-        name = "policy_permission",
-        joinColumns = @JoinColumn(name = "policy_id"),
-        inverseJoinColumns = @JoinColumn(name = "permission_id")
-    )
+    @ManyToMany(mappedBy = "permissions")
     @Builder.Default
-    private Set<Permission> permissions = new HashSet<>();
-
-    @ManyToMany(mappedBy = "policies")
-    @Builder.Default
-    private Set<Role> roles = new HashSet<>();
+    private Set<Policy> policies = new HashSet<>();
 
     public void updateDescription(String description) {
         this.description = description;
-    }
-
-    public void updatePermissions(Set<Permission> newPermissions) {
-        this.permissions.clear();
-        this.permissions.addAll(newPermissions);
     }
 }

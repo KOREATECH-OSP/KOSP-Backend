@@ -1,4 +1,4 @@
-package io.swkoreatech.kosp.domain.user.model;
+package io.swkoreatech.kosp.common.user.model;
 
 import static lombok.AccessLevel.PROTECTED;
 
@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import io.swkoreatech.kosp.common.user.BaseUser;
-import io.swkoreatech.kosp.domain.auth.model.Role;
+import io.swkoreatech.kosp.common.user.model.BaseUser;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
