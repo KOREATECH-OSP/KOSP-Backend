@@ -13,8 +13,8 @@ import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsReposito
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

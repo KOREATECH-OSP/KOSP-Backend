@@ -35,7 +35,7 @@ import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService 단위 테스트")

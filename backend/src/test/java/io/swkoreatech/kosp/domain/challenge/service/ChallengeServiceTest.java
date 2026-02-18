@@ -31,7 +31,7 @@ import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepositor
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChallengeService 단위 테스트")

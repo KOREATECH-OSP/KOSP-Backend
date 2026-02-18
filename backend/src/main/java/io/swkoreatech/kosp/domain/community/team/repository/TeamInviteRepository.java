@@ -7,8 +7,8 @@ import org.springframework.data.repository.Repository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
 

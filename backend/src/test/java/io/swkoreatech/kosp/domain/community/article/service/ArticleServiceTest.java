@@ -35,7 +35,7 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ArticleService 단위 테스트")

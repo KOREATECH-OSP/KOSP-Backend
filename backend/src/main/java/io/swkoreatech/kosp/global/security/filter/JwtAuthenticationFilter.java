@@ -19,8 +19,8 @@ import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.resolver.TokenHeaderResolver;
 import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.JwtToken;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

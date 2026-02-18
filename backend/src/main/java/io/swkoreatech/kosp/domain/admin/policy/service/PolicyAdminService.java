@@ -14,8 +14,8 @@ import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

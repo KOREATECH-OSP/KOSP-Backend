@@ -28,8 +28,8 @@ import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.JwtToken;
 import io.swkoreatech.kosp.global.auth.token.RefreshToken;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

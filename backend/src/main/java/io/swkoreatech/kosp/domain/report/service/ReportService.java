@@ -13,8 +13,8 @@ import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

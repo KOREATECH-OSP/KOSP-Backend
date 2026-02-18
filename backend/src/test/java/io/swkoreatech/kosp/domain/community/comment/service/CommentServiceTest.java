@@ -34,7 +34,7 @@ import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommentService 단위 테스트")

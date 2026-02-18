@@ -32,7 +32,7 @@ import io.swkoreatech.kosp.domain.point.model.TransactionType;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminPointService 단위 테스트")

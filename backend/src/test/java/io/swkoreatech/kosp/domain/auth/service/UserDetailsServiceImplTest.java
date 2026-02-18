@@ -22,7 +22,7 @@ import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserDetailsServiceImpl 단위 테스트")

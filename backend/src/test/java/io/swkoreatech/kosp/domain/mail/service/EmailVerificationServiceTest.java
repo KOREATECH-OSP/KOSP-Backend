@@ -19,7 +19,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
 
 @ExtendWith(MockitoExtension.class)

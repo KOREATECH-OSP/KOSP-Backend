@@ -2,8 +2,8 @@ package io.swkoreatech.kosp.domain.auth.repository;
 
 import java.util.Optional;
 import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 import org.springframework.data.repository.Repository;
 

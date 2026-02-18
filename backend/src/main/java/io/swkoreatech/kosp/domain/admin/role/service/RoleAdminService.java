@@ -13,8 +13,8 @@ import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
 import io.swkoreatech.kosp.infra.github.dto.GithubGraphQLResponse;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.infra.github.dto.GithubGraphQLRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

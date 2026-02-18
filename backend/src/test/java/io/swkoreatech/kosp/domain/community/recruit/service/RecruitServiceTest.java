@@ -43,7 +43,7 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RecruitService 단위 테스트")

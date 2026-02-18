@@ -11,8 +11,8 @@ import io.swkoreatech.kosp.domain.user.model.PasswordResetToken;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
 import lombok.RequiredArgsConstructor;
 

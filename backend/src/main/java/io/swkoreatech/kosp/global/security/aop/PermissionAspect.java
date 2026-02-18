@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 
 import io.swkoreatech.kosp.domain.auth.service.PermissionService;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

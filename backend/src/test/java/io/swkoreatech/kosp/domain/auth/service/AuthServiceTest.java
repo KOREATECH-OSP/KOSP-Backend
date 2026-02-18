@@ -45,7 +45,7 @@ import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
 import io.swkoreatech.kosp.global.auth.token.RefreshToken;
 import io.swkoreatech.kosp.global.auth.token.TokenType;
 import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuthService 단위 테스트")

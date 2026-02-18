@@ -29,7 +29,7 @@ import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminReportService 단위 테스트")

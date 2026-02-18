@@ -10,8 +10,8 @@ import org.springframework.data.repository.Repository;
 
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 public interface RecruitRepository extends Repository<Recruit, Long>, JpaSpecificationExecutor<Recruit> {
 
