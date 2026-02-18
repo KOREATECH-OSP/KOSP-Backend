@@ -3,13 +3,18 @@ package io.swkoreatech.kosp.domain.github.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
@@ -22,8 +27,11 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class GithubStatisticsService {
 
+    private static final Integer RECENT_ACTIVITY_LIMIT = 10;
+
     private final UserRepository userRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final PlatformStatisticsRepository platformStatisticsRepository;
 
     public GithubOverallHistoryResponse getOverallHistory(Long userId) {
@@ -60,6 +68,19 @@ public class GithubStatisticsService {
     public GithubContributionScoreResponse getScore(Long userId) {
         GithubUserStatistics stats = getStatisticsByUserId(userId);
         return GithubContributionScoreResponse.from(stats);
+    }
+
+    public List<GithubRecentActivityResponse> getRecentActivity(Long userId) {
+        User user = userRepository.getById(userId);
+
+        if (user.getGithubUser() == null) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
+        }
+
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        List<GithubRepositoryStatistics> repositories = repositoryStatisticsRepository
+            .findTopNByContributorGithubIdOrderByLastCommitDateDesc(githubId, RECENT_ACTIVITY_LIMIT);
+        return repositories.stream().map(GithubRecentActivityResponse::from).toList();
     }
 
     public GlobalStatisticsResponse getGlobalStatistics() {

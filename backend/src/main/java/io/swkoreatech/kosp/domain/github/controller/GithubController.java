@@ -22,7 +22,7 @@ public class GithubController implements GithubApi {
 
     @Override
     public ResponseEntity<List<GithubRecentActivityResponse>> getRecentActivity(Long userId) {
-        return ResponseEntity.ok(List.of());
+        return ResponseEntity.ok(statisticsService.getRecentActivity(userId));
     }
 
     @Override
