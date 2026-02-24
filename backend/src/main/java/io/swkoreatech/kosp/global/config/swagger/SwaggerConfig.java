@@ -71,7 +71,7 @@ public class SwaggerConfig {
             .addSecurityItem(securityRequirement)
             .components(components)
             .tags(List.of(
-                new Tag().name("Auth").description("인증 API"),
+                new Tag().name("Auth").description("인증 및 세션 관리 API"),
                 new Tag().name("User").description("사용자 관리 API"),
                 new Tag().name("User Activity").description("사용자 활동 조회 API"),
                 new Tag().name("GitHub").description("GitHub 관련 API"),
@@ -81,8 +81,8 @@ public class SwaggerConfig {
                 new Tag().name("Community - Article").description("게시글 관리 API"),
                 new Tag().name("Community - Comment").description("댓글 관리 API"),
                 new Tag().name("Community - Recruit").description("모집 공고 관리 API"),
-                new Tag().name("Community - Team").description("팀 및 초대 관리 API"),
                 new Tag().name("Community - Report").description("신고 API"),
+                new Tag().name("Team").description("팀 및 초대 관리 API"),
                 new Tag().name("Search").description("통합 검색 API"),
                 new Tag().name("Banner").description("배너 API"),
                 new Tag().name("Upload").description("파일 업로드 API"),
@@ -91,11 +91,11 @@ public class SwaggerConfig {
                 new Tag().name("Admin - Permission").description("관리자 전용 권한 조회 API"),
                 new Tag().name("Admin - Policy").description("관리자 전용 정책 관리 API"),
                 new Tag().name("Admin - Point").description("관리자 전용 포인트 관리 API"),
-                new Tag().name("Admin - Challenge").description("관리자 전용 챔린지 관리 API"),
+                new Tag().name("Admin - Challenge").description("관리자 전용 챌린지 관리 API"),
                 new Tag().name("Admin - Article").description("관리자 전용 게시글 관리 API"),
                 new Tag().name("Admin - Content").description("관리자 전용 콘텐츠 관리 API"),
                 new Tag().name("Admin - Report").description("관리자 전용 신고 관리 API"),
-                new Tag().name("Admin - Contact").description("관리자 연락정 관리 API"),
+                new Tag().name("Admin - Contact").description("관리자 연락처 관리 API"),
                 new Tag().name("Admin - Search").description("관리자 전용 통합 검색 API"),
                 new Tag().name("Admin - Banner").description("배너 관리 API (관리자 전용)")
             ));
@@ -115,7 +115,16 @@ public class SwaggerConfig {
         return GroupedOpenApi.builder()
             .group("community")
             .displayName("02. 커뮤니티")
-            .pathsToMatch("/v1/community/**", "/v1/teams/**")
+            .pathsToMatch("/v1/community/**")
+            .build();
+    }
+
+    @Bean
+    public GroupedOpenApi teamApi() {
+        return GroupedOpenApi.builder()
+            .group("team")
+            .displayName("03. 팀")
+            .pathsToMatch("/v1/teams/**")
             .build();
     }
 
@@ -123,7 +132,7 @@ public class SwaggerConfig {
     public GroupedOpenApi utilityApi() {
         return GroupedOpenApi.builder()
             .group("utility")
-            .displayName("03. 부가기능")
+            .displayName("04. 부가기능")
             .pathsToMatch("/v1/search/**", "/v1/banner/**", "/v1/upload/**",
                 "/v1/challenges/**", "/v1/notifications/**")
             .build();
@@ -133,17 +142,8 @@ public class SwaggerConfig {
     public GroupedOpenApi adminApi() {
         return GroupedOpenApi.builder()
             .group("admin")
-            .displayName("04. 관리자")
+            .displayName("05. 관리자")
             .pathsToMatch("/v1/admin/**")
-            .build();
-    }
-
-    @Bean
-    public GroupedOpenApi allApi() {
-        return GroupedOpenApi.builder()
-            .group("all")
-            .displayName("00. 전체")
-            .pathsToMatch("/**")
             .build();
     }
 }

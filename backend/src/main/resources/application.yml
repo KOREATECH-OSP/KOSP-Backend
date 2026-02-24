@@ -61,8 +61,6 @@ spring:
       host: ${MONGODB_HOST}
       port: ${MONGODB_PORT}
       database: ${MONGODB_DATABASE}
-      username: ${MONGODB_USERNAME}
-      password: ${MONGODB_PASSWORD}
       auto-index-creation: false
       uuid-representation: standard
 
@@ -112,7 +110,6 @@ server:
 springdoc:
   swagger-ui:
     tags-sorter: alpha
-    operations-sorter: alpha
     persist-authorization: true
     disable-swagger-default-url: true
   default-produces-media-type: application/json
