@@ -18,6 +18,18 @@ public record GlobalSearchResponse(
     List<RepositorySummary> repositories,
     PageMeta meta
 ) {
+    public static GlobalSearchResponse from(
+        List<ArticleSummary> articles,
+        List<RecruitSummary> recruits,
+        List<TeamSummary> teams,
+        List<ChallengeSummary> challenges,
+        List<UserSummary> users,
+        List<RepositorySummary> repositories,
+        PageMeta meta
+    ) {
+        return new GlobalSearchResponse(articles, recruits, teams, challenges, users, repositories, meta);
+    }
+
     public record ArticleSummary(
         Long id,
         String title,

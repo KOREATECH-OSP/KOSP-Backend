@@ -19,7 +19,7 @@ import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
 import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.dto.PageMeta;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +76,7 @@ public class CommentService {
                 isMine(user, comment)
             ))
             .toList();
-        return new CommentListResponse(comments, PageMeta.from(page));
+        return CommentListResponse.from(comments, page);
     }
 
     private boolean isLiked(User user, Comment comment) {

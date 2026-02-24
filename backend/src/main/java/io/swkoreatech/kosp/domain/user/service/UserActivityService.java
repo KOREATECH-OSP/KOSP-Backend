@@ -1,6 +1,6 @@
 package io.swkoreatech.kosp.domain.user.service;
 
-import java.util.Collections;
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -61,11 +61,11 @@ public class UserActivityService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
 
         if (targetUser.getGithubUser() == null) {
-            return new GithubActivityResponse(Collections.emptyList());
+            return GithubActivityResponse.empty();
         }
 
         // TODO: Implement after MongoDB schema is rebuilt
-        return new GithubActivityResponse(Collections.emptyList());
+        return GithubActivityResponse.empty();
     }
 
     private ArticleListResponse toArticleResponse(Page<Article> page, User user) {
@@ -76,7 +76,7 @@ public class UserActivityService {
                 isArticleBookmarked(user, article)
             ))
             .toList();
-        return new ArticleListResponse(posts, PageMeta.from(page));
+        return new ArticleListResponse<>(posts, PageMeta.from(page));
     }
 
     private CommentListResponse toCommentResponse(Page<Comment> page, User user) {
@@ -87,7 +87,7 @@ public class UserActivityService {
                 isCommentMine(user, comment)
             ))
             .toList();
-        return new CommentListResponse(comments, PageMeta.from(page));
+        return CommentListResponse.from(comments, page);
     }
 
     private boolean isArticleLiked(User user, Article article) {

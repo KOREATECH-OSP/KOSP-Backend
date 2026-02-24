@@ -1,10 +1,15 @@
 package io.swkoreatech.kosp.domain.user.dto.response;
 
+import java.util.Collections;
 import java.util.List;
 
 public record GithubActivityResponse(
     List<Activity> activities
 ) {
+    public static GithubActivityResponse empty() {
+        return new GithubActivityResponse(Collections.emptyList());
+    }
+
     public record Activity(
         String id, // Repo ID or Event ID
         String type, // "REPOSITORY", "PR", "ISSUE"

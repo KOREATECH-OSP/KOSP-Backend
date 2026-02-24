@@ -69,7 +69,7 @@ public class SearchService {
 
          PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories);
 
-         return new GlobalSearchResponse(articles, recruits, teams, challenges, users, repositories, meta);
+         return GlobalSearchResponse.from(articles, recruits, teams, challenges, users, repositories, meta);
     }
 
     private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
