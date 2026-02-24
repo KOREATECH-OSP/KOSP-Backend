@@ -34,8 +34,7 @@ public class ChallengeEventPublisher {
                 rabbitEvent
             );
 
-            log.info("Published PointChangedEvent to RabbitMQ: userId={}, points={}", 
-                userId, amount);
+            log.info("Published PointChangedEvent to RabbitMQ: userId={}, points={}", userId, amount);
         } catch (Exception e) {
             log.error("Failed to publish PointChangedEvent", e);
         }
@@ -57,8 +56,7 @@ public class ChallengeEventPublisher {
                 event
             );
 
-            log.info("Published ChallengeCompletedEvent to RabbitMQ: userId={}, challengeId={}", 
-                userId, challengeId);
+            log.info("Published ChallengeCompletedEvent to RabbitMQ: userId={}, challengeId={}", userId, challengeId);
         } catch (Exception e) {
             log.error("Failed to publish ChallengeCompletedEvent", e);
         }

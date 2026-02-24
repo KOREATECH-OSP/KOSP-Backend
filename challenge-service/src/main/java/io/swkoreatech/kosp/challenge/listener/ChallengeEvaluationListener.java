@@ -23,36 +23,38 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class ChallengeEvaluationListener {
+
     private final ChallengeEvaluator challengeEvaluator;
     private final UserRepository userRepository;
     private final ProcessedMessageRepository processedMessageRepository;
-    
+
     @RabbitListener(queues = QueueNames.CHALLENGE_EVALUATION, concurrency = "5")
     public void handleEvaluationRequest(
-            ChallengeEvaluationRequest request,
-            @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
-            Channel channel) throws IOException {
-        
+        ChallengeEvaluationRequest request,
+        @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag,
+        Channel channel
+    ) throws IOException {
+
         if (processedMessageRepository.existsByMessageId(request.messageId())) {
             log.info("Duplicate message: {}", request.messageId());
             channel.basicAck(deliveryTag, false);
             return;
         }
-        
+
         try {
             log.info("Evaluating challenges for user: {}", request.userId());
-            
+
             User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.userId()));
-            
+
             challengeEvaluator.evaluate(user);
-            
+
             processedMessageRepository.save(
                 new ProcessedMessage(request.messageId(), "ChallengeEvaluationRequest")
             );
-            
+
             channel.basicAck(deliveryTag, false);
-            
+
         } catch (Exception e) {
             log.error("Failed to evaluate challenges: userId={}", request.userId(), e);
             channel.basicNack(deliveryTag, false, false);

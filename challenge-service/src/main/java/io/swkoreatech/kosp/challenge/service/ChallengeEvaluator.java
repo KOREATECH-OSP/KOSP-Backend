@@ -1,6 +1,5 @@
 package io.swkoreatech.kosp.challenge.service;
 
-import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -13,11 +12,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import lombok.RequiredArgsConstructor;
@@ -65,18 +64,18 @@ public class ChallengeEvaluator {
     private StandardEvaluationContext createEvaluationContext(GithubUserStatistics stats) {
         StandardEvaluationContext context = new StandardEvaluationContext(stats);
         context.setVariable("stats", stats);
-        
+
         try {
-            context.registerFunction("min", 
+            context.registerFunction("min",
                 ChallengeEvaluator.class.getMethod("min", int[].class));
-            context.registerFunction("max", 
+            context.registerFunction("max",
                 ChallengeEvaluator.class.getMethod("max", int[].class));
-            context.registerFunction("progress", 
+            context.registerFunction("progress",
                 ChallengeEvaluator.class.getMethod("calculateProgressPercentage", int.class, int.class));
         } catch (NoSuchMethodException e) {
             log.error("Failed to register helper functions for SpEL", e);
         }
-        
+
         return context;
     }
 
@@ -157,7 +156,7 @@ public class ChallengeEvaluator {
     }
 
     private void grantReward(User user, Challenge challenge, int progress) {
-        log.info("User {} achieved challenge: {} (+{} points)", 
+        log.info("User {} achieved challenge: {} (+{} points)",
             user.getId(), challenge.getName(), challenge.getPoint());
 
         String reason = String.format("챌린지 달성: %s", challenge.getName());
@@ -169,9 +168,9 @@ public class ChallengeEvaluator {
         );
 
         challengeEventPublisher.publishChallengeCompleted(
-            user.getId(), 
-            challenge.getId(), 
-            challenge.getName(), 
+            user.getId(),
+            challenge.getId(),
+            challenge.getName(),
             challenge.getPoint()
         );
     }
