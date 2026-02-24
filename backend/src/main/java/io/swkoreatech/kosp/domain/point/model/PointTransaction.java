@@ -16,15 +16,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Entity
 @Table(name = "point_transactions")
 @NoArgsConstructor(access = PROTECTED)
-@SuperBuilder
 public class PointTransaction extends BaseEntity {
 
     @Id
@@ -57,4 +56,14 @@ public class PointTransaction extends BaseEntity {
     @NotNull
     @Column(name = "balance_after", nullable = false)
     private Integer balanceAfter;
+
+    @Builder
+    private PointTransaction(User user, Integer amount, TransactionType type, PointSource source, String reason, Integer balanceAfter) {
+        this.user = user;
+        this.amount = amount;
+        this.type = type;
+        this.source = source;
+        this.reason = reason;
+        this.balanceAfter = balanceAfter;
+    }
 }

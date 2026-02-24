@@ -8,15 +8,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "board")
-@SuperBuilder
 public class Board extends BaseEntity {
 
     @Id
@@ -34,4 +33,12 @@ public class Board extends BaseEntity {
 
     @Column(name = "is_notice", nullable = false)
     private boolean isNotice = false;
+
+    @Builder
+    private Board(String name, String description, boolean isRecruitAllowed, boolean isNotice) {
+        this.name = name;
+        this.description = description;
+        this.isRecruitAllowed = isRecruitAllowed;
+        this.isNotice = isNotice;
+    }
 }

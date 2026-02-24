@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
-import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -21,16 +21,15 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "article")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -56,35 +55,39 @@ public class Article extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Builder.Default
     @Column(nullable = false)
     private Integer views = 0;
 
-    @Builder.Default
     @Column(nullable = false)
     private Integer likes = 0;
 
-    @Builder.Default
     @Column(name = "comments_count", nullable = false)
     private Integer commentsCount = 0;
 
-    @Builder.Default
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
-    @Builder.Default
     @Column(name = "is_pinned", nullable = false)
     private boolean isPinned = false;
 
-    @Builder.Default
     @ElementCollection
     @CollectionTable(name = "article_tags", joinColumns = @JoinColumn(name = "article_id"))
     @Column(name = "tag")
     private List<String> tags = new ArrayList<>();
 
-    @Builder.Default
-    @jakarta.persistence.OneToMany(mappedBy = "article")
+    @OneToMany(mappedBy = "article")
     private List<Attachment> attachments = new ArrayList<>();
+
+    @Builder
+    protected Article(User author, Board board, String title, String content, List<String> tags, Boolean isPinned) {
+        this.author = author;
+        this.board = board;
+        this.title = title;
+        this.content = content;
+        this.tags = tags != null ? tags : new ArrayList<>();
+        if (isPinned != null)
+            this.isPinned = isPinned;
+    }
 
     public static Article create(User author, Board board, String title, String content, List<String> tags) {
         return Article.builder()
@@ -93,8 +96,6 @@ public class Article extends BaseEntity {
             .title(title)
             .content(content)
             .tags(tags)
-            .createdAt(java.time.LocalDateTime.now())
-            .updatedAt(java.time.LocalDateTime.now())
             .build();
     }
 
@@ -114,7 +115,6 @@ public class Article extends BaseEntity {
         this.isPinned = isPinned;
         this.tags = tags;
     }
-
 
     public void increaseViews() {
         this.views++;
