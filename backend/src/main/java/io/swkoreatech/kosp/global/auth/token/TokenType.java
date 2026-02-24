@@ -8,6 +8,7 @@ import lombok.Setter;
  */
 @Getter
 public enum TokenType {
+
     ACCESS,
     REFRESH,
     SIGNUP,

@@ -4,9 +4,11 @@ import io.swkoreatech.kosp.domain.admin.contact.dto.request.AdminContactUpdateRe
 import io.swkoreatech.kosp.domain.admin.contact.dto.response.AdminContactResponse;
 import io.swkoreatech.kosp.domain.admin.contact.model.AdminContact;
 import io.swkoreatech.kosp.domain.admin.contact.repository.AdminContactRepository;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

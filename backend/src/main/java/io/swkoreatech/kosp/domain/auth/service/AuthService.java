@@ -1,5 +1,22 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
+import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
+import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
+import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
+import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
+import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
+import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
+import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
+import io.swkoreatech.kosp.global.auth.token.AccessToken;
+import io.swkoreatech.kosp.global.auth.token.JwtToken;
+import io.swkoreatech.kosp.global.auth.token.RefreshToken;
+import io.swkoreatech.kosp.global.auth.token.SignupToken;
+
 import java.util.Map;
 
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,22 +32,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
-import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
-import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
-import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
-import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
-import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
-import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
-import io.swkoreatech.kosp.global.auth.token.AccessToken;
-import io.swkoreatech.kosp.global.auth.token.JwtToken;
-import io.swkoreatech.kosp.global.auth.token.RefreshToken;
-import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

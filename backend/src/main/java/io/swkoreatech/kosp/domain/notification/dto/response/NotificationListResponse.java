@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.notification.dto.response;
 
+import io.swkoreatech.kosp.domain.notification.model.Notification;
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-
-import io.swkoreatech.kosp.domain.notification.model.Notification;
 
 public record NotificationListResponse(
     List<NotificationResponse> notifications,

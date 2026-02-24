@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.community.team.model;
 
-import java.time.Instant;
-
 import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.common.user.model.User;
+
+import java.time.Instant;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

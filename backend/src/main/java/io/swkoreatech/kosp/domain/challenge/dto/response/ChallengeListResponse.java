@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.challenge.dto.response;
 
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.model.ImageResourceType;
+
 import java.util.List;
 
 public record ChallengeListResponse(

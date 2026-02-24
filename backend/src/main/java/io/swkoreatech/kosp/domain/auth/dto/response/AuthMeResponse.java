@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.auth.dto.response;
 
 import io.swkoreatech.kosp.common.user.model.User;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "현재 로그인한 사용자의 기본 정보 응답 DTO 임.")
@@ -23,6 +24,12 @@ public record AuthMeResponse(
 ) {
     public static AuthMeResponse from(User user) {
         String profileImage = user.getGithubUser() != null ? user.getGithubUser().getGithubAvatarUrl() : null;
-        return new AuthMeResponse(user.getId(), user.getKutEmail(), user.getName(), profileImage, user.getIntroduction());
+        return new AuthMeResponse(
+                user.getId(),
+                user.getKutEmail(),
+                user.getName(),
+                profileImage,
+                user.getIntroduction()
+        );
     }
 }

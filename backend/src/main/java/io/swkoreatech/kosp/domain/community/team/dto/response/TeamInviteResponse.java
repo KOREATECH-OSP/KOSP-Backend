@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.community.team.dto.response;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
 
 public record TeamInviteResponse(
     Long id,

@@ -1,8 +1,10 @@
 package io.swkoreatech.kosp.statistics.model;
 
 import io.swkoreatech.kosp.common.model.BasePlatformStatistics;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

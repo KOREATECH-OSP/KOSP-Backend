@@ -1,14 +1,15 @@
 package io.swkoreatech.kosp.domain.point.eventlistener;
 
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.NotificationType;
+import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
+import io.swkoreatech.kosp.domain.point.service.PointService;
+
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
-import io.swkoreatech.kosp.domain.notification.model.NotificationType;
-import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
-import io.swkoreatech.kosp.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

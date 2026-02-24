@@ -1,15 +1,10 @@
 package io.swkoreatech.kosp.domain.community.article.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import io.swkoreatech.kosp.domain.community.article.dto.response.AdminArticleResponse;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
+import io.swkoreatech.kosp.domain.community.article.dto.response.AdminArticleResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
@@ -23,10 +18,16 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

@@ -1,14 +1,14 @@
 package io.swkoreatech.kosp.domain.admin.member.dto.response;
 
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.user.model.User;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.common.user.model.User;
 
 public record AdminUserListResponse(
     List<UserInfo> users,

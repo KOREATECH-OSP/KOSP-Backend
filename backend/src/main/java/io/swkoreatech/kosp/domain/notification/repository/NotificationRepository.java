@@ -1,19 +1,23 @@
 package io.swkoreatech.kosp.domain.notification.repository;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.notification.model.Notification;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import io.swkoreatech.kosp.domain.notification.model.Notification;
-
-public interface NotificationRepository extends JpaRepository<Notification, Long> {
+public interface NotificationRepository extends CrudRepository<Notification, Long> {
 
     Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
 
     List<Notification> findByUserIdAndIsReadFalseOrderByCreatedAtDesc(Long userId);
 
@@ -26,4 +30,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     @Modifying
     @Query("DELETE FROM Notification n WHERE n.user.id = :userId")
     int deleteAllByUserId(@Param("userId") Long userId);
+
+    default Notification getById(Long id) {
+        return findById(id)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    }
 }

@@ -3,12 +3,12 @@ package io.swkoreatech.kosp.client.dto;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import lombok.Getter;
 
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UserBasicInfoResponse {
+
     private User user;
     
     @Getter

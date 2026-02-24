@@ -1,5 +1,26 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
+import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
+import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
+import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
+import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
+import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.job.ContextValidationListener;
+import io.swkoreatech.kosp.job.StepCompletionListener;
+
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -17,26 +38,6 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.client.GithubGraphQLClient;
-import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
-import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
-import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
-import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
-import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
-import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
-import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
-import io.swkoreatech.kosp.collection.util.StepContextHelper;
-import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
-import io.swkoreatech.kosp.job.ContextValidationListener;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

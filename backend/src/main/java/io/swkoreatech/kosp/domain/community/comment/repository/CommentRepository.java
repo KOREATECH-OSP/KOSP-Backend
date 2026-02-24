@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.community.comment.repository;
 
-import java.util.Optional;
-import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.community.comment.model.Comment;
+
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

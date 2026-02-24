@@ -1,5 +1,14 @@
 package io.swkoreatech.kosp.challenge.service;
 
+import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -11,14 +20,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
-import io.swkoreatech.kosp.common.challenge.model.Challenge;
-import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.common.user.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

@@ -1,5 +1,13 @@
 package io.swkoreatech.kosp.global.init;
 
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
+import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
+import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,13 +23,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swkoreatech.kosp.common.auth.model.Permission;
-import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
-import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
-import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -135,21 +136,33 @@ public class PermissionInitializer implements CommandLineRunner {
     }
 
     private void initAdminRole(Set<Permission> permissions) {
-        createRoleIfNotExists("ROLE_ADMIN", "시스템 관리자", "AdminPolicy", "시스템 관리자 정책 (모든 권한)", permissions);
+        createRoleIfNotExists(
+                "ROLE_ADMIN", "시스템 관리자",
+                "AdminPolicy", "시스템 관리자 정책 (모든 권한)",
+                permissions
+        );
     }
 
     private void initStudentRole(Set<Permission> permissions) {
         Set<Permission> nonAdminPermissions = permissions.stream()
             .filter(p -> !p.getName().startsWith("admin:"))
             .collect(Collectors.toSet());
-        createRoleIfNotExists("ROLE_STUDENT", "학생", "StudentPolicy", "학생 권한 정책 (모든 일반 권한)", nonAdminPermissions);
+        createRoleIfNotExists(
+                "ROLE_STUDENT", "학생",
+                "StudentPolicy", "학생 권한 정책 (모든 일반 권한)",
+                nonAdminPermissions
+        );
     }
 
     private void initEmployeeRole(Set<Permission> permissions) {
         Set<Permission> nonAdminPermissions = permissions.stream()
             .filter(p -> !p.getName().startsWith("admin:"))
             .collect(Collectors.toSet());
-        createRoleIfNotExists("ROLE_EMPLOYEE", "교직원", "EmployeePolicy", "교직원 권한 정책 (모든 일반 권한)", nonAdminPermissions);
+        createRoleIfNotExists(
+                "ROLE_EMPLOYEE", "교직원",
+                "EmployeePolicy", "교직원 권한 정책 (모든 일반 권한)",
+                nonAdminPermissions
+        );
     }
 
     private void createRoleIfNotExists(

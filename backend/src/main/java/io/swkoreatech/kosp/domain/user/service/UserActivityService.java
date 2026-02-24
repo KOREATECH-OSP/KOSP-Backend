@@ -1,13 +1,10 @@
 package io.swkoreatech.kosp.domain.user.service;
 
 
-import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
@@ -20,11 +17,15 @@ import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
 import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
+
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -57,8 +58,7 @@ public class UserActivityService {
     }
 
     public GithubActivityResponse getGithubActivities(Long userId) {
-        User targetUser = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        User targetUser = userRepository.getById(userId);
 
         if (targetUser.getGithubUser() == null) {
             return GithubActivityResponse.empty();

@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.collection.repository;
 
+import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
+
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-
-import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 
 public interface CollectionMetadataRepository extends MongoRepository<CollectionMetadataDocument, String> {
 

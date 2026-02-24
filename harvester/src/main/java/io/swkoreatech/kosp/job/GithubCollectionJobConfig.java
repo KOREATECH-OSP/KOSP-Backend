@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.job;
 
-import org.springframework.batch.core.Job;
-import org.springframework.batch.core.job.builder.JobBuilder;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
 import io.swkoreatech.kosp.collection.step.impl.ChallengeEvaluationStep;
 import io.swkoreatech.kosp.collection.step.impl.CleanupStep;
 import io.swkoreatech.kosp.collection.step.impl.CommitMiningStep;
@@ -15,6 +9,13 @@ import io.swkoreatech.kosp.collection.step.impl.PullRequestMiningStep;
 import io.swkoreatech.kosp.collection.step.impl.RepositoryDiscoveryStep;
 import io.swkoreatech.kosp.collection.step.impl.ScoreCalculationStep;
 import io.swkoreatech.kosp.collection.step.impl.StatisticsAggregationStep;
+
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.job.builder.JobBuilder;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

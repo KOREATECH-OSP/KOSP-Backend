@@ -1,5 +1,16 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
+import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.job.StepCompletionListener;
+import io.swkoreatech.kosp.user.GithubUserRepository;
+
 import java.time.Instant;
 
 import org.springframework.batch.core.Step;
@@ -10,16 +21,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
-import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.StepContextHelper;
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.user.GithubUserRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 /**

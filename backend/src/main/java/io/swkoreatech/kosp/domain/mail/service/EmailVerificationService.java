@@ -1,5 +1,12 @@
 package io.swkoreatech.kosp.domain.mail.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
+import io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository;
+import io.swkoreatech.kosp.global.auth.token.TokenType;
+import io.swkoreatech.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
+
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -7,17 +14,12 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
-import io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository;
-import io.swkoreatech.kosp.global.auth.token.TokenType;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
 public class EmailVerificationService {
+
     private final EmailVerificationRepository emailVerificationRepository;
     private final ApplicationEventPublisher eventPublisher;
 
@@ -52,8 +54,7 @@ public class EmailVerificationService {
 
     @Transactional
     public EmailVerification verifyCode(String email, String code) {
-        EmailVerification verification = emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
+        EmailVerification verification = emailVerificationRepository.getById(email);
 
         if (!verification.getCode().equals(code)) {
             throw new GlobalException(ExceptionMessage.INVALID_VERIFICATION_CODE);
@@ -67,8 +68,7 @@ public class EmailVerificationService {
 
     @Transactional
     public void completeSignupVerification(String email) {
-        EmailVerification verification = emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
+        EmailVerification verification = emailVerificationRepository.getById(email);
 
         if (!verification.isVerified()) {
             throw new GlobalException(ExceptionMessage.EMAIL_NOT_VERIFIED);
@@ -78,8 +78,7 @@ public class EmailVerificationService {
     }
 
     public EmailVerification getVerification(String email) {
-        return emailVerificationRepository.findById(email)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
+        return emailVerificationRepository.getById(email);
     }
 
     private String generateCode() {

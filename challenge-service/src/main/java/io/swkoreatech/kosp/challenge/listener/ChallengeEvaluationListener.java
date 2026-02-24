@@ -1,5 +1,13 @@
 package io.swkoreatech.kosp.challenge.listener;
 
+import io.swkoreatech.kosp.challenge.service.ChallengeEvaluator;
+import io.swkoreatech.kosp.common.entity.ProcessedMessage;
+import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
+import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
+
 import java.io.IOException;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -8,14 +16,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import com.rabbitmq.client.Channel;
-
-import io.swkoreatech.kosp.challenge.service.ChallengeEvaluator;
-import io.swkoreatech.kosp.common.entity.ProcessedMessage;
-import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
-import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

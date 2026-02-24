@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.admin.role.dto.response;
 
-import java.util.List;
-
 import io.swkoreatech.kosp.common.auth.model.Policy;
+
+import java.util.List;
 
 public record PolicyDetailResponse(
     Long id,

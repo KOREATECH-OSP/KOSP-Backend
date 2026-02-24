@@ -1,9 +1,9 @@
 package io.swkoreatech.kosp.config;
 
+import java.util.Map;
+
 import org.slf4j.MDC;
 import org.springframework.core.task.TaskDecorator;
-
-import java.util.Map;
 
 /**
  * Propagates SLF4J MDC context to worker threads.

@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.global.auth.resolver;
 
+import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
+import io.swkoreatech.kosp.global.auth.token.JwtToken;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
-
-import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
-import io.swkoreatech.kosp.global.auth.token.JwtToken;
 
 @Component
 public class TokenHeaderResolver {

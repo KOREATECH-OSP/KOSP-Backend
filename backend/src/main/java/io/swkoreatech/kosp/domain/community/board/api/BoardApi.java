@@ -1,12 +1,13 @@
 package io.swkoreatech.kosp.domain.community.board.api;
 
+import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
 
 @Tag(name = "Community - Board", description = "게시판 메타데이터 API")
 @RequestMapping("/v1/community/boards")

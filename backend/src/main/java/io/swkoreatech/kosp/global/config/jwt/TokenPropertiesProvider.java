@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.global.config.jwt;
 
+import io.swkoreatech.kosp.global.auth.token.TokenType;
+
 import javax.crypto.SecretKey;
 
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jsonwebtoken.security.Keys;
-import io.swkoreatech.kosp.global.auth.token.TokenType;
 
 @Component
 public class TokenPropertiesProvider {

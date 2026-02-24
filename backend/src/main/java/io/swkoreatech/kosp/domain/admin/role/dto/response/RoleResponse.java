@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.role.dto.response;
 
-import java.util.Set;
-import java.util.stream.Collectors;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public record RoleResponse(
     String name,

@@ -1,5 +1,18 @@
 package io.swkoreatech.kosp.domain.community.recruit.api;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,22 +27,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
-import jakarta.validation.Valid;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Community - Recruit", description = "모집 공고 관리 API")
 public interface RecruitApi {
 
-    @Operation(summary = "모집 공고 목록 조회", description = "전체 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: isDeleted==false, status==OPEN)")
+    @Operation(
+        summary = "모집 공고 목록 조회",
+        description = "전체 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: isDeleted==false, status==OPEN)"
+    )
     @GetMapping
     ResponseEntity<RecruitListResponse> getList(
         @Parameter(hidden = true) @AuthUser User user,
@@ -83,7 +88,10 @@ public interface RecruitApi {
         @RequestBody @Valid RecruitApplyRequest request
     );
 
-    @Operation(summary = "지원자 목록 조회", description = "모집 공고에 대한 지원자 목록을 조회합니다. (팀장 전용) RSQL filter로 필터링 가능 (예: status==PENDING)")
+    @Operation(
+        summary = "지원자 목록 조회",
+        description = "모집 공고에 대한 지원자 목록을 조회합니다. (팀장 전용) RSQL filter로 필터링 가능 (예: status==PENDING)"
+    )
     @GetMapping("/{recruitId}/applications")
     ResponseEntity<RecruitApplyListResponse> getApplicants(
         @Parameter(hidden = true) @AuthUser User user,
@@ -92,14 +100,20 @@ public interface RecruitApi {
         @Parameter(hidden = true) Pageable pageable
     );
 
-    @Operation(summary = "지원 상세 조회", description = "지원 상세 정보를 조회합니다. (팀장 전용)")
+    @Operation(
+        summary = "지원 상세 조회",
+        description = "지원 상세 정보를 조회합니다. (팀장 전용)"
+    )
     @GetMapping("/applications/{applicationId}")
     ResponseEntity<RecruitApplyResponse> getApplication(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long applicationId
     );
 
-    @Operation(summary = "지원 수락/거절", description = "지원을 수락하거나 거절합니다. (팀장 전용)")
+    @Operation(
+        summary = "지원 수락/거절",
+        description = "지원을 수락하거나 거절합니다. (팀장 전용)"
+    )
     @PatchMapping("/applications/{applicationId}")
     ResponseEntity<Void> decideApplication(
         @Parameter(hidden = true) @AuthUser User user,
@@ -107,4 +121,3 @@ public interface RecruitApi {
         @RequestBody @Valid RecruitApplyDecisionRequest request
     );
 }
-

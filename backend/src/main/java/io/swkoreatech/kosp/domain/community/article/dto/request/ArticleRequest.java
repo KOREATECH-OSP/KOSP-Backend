@@ -1,8 +1,9 @@
 package io.swkoreatech.kosp.domain.community.article.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 
 public record ArticleRequest(
     @NotNull(message = "게시판 ID는 필수입니다.")

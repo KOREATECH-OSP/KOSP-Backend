@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.job;
 
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+
 import java.util.List;
 
 import org.springframework.batch.core.StepExecution;
@@ -7,7 +9,6 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.batch.item.ExecutionContext;
 import org.springframework.stereotype.Component;
 
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j

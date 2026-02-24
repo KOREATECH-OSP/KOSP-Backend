@@ -1,7 +1,8 @@
 package io.swkoreatech.kosp.domain.upload.dto.response;
 
-import java.time.LocalDateTime;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
+
+import java.time.LocalDateTime;
 
 public record FileResponse(
     Long id,

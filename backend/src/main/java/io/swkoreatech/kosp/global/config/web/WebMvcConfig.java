@@ -1,18 +1,19 @@
 package io.swkoreatech.kosp.global.config.web;
 
-import java.util.List;
-
-import org.springframework.context.annotation.Configuration;
-import org.springframework.web.method.support.HandlerMethodArgumentResolver;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-
 import io.swkoreatech.kosp.global.auth.resolver.JwtArgumentResolver;
 import io.swkoreatech.kosp.global.host.ClientURLArgumentResolver;
 import io.swkoreatech.kosp.global.host.ClientURLInterceptor;
 import io.swkoreatech.kosp.global.host.ServerURLArgumentResolver;
 import io.swkoreatech.kosp.global.host.ServerURLInterceptor;
+
+import java.util.List;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration

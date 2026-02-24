@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.search.dto.response;
 
-import java.time.LocalDateTime;
-
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+
+import java.time.LocalDateTime;
 
 public record RepositorySummary(
     String repoOwner,

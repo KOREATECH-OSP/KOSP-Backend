@@ -13,6 +13,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 })
 @EnableScheduling
 public class ChallengeServiceApplication {
+
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(ChallengeServiceApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);

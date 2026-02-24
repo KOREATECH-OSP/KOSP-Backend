@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.domain.search.dto.response;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.global.dto.PageMeta;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public record GlobalSearchResponse(
     List<ArticleSummary> articles,

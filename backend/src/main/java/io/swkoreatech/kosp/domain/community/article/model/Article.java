@@ -1,12 +1,13 @@
 package io.swkoreatech.kosp.domain.community.article.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorColumn;
@@ -23,6 +24,7 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -85,8 +87,9 @@ public class Article extends BaseEntity {
         this.title = title;
         this.content = content;
         this.tags = tags != null ? tags : new ArrayList<>();
-        if (isPinned != null)
+        if (isPinned != null) {
             this.isPinned = isPinned;
+        }
     }
 
     public Long getBoardId() {

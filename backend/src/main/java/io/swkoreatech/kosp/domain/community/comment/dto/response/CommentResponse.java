@@ -1,8 +1,9 @@
 package io.swkoreatech.kosp.domain.community.comment.dto.response;
 
-import java.time.LocalDateTime;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
+
+import java.time.LocalDateTime;
 
 public record CommentResponse(
     Long id,

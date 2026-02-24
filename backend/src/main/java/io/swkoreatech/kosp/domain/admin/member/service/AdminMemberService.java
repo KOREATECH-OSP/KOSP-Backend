@@ -1,5 +1,17 @@
 package io.swkoreatech.kosp.domain.admin.member.service;
 
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
+import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
+import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
+
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -9,17 +21,6 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
-import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
-import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,8 +37,7 @@ public class AdminMemberService {
 
     @Transactional
     public void updateUserRoles(Long userId, Set<String> roleNames) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        User user = userRepository.getById(userId);
         
         Set<Role> roles = roleNames.stream()
             .map(this::findRole)
@@ -50,8 +50,7 @@ public class AdminMemberService {
 
     @Transactional
     public void deleteUser(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        User user = userRepository.getById(userId);
         
         user.delete();
     }
@@ -68,8 +67,7 @@ public class AdminMemberService {
 
     @Transactional
     public void updateUser(Long userId, AdminUserUpdateRequest request) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        User user = userRepository.getById(userId);
 
         if (request.kutId() != null) {
             boolean kutIdExists = userRepository.existsByKutIdAndIdNot(request.kutId(), userId);
@@ -102,8 +100,7 @@ public class AdminMemberService {
 
     @Transactional
     public void triggerGithubCollection(Long userId) {
-        User user = userRepository.findById(userId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+        User user = userRepository.getById(userId);
 
         if (user.getGithubUser() == null) {
             throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);

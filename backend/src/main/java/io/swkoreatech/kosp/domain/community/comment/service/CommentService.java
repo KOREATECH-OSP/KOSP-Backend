@@ -1,5 +1,19 @@
 package io.swkoreatech.kosp.domain.community.comment.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
+import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
+import io.swkoreatech.kosp.domain.community.comment.model.Comment;
+import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
+import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
+import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -8,20 +22,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
-import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentResponse;
-import io.swkoreatech.kosp.domain.community.comment.model.Comment;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
-import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
-import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
-import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

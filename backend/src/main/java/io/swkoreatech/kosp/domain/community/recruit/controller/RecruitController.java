@@ -1,6 +1,25 @@
 package io.swkoreatech.kosp.domain.community.recruit.controller;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.board.service.BoardService;
+import io.swkoreatech.kosp.domain.community.recruit.api.RecruitApi;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import io.swkoreatech.kosp.domain.community.recruit.service.RecruitApplyService;
+import io.swkoreatech.kosp.domain.community.recruit.service.RecruitService;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+
 import java.net.URI;
+
+import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -16,23 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
-import jakarta.validation.Valid;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.domain.community.recruit.api.RecruitApi;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.domain.community.recruit.service.RecruitApplyService;
-import io.swkoreatech.kosp.domain.community.recruit.service.RecruitService;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 @RestController

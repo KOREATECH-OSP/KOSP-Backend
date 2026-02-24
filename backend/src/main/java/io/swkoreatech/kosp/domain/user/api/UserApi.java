@@ -1,5 +1,19 @@
 package io.swkoreatech.kosp.domain.user.api;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
+import io.swkoreatech.kosp.domain.user.dto.request.UserPasswordChangeRequest;
+import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
+import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
+import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
+import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
+import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
+import io.swkoreatech.kosp.global.auth.annotation.Token;
+import io.swkoreatech.kosp.global.auth.token.SignupToken;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,18 +28,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.user.dto.request.UserPasswordChangeRequest;
-import jakarta.validation.Valid;
-import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
-import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
-import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
-import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.auth.annotation.Token;
-import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "User", description = "사용자 관리 API")
 @RequestMapping("/v1/users")
@@ -73,11 +75,15 @@ public interface UserApi {
         @RequestBody @Valid UserPasswordChangeRequest request
     );
 
-    @Operation(summary = "본인 지원 내역 조회", description = "로그인한 사용자가 지원한 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: status==PENDING, status==ACCEPTED)")
+    @Operation(
+        summary = "본인 지원 내역 조회",
+        description = "로그인한 사용자가 지원한 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: status==PENDING, status==ACCEPTED)"
+    )
     @GetMapping("/me/applications")
     ResponseEntity<MyApplicationListResponse> getMyApplications(
         @Parameter(hidden = true) @AuthUser User user,
-        @Parameter(description = "RSQL 필터 (예: status==PENDING, status==ACCEPTED;createdAt=gt=2024-01-01)") @RequestParam(required = false) String filter,
+        @Parameter(description = "RSQL 필터 (예: status==PENDING, status==ACCEPTED;createdAt=gt=2024-01-01)")
+        @RequestParam(required = false) String filter,
         @Parameter(hidden = true) Pageable pageable
     );
 

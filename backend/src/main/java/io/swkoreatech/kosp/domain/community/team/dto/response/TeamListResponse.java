@@ -1,7 +1,8 @@
 package io.swkoreatech.kosp.domain.community.team.dto.response;
 
-import java.util.List;
 import io.swkoreatech.kosp.global.dto.PageMeta;
+
+import java.util.List;
 
 public record TeamListResponse(
     List<TeamResponse> teams,

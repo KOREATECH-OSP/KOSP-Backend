@@ -3,6 +3,7 @@ package io.swkoreatech.kosp.infra.email.form;
 import java.util.Map;
 
 public class ResetPasswordForm implements EmailForm {
+
     private static final String SUBJECT = "KOSP 비밀번호 초기화";
     private static final String PATH = "reset_password_button";
 

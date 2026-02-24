@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.point.event;
 
-import io.swkoreatech.kosp.domain.point.model.PointSource;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.point.model.PointSource;
 
 public record PointChangeEvent(
     User user,

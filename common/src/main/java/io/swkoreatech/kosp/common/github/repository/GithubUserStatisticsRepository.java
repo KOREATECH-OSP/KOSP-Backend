@@ -1,11 +1,13 @@
 package io.swkoreatech.kosp.common.github.repository;
 
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
-
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 public interface GithubUserStatisticsRepository extends Repository<GithubUserStatistics, Long> {
 
@@ -19,24 +21,24 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
 
     boolean existsByGithubId(String githubId);
 
-    @org.springframework.data.jpa.repository.Query("SELECT " +
+    @Query("SELECT " +
         "AVG(u.totalCommits), AVG(u.totalPrs), AVG(u.totalIssues), AVG(u.totalStarsReceived), COUNT(u) " +
         "FROM GithubUserStatistics u")
     Object[] getGlobalAverages();
 
     long count();
 
-    @org.springframework.data.jpa.repository.Query("SELECT AVG(g.totalCommits) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
-    java.math.BigDecimal findAverageCommits();
+    @Query("SELECT AVG(g.totalCommits) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
+    BigDecimal findAverageCommits();
 
-    @org.springframework.data.jpa.repository.Query("SELECT AVG(g.totalPrs) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
-    java.math.BigDecimal findAveragePrs();
+    @Query("SELECT AVG(g.totalPrs) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
+    BigDecimal findAveragePrs();
 
-    @org.springframework.data.jpa.repository.Query("SELECT AVG(g.totalIssues) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
-    java.math.BigDecimal findAverageIssues();
+    @Query("SELECT AVG(g.totalIssues) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
+    BigDecimal findAverageIssues();
 
-    @org.springframework.data.jpa.repository.Query("SELECT AVG(g.totalStarsReceived) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
-    java.math.BigDecimal findAverageStars();
+    @Query("SELECT AVG(g.totalStarsReceived) FROM GithubUserStatistics g WHERE g.calculatedAt IS NOT NULL")
+    BigDecimal findAverageStars();
 
     default GithubUserStatistics getOrCreate(String githubId) {
         return findByGithubId(githubId)

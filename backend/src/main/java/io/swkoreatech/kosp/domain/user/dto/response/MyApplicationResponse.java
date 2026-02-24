@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.user.dto.response;
 
-import java.time.LocalDateTime;
-
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+
+import java.time.LocalDateTime;
+
 import lombok.Builder;
 
 @Builder

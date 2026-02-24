@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.community.team.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
+
 import org.hibernate.validator.constraints.Length;
 
 public record TeamCreateRequest(

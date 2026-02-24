@@ -1,5 +1,15 @@
 package io.swkoreatech.kosp.domain.community.article.api;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+
+import jakarta.validation.Valid;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,19 +23,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
-import jakarta.validation.Valid;
-import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Community - Article", description = "게시글 관리 API")
 public interface ArticleApi {
 
-    @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다. pinned=true로 고정 게시글(배너)만 조회할 수 있습니다.")
+    @Operation(
+        summary = "게시글 목록 조회",
+        description = "전체 게시글 목록을 조회합니다. pinned=true로 고정 게시글(배너)만 조회할 수 있습니다."
+    )
     @GetMapping
     ResponseEntity<ArticleListResponse<ArticleResponse>> getList(
         @Parameter(hidden = true) @AuthUser User user,

@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.global.config.web;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.security.core.Authentication;
@@ -10,8 +13,6 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import lombok.RequiredArgsConstructor;
 
 @Component

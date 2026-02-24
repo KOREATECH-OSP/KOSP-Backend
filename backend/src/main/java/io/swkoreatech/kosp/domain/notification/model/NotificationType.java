@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.notification.model;
 
 public enum NotificationType {
+
     ARTICLE_REPORTED,
     COMMENT_REPORTED,
     CHALLENGE_ACHIEVED,

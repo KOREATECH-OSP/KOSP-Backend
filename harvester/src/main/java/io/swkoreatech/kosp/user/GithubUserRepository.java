@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.user;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
-
-import io.swkoreatech.kosp.common.github.model.GithubUser;
 
 public interface GithubUserRepository extends Repository<GithubUser, Long> {
 

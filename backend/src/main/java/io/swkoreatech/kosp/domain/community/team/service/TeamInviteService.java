@@ -1,11 +1,12 @@
 package io.swkoreatech.kosp.domain.community.team.service;
 
-import org.springframework.stereotype.Service;
-
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
+
+import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

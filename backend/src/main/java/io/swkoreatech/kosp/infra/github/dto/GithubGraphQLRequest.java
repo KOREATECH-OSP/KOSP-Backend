@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class GithubGraphQLRequest {
+
     private String query;
 
     public GithubGraphQLRequest(String query) {

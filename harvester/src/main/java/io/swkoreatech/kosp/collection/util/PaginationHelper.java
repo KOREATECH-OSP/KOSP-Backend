@@ -1,10 +1,11 @@
 package io.swkoreatech.kosp.collection.util;
 
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for handling GraphQL pagination with generic data types.
@@ -84,7 +85,9 @@ public final class PaginationHelper {
         int totalSaved = 0;
         String cursor = null;
         do {
-            PageResult<T> result = fetchAndProcessPage(fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
+            PageResult<T> result = fetchAndProcessPage(
+                    fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass
+            );
             if (result.hasError) break;
             totalSaved += result.saved;
             cursor = result.nextCursor;

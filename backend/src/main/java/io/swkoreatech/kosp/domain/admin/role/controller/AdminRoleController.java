@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.role.controller;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swkoreatech.kosp.domain.admin.role.api.AdminRoleApi;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
@@ -13,6 +7,13 @@ import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
 import io.swkoreatech.kosp.domain.admin.role.service.RoleAdminService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController

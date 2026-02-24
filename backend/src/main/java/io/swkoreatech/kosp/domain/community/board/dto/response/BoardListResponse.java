@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.board.dto.response;
 
-import java.util.List;
-
 import io.swkoreatech.kosp.domain.community.board.model.Board;
+
+import java.util.List;
 
 public record BoardListResponse(
     List<BoardResponse> boards

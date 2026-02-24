@@ -1,5 +1,11 @@
 package io.swkoreatech.kosp.queue;
 
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
+import io.swkoreatech.kosp.launcher.PriorityJobLauncher;
+
 import java.io.IOException;
 import java.util.Set;
 import java.util.UUID;
@@ -12,12 +18,6 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Service;
 
 import com.rabbitmq.client.Channel;
-
-import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
-import io.swkoreatech.kosp.launcher.PriorityJobLauncher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Slf4j
 public class GithubCollectionListener {
+
     private final PriorityJobLauncher jobLauncher;
     private final UserRepository userRepository;
     private final JobExplorer jobExplorer;

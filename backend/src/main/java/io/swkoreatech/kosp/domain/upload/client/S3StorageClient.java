@@ -1,5 +1,9 @@
 package io.swkoreatech.kosp.domain.upload.client;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.time.Clock;
@@ -10,9 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -98,7 +99,10 @@ public class S3StorageClient {
             .acl(ObjectCannedACL.PUBLIC_READ)
             .build();
 
-        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(new ByteArrayInputStream(fileData), fileData.length));
+        s3Client.putObject(
+                putObjectRequest,
+                RequestBody.fromInputStream(new ByteArrayInputStream(fileData), fileData.length)
+        );
         log.info("File uploaded successfully to S3: {}", uploadFilePath);
 
         return domainUrlPrefix + uploadFilePath;

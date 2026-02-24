@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.community.comment.dto.response;
 
+import io.swkoreatech.kosp.global.dto.PageMeta;
+
 import java.util.List;
 
 import org.springframework.data.domain.Page;
-
-import io.swkoreatech.kosp.global.dto.PageMeta;
 
 public record CommentListResponse(
     List<CommentResponse> comments,

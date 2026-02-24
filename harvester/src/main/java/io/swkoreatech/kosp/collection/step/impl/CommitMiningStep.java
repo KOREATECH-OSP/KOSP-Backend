@@ -1,5 +1,21 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
+import io.swkoreatech.kosp.collection.document.CommitDocument;
+import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.job.LoggingConstants;
+import io.swkoreatech.kosp.job.StepCompletionListener;
+
 import java.time.Instant;
 import java.util.List;
 
@@ -12,21 +28,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.client.GithubGraphQLClient;
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
-import io.swkoreatech.kosp.collection.document.CommitDocument;
-import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
-import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
-import io.swkoreatech.kosp.collection.util.PaginationHelper;
-import io.swkoreatech.kosp.collection.util.StepContextHelper;
-import io.swkoreatech.kosp.job.LoggingConstants;
-import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

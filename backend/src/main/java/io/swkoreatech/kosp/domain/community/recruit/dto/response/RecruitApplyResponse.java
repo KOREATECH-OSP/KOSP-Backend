@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.recruit.dto.response;
 
-import java.time.LocalDateTime;
-
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+
+import java.time.LocalDateTime;
 
 public record RecruitApplyResponse(
     Long id,

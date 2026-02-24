@@ -1,5 +1,16 @@
 package io.swkoreatech.kosp.domain.notification.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.Notification;
+import io.swkoreatech.kosp.domain.notification.repository.NotificationRepository;
+
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,16 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse;
-import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
-import io.swkoreatech.kosp.domain.notification.model.Notification;
-import io.swkoreatech.kosp.domain.notification.repository.NotificationRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -129,8 +130,7 @@ public class NotificationService {
 
     @Transactional
     public void markAsRead(User user, Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        Notification notification = notificationRepository.getById(notificationId);
 
         validateOwnership(user, notification);
 
@@ -139,8 +139,7 @@ public class NotificationService {
 
     @Transactional
     public void deleteNotification(User user, Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        Notification notification = notificationRepository.getById(notificationId);
 
         validateOwnership(user, notification);
 

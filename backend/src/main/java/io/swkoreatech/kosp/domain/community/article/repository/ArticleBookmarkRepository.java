@@ -1,9 +1,11 @@
 package io.swkoreatech.kosp.domain.community.article.repository;
 
-import java.util.Optional;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
-import io.swkoreatech.kosp.common.user.model.User;
+
+import java.util.Optional;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +13,7 @@ import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 public interface ArticleBookmarkRepository extends Repository<ArticleBookmark, Long> {
+
     ArticleBookmark save(ArticleBookmark articleBookmark);
     void delete(ArticleBookmark articleBookmark);
     Optional<ArticleBookmark> findByUserAndArticle(User user, Article article);

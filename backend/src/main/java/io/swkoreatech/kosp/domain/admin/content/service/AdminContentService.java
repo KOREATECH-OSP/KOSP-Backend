@@ -1,17 +1,18 @@
 package io.swkoreatech.kosp.domain.admin.content.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
+import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
+import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
+import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
-import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
-import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
 @Service

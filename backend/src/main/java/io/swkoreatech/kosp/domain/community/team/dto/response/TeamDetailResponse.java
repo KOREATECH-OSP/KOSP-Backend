@@ -1,7 +1,8 @@
 package io.swkoreatech.kosp.domain.community.team.dto.response;
 
-import java.util.List;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
+
+import java.util.List;
 
 public record TeamDetailResponse(
     Long id,

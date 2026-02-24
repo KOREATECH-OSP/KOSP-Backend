@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.article.dto.response;
 
-import java.util.List;
-
 import io.swkoreatech.kosp.global.dto.PageMeta;
+
+import java.util.List;
 
 public record ArticleListResponse<T>(
     List<T> posts,

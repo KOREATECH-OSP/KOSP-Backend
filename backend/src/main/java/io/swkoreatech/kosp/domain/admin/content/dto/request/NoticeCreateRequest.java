@@ -1,8 +1,9 @@
 package io.swkoreatech.kosp.domain.admin.content.dto.request;
 
+import java.util.List;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.List;
 
 public record NoticeCreateRequest(
     @NotBlank(message = "제목은 필수입니다.")

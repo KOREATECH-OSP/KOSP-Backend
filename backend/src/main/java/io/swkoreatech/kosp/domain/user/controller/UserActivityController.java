@@ -1,16 +1,17 @@
 package io.swkoreatech.kosp.domain.user.controller;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.user.api.UserActivityApi;
+import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
+import io.swkoreatech.kosp.domain.user.service.UserActivityService;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
-import io.swkoreatech.kosp.domain.user.api.UserActivityApi;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.user.service.UserActivityService;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 @RestController

@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 
 @Schema(description = "1. 최근 기여활동 항목")
 public record GithubRecentActivityResponse(

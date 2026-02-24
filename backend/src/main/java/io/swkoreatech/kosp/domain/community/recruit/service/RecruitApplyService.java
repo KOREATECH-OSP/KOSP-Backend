@@ -1,18 +1,15 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
 import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
@@ -20,11 +17,15 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
 import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -73,8 +74,7 @@ public class RecruitApplyService {
     }
 
     public RecruitApplyResponse getApplication(Long applicationId, User user) {
-        RecruitApply apply = recruitApplyRepository.findById(applicationId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.APPLICATION_NOT_FOUND));
+        RecruitApply apply = recruitApplyRepository.getById(applicationId);
 
         validateLeader(apply.getRecruit().getTeam(), user);
 
@@ -83,8 +83,7 @@ public class RecruitApplyService {
 
     @Transactional
     public void decideApplication(Long applicationId, User user, RecruitApplyDecisionRequest request) {
-        RecruitApply apply = recruitApplyRepository.findById(applicationId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.APPLICATION_NOT_FOUND));
+        RecruitApply apply = recruitApplyRepository.getById(applicationId);
 
         validateLeader(apply.getRecruit().getTeam(), user);
 

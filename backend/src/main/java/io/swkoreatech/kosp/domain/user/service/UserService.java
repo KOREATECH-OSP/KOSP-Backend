@@ -1,5 +1,30 @@
 package io.swkoreatech.kosp.domain.user.service;
 
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
+import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
+import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
+import io.swkoreatech.kosp.domain.auth.service.AuthService;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
+import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
+import io.swkoreatech.kosp.domain.point.model.PointTransaction;
+import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
+import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
+import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
+import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
+import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
+import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
+import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
+import io.swkoreatech.kosp.global.auth.token.SignupToken;
+import io.swkoreatech.kosp.global.util.RsqlUtils;
+
 import java.util.Optional;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -11,32 +36,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
-import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.auth.service.AuthService;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
-import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
-import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
-import io.swkoreatech.kosp.domain.point.model.PointTransaction;
-import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
-import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
-import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
-import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
-
-import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
-import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.auth.token.SignupToken;
-
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

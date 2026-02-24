@@ -1,10 +1,11 @@
 package io.swkoreatech.kosp.domain.admin.report.dto.response;
 
-import java.time.LocalDateTime;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportReason;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
+
+import java.time.LocalDateTime;
 
 public record ReportResponse(
     Long id,

@@ -1,11 +1,12 @@
 package io.swkoreatech.kosp.domain.admin.banner.service;
 
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import io.swkoreatech.kosp.domain.admin.banner.dto.response.BannerSettingResponse;
 import io.swkoreatech.kosp.domain.admin.banner.model.BannerSetting;
 import io.swkoreatech.kosp.domain.admin.banner.repository.BannerSettingRepository;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service

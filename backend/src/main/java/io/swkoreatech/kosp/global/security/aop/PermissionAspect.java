@@ -1,5 +1,11 @@
 package io.swkoreatech.kosp.global.security.aop;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.auth.service.PermissionService;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -7,11 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import io.swkoreatech.kosp.domain.auth.service.PermissionService;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,17 +32,17 @@ public class PermissionAspect {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
+        if (authentication == null
+                || !authentication.isAuthenticated()
+                || "anonymousUser".equals(authentication.getPrincipal())) {
             throw new GlobalException(ExceptionMessage.UNAUTHORIZED);
         }
 
         Object principal = authentication.getPrincipal();
         if (!(principal instanceof User user)) {
-            // Should not happen if authenticated properly with our User model
             throw new GlobalException(ExceptionMessage.AUTHENTICATION);
         }
 
-        // SUPERUSER 체크: ROLE_SUPERUSER는 모든 권한 보유
         boolean isSuperuser = user.getRoles().stream()
             .anyMatch(role -> "ROLE_SUPERUSER".equals(role.getName()));
         
@@ -51,14 +52,15 @@ public class PermissionAspect {
         }
 
         if (permit.name().isEmpty()) {
-            // No specific permission required, just authentication
             return;
         }
 
         boolean hasPermission = permissionService.hasPermission(user.getId(), permit.name());
         if (!hasPermission) {
-            log.warn("Access Denied: User {} (ID: {}) tried to access {} without permission {}", 
-                user.getName(), user.getId(), joinPoint.getSignature(), permit.name());
+            log.warn(
+                    "Access Denied: User {} (ID: {}) tried to access {} without permission {}",
+                    user.getName(), user.getId(), joinPoint.getSignature(), permit.name()
+            );
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
     }

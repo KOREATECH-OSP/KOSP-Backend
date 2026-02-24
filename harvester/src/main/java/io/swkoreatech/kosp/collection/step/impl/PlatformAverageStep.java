@@ -1,5 +1,11 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.job.StepCompletionListener;
+import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
+import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
+
 import java.math.BigDecimal;
 
 import org.springframework.batch.core.Step;
@@ -9,11 +15,6 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

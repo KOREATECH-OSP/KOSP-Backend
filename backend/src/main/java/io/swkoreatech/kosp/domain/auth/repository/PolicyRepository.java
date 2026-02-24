@@ -1,13 +1,15 @@
 package io.swkoreatech.kosp.domain.auth.repository;
 
-import java.util.Optional;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 
+import java.util.Optional;
+
 import org.springframework.data.repository.Repository;
 
 public interface PolicyRepository extends Repository<Policy, Long> {
+
     Policy save(Policy policy);
     Optional<Policy> findByName(String name);
     java.util.List<Policy> findAll();

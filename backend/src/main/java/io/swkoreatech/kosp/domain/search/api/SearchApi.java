@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.domain.search.api;
 
+import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
+import io.swkoreatech.kosp.domain.search.model.SearchFilter;
+
 import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
@@ -14,8 +17,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
-import io.swkoreatech.kosp.domain.search.model.SearchFilter;
 
 @Tag(name = "Search", description = "통합 검색 API")
 @RequestMapping("/v1/search")

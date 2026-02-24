@@ -1,10 +1,7 @@
 package io.swkoreatech.kosp.domain.admin.report.service;
 
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.admin.content.service.AdminContentService;
 import io.swkoreatech.kosp.domain.admin.report.dto.request.ReportProcessRequest;
 import io.swkoreatech.kosp.domain.admin.report.dto.response.ReportResponse;
@@ -12,8 +9,12 @@ import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
+
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -33,8 +34,7 @@ public class AdminReportService {
 
     @Transactional
     public void processReport(Long reportId, ReportProcessRequest request) {
-        Report report = reportRepository.findById(reportId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        Report report = reportRepository.getById(reportId);
 
         if (report.getStatus() != ReportStatus.PENDING) {
             throw new GlobalException(ExceptionMessage.BAD_REQUEST);

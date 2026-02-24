@@ -1,12 +1,6 @@
 package io.swkoreatech.kosp.domain.community.team.controller;
 
-import java.net.URI;
-import java.util.List;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.api.TeamApi;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
@@ -14,10 +8,17 @@ import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
 import io.swkoreatech.kosp.domain.community.team.service.TeamService;
-import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+
+import java.net.URI;
+import java.util.List;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -70,7 +71,12 @@ public class TeamController implements TeamApi {
 
     @Override
     @Permit(name = "team:invite", description = "팀원 초대")
-    public ResponseEntity<Void> inviteMember(@AuthUser User user, Long teamId, TeamInviteRequest request, @ClientURL String clientUrl) {
+    public ResponseEntity<Void> inviteMember(
+            @AuthUser User user,
+            Long teamId,
+            TeamInviteRequest request,
+            @ClientURL String clientUrl
+    ) {
         teamService.inviteMember(teamId, user, request, clientUrl);
         return ResponseEntity.ok().build();
     }

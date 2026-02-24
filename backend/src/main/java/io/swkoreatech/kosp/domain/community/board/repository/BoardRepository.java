@@ -1,10 +1,12 @@
 package io.swkoreatech.kosp.domain.community.board.repository;
 
-import java.util.List;
-import java.util.Optional;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.repository.Repository;
 
 public interface BoardRepository extends Repository<Board, Long> {

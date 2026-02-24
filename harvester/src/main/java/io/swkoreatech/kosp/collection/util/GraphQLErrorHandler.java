@@ -1,7 +1,8 @@
 package io.swkoreatech.kosp.collection.util;
 
-import lombok.extern.slf4j.Slf4j;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Utility class for handling GraphQL response errors with standardized logging.

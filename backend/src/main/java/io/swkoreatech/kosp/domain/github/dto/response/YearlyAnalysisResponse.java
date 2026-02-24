@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import java.math.BigDecimal;
-
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
+
+import java.math.BigDecimal;
+
 import lombok.Builder;
 
 public record YearlyAnalysisResponse(

@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.collection.repository;
 
+import io.swkoreatech.kosp.collection.document.IssueDocument;
+
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-
-import io.swkoreatech.kosp.collection.document.IssueDocument;
 
 public interface IssueDocumentRepository extends MongoRepository<IssueDocument, String> {
 

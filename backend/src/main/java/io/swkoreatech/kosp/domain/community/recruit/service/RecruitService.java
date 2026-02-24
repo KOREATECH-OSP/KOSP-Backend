@@ -1,5 +1,26 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
+import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
+import io.swkoreatech.kosp.global.dto.PageMeta;
+import io.swkoreatech.kosp.global.util.RsqlUtils;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -10,26 +31,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
-import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
-import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
-import io.swkoreatech.kosp.domain.community.team.model.Team;
-import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -147,14 +148,17 @@ public class RecruitService {
     }
 
     boolean canApply(User user, Recruit recruit) {
-        if (user == null) return false;
-        
+        if (user == null) {
+            return false;
+        }
         Optional<RecruitApply> application = recruitApplyRepository.findByRecruitAndUser(recruit, user);
-        if (application.isPresent() && isActiveApplication(application.get())) return false;
-        
+        if (application.isPresent() && isActiveApplication(application.get())) {
+            return false;
+        }
         Team team = recruit.getTeam();
-        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user)) return false;
-        
+        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user)) {
+            return false;
+        }
         return true;
     }
 

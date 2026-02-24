@@ -1,12 +1,14 @@
 package io.swkoreatech.kosp.statistics.repository;
 
-import java.util.Optional;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
 
-public interface PlatformStatisticsRepository extends JpaRepository<PlatformStatistics, String> {
+import java.util.Optional;
+
+import org.springframework.data.repository.Repository;
+
+public interface PlatformStatisticsRepository extends Repository<PlatformStatistics, String> {
+
+    PlatformStatistics save(PlatformStatistics statistics);
 
     Optional<PlatformStatistics> findByStatKey(String statKey);
 

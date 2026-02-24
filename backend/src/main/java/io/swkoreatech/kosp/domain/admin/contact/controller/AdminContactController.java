@@ -1,13 +1,14 @@
 package io.swkoreatech.kosp.domain.admin.contact.controller;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import io.swkoreatech.kosp.domain.admin.contact.api.AdminContactApi;
 import io.swkoreatech.kosp.domain.admin.contact.dto.request.AdminContactUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.contact.dto.response.AdminContactResponse;
 import io.swkoreatech.kosp.domain.admin.contact.service.AdminContactService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import lombok.RequiredArgsConstructor;
 
 @RestController

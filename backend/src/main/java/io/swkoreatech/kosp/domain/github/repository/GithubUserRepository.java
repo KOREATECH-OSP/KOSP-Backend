@@ -1,14 +1,14 @@
 package io.swkoreatech.kosp.domain.github.repository;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
-
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 public interface GithubUserRepository extends PagingAndSortingRepository<GithubUser, Long> {
 

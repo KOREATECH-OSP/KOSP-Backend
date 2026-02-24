@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.notification.api;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,21 +19,23 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 @Tag(name = "Notification", description = "알림 API")
 @RequestMapping("/v1/notifications")
 public interface NotificationApi {
 
-    @Operation(summary = "SSE 구독", description = "실시간 알림을 수신하기 위한 SSE 연결을 생성합니다.")
+    @Operation(
+        summary = "SSE 구독",
+        description = "실시간 알림을 수신하기 위한 SSE 연결을 생성합니다."
+    )
     @ApiResponse(responseCode = "200", description = "연결 성공")
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     SseEmitter subscribe(@Parameter(hidden = true) @AuthUser User user);
 
-    @Operation(summary = "알림 목록 조회", description = "사용자의 알림 목록을 페이지네이션하여 조회합니다.")
+    @Operation(
+        summary = "알림 목록 조회",
+        description = "사용자의 알림 목록을 페이지네이션하여 조회합니다."
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     ResponseEntity<NotificationListResponse> getNotifications(
@@ -37,7 +44,10 @@ public interface NotificationApi {
         @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size
     );
 
-    @Operation(summary = "읽지 않은 알림 수 조회", description = "읽지 않은 알림의 개수를 조회합니다.")
+    @Operation(
+        summary = "읽지 않은 알림 수 조회",
+        description = "읽지 않은 알림의 개수를 조회합니다."
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/unread-count")
     ResponseEntity<UnreadCountResponse> getUnreadCount(@Parameter(hidden = true) @AuthUser User user);

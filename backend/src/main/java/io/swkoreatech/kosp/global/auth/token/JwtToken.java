@@ -1,31 +1,24 @@
 package io.swkoreatech.kosp.global.auth.token;
 
+import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
+import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
+import io.swkoreatech.kosp.global.auth.exception.TokenParseException;
+import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
+
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
-import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
-import io.swkoreatech.kosp.global.auth.exception.TokenParseException;
-import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
 
-/**
- * JWT 토큰 추상 클래스
- * DTO처럼 필드만 선언하면 자동으로 JWT 변환
- */
 public abstract class JwtToken {
 
     @JsonIgnore
     protected String value;
 
-    /**
-     * 토큰 타입
-     */
     public TokenType getTokenType() {
         TokenSpec spec = this.getClass().getAnnotation(TokenSpec.class);
         if (spec == null) {
@@ -34,21 +27,16 @@ public abstract class JwtToken {
         return spec.value();
     }
 
-    /**
-     * Subject (하위 클래스에서 구현)
-     */
     public abstract String getSubject();
 
-    /**
-     * JWT 문자열로 변환
-     */
     @Override
     public String toString() {
         if (value != null) {
             return value;
         }
 
-        Map<String, Object> claims = TokenPropertiesProvider.objectMapper().convertValue(this, new TypeReference<>() {});
+        Map<String, Object> claims = TokenPropertiesProvider.objectMapper()
+                .convertValue(this, new TypeReference<>() {});
 
         value = Jwts.builder()
             .subject(getSubject())
@@ -61,26 +49,17 @@ public abstract class JwtToken {
         return value;
     }
 
-    /**
-     * JWT 문자열에서 토큰 객체 생성
-     */
     public static <T extends JwtToken> T from(Class<T> tokenClass, String jwt) {
-        // Level 1: JWT 검증
         Claims claims = parseJwt(jwt);
 
-        // Level 2: Category 검증
         validateTokenType(tokenClass, claims);
 
-        // Level 3: 객체 생성
         T token = createFromClaims(tokenClass, claims);
         token.value = jwt;
 
         return token;
     }
 
-    /**
-     * JWT 파싱 및 검증
-     */
     private static Claims parseJwt(String jwt) {
         try {
             return Jwts.parser()
@@ -93,9 +72,6 @@ public abstract class JwtToken {
         }
     }
 
-    /**
-     * 토큰 타입 검증
-     */
     private static <T extends JwtToken> void validateTokenType(Class<T> tokenClass, Claims claims) {
         try {
             T temp = tokenClass.getDeclaredConstructor().newInstance();
@@ -114,9 +90,6 @@ public abstract class JwtToken {
         }
     }
 
-    /**
-     * Claims → 객체 생성 (ObjectMapper)
-     */
     private static <T extends JwtToken> T createFromClaims(Class<T> tokenClass, Claims claims) {
         try {
             return TokenPropertiesProvider.objectMapper().convertValue(claims, tokenClass);

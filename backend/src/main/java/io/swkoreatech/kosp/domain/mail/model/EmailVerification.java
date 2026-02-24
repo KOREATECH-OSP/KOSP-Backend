@@ -1,17 +1,19 @@
 package io.swkoreatech.kosp.domain.mail.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.data.redis.core.TimeToLive;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Builder
 @AllArgsConstructor
 @RedisHash("email_verification")
 public class EmailVerification {
+
     @Id
     private String email;
 

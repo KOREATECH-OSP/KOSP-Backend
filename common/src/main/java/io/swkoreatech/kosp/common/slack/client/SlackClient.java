@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.common.slack.client;
 
+import io.swkoreatech.kosp.common.slack.model.SlackNotification;
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 import java.util.HashMap;
@@ -14,7 +16,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import io.swkoreatech.kosp.common.slack.model.SlackNotification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

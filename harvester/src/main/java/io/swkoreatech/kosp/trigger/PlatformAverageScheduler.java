@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.trigger;
 
+import io.swkoreatech.kosp.statistics.service.PlatformAverageCalculator;
+
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.swkoreatech.kosp.statistics.service.PlatformAverageCalculator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

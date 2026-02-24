@@ -1,8 +1,9 @@
 package io.swkoreatech.kosp.domain.community.team.dto.request;
 
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 
 public record TeamUpdateRequest(
     @Schema(description = "팀 이름", example = "KOSP Team")

@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.community.recruit.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public record RecruitRequest(
     @NotNull(message = "게시판 ID는 필수입니다.")

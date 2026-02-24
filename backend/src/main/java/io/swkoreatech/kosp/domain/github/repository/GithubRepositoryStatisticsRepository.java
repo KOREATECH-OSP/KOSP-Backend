@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.github.repository;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -8,9 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-
-public interface GithubRepositoryStatisticsRepository extends Repository<GithubRepositoryStatistics, Long>, JpaSpecificationExecutor<GithubRepositoryStatistics> {
+public interface GithubRepositoryStatisticsRepository
+        extends Repository<GithubRepositoryStatistics, Long>,
+        JpaSpecificationExecutor<GithubRepositoryStatistics> {
 
     GithubRepositoryStatistics save(GithubRepositoryStatistics statistics);
 

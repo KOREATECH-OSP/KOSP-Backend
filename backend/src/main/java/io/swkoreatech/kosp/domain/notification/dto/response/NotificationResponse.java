@@ -1,9 +1,9 @@
 package io.swkoreatech.kosp.domain.notification.dto.response;
 
-import java.time.LocalDateTime;
-
 import io.swkoreatech.kosp.domain.notification.model.Notification;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
+
+import java.time.LocalDateTime;
 
 public record NotificationResponse(
     Long id,

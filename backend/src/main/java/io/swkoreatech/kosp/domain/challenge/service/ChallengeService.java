@@ -1,5 +1,20 @@
 package io.swkoreatech.kosp.domain.challenge.service;
 
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
+import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
+
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -15,20 +30,6 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
-import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
-import io.swkoreatech.kosp.common.challenge.model.Challenge;
-import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -48,8 +49,7 @@ public class ChallengeService {
     }
 
     public AdminChallengeResponse getChallenge(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.getById(challengeId);
         return AdminChallengeResponse.from(challenge);
     }
 
@@ -74,8 +74,7 @@ public class ChallengeService {
 
     @Transactional
     public void deleteChallenge(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.getById(challengeId);
 
         challengeRepository.delete(challenge);
         log.info("Deleted challenge: {}", challengeId);
@@ -85,8 +84,7 @@ public class ChallengeService {
 
     @Transactional
     public void updateChallenge(Long challengeId, ChallengeRequest request) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.getById(challengeId);
 
         if (!challenge.getCondition().equals(request.condition())) {
             validateSpelCondition(request.condition());
@@ -109,7 +107,7 @@ public class ChallengeService {
             parser.parseExpression(condition);
         } catch (ParseException e) {
             log.error("Invalid SpEL condition: {}", condition, e);
-            throw new GlobalException(ExceptionMessage.INVALID_CHALLENGE_CONDITION); // Need to add INVALID_CHALLENGE_CONDITION
+            throw new GlobalException(ExceptionMessage.INVALID_CHALLENGE_CONDITION);
         }
     }
 
@@ -142,7 +140,9 @@ public class ChallengeService {
 
         return ChallengeListResponse.from(
             challengeResponses,
-            ChallengeListResponse.ChallengeSummary.from(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
+            ChallengeListResponse.ChallengeSummary.from(
+                    totalChallenges, completedCount, overallProgress, totalEarnedPoints
+            )
         );
     }
 

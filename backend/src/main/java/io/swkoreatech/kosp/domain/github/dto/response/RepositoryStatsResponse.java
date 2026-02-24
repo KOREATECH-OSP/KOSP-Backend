@@ -1,9 +1,10 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import lombok.Builder;
 
 public record RepositoryStatsResponse(

@@ -1,18 +1,10 @@
 package io.swkoreatech.kosp.domain.search.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
@@ -21,20 +13,30 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
-import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ChallengeSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.RecruitSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.TeamSummary;
+import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.RepositorySummary;
 import io.swkoreatech.kosp.domain.search.dto.response.UserSummary;
 import io.swkoreatech.kosp.domain.search.model.SearchFilter;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -67,9 +69,9 @@ public class SearchService {
         List<UserSummary> users = searchUsers(keyword, effectiveFilters, rsql, pageable);
         List<RepositorySummary> repositories = searchRepositories(keyword, effectiveFilters, rsql, pageable);
 
-         PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories);
+        PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories);
 
-         return GlobalSearchResponse.from(articles, recruits, teams, challenges, users, repositories, meta);
+        return GlobalSearchResponse.from(articles, recruits, teams, challenges, users, repositories, meta);
     }
 
     private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
@@ -79,7 +81,12 @@ public class SearchService {
         return filters;
     }
 
-    private List<ArticleSummary> searchArticles(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<ArticleSummary> searchArticles(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         if (!filters.contains(SearchFilter.articles)) {
             return Collections.emptyList();
         }
@@ -114,7 +121,12 @@ public class SearchService {
         return (root, query, cb) -> cb.like(cb.lower(root.get("title")), pattern);
     }
 
-    private List<RecruitSummary> searchRecruits(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<RecruitSummary> searchRecruits(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         if (!filters.contains(SearchFilter.recruits)) {
             return Collections.emptyList();
         }
@@ -148,7 +160,12 @@ public class SearchService {
         return (root, query, cb) -> cb.like(cb.lower(root.get("title")), pattern);
     }
 
-    private List<TeamSummary> searchTeams(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<TeamSummary> searchTeams(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         if (!filters.contains(SearchFilter.teams)) {
             return Collections.emptyList();
         }
@@ -182,7 +199,12 @@ public class SearchService {
         return (root, query, cb) -> cb.like(cb.lower(root.get("name")), pattern);
     }
 
-    private List<ChallengeSummary> searchChallenges(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<ChallengeSummary> searchChallenges(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         if (!filters.contains(SearchFilter.challenges)) {
             return Collections.emptyList();
         }
@@ -216,7 +238,12 @@ public class SearchService {
         return (root, query, cb) -> cb.like(cb.lower(root.get("name")), pattern);
     }
 
-    private List<UserSummary> searchUsers(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<UserSummary> searchUsers(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         Specification<User> spec = createUserSpec(keyword, rsql);
         Page<User> page = userRepository.findAll(spec, pageable);
 
@@ -258,7 +285,12 @@ public class SearchService {
         };
     }
 
-    private List<RepositorySummary> searchRepositories(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
+    private List<RepositorySummary> searchRepositories(
+            String keyword,
+            Set<SearchFilter> filters,
+            String rsql,
+            Pageable pageable
+    ) {
         if (!filters.contains(SearchFilter.repositories)) {
             return Collections.emptyList();
         }
@@ -295,10 +327,16 @@ public class SearchService {
         );
     }
 
-    private PageMeta createPageMeta(List<ArticleSummary> articles, List<RecruitSummary> recruits, 
-                                     List<TeamSummary> teams, List<ChallengeSummary> challenges, 
-                                     List<UserSummary> users, List<RepositorySummary> repositories) {
-        long totalItems = articles.size() + recruits.size() + teams.size() + challenges.size() + users.size() + repositories.size();
+    private PageMeta createPageMeta(
+            List<ArticleSummary> articles,
+            List<RecruitSummary> recruits,
+            List<TeamSummary> teams,
+            List<ChallengeSummary> challenges,
+            List<UserSummary> users,
+            List<RepositorySummary> repositories
+    ) {
+        long totalItems = articles.size() + recruits.size() + teams.size()
+            + challenges.size() + users.size() + repositories.size();
         return new PageMeta(0, 1, totalItems);
     }
 }

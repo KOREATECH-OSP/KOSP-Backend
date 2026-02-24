@@ -1,31 +1,33 @@
 package io.swkoreatech.kosp.domain.notification.eventlistener;
 
-import com.rabbitmq.client.Channel;
 import io.swkoreatech.kosp.common.entity.ProcessedMessage;
 import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
 import io.swkoreatech.kosp.common.event.PointChangedEvent;
 import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
-import io.swkoreatech.kosp.domain.point.model.PointSource;
-import io.swkoreatech.kosp.domain.point.service.PointService;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import org.springframework.context.ApplicationEventPublisher;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import io.swkoreatech.kosp.domain.notification.service.NotificationService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import io.swkoreatech.kosp.domain.point.model.PointSource;
+import io.swkoreatech.kosp.domain.point.service.PointService;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
+
+import java.io.IOException;
+
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.support.AmqpHeaders;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
+import com.rabbitmq.client.Channel;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component

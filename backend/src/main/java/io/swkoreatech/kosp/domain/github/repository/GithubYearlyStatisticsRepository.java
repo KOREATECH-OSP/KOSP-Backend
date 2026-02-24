@@ -1,11 +1,11 @@
 package io.swkoreatech.kosp.domain.github.repository;
 
+import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
+
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
-
-import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
 
 public interface GithubYearlyStatisticsRepository extends Repository<GithubYearlyStatistics, Long> {
 
