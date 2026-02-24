@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
 
-@Tag(name = "Community - Team", description = "팀 및 초대 관리 API")
+@Tag(name = "Team", description = "팀 및 초대 관리 API")
 public interface TeamInviteApi {
 
     @Operation(summary = "초대 상세 조회", description = "초대 ID로 상세 정보를 조회합니다.")
