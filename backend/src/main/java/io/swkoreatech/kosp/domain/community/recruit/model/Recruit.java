@@ -3,25 +3,26 @@ package io.swkoreatech.kosp.domain.community.recruit.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.team.model.Team;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.Table;
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.team.model.Team;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
-@SuperBuilder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "recruit")
 @DiscriminatorValue("RECRUIT")
@@ -40,6 +41,16 @@ public class Recruit extends Article {
 
     @Column(name = "end_date")
     private LocalDateTime endDate;
+
+    @Builder(builderMethodName = "recruitBuilder")
+    private Recruit(User author, Board board, String title, String content, List<String> tags,
+                    Team team, RecruitStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        super(author, board, title, content, tags, null);
+        this.team = team;
+        this.status = status;
+        this.startDate = startDate;
+        this.endDate = endDate;
+    }
 
     public void updateRecruit(
         String title,

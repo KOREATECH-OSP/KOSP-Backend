@@ -46,7 +46,7 @@ public class RecruitService {
 
     @Transactional
     public Long create(User author, Board board, RecruitRequest request) {
-        Recruit recruit = Recruit.builder()
+        Recruit recruit = Recruit.recruitBuilder()
             .author(author)
             .board(board)
             .title(request.title())
