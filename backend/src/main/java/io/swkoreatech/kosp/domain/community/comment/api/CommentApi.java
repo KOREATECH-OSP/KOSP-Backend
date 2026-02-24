@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@Tag(name = "Comment", description = "댓글 관리 API")
+@Tag(name = "Community - Comment", description = "댓글 관리 API")
 public interface CommentApi {
 
     @Operation(summary = "댓글 목록 조회", description = "게시글의 댓글 목록을 조회합니다.")

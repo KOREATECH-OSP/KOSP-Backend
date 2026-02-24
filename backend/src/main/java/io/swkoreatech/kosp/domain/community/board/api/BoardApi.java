@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
 
-@Tag(name = "Board", description = "게시판 메타데이터 API")
+@Tag(name = "Community - Board", description = "게시판 메타데이터 API")
 @RequestMapping("/v1/community/boards")
 public interface BoardApi {
 

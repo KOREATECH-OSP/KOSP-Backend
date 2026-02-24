@@ -22,7 +22,7 @@ import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
-@Tag(name = "Article", description = "게시글 관리 API")
+@Tag(name = "Community - Article", description = "게시글 관리 API")
 public interface ArticleApi {
 
     @Operation(summary = "게시글 목록 조회", description = "전체 게시글 목록을 조회합니다. pinned=true로 고정 게시글(배너)만 조회할 수 있습니다.")

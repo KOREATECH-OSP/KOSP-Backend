@@ -25,7 +25,7 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
-@Tag(name = "Team", description = "팀 관리 API")
+@Tag(name = "Community - Team", description = "팀 관리 API")
 public interface TeamApi {
 
     @Operation(summary = "팀 목록 조회", description = "팀 목록을 조회합니다.")

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-@Tag(name = "Report", description = "신고 API")
+@Tag(name = "Community - Report", description = "신고 API")
 @RequestMapping("/v1/community")
 public interface ReportApi {
 

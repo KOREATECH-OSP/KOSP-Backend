@@ -26,7 +26,7 @@ import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
-@Tag(name = "Recruit", description = "모집 공고 관리 API")
+@Tag(name = "Community - Recruit", description = "모집 공고 관리 API")
 public interface RecruitApi {
 
     @Operation(summary = "모집 공고 목록 조회", description = "전체 모집 공고 목록을 조회합니다. RSQL filter로 필터링 가능 (예: isDeleted==false, status==OPEN)")
