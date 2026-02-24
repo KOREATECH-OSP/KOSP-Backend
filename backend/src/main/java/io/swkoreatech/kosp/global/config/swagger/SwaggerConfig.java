@@ -10,11 +10,18 @@ import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.tags.Tag;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.CollectionUtils;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @OpenAPIDefinition(
@@ -37,6 +44,48 @@ public class SwaggerConfig {
     private static final String ACCESS_TOKEN = "ACCESS";
     private static final String REFRESH_TOKEN = "REFRESH";
     private static final String SIGNUP_TOKEN = "SIGNUP";
+
+    private static final List<String> USER_TAG_ORDER = List.of(
+        "Auth",
+        "User",
+        "User Activity",
+        "GitHub"
+    );
+
+    private static final List<String> COMMUNITY_TAG_ORDER = List.of(
+        "Community - Board",
+        "Community - Article",
+        "Community - Comment",
+        "Community - Recruit",
+        "Community - Report"
+    );
+
+    private static final List<String> TEAM_TAG_ORDER = List.of(
+        "Team"
+    );
+
+    private static final List<String> UTILITY_TAG_ORDER = List.of(
+        "Challenge",
+        "Notification",
+        "Search",
+        "Banner",
+        "Upload"
+    );
+
+    private static final List<String> ADMIN_TAG_ORDER = List.of(
+        "Admin - Member",
+        "Admin - Role",
+        "Admin - Permission",
+        "Admin - Policy",
+        "Admin - Point",
+        "Admin - Challenge",
+        "Admin - Article",
+        "Admin - Content",
+        "Admin - Report",
+        "Admin - Contact",
+        "Admin - Search",
+        "Admin - Banner"
+    );
 
     @Bean
     public OpenAPI customOpenAPI() {
@@ -69,36 +118,7 @@ public class SwaggerConfig {
         return new OpenAPI()
             .addServersItem(new Server().url("/").description("Current server"))
             .addSecurityItem(securityRequirement)
-            .components(components)
-            .tags(List.of(
-                new Tag().name("Auth").description("인증 및 세션 관리 API"),
-                new Tag().name("User").description("사용자 관리 API"),
-                new Tag().name("User Activity").description("사용자 활동 조회 API"),
-                new Tag().name("GitHub").description("GitHub 관련 API"),
-                new Tag().name("Challenge").description("도전 과제 API"),
-                new Tag().name("Notification").description("알림 API"),
-                new Tag().name("Community - Board").description("게시판 메타데이터 API"),
-                new Tag().name("Community - Article").description("게시글 관리 API"),
-                new Tag().name("Community - Comment").description("댓글 관리 API"),
-                new Tag().name("Community - Recruit").description("모집 공고 관리 API"),
-                new Tag().name("Community - Report").description("신고 API"),
-                new Tag().name("Team").description("팀 및 초대 관리 API"),
-                new Tag().name("Search").description("통합 검색 API"),
-                new Tag().name("Banner").description("배너 API"),
-                new Tag().name("Upload").description("파일 업로드 API"),
-                new Tag().name("Admin - Member").description("관리자 전용 사용자 관리 API"),
-                new Tag().name("Admin - Role").description("관리자 전용 역할 관리 API"),
-                new Tag().name("Admin - Permission").description("관리자 전용 권한 조회 API"),
-                new Tag().name("Admin - Policy").description("관리자 전용 정책 관리 API"),
-                new Tag().name("Admin - Point").description("관리자 전용 포인트 관리 API"),
-                new Tag().name("Admin - Challenge").description("관리자 전용 챌린지 관리 API"),
-                new Tag().name("Admin - Article").description("관리자 전용 게시글 관리 API"),
-                new Tag().name("Admin - Content").description("관리자 전용 콘텐츠 관리 API"),
-                new Tag().name("Admin - Report").description("관리자 전용 신고 관리 API"),
-                new Tag().name("Admin - Contact").description("관리자 연락처 관리 API"),
-                new Tag().name("Admin - Search").description("관리자 전용 통합 검색 API"),
-                new Tag().name("Admin - Banner").description("배너 관리 API (관리자 전용)")
-            ));
+            .components(components);
     }
 
     @Bean
@@ -107,6 +127,8 @@ public class SwaggerConfig {
             .group("user")
             .displayName("01. 사용자")
             .pathsToMatch("/v1/auth/**", "/v1/users/**")
+            .addOpenApiCustomizer(retainUsedTagsOnly())
+            .addOpenApiCustomizer(orderTags(USER_TAG_ORDER))
             .build();
     }
 
@@ -116,6 +138,8 @@ public class SwaggerConfig {
             .group("community")
             .displayName("02. 커뮤니티")
             .pathsToMatch("/v1/community/**")
+            .addOpenApiCustomizer(retainUsedTagsOnly())
+            .addOpenApiCustomizer(orderTags(COMMUNITY_TAG_ORDER))
             .build();
     }
 
@@ -125,6 +149,8 @@ public class SwaggerConfig {
             .group("team")
             .displayName("03. 팀")
             .pathsToMatch("/v1/teams/**")
+            .addOpenApiCustomizer(retainUsedTagsOnly())
+            .addOpenApiCustomizer(orderTags(TEAM_TAG_ORDER))
             .build();
     }
 
@@ -135,6 +161,8 @@ public class SwaggerConfig {
             .displayName("04. 부가기능")
             .pathsToMatch("/v1/search/**", "/v1/banner/**", "/v1/upload/**",
                 "/v1/challenges/**", "/v1/notifications/**")
+            .addOpenApiCustomizer(retainUsedTagsOnly())
+            .addOpenApiCustomizer(orderTags(UTILITY_TAG_ORDER))
             .build();
     }
 
@@ -144,6 +172,43 @@ public class SwaggerConfig {
             .group("admin")
             .displayName("05. 관리자")
             .pathsToMatch("/v1/admin/**")
+            .addOpenApiCustomizer(retainUsedTagsOnly())
+            .addOpenApiCustomizer(orderTags(ADMIN_TAG_ORDER))
             .build();
+    }
+
+    private OpenApiCustomizer retainUsedTagsOnly() {
+        return openApi -> {
+            if (openApi.getPaths() == null || openApi.getTags() == null) {
+                return;
+            }
+            Set<String> usedTags = openApi.getPaths().values().stream()
+                .flatMap(pathItem -> pathItem.readOperations().stream())
+                .filter(operation -> operation.getTags() != null)
+                .flatMap(operation -> operation.getTags().stream())
+                .collect(Collectors.toSet());
+            openApi.getTags().removeIf(tag -> !usedTags.contains(tag.getName()));
+        };
+    }
+
+    private OpenApiCustomizer orderTags(List<String> order) {
+        return openApi -> {
+            List<Tag> tags = openApi.getTags();
+            if (CollectionUtils.isEmpty(tags)) {
+                return;
+            }
+            Map<String, Tag> tagMap = tags.stream()
+                .collect(Collectors.toMap(Tag::getName, tag -> tag, (a, b) -> a));
+            List<Tag> ordered = new ArrayList<>();
+            order.stream()
+                .filter(tagMap::containsKey)
+                .map(tagMap::get)
+                .forEach(ordered::add);
+            tags.stream()
+                .filter(tag -> !order.contains(tag.getName()))
+                .sorted(Comparator.comparing(Tag::getName))
+                .forEach(ordered::add);
+            openApi.setTags(ordered);
+        };
     }
 }
