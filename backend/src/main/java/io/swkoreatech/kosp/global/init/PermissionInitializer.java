@@ -179,7 +179,7 @@ public class PermissionInitializer implements CommandLineRunner {
     }
     
     private void createNewRole(String name, String description, Policy policy) {
-        Role.RoleBuilder builder = Role.builder()
+        var builder = Role.builder()
             .name(name)
             .description(description)
             .policies(Set.of(policy));
