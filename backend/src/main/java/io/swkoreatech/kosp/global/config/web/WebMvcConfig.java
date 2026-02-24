@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 
 import io.swkoreatech.kosp.global.auth.resolver.JwtArgumentResolver;
 import io.swkoreatech.kosp.global.host.ClientURLArgumentResolver;
@@ -41,5 +42,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(clientURLInterceptor)
             .addPathPatterns("/**")
             .order(3);
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/swagger-sort.js")
+            .addResourceLocations("classpath:/static/");
     }
 }
