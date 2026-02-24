@@ -18,13 +18,11 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "role")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SuperBuilder
 public class Role extends BaseEntity {
 
     @Id
@@ -36,7 +34,6 @@ public class Role extends BaseEntity {
 
     private String description;
 
-    @Builder.Default
     @Column(name = "can_access_admin", nullable = false)
     private Boolean canAccessAdmin = false;
 
@@ -46,8 +43,15 @@ public class Role extends BaseEntity {
         joinColumns = @JoinColumn(name = "role_id"),
         inverseJoinColumns = @JoinColumn(name = "policy_id")
     )
-    @Builder.Default
     private Set<Policy> policies = new HashSet<>();
+
+    @Builder
+    private Role(String name, String description, Boolean canAccessAdmin, Set<Policy> policies) {
+        this.name = name;
+        this.description = description;
+        this.canAccessAdmin = canAccessAdmin != null && canAccessAdmin;
+        this.policies = policies != null ? policies : new HashSet<>();
+    }
 
     public void updateDescription(String description) {
         this.description = description;

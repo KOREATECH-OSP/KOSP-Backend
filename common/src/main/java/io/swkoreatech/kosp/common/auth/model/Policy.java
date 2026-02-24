@@ -18,13 +18,11 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "policy")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SuperBuilder
 public class Policy extends BaseEntity {
 
     @Id
@@ -42,12 +40,17 @@ public class Policy extends BaseEntity {
         joinColumns = @JoinColumn(name = "policy_id"),
         inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
-    @Builder.Default
     private Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(mappedBy = "policies")
-    @Builder.Default
     private Set<Role> roles = new HashSet<>();
+
+    @Builder
+    private Policy(String name, String description, Set<Permission> permissions) {
+        this.name = name;
+        this.description = description;
+        this.permissions = permissions != null ? permissions : new HashSet<>();
+    }
 
     public void updateDescription(String description) {
         this.description = description;

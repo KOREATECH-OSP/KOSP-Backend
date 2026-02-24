@@ -10,8 +10,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import io.swkoreatech.kosp.common.user.model.BaseUser;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,14 +26,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED)
 @ToString(exclude = {"password"})
-@SuperBuilder
 public class User extends BaseUser implements UserDetails {
 
     @NotNull
@@ -43,12 +41,10 @@ public class User extends BaseUser implements UserDetails {
     @Column(name = "introduction")
     private String introduction;
 
-    @Builder.Default
     @NotNull
     @Column(name = "point", nullable = false)
     private Integer point = 0;
 
-    @Builder.Default
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_role",
@@ -57,9 +53,28 @@ public class User extends BaseUser implements UserDetails {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @Builder
+    private User(
+        Long id,
+        String name,
+        String kutId,
+        String kutEmail,
+        GithubUser githubUser,
+        String password,
+        String introduction
+    ) {
+        super(id, name, kutId, kutEmail, githubUser);
+        this.password = password;
+        this.introduction = introduction;
+    }
+
     public void updateInfo(String name, String introduction) {
-        if (name != null) this.updateName(name);
-        if (introduction != null) this.introduction = introduction;
+        if (name != null) {
+            this.updateName(name);
+        }
+        if (introduction != null) {
+            this.introduction = introduction;
+        }
     }
 
     public void encodePassword(PasswordEncoder passwordEncoder) {

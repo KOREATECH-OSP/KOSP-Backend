@@ -16,13 +16,11 @@ import jakarta.persistence.Table;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Table(name = "permission")
 @Getter
 @NoArgsConstructor(access = PROTECTED)
-@SuperBuilder
 public class Permission extends BaseEntity {
 
     @Id
@@ -35,8 +33,13 @@ public class Permission extends BaseEntity {
     private String description;
 
     @ManyToMany(mappedBy = "permissions")
-    @Builder.Default
     private Set<Policy> policies = new HashSet<>();
+
+    @Builder
+    private Permission(String name, String description) {
+        this.name = name;
+        this.description = description;
+    }
 
     public void updateDescription(String description) {
         this.description = description;

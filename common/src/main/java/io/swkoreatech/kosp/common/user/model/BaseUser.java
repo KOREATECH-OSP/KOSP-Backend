@@ -16,12 +16,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Getter
 @MappedSuperclass
 @NoArgsConstructor(access = PROTECTED)
-@SuperBuilder
 public abstract class BaseUser extends BaseEntity {
 
     @Id
@@ -48,6 +46,14 @@ public abstract class BaseUser extends BaseEntity {
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "github_id")
     private GithubUser githubUser;
+
+    protected BaseUser(Long id, String name, String kutId, String kutEmail, GithubUser githubUser) {
+        this.id = id;
+        this.name = name;
+        this.kutId = kutId;
+        this.kutEmail = kutEmail;
+        this.githubUser = githubUser;
+    }
 
     public boolean hasGithubUser() {
         return githubUser != null;

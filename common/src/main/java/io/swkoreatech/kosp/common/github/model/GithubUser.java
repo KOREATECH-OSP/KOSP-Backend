@@ -14,13 +14,11 @@ import jakarta.persistence.Transient;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @Table(name = "github_user")
 @NoArgsConstructor
-@SuperBuilder
 public class GithubUser extends BaseEntity implements Persistable<Long> {
 
     @Id
@@ -39,7 +37,6 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
     @Column(name = "github_token", columnDefinition = "TEXT")
     private String githubToken;
 
-    @Builder.Default
     @Column(name = "last_crawling")
     private LocalDateTime lastCrawling = LocalDateTime.now();
 
@@ -48,6 +45,15 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
 
     @Transient
     private Integer rateLimitRemaining;
+
+    @Builder
+    private GithubUser(Long githubId, String githubLogin, String githubName, String githubAvatarUrl, String githubToken) {
+        this.githubId = githubId;
+        this.githubLogin = githubLogin;
+        this.githubName = githubName;
+        this.githubAvatarUrl = githubAvatarUrl;
+        this.githubToken = githubToken;
+    }
 
     public void updateLastCrawling() {
         this.lastCrawling = LocalDateTime.now();
