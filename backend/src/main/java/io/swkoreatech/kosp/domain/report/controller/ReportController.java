@@ -1,9 +1,12 @@
 package io.swkoreatech.kosp.domain.report.controller;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.report.api.ReportApi;
 import io.swkoreatech.kosp.domain.report.dto.request.ReportRequest;
 import io.swkoreatech.kosp.domain.report.service.ReportService;
-import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,16 +15,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/v1/community")
 @RequiredArgsConstructor
-public class ReportController {
+public class ReportController implements ReportApi {
 
     private final ReportService reportService;
 
+    @Override
     @PostMapping("/articles/{articleId}/reports")
+    @Permit(name = "community:article:report", description = "게시글 신고")
     public ResponseEntity<Void> reportArticle(
         @AuthUser User user,
         @PathVariable Long articleId,
