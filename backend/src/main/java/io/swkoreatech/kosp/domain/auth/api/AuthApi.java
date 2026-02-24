@@ -27,10 +27,7 @@ import io.swkoreatech.kosp.global.auth.token.RefreshToken;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
-@Tag(
-    name = "Auth",
-    description = "인증 및 세션 관리와 관련된 API 모음임. 로그인, 로그아웃, 내 정보 조회 기능을 제공함."
-)
+@Tag(name = "Auth", description = "인증 및 세션 관리 API")
 @RequestMapping("/v1/auth")
 public interface AuthApi {
 
