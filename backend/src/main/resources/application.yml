@@ -108,3 +108,11 @@ server:
   servlet:
     encoding:
       force-response: true
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha
+    persist-authorization: true
+    disable-swagger-default-url: true
+  default-produces-media-type: application/json
