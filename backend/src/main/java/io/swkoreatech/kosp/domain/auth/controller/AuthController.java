@@ -47,8 +47,7 @@ public class AuthController implements AuthApi {
     public ResponseEntity<GithubVerificationResponse> exchangeGithubToken(
         @RequestBody @Valid GithubTokenRequest request
     ) {
-        String verificationToken = authService.exchangeGithubTokenForSignup(request.githubAccessToken());
-        return ResponseEntity.ok(new GithubVerificationResponse(verificationToken));
+        return ResponseEntity.ok(authService.exchangeGithubTokenForSignup(request.githubAccessToken()));
     }
 
     @Override

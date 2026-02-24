@@ -26,14 +26,14 @@ import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
 import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationResponse;
+
 import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.dto.PageMeta;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
@@ -100,7 +100,7 @@ public class UserService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ROLE_NOT_FOUND));
         user.getRoles().add(role);
 
-        log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
+        log.info("사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
         
          // 6. GitHub 데이터 수집 이벤트 발행
           if (githubUser.getGithubLogin() != null) {
@@ -109,7 +109,7 @@ public class UserService {
            }
            
            emailVerificationService.completeSignupVerification(kutEmail);
-          log.info("✅ Redis cleanup completed for email: {}", kutEmail);
+           log.info("Redis cleanup completed for email: {}", kutEmail);
           return authService.createTokensForUser(user);
     }
 
@@ -145,11 +145,7 @@ public class UserService {
         String label = extractMemberLabel(memberId);
         String message = buildAvailabilityMessage(exists, label);
         
-        return new CheckMemberIdResponse(
-            true, 
-            !exists, 
-            message
-        );
+        return CheckMemberIdResponse.from(!exists, message);
     }
 
     private String extractMemberLabel(String memberId) {
@@ -170,10 +166,7 @@ public class UserService {
         Specification<RecruitApply> baseSpec = (root, query, cb) -> cb.equal(root.get("user"), user);
         Specification<RecruitApply> spec = RsqlUtils.toSpecification(filter, baseSpec);
         Page<RecruitApply> page = recruitApplyRepository.findAll(spec, pageable);
-        return new MyApplicationListResponse(
-            page.getContent().stream().map(MyApplicationResponse::from).toList(),
-            PageMeta.from(page)
-        );
+        return MyApplicationListResponse.from(page);
     }
 
     public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {

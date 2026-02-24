@@ -60,7 +60,6 @@ public class CommentController implements CommentApi {
         Long articleId,
         Long commentId
     ) {
-        boolean isLiked = commentService.toggleLike(user, commentId);
-        return ResponseEntity.ok(new CommentToggleLikeResponse(isLiked));
+        return ResponseEntity.ok(commentService.toggleLike(user, commentId));
     }
 }

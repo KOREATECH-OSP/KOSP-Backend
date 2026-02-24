@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
 import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
 import io.swkoreatech.kosp.domain.notification.model.Notification;
@@ -122,8 +123,8 @@ public class NotificationService {
         return NotificationListResponse.from(page);
     }
 
-    public long getUnreadCount(User user) {
-        return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
+    public UnreadCountResponse getUnreadCount(User user) {
+        return UnreadCountResponse.from(notificationRepository.countByUserIdAndIsReadFalse(user.getId()));
     }
 
     @Transactional

@@ -8,9 +8,37 @@ public record GithubContributionComparisonResponse(
     Double avgStarCount,
     Double avgPrCount,
     Double avgIssueCount,
-    
+
     Integer userCommitCount,
     Integer userStarCount,
     Integer userPrCount,
     Integer userIssueCount
-) {}
+) {
+    public static GithubContributionComparisonResponse from(
+        Double avgCommitCount,
+        Double avgStarCount,
+        Double avgPrCount,
+        Double avgIssueCount,
+        Integer userCommitCount,
+        Integer userStarCount,
+        Integer userPrCount,
+        Integer userIssueCount
+    ) {
+        return new GithubContributionComparisonResponse(
+            avgCommitCount, avgStarCount, avgPrCount, avgIssueCount,
+            userCommitCount, userStarCount, userPrCount, userIssueCount
+        );
+    }
+
+    public static GithubContributionComparisonResponse empty(
+        Integer userCommitCount,
+        Integer userStarCount,
+        Integer userPrCount,
+        Integer userIssueCount
+    ) {
+        return new GithubContributionComparisonResponse(
+            0.0, 0.0, 0.0, 0.0,
+            userCommitCount, userStarCount, userPrCount, userIssueCount
+        );
+    }
+}

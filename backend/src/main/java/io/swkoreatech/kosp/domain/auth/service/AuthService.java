@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
+import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
@@ -71,7 +72,7 @@ public class AuthService {
      * GitHub Access Token으로 회원가입 토큰 발급
      */
     @Transactional
-    public String exchangeGithubTokenForSignup(String githubAccessToken) {
+    public GithubVerificationResponse exchangeGithubTokenForSignup(String githubAccessToken) {
         OAuth2UserRequest userRequest = createOAuth2UserRequest(githubAccessToken);
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -95,19 +96,19 @@ public class AuthService {
             encryptedToken
         );
 
-        return token.toString();
+        return GithubVerificationResponse.from(token.toString());
     }
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
     public AuthTokenResponse login(LoginRequest request) {
-        log.info("🔐 Login attempt for email: {}", request.email());
+        log.info("Login attempt for email: {}", request.email());
         Authentication authentication = authenticate(request.email(), request.password());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = (User)authentication.getPrincipal();
-        log.info("✅ Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
+        log.info("Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 
@@ -130,29 +131,14 @@ public class AuthService {
      * 사용자 정보 조회
      */
     public AuthMeResponse getUserInfo(User user) {
-        String profileImage = extractProfileImage(user);
-
-        return new AuthMeResponse(
-            user.getId(),
-            user.getKutEmail(),
-            user.getName(),
-            profileImage,
-            user.getIntroduction()
-        );
-    }
-
-    private String extractProfileImage(User user) {
-        if (user.getGithubUser() == null) {
-            return null;
-        }
-        return user.getGithubUser().getGithubAvatarUrl();
+        return AuthMeResponse.from(user);
     }
 
     /**
      * User Entity 기반으로 토큰 생성
      */
     public AuthTokenResponse createTokensForUser(User user) {
-        log.info("🎫 Creating tokens for user: {} (ID: {})", user.getKutEmail(), user.getId());
+        log.info("Creating tokens for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 

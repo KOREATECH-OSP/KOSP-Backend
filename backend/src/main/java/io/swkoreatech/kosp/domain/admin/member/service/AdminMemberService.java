@@ -62,39 +62,7 @@ public class AdminMemberService {
     }
 
     public AdminUserListResponse getUsers(org.springframework.data.domain.Pageable pageable) {
-        org.springframework.data.domain.Page<User> userPage = userRepository.findAll(pageable);
-        
-        java.util.List<AdminUserListResponse.UserInfo> userInfos = userPage.getContent().stream()
-            .map(user -> {
-                String profileImageUrl = user.getGithubUser() != null 
-                    ? user.getGithubUser().getGithubAvatarUrl() 
-                    : null;
-                
-                Set<String> roleNames = user.getRoles().stream()
-                    .map(Role::getName)
-                    .collect(Collectors.toSet());
-                
-                return new AdminUserListResponse.UserInfo(
-                    user.getId(),
-                    user.getName(),
-                    user.getKutEmail(),
-                    user.getKutId(),
-                    profileImageUrl,
-                    user.getIntroduction(),
-                    roleNames,
-                    user.isDeleted(),
-                    user.getCreatedAt()
-                );
-            })
-            .toList();
-        
-        return new AdminUserListResponse(
-            userInfos,
-            userPage.getTotalElements(),
-            userPage.getTotalPages(),
-            userPage.getNumber(),
-            userPage.getSize()
-        );
+        return AdminUserListResponse.from(userRepository.findAll(pageable));
     }
 
 

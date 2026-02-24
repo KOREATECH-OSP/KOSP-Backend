@@ -105,8 +105,7 @@ public class ArticleController implements ArticleApi {
         @AuthUser User user,
         @PathVariable Long id
     ) {
-        boolean isLiked = articleService.toggleLike(user, id);
-        return ResponseEntity.ok(new ToggleLikeResponse(isLiked));
+        return ResponseEntity.ok(articleService.toggleLike(user, id));
     }
 
     @Override
@@ -116,7 +115,6 @@ public class ArticleController implements ArticleApi {
         @AuthUser User user,
         @PathVariable Long id
     ) {
-        boolean isBookmarked = articleService.toggleBookmark(user, id);
-        return ResponseEntity.ok(new ToggleBookmarkResponse(isBookmarked));
+        return ResponseEntity.ok(articleService.toggleBookmark(user, id));
     }
 }

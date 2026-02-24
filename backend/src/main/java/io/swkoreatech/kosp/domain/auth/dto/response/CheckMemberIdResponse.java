@@ -5,4 +5,7 @@ public record CheckMemberIdResponse(
     boolean available,
     String message
 ) {
+    public static CheckMemberIdResponse from(boolean available, String message) {
+        return new CheckMemberIdResponse(true, available, message);
+    }
 }

@@ -286,11 +286,11 @@ public class StatisticsAggregationStep implements StepProvider {
                  repo.getRepositoryName(),
                  githubId
              )
-             .orElse(GithubRepositoryStatistics.create(
-                 repo.getRepositoryOwner(),
-                 repo.getRepositoryName(),
-                 githubId
-             ));
+             .orElse(GithubRepositoryStatistics.builder()
+                 .repoOwner(repo.getRepositoryOwner())
+                 .repoName(repo.getRepositoryName())
+                 .contributorGithubId(githubId)
+                 .build());
          
          stats.updateRepositoryInfo(
              defaultToZero(repo.getStargazersCount()),

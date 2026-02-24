@@ -77,7 +77,7 @@ public class RecruitService {
         Specification<Recruit> spec = createSpecification(board, rsql);
         Page<Recruit> page = recruitRepository.findAll(spec, validatedPageable);
         List<RecruitResponse> recruits = mapToResponses(page, user);
-        return new RecruitListResponse(recruits, PageMeta.from(page));
+        return RecruitListResponse.from(recruits, PageMeta.from(page));
     }
 
     private Pageable validatePageSize(Pageable pageable) {

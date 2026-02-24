@@ -14,6 +14,7 @@ import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateReq
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentResponse;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
@@ -87,14 +88,14 @@ public class CommentService {
     }
 
     @Transactional
-    public boolean toggleLike(User user, Long commentId) {
+    public CommentToggleLikeResponse toggleLike(User user, Long commentId) {
         Comment comment = commentRepository.getById(commentId);
         Optional<CommentLike> like = commentLikeRepository.findByUserAndComment(user, comment);
         if (like.isPresent()) {
             commentLikeRepository.delete(like.get());
-            return false;
+            return CommentToggleLikeResponse.from(false);
         }
         commentLikeRepository.save(CommentLike.builder().user(user).comment(comment).build());
-        return true;
+        return CommentToggleLikeResponse.from(true);
     }
 }

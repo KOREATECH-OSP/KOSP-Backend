@@ -69,12 +69,7 @@ public class RecruitApplyService {
         Specification<RecruitApply> spec = RsqlUtils.toSpecification(filter, baseSpec);
         Page<RecruitApply> page = recruitApplyRepository.findAll(spec, pageable);
 
-        return new RecruitApplyListResponse(
-            page.getContent().stream()
-                .map(RecruitApplyResponse::from)
-                .toList(),
-            PageMeta.from(page)
-        );
+        return RecruitApplyListResponse.from(page);
     }
 
     public RecruitApplyResponse getApplication(Long applicationId, User user) {

@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,38 +40,38 @@ public class GithubYearlyStatistics {
 
     // 연도별 통계
     @Column(nullable = false)
-    private Integer commits = 0;
+    private Integer commits;
 
     @Column(nullable = false)
-    private Integer lines = 0;
+    private Integer lines;
 
     @Column(nullable = false)
-    private Integer additions = 0;
+    private Integer additions;
 
     @Column(nullable = false)
-    private Integer deletions = 0;
+    private Integer deletions;
 
     @Column(nullable = false)
-    private Integer prs = 0;
+    private Integer prs;
 
     @Column(nullable = false)
-    private Integer issues = 0;
+    private Integer issues;
 
     // 연도별 점수
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalScore = BigDecimal.ZERO;
+    private BigDecimal totalScore;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal mainRepoScore = BigDecimal.ZERO;
+    private BigDecimal mainRepoScore;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal otherRepoScore = BigDecimal.ZERO;
+    private BigDecimal otherRepoScore;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal prIssueScore = BigDecimal.ZERO;
+    private BigDecimal prIssueScore;
 
     @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal reputationScore = BigDecimal.ZERO;
+    private BigDecimal reputationScore;
 
     // 순위
     private Integer rank;
@@ -88,12 +89,22 @@ public class GithubYearlyStatistics {
     @Column(nullable = false)
     private LocalDateTime calculatedAt;
 
-    public static GithubYearlyStatistics create(String githubId, int year) {
-        GithubYearlyStatistics statistics = new GithubYearlyStatistics();
-        statistics.githubId = githubId;
-        statistics.year = year;
-        statistics.calculatedAt = LocalDateTime.now();
-        return statistics;
+    @Builder
+    private GithubYearlyStatistics(String githubId, Integer year) {
+        this.githubId = githubId;
+        this.year = year;
+        this.commits = 0;
+        this.lines = 0;
+        this.additions = 0;
+        this.deletions = 0;
+        this.prs = 0;
+        this.issues = 0;
+        this.totalScore = BigDecimal.ZERO;
+        this.mainRepoScore = BigDecimal.ZERO;
+        this.otherRepoScore = BigDecimal.ZERO;
+        this.prIssueScore = BigDecimal.ZERO;
+        this.reputationScore = BigDecimal.ZERO;
+        this.calculatedAt = LocalDateTime.now();
     }
 
     public void updateStatistics(

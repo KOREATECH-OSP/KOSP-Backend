@@ -7,5 +7,7 @@ public record RecruitListResponse(
     List<RecruitResponse> recruits,
     PageMeta pagination
 ) {
-    // Static factory removed. Service handles mapping.
+    public static RecruitListResponse from(List<RecruitResponse> recruits, PageMeta pagination) {
+        return new RecruitListResponse(recruits, pagination);
+    }
 }

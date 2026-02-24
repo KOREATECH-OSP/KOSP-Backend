@@ -44,8 +44,7 @@ public class GithubStatisticsService {
         PlatformStatistics platformStats = platformStatisticsRepository.getGlobal();
 
         if (platformStats == null) {
-            return new GithubContributionComparisonResponse(
-                0.0, 0.0, 0.0, 0.0,
+            return GithubContributionComparisonResponse.empty(
                 userStats.getTotalCommits(),
                 userStats.getTotalStarsReceived(),
                 userStats.getTotalPrs(),
@@ -53,7 +52,7 @@ public class GithubStatisticsService {
             );
         }
 
-        return new GithubContributionComparisonResponse(
+        return GithubContributionComparisonResponse.from(
             platformStats.getAvgCommitCount().doubleValue(),
             platformStats.getAvgStarCount().doubleValue(),
             platformStats.getAvgPrCount().doubleValue(),

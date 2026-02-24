@@ -44,36 +44,13 @@ public class ChallengeService {
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
     public AdminChallengeListResponse getAllChallenges() {
-        List<Challenge> challenges = challengeRepository.findAll();
-        List<AdminChallengeListResponse.ChallengeInfo> challengeInfos = challenges.stream()
-            .map(challenge -> new AdminChallengeListResponse.ChallengeInfo(
-                challenge.getId(),
-                challenge.getName(),
-                challenge.getDescription(),
-                challenge.getCondition(),
-                challenge.getTier(),
-                challenge.getImageResource(),
-                challenge.getImageResourceType(),
-                challenge.getPoint()
-            ))
-            .toList();
-        return new AdminChallengeListResponse(challengeInfos);
+        return AdminChallengeListResponse.from(challengeRepository.findAll());
     }
 
     public AdminChallengeResponse getChallenge(Long challengeId) {
         Challenge challenge = challengeRepository.findById(challengeId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
-        
-        return new AdminChallengeResponse(
-            challenge.getId(),
-            challenge.getName(),
-            challenge.getDescription(),
-            challenge.getCondition(),
-            challenge.getTier(),
-            challenge.getImageResource(),
-            challenge.getImageResourceType(),
-            challenge.getPoint()
-        );
+        return AdminChallengeResponse.from(challenge);
     }
 
 
@@ -150,36 +127,22 @@ public class ChallengeService {
             .map(challenge -> {
                 Optional<ChallengeHistory> historyOpt = Optional.ofNullable(historyMap.get(challenge.getId()));
                 boolean isCompleted = historyOpt.map(ChallengeHistory::isAchieved).orElse(false);
-                
                 int progress = isCompleted ? 100 : evaluateProgress(challenge, context);
-
-                return new ChallengeListResponse.ChallengeResponse(
-                    challenge.getId(),
-                    challenge.getName(),
-                    challenge.getDescription(),
-                    "general",
-                    progress,
-                    isCompleted,
-                    challenge.getImageResource(),
-                    challenge.getImageResourceType(),
-                    challenge.getTier(),
-                    challenge.getPoint()
-                );
+                return ChallengeListResponse.ChallengeResponse.from(challenge, progress, isCompleted);
             })
             .toList();
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
         long totalChallenges = challenges.size();
         double overallProgress = calculateOverallProgress(completedCount, totalChallenges);
-        
         int totalEarnedPoints = histories.stream()
             .filter(ChallengeHistory::isAchieved)
             .mapToInt(h -> h.getChallenge().getPoint())
             .sum();
 
-        return new ChallengeListResponse(
+        return ChallengeListResponse.from(
             challengeResponses,
-            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
+            ChallengeListResponse.ChallengeSummary.from(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
         );
     }
 
@@ -251,7 +214,7 @@ public class ChallengeService {
                 "커밋 50회 + PR 5개 복합 조건 (평균)")
         );
 
-        return new SpelVariableResponse(variables, examples);
+        return SpelVariableResponse.from(variables, examples);
     }
 
     private List<SpelVariableResponse.VariableInfo> buildVariablesFromEntity() {

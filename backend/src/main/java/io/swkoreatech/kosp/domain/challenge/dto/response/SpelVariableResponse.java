@@ -8,10 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record SpelVariableResponse(
     @Schema(description = "사용 가능한 변수 목록")
     List<VariableInfo> variables,
-    
+
     @Schema(description = "예제 표현식")
     List<ExampleExpression> examples
 ) {
+    public static SpelVariableResponse from(List<VariableInfo> variables, List<ExampleExpression> examples) {
+        return new SpelVariableResponse(variables, examples);
+    }
     @Schema(description = "변수 정보")
     public record VariableInfo(
         @Schema(description = "변수 경로", example = "#activity['commits']")

@@ -37,8 +37,7 @@ public class NotificationController implements NotificationApi {
     @Override
     @Permit(description = "읽지 않은 알림 수 조회")
     public ResponseEntity<UnreadCountResponse> getUnreadCount(User user) {
-        long count = notificationService.getUnreadCount(user);
-        return ResponseEntity.ok(new UnreadCountResponse(count));
+        return ResponseEntity.ok(notificationService.getUnreadCount(user));
     }
 
     @Override

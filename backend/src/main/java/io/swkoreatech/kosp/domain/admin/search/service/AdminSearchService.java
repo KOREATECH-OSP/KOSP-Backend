@@ -21,7 +21,7 @@ public class AdminSearchService {
 
     public AdminSearchResponse search(String keyword, String type) {
         if (keyword == null || keyword.isBlank()) {
-            return new AdminSearchResponse(Collections.emptyList(), Collections.emptyList());
+            return AdminSearchResponse.empty();
         }
 
         List<AdminSearchResponse.UserSummary> users = Collections.emptyList();
@@ -39,6 +39,6 @@ public class AdminSearchService {
                 .toList();
         }
 
-        return new AdminSearchResponse(users, articles);
+        return AdminSearchResponse.from(users, articles);
     }
 }

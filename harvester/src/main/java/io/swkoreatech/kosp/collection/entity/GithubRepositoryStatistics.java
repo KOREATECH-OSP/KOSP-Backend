@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -39,37 +40,34 @@ public class GithubRepositoryStatistics {
     private String contributorGithubId;
 
     @Column(name = "is_owned")
-    private Boolean isOwned = false;
+    private Boolean isOwned;
 
-    // 저장소 기본 정보
     @Column(name = "stargazers_count", nullable = false)
-    private Integer stargazersCount = 0;
+    private Integer stargazersCount;
 
     @Column(name = "forks_count", nullable = false)
-    private Integer forksCount = 0;
+    private Integer forksCount;
 
     @Column(name = "watchers_count", nullable = false)
-    private Integer watchersCount = 0;
+    private Integer watchersCount;
 
-    // 저장소 전체 통계
     @Column(name = "total_commits_count", nullable = false)
-    private Integer totalCommitsCount = 0;
+    private Integer totalCommitsCount;
 
     @Column(name = "total_prs_count", nullable = false)
-    private Integer totalPrsCount = 0;
+    private Integer totalPrsCount;
 
     @Column(name = "total_issues_count", nullable = false)
-    private Integer totalIssuesCount = 0;
+    private Integer totalIssuesCount;
 
-    // 사용자별 기여도
     @Column(name = "user_commits_count", nullable = false)
-    private Integer userCommitsCount = 0;
+    private Integer userCommitsCount;
 
     @Column(name = "user_prs_count", nullable = false)
-    private Integer userPrsCount = 0;
+    private Integer userPrsCount;
 
     @Column(name = "user_issues_count", nullable = false)
-    private Integer userIssuesCount = 0;
+    private Integer userIssuesCount;
 
     @Column(name = "last_commit_date")
     private LocalDateTime lastCommitDate;
@@ -86,17 +84,22 @@ public class GithubRepositoryStatistics {
     @Column(name = "calculated_at", nullable = false)
     private LocalDateTime calculatedAt;
 
-    public static GithubRepositoryStatistics create(
-        String repoOwner,
-        String repoName,
-        String contributorGithubId
-    ) {
-        GithubRepositoryStatistics statistics = new GithubRepositoryStatistics();
-        statistics.repoOwner = repoOwner;
-        statistics.repoName = repoName;
-        statistics.contributorGithubId = contributorGithubId;
-        statistics.calculatedAt = LocalDateTime.now();
-        return statistics;
+    @Builder
+    private GithubRepositoryStatistics(String repoOwner, String repoName, String contributorGithubId) {
+        this.repoOwner = repoOwner;
+        this.repoName = repoName;
+        this.contributorGithubId = contributorGithubId;
+        this.isOwned = false;
+        this.stargazersCount = 0;
+        this.forksCount = 0;
+        this.watchersCount = 0;
+        this.totalCommitsCount = 0;
+        this.totalPrsCount = 0;
+        this.totalIssuesCount = 0;
+        this.userCommitsCount = 0;
+        this.userPrsCount = 0;
+        this.userIssuesCount = 0;
+        this.calculatedAt = LocalDateTime.now();
     }
 
     public void updateRepositoryInfo(

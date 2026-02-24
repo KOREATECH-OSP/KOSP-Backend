@@ -7,4 +7,7 @@ public record TeamListResponse(
     List<TeamResponse> teams,
     PageMeta meta
 ) {
+    public static TeamListResponse from(List<TeamResponse> teams, PageMeta meta) {
+        return new TeamListResponse(teams, meta);
+    }
 }

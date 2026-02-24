@@ -40,6 +40,6 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
 
     default GithubUserStatistics getOrCreate(String githubId) {
         return findByGithubId(githubId)
-            .orElseGet(() -> save(GithubUserStatistics.create(githubId)));
+            .orElseGet(() -> save(GithubUserStatistics.builder().githubId(githubId).build()));
     }
 }

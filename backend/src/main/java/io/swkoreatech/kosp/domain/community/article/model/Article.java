@@ -89,16 +89,6 @@ public class Article extends BaseEntity {
             this.isPinned = isPinned;
     }
 
-    public static Article create(User author, Board board, String title, String content, List<String> tags) {
-        return Article.builder()
-            .author(author)
-            .board(board)
-            .title(title)
-            .content(content)
-            .tags(tags)
-            .build();
-    }
-
     public Long getBoardId() {
         return board.getId();
     }

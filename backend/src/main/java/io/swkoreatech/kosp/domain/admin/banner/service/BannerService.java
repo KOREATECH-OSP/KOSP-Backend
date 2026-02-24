@@ -17,13 +17,12 @@ public class BannerService {
 
     public BannerSettingResponse getSetting() {
         BannerSetting setting = bannerSettingRepository.getOrCreate();
-        return new BannerSettingResponse(setting.getIsActive());
+        return BannerSettingResponse.from(setting.getIsActive());
     }
 
     @Transactional
     public BannerSettingResponse toggle() {
         BannerSetting setting = bannerSettingRepository.getOrCreate();
-        boolean newValue = setting.toggle();
-        return new BannerSettingResponse(newValue);
+        return BannerSettingResponse.from(setting.toggle());
     }
 }

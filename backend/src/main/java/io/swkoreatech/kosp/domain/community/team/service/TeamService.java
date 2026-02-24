@@ -75,7 +75,7 @@ public class TeamService {
         List<TeamResponse> teams = page.getContent().stream()
             .map(team -> TeamResponse.from(team, getLeader(team)))
             .toList();
-        return new TeamListResponse(teams, PageMeta.from(page));
+        return TeamListResponse.from(teams, PageMeta.from(page));
     }
 
     private Specification<Team> createSpecification(String search, String rsql) {

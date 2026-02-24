@@ -12,6 +12,8 @@ import io.swkoreatech.kosp.domain.community.article.dto.response.AdminArticleRes
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
@@ -129,29 +131,29 @@ public class ArticleService {
     }
 
     @Transactional
-    public boolean toggleLike(User user, Long id) {
+    public ToggleLikeResponse toggleLike(User user, Long id) {
         Article article = articleRepository.getById(id);
         Optional<ArticleLike> like = articleLikeRepository.findByUserAndArticle(user, article);
         if (like.isPresent()) {
             articleLikeRepository.delete(like.get());
             article.decrementLikes();
-            return false;
+            return ToggleLikeResponse.from(false);
         }
         articleLikeRepository.save(ArticleLike.builder().user(user).article(article).build());
         article.incrementLikes();
-        return true;
+        return ToggleLikeResponse.from(true);
     }
 
     @Transactional
-    public boolean toggleBookmark(User user, Long id) {
+    public ToggleBookmarkResponse toggleBookmark(User user, Long id) {
         Article article = articleRepository.getById(id);
         Optional<ArticleBookmark> bookmark = articleBookmarkRepository.findByUserAndArticle(user, article);
         if (bookmark.isPresent()) {
             articleBookmarkRepository.delete(bookmark.get());
-            return false;
+            return ToggleBookmarkResponse.from(false);
         }
         articleBookmarkRepository.save(ArticleBookmark.builder().user(user).article(article).build());
-        return true;
+        return ToggleBookmarkResponse.from(true);
     }
 
     @Transactional

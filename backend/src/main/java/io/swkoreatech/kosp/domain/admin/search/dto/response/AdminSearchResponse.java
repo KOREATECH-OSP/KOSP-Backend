@@ -8,6 +8,13 @@ public record AdminSearchResponse(
     List<UserSummary> users,
     List<ArticleSummary> articles
 ) {
+    public static AdminSearchResponse from(List<UserSummary> users, List<ArticleSummary> articles) {
+        return new AdminSearchResponse(users, articles);
+    }
+
+    public static AdminSearchResponse empty() {
+        return new AdminSearchResponse(java.util.Collections.emptyList(), java.util.Collections.emptyList());
+    }
     public record UserSummary(Long id, String name, String email, String profileImage) {
         public static UserSummary from(User user) {
             String profileImage = user.getGithubUser() != null ? user.getGithubUser().getGithubAvatarUrl() : null;
