@@ -109,7 +109,7 @@ server:
 
 springdoc:
   swagger-ui:
-    tags-sorter: alpha
     persist-authorization: true
     disable-swagger-default-url: true
   default-produces-media-type: application/json
+
