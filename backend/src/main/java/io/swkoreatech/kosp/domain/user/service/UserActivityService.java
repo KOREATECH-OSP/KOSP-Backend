@@ -16,6 +16,8 @@ import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentResponse
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 
@@ -39,6 +41,7 @@ public class UserActivityService {
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final UserRepository userRepository;
+    private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
 
     public ArticleListResponse getPosts(Long userId, Pageable pageable, User user) {
         User author = User.builder().id(userId).build();
@@ -64,8 +67,22 @@ public class UserActivityService {
             return GithubActivityResponse.empty();
         }
 
-        // TODO: Implement after MongoDB schema is rebuilt
-        return GithubActivityResponse.empty();
+        String githubId = String.valueOf(targetUser.getGithubUser().getGithubId());
+        List<GithubRepositoryStatistics> repositories = repositoryStatisticsRepository
+            .findByContributorGithubIdOrderByLastCommitDateDesc(githubId);
+
+        List<GithubActivityResponse.Activity> activities = repositories.stream()
+            .map(repo -> new GithubActivityResponse.Activity(
+                String.valueOf(repo.getId()),
+                "REPOSITORY",
+                repo.getRepoOwner() + "/" + repo.getRepoName(),
+                repo.getDescription(),
+                repo.getLastCommitDate() != null ? repo.getLastCommitDate().toString() : null,
+                "https://github.com/" + repo.getRepoOwner() + "/" + repo.getRepoName()
+            ))
+            .toList();
+
+        return new GithubActivityResponse(activities);
     }
 
     private ArticleListResponse toArticleResponse(Page<Article> page, User user) {
