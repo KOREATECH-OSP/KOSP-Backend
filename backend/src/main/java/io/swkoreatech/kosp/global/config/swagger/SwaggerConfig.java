@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,11 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
+import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
@@ -212,6 +218,44 @@ public class SwaggerConfig {
             .addOpenApiCustomizer(retainUsedTagsOnly())
             .addOpenApiCustomizer(orderTags(ADMIN_TAG_ORDER))
             .build();
+    }
+
+    /**
+     * 모든 API 엔드포인트에 공통 에러 응답(400, 401, 403, 404, 409, 500)을 자동 등록한다.
+     *
+     * @return OperationCustomizer 빈
+     */
+    @Bean
+    public OperationCustomizer globalErrorResponseCustomizer() {
+        return (operation, handlerMethod) -> {
+            ApiResponses responses = operation.getResponses();
+
+            @SuppressWarnings("rawtypes")
+            Schema<Object> errorSchema = new Schema<>()
+                .type("object")
+                .addProperty("message", new Schema<>().type("string").example("오류 메시지"))
+                .addProperty("status", new Schema<>().type("integer").example(400));
+
+            Map<String, String> errorResponses = Map.of(
+                "400", "요청값 검증 실패",
+                "401", "인증 실패",
+                "403", "권한 부족",
+                "404", "리소스 미존재",
+                "409", "충돌/중복",
+                "500", "서버 내부 오류"
+            );
+
+            errorResponses.forEach((code, description) -> {
+                if (!responses.containsKey(code)) {
+                    responses.addApiResponse(code, new ApiResponse()
+                        .description(description)
+                        .content(new Content().addMediaType("application/json",
+                            new MediaType().schema(errorSchema))));
+                }
+            });
+
+            return operation;
+        };
     }
 
     private OpenApiCustomizer retainUsedTagsOnly() {
