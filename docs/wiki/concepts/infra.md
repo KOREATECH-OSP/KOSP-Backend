@@ -12,16 +12,20 @@ AWS 클라우드 환경 내 VPC(Virtual Private Cloud)를 구성하여 보안성
 ## 2. 🌍 서버 구성 요소 (Component Details)
 
 ### 🖥️ 애플리케이션 서버 (WAS Server)
-*   **리소스**: AWS EC2 (Linux)
-*   **Nginx**: Reverse Proxy, 80/443 Port.
-*   **Spring Boot 3**: API Server, Docker Container, 8080 Port.
+
+* **리소스**: AWS EC2 (Linux)
+* **Nginx**: Reverse Proxy, 80/443 Port.
+* **Spring Boot 3**: API Server, Docker Container, 8080 Port.
 
 ### 💾 데이터 서버 (DB Server)
+
 데이터의 안정성과 리소스 격리를 위해 별도의 EC2 인스턴스로 분리했습니다.
-*   **리소스**: AWS EC2 (Linux)
-*   **MySQL 8.0**
-*   **Redis**
-*   **MongoDB**
+
+* **리소스**: AWS EC2 (Linux)
+* **MySQL 8.0**
+* **Redis**
+* **MongoDB**
 
 ## 3. ☁️ 외부 연동 서비스 (External Services)
-*   **AWS SES** (Simple Email Service)
+
+* **AWS SES** (Simple Email Service)

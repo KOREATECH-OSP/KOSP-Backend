@@ -3,20 +3,25 @@ package io.swkoreatech.kosp.domain.admin.member.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
 import io.swkoreatech.kosp.domain.admin.member.api.AdminMemberApi;
 import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.member.dto.request.UserRoleUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
 import io.swkoreatech.kosp.domain.admin.member.service.AdminMemberService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 사용자 관리 컨트롤러.
+ * <p>{@link AdminMemberApi}를 구현하여 사용자 관리 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminMemberController implements AdminMemberApi {
 
     private final AdminMemberService adminMemberService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:users:read", description = "사용자 목록 조회")
     public ResponseEntity<AdminUserListResponse> getUsers(int page, int size) {
@@ -25,6 +30,7 @@ public class AdminMemberController implements AdminMemberApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:users:delete", description = "사용자 강제 탈퇴")
     public ResponseEntity<Void> deleteUser(Long userId) {
@@ -32,7 +38,7 @@ public class AdminMemberController implements AdminMemberApi {
         return ResponseEntity.noContent().build();
     }
 
-
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:users:update", description = "사용자 정보 수정")
     public ResponseEntity<Void> updateUser(Long userId, AdminUserUpdateRequest request) {
@@ -40,6 +46,7 @@ public class AdminMemberController implements AdminMemberApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:users:update-roles", description = "사용자 역할 변경")
     public ResponseEntity<Void> updateUserRoles(Long userId, UserRoleUpdateRequest request) {
@@ -47,10 +54,19 @@ public class AdminMemberController implements AdminMemberApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:users:trigger-github", description = "[임시] GitHub 수집 트리거")
     public ResponseEntity<Void> triggerGithubCollection(Long userId) {
         adminMemberService.triggerGithubCollection(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:users:trigger-all-collection", description = "전체 GitHub 수집 트리거")
+    public ResponseEntity<Void> triggerAllGithubCollection() {
+        adminMemberService.triggerAllGithubCollection();
         return ResponseEntity.ok().build();
     }
 }

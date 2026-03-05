@@ -4,7 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MvcResult;
@@ -14,143 +18,165 @@ import com.fasterxml.jackson.databind.JsonNode;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @Sql("/data/repository-search-test.sql")
-@DisplayName("Repository Search Integration Test")
+@DisplayName("RepositorySearch 통합 테스트")
 public class RepositorySearchIntegrationTest extends IntegrationTestSupport {
 
-    @Test
-    @DisplayName("기본 검색: keyword로 레포지토리 검색")
-    void searchByKeyword() throws Exception {
-        MvcResult resultNoFilter = mockMvc.perform(get("/v1/search")
-                .param("keyword", "spring"))
-            .andReturn();
-        
-        System.out.println("No filter status: " + resultNoFilter.getResponse().getStatus());
-        System.out.println("No filter body length: " + resultNoFilter.getResponse().getContentAsString().length());
-        
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "spring")
-                .param("filter", "repositories"))
-            .andReturn();
-        
-        int status = result.getResponse().getStatus();
-        String responseBody = result.getResponse().getContentAsString();
-        
-        assertThat(status).as("HTTP status should be 200").isEqualTo(200);
-        assertThat(responseBody).as("Response body should not be empty (got " + responseBody.length() + " chars)").isNotEmpty();
-        
-        JsonNode response = objectMapper.readTree(responseBody);
-        assertThat(response.has("repositories")).as("Response should have repositories field").isTrue();
-        JsonNode repositories = response.get("repositories");
-        assertThat(repositories.isArray()).as("repositories should be array").isTrue();
-        assertThat(repositories.size()).as("should find spring repos").isGreaterThan(0);
-        
-        JsonNode firstRepo = repositories.get(0);
-        assertThat(firstRepo.has("repoName")).isTrue();
-        assertThat(firstRepo.has("description")).isTrue();
+    @Nested
+    @DisplayName("기본 검색")
+    class BasicSearchTest {
+
+        @Test
+        @DisplayName("keyword로 레포지토리를 검색한다")
+        void searchByKeyword() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "spring")
+                    .param("filter", "repositories"))
+                .andReturn();
+
+            // then
+            int status = result.getResponse().getStatus();
+            String responseBody = result.getResponse().getContentAsString();
+
+            assertThat(status).isEqualTo(200);
+            assertThat(responseBody).isNotEmpty();
+
+            JsonNode response = objectMapper.readTree(responseBody);
+            assertThat(response.has("repositories")).isTrue();
+            JsonNode repositories = response.get("repositories");
+            assertThat(repositories.isArray()).isTrue();
+            assertThat(repositories.size()).isGreaterThan(0);
+
+            JsonNode firstRepo = repositories.get(0);
+            assertThat(firstRepo.has("repoName")).isTrue();
+            assertThat(firstRepo.has("description")).isTrue();
+        }
     }
 
-    @Test
-    @DisplayName("RSQL 필터: stargazersCount>100")
-    void searchByStars() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "")
-                .param("filter", "repositories")
-                .param("rsql", "stargazersCount>100"))
-            .andExpect(status().isOk())
-            .andReturn();
+    @Nested
+    @DisplayName("RSQL 필터")
+    class RsqlFilterTest {
 
-        String responseBody = result.getResponse().getContentAsString();
-        JsonNode response = objectMapper.readTree(responseBody);
-        
-        JsonNode repositories = response.get("repositories");
-        
-        repositories.forEach(repo -> {
-            int starCount = repo.get("stargazersCount").asInt();
-            assertThat(starCount).isGreaterThan(100);
-        });
+        @Test
+        @DisplayName("stargazersCount>100 필터로 검색한다")
+        void searchByStars() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "")
+                    .param("filter", "repositories")
+                    .param("rsql", "stargazersCount>100"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+            // then
+            String responseBody = result.getResponse().getContentAsString();
+            JsonNode response = objectMapper.readTree(responseBody);
+            JsonNode repositories = response.get("repositories");
+
+            List<JsonNode> repoList = new ArrayList<>();
+            repositories.forEach(repoList::add);
+            assertThat(repoList).allSatisfy(repo ->
+                assertThat(repo.get("stargazersCount").asInt()).isGreaterThan(100)
+            );
+        }
+
+        @Test
+        @DisplayName("primaryLanguage==Java 필터로 검색한다")
+        void searchByLanguage() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "")
+                    .param("filter", "repositories")
+                    .param("rsql", "primaryLanguage==Java"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+            // then
+            String responseBody = result.getResponse().getContentAsString();
+            JsonNode response = objectMapper.readTree(responseBody);
+            JsonNode repositories = response.get("repositories");
+
+            List<JsonNode> repoList = new ArrayList<>();
+            repositories.forEach(repoList::add);
+            assertThat(repoList).allSatisfy(repo ->
+                assertThat(repo.get("primaryLanguage").asText()).isEqualTo("Java")
+            );
+        }
     }
 
-    @Test
-    @DisplayName("RSQL 필터: primaryLanguage==Java")
-    void searchByLanguage() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "")
-                .param("filter", "repositories")
-                .param("rsql", "primaryLanguage==Java"))
-            .andExpect(status().isOk())
-            .andReturn();
+    @Nested
+    @DisplayName("복합 검색")
+    class CombinedSearchTest {
 
-        String responseBody = result.getResponse().getContentAsString();
-        JsonNode response = objectMapper.readTree(responseBody);
-        
-        JsonNode repositories = response.get("repositories");
-        
-        repositories.forEach(repo -> {
-            String language = repo.get("primaryLanguage").asText();
-            assertThat(language).isEqualTo("Java");
-        });
+        @Test
+        @DisplayName("keyword + RSQL로 검색한다")
+        void searchCombined() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "KOSP")
+                    .param("filter", "repositories")
+                    .param("rsql", "stargazersCount>10"))
+                .andExpect(status().isOk())
+                .andReturn();
+
+            // then
+            String responseBody = result.getResponse().getContentAsString();
+            JsonNode response = objectMapper.readTree(responseBody);
+            JsonNode repositories = response.get("repositories");
+
+            List<JsonNode> repoList = new ArrayList<>();
+            repositories.forEach(repoList::add);
+            assertThat(repoList).allSatisfy(repo -> {
+                String repoName = repo.get("repoName").asText();
+                String description = repo.get("description").asText();
+                assertThat(repoName.contains("KOSP") || description.contains("KOSP"))
+                    .isTrue();
+                assertThat(repo.get("stargazersCount").asInt()).isGreaterThan(10);
+            });
+        }
     }
 
-    @Test
-    @DisplayName("복합 검색: keyword + RSQL")
-    void searchCombined() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "KOSP")
-                .param("filter", "repositories")
-                .param("rsql", "stargazersCount>10"))
-            .andExpect(status().isOk())
-            .andReturn();
+    @Nested
+    @DisplayName("빈 결과 및 페이지네이션")
+    class EmptyAndPaginationTest {
 
-        String responseBody = result.getResponse().getContentAsString();
-        JsonNode response = objectMapper.readTree(responseBody);
-        
-        JsonNode repositories = response.get("repositories");
-        
-        repositories.forEach(repo -> {
-            String repoName = repo.get("repoName").asText();
-            String description = repo.get("description").asText();
-            int starCount = repo.get("stargazersCount").asInt();
-            
-            boolean containsKOSP = repoName.contains("KOSP") || description.contains("KOSP");
-            assertThat(containsKOSP).isTrue();
-            assertThat(starCount).isGreaterThan(10);
-        });
-    }
+        @Test
+        @DisplayName("매칭 없는 keyword 검색 시 빈 결과를 반환한다")
+        void searchNoResults() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "nonexistent12345xyz")
+                    .param("filter", "repositories"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-    @Test
-    @DisplayName("빈 결과: 매칭 없는 keyword")
-    void searchNoResults() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "nonexistent12345xyz")
-                .param("filter", "repositories"))
-            .andExpect(status().isOk())
-            .andReturn();
+            // then
+            String responseBody = result.getResponse().getContentAsString();
+            JsonNode response = objectMapper.readTree(responseBody);
+            JsonNode repositories = response.get("repositories");
+            assertThat(repositories.size()).isEqualTo(0);
+        }
 
-        String responseBody = result.getResponse().getContentAsString();
-        JsonNode response = objectMapper.readTree(responseBody);
-        
-        JsonNode repositories = response.get("repositories");
-        assertThat(repositories.size()).isEqualTo(0);
-    }
+        @Test
+        @DisplayName("page=0&size=2로 페이지네이션 검색한다")
+        void searchPagination() throws Exception {
+            // given & when
+            MvcResult result = mockMvc.perform(get("/v1/search")
+                    .param("keyword", "")
+                    .param("filter", "repositories")
+                    .param("page", "0")
+                    .param("size", "2"))
+                .andExpect(status().isOk())
+                .andReturn();
 
-    @Test
-    @DisplayName("페이지네이션: page=0&size=2")
-    void searchPagination() throws Exception {
-        MvcResult result = mockMvc.perform(get("/v1/search")
-                .param("keyword", "")
-                .param("filter", "repositories")
-                .param("page", "0")
-                .param("size", "2"))
-            .andExpect(status().isOk())
-            .andReturn();
+            // then
+            String responseBody = result.getResponse().getContentAsString();
+            JsonNode response = objectMapper.readTree(responseBody);
+            JsonNode repositories = response.get("repositories");
+            assertThat(repositories.size()).isLessThanOrEqualTo(2);
 
-        String responseBody = result.getResponse().getContentAsString();
-        JsonNode response = objectMapper.readTree(responseBody);
-        
-        JsonNode repositories = response.get("repositories");
-        assertThat(repositories.size()).isLessThanOrEqualTo(2);
-        
-        JsonNode meta = response.get("meta");
-        assertThat(meta.get("size").asInt()).isEqualTo(2);
+            JsonNode meta = response.get("meta");
+            assertThat(meta.get("currentPage").asInt()).isEqualTo(0);
+        }
     }
 }

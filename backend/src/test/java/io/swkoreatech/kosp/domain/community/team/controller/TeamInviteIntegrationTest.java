@@ -1,13 +1,11 @@
 package io.swkoreatech.kosp.domain.community.team.controller;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
@@ -24,8 +24,6 @@ import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @DisplayName("TeamInvite 통합 테스트")
@@ -61,7 +59,6 @@ class TeamInviteIntegrationTest extends IntegrationTestSupport {
             .kutId("2024201")
             .kutEmail("invite-leader@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
         leader = userRepository.save(leader);
         ReflectionTestUtils.setField(leader, "githubUser", githubUserRepository.getByGithubId(3001L));
@@ -72,7 +69,6 @@ class TeamInviteIntegrationTest extends IntegrationTestSupport {
             .kutId("2024202")
             .kutEmail("invitee@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
         invitee = userRepository.save(invitee);
         ReflectionTestUtils.setField(invitee, "githubUser", githubUserRepository.getByGithubId(3002L));

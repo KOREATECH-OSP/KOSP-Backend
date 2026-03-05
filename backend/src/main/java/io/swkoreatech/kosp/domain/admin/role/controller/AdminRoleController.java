@@ -15,24 +15,31 @@ import io.swkoreatech.kosp.domain.admin.role.service.RoleAdminService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 역할 관리 컨트롤러.
+ * <p>{@link AdminRoleApi}를 구현하여 역할 CRUD 및 정책 할당/제거 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminRoleController implements AdminRoleApi {
 
     private final RoleAdminService roleAdminService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:read", description = "역할 목록 조회")
     public ResponseEntity<List<RoleResponse>> getAllRoles() {
         return ResponseEntity.ok(roleAdminService.getAllRoles());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:read", description = "역할 단일 조회")
     public ResponseEntity<RoleResponse> getRole(String roleName) {
         return ResponseEntity.ok(roleAdminService.getRole(roleName));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:create", description = "역할 생성")
     public ResponseEntity<Void> createRole(RoleRequest request) {
@@ -40,6 +47,7 @@ public class AdminRoleController implements AdminRoleApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:update", description = "역할 수정")
     public ResponseEntity<Void> updateRole(String roleName, RoleUpdateRequest request) {
@@ -47,6 +55,7 @@ public class AdminRoleController implements AdminRoleApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:delete", description = "역할 삭제")
     public ResponseEntity<Void> deleteRole(String roleName) {
@@ -54,6 +63,7 @@ public class AdminRoleController implements AdminRoleApi {
         return ResponseEntity.noContent().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:assign-policy", description = "역할에 정책 할당")
     public ResponseEntity<Void> assignPolicy(String roleName, PolicyAssignRequest request) {
@@ -61,6 +71,7 @@ public class AdminRoleController implements AdminRoleApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:roles:remove-policy", description = "역할에서 정책 제거")
     public ResponseEntity<Void> removePolicy(String roleName, String policyName) {

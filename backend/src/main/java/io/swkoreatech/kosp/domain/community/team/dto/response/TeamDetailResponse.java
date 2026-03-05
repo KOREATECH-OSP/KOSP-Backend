@@ -1,8 +1,18 @@
 package io.swkoreatech.kosp.domain.community.team.dto.response;
 
 import java.util.List;
+
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 
+/**
+ * 팀 상세 응답 DTO.
+ *
+ * @param id 팀 ID
+ * @param name 팀 이름
+ * @param description 팀 설명
+ * @param imageUrl 팀 이미지 URL
+ * @param members 팀 멤버 목록
+ */
 public record TeamDetailResponse(
     Long id,
     String name,
@@ -10,6 +20,12 @@ public record TeamDetailResponse(
     String imageUrl,
     List<TeamMemberResponse> members
 ) {
+    /**
+     * {@link Team} 엔티티로부터 상세 응답을 생성한다.
+     *
+     * @param team 팀 엔티티
+     * @return 팀 상세 응답
+     */
     public static TeamDetailResponse from(Team team) {
         return new TeamDetailResponse(
             team.getId(),

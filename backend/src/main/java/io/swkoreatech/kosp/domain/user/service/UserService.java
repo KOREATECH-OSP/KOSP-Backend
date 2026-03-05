@@ -11,10 +11,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
-import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
@@ -26,20 +30,18 @@ import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
 import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.MyPointHistoryResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 사용자 서비스.
+ * 회원가입, 정보 수정, 프로필 조회, 탈퇴, 비밀번호 변경, 지원 내역/포인트 내역 조회 기능을 담당한다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -57,6 +59,15 @@ public class UserService {
     private final EmailVerificationService emailVerificationService;
     private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * 회원가입을 처리하고 인증 토큰을 발급한다.
+     * 이메일 인증 확인, GitHub 정보 연동, 사용자 생성/복구, 권한 할당 및 토큰 발급을 수행한다.
+     *
+     * @param request 회원가입 요청
+     * @param token 회원가입 토큰 (이메일/GitHub 인증 정보 포함)
+     * @return 인증 토큰 응답
+     * @throws GlobalException 이메일 미인증 또는 이미 가입된 사용자인 경우
+     */
     @Transactional
     public AuthTokenResponse signup(UserSignupRequest request, SignupToken token) {
         // 1. Email Verified 확인
@@ -77,8 +88,6 @@ public class UserService {
         GithubUser githubUser = githubUserRepository.findByGithubId(githubId)
             .orElseGet(() -> GithubUser.builder()
                 .githubId(githubId)
-                .createdAt(java.time.LocalDateTime.now())
-                .updatedAt(java.time.LocalDateTime.now())
                 .build());
 
         // GitHub 정보 업데이트 (암호화된 토큰 그대로 저장)
@@ -102,7 +111,7 @@ public class UserService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ROLE_NOT_FOUND));
         user.getRoles().add(role);
 
-        log.info("✅ 사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
+        log.info("사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
 
         // 6. GitHub 데이터 수집 이벤트 발행
         if (githubUser.getGithubLogin() != null) {
@@ -111,27 +120,52 @@ public class UserService {
         }
 
         emailVerificationService.completeSignupVerification(kutEmail);
-        log.info("✅ Redis cleanup completed for email: {}", kutEmail);
+        log.info("Redis cleanup completed for email: {}", kutEmail);
         return authService.createTokensForUser(user);
     }
 
+    /**
+     * 사용자 정보를 수정한다.
+     *
+     * @param userId 사용자 ID
+     * @param request 수정 요청
+     */
     @Transactional
     public void update(Long userId, UserUpdateRequest request) {
         User user = userRepository.getById(userId);
         user.updateInfo(request.name(), request.introduction());
     }
 
+    /**
+     * 사용자 프로필을 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 사용자 프로필 응답
+     */
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
     }
 
+    /**
+     * 사용자 계정을 탈퇴(Soft Delete) 처리한다.
+     *
+     * @param userId 사용자 ID
+     */
     @Transactional
     public void delete(Long userId) {
         User user = userRepository.getById(userId);
         user.delete();
     }
 
+    /**
+     * 사용자의 비밀번호를 변경한다.
+     *
+     * @param userId 사용자 ID
+     * @param currentPassword 현재 비밀번호
+     * @param newPassword 새 비밀번호
+     * @throws GlobalException 현재 비밀번호가 일치하지 않는 경우
+     */
     @Transactional
     public void changePassword(Long userId, String currentPassword, String newPassword) {
         User user = userRepository.getById(userId);
@@ -143,17 +177,19 @@ public class UserService {
         user.changePassword(newPassword, passwordEncoder);
     }
 
+    /**
+     * 학번/사번의 사용 가능 여부를 확인한다.
+     *
+     * @param memberId 학번 또는 사번
+     * @return 사용 가능 여부 응답
+     */
     @Transactional(readOnly = true)
     public CheckMemberIdResponse checkMemberIdAvailability(String memberId) {
         boolean exists = userRepository.existsByKutIdAndIsDeletedFalse(memberId);
         String label = extractMemberLabel(memberId);
         String message = buildAvailabilityMessage(exists, label);
 
-        return new CheckMemberIdResponse(
-            true,
-            !exists,
-            message
-        );
+        return CheckMemberIdResponse.from(!exists, message);
     }
 
     private String extractMemberLabel(String memberId) {
@@ -170,20 +206,39 @@ public class UserService {
         return "사용 가능한 " + label + "입니다.";
     }
 
+    /**
+     * 로그인한 사용자의 지원 내역을 RSQL 필터로 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param filter RSQL 필터 문자열
+     * @param pageable 페이지 정보
+     * @return 지원 내역 목록 응답
+     */
     public MyApplicationListResponse getMyApplications(User user, String filter, Pageable pageable) {
         Specification<RecruitApply> baseSpec = (root, query, cb) -> cb.equal(root.get("user"), user);
         Specification<RecruitApply> spec = RsqlUtils.toSpecification(filter, baseSpec);
         Page<RecruitApply> page = recruitApplyRepository.findAll(spec, pageable);
-        return new MyApplicationListResponse(
-            page.getContent().stream().map(MyApplicationResponse::from).toList(),
-            PageMeta.from(page)
-        );
+        return MyApplicationListResponse.from(page);
     }
 
+    /**
+     * 로그인한 사용자의 전체 지원 내역을 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param pageable 페이지 정보
+     * @return 지원 내역 목록 응답
+     */
     public MyApplicationListResponse getMyApplications(User user, Pageable pageable) {
         return getMyApplications(user, null, pageable);
     }
 
+    /**
+     * 로그인한 사용자의 포인트 내역을 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param pageable 페이지 정보
+     * @return 포인트 내역 응답
+     */
     public MyPointHistoryResponse getMyPointHistory(User user, Pageable pageable) {
         Page<PointTransaction> transactions = pointTransactionRepository.findByUserOrderByCreatedAtDesc(user, pageable);
         return MyPointHistoryResponse.from(user, transactions);
@@ -202,8 +257,6 @@ public class UserService {
             .kutId(request.kutId())
             .kutEmail(kutEmail)
             .password(request.password())
-            .createdAt(java.time.LocalDateTime.now())
-            .updatedAt(java.time.LocalDateTime.now())
             .build();
 
         user.encodePassword(passwordEncoder);

@@ -15,25 +15,37 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
+import jakarta.validation.Valid;
 
+/**
+ * 관리자 전용 역할 관리 API 인터페이스.
+ * <p>역할의 CRUD 및 정책 할당/제거 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Role", description = "관리자 전용 역할 관리 API")
 @RequestMapping("/v1/admin/roles")
 public interface AdminRoleApi {
 
-    @Operation(summary = "모든 역할(Role) 조회", description = "시스템에 등록된 모든 역할을 조회합니다.")
+    @Operation(
+        summary = "모든 역할(Role) 조회",
+        description = "시스템에 등록된 모든 역할을 조회합니다."
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
     ResponseEntity<List<RoleResponse>> getAllRoles();
 
-    @Operation(summary = "역할(Role) 단일 조회", description = "특정 역할의 상세 정보를 조회합니다.")
+    @Operation(
+        summary = "역할(Role) 단일 조회",
+        description = "특정 역할의 상세 정보를 조회합니다."
+    )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/{roleName}")
-    ResponseEntity<RoleResponse> getRole(@Parameter(description = "역할 이름") @PathVariable String roleName);
+    ResponseEntity<RoleResponse> getRole(
+        @Parameter(description = "역할 이름") @PathVariable String roleName
+    );
 
     @Operation(summary = "새로운 역할(Role) 생성", description = "새로운 역할을 생성합니다.")
     @ApiResponse(responseCode = "201", description = "생성 성공")
@@ -51,9 +63,14 @@ public interface AdminRoleApi {
     @Operation(summary = "역할(Role) 삭제", description = "특정 역할을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/{roleName}")
-    ResponseEntity<Void> deleteRole(@Parameter(description = "역할 이름") @PathVariable String roleName);
+    ResponseEntity<Void> deleteRole(
+        @Parameter(description = "역할 이름") @PathVariable String roleName
+    );
 
-    @Operation(summary = "역할에 정책(Policy) 할당", description = "특정 역할에 정책을 할당합니다.")
+    @Operation(
+        summary = "역할에 정책(Policy) 할당",
+        description = "특정 역할에 정책을 할당합니다."
+    )
     @ApiResponse(responseCode = "200", description = "할당 성공")
     @PostMapping("/{roleName}/policies")
     ResponseEntity<Void> assignPolicy(
@@ -61,7 +78,10 @@ public interface AdminRoleApi {
         @RequestBody @Valid PolicyAssignRequest request
     );
 
-    @Operation(summary = "역할에서 정책(Policy) 제거", description = "특정 역할에서 정책 할당을 해제합니다.")
+    @Operation(
+        summary = "역할에서 정책(Policy) 제거",
+        description = "특정 역할에서 정책 할당을 해제합니다."
+    )
     @ApiResponse(responseCode = "204", description = "제거 성공")
     @DeleteMapping("/{roleName}/policies/{policyName}")
     ResponseEntity<Void> removePolicy(

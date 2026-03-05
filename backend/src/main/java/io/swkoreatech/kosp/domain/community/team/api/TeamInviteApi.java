@@ -8,7 +8,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
 
-@Tag(name = "TeamInvite", description = "팀 초대 관리 API")
+/**
+ * 팀 초대 API 인터페이스.
+ * 팀 초대 정보 조회 엔드포인트를 정의한다.
+ */
+@Tag(name = "Team", description = "팀 및 초대 관리 API")
 public interface TeamInviteApi {
 
     @Operation(summary = "초대 상세 조회", description = "초대 ID로 상세 정보를 조회합니다.")

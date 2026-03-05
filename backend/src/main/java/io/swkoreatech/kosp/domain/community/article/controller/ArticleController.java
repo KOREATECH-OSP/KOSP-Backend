@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.api.ArticleApi;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
@@ -24,11 +24,15 @@ import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeRespo
 import io.swkoreatech.kosp.domain.community.article.service.ArticleService;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 게시글 컨트롤러.
+ * {@link ArticleApi}를 구현하여 게시글 관련 요청을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/community/articles")
@@ -37,6 +41,7 @@ public class ArticleController implements ArticleApi {
     private final ArticleService articleService;
     private final BoardService boardService;
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping
     @Permit(permitAll = true, name = "articles:list", description = "게시글 목록 조회")
@@ -53,6 +58,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok(articleService.getList(board, pageable, user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/{id}")
     @Permit(permitAll = true, name = "articles:read", description = "게시글 상세 조회")
@@ -64,6 +70,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping
     @Permit(name = "article:create", description = "게시글 작성")
@@ -76,6 +83,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.created(URI.create("/v1/community/articles/" + id)).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PutMapping("/{id}")
     @Permit(name = "article:update", description = "게시글 수정")
@@ -88,6 +96,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @DeleteMapping("/{id}")
     @Permit(name = "article:delete", description = "게시글 삭제")
@@ -98,6 +107,8 @@ public class ArticleController implements ArticleApi {
         articleService.delete(user, id);
         return ResponseEntity.noContent().build();
     }
+
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/{id}/likes")
     @Permit(name = "article:like", description = "게시글 좋아요")
@@ -105,10 +116,10 @@ public class ArticleController implements ArticleApi {
         @AuthUser User user,
         @PathVariable Long id
     ) {
-        boolean isLiked = articleService.toggleLike(user, id);
-        return ResponseEntity.ok(new ToggleLikeResponse(isLiked));
+        return ResponseEntity.ok(articleService.toggleLike(user, id));
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/{id}/bookmarks")
     @Permit(name = "article:bookmark", description = "게시글 북마크")
@@ -116,7 +127,6 @@ public class ArticleController implements ArticleApi {
         @AuthUser User user,
         @PathVariable Long id
     ) {
-        boolean isBookmarked = articleService.toggleBookmark(user, id);
-        return ResponseEntity.ok(new ToggleBookmarkResponse(isBookmarked));
+        return ResponseEntity.ok(articleService.toggleBookmark(user, id));
     }
 }

@@ -8,12 +8,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
-import io.swkoreatech.kosp.domain.user.model.User;
 
-public interface RecruitApplyRepository extends JpaRepository<RecruitApply, Long>, JpaSpecificationExecutor<RecruitApply> {
+/**
+ * 모집 지원 리포지토리.
+ * 모집 지원의 CRUD 및 조건 조회 기능을 제공한다.
+ */
+public interface RecruitApplyRepository
+    extends JpaRepository<RecruitApply, Long>, JpaSpecificationExecutor<RecruitApply> {
+
     Optional<RecruitApply> findByRecruitAndUser(Recruit recruit, User user);
 
     Page<RecruitApply> findByRecruit(Recruit recruit, Pageable pageable);
@@ -23,4 +31,9 @@ public interface RecruitApplyRepository extends JpaRepository<RecruitApply, Long
     Page<RecruitApply> findByUser(User user, Pageable pageable);
 
     void deleteByRecruit(Recruit recruit);
+
+    default RecruitApply getById(Long id) {
+        return findById(id)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.APPLICATION_NOT_FOUND));
+    }
 }

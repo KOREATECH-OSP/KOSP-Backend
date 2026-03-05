@@ -6,8 +6,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Controller 파라미터에서 토큰을 추출할 때 사용
- * 사용법: @Token AccessToken accessToken
+ * 컨트롤러 메서드 파라미터에서 JWT 토큰을 추출하기 위한 어노테이션.
+ * <p>{@link io.swkoreatech.kosp.global.auth.resolver.JwtArgumentResolver}에 의해 처리되며,
+ * HTTP 헤더에서 토큰을 추출하여 {@link io.swkoreatech.kosp.global.auth.token.JwtToken}
+ * 하위 클래스 인스턴스로 변환한다.</p>
+ * <p>사용법: {@code @Token AccessToken accessToken}</p>
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

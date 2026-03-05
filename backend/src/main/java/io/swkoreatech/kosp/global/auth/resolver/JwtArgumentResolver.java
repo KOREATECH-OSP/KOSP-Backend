@@ -8,16 +8,17 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
-import jakarta.servlet.http.HttpServletRequest;
 import io.swkoreatech.kosp.global.auth.annotation.Token;
 import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
 import io.swkoreatech.kosp.global.auth.token.JwtToken;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * @Token 어노테이션 처리
- * Request Body에서 토큰 추출 및 검증
+ * {@link Token} 어노테이션이 붙은 컨트롤러 메서드 파라미터에 JWT 토큰을 주입하는 리졸버.
+ * <p>HTTP 요청 헤더에서 토큰 문자열을 추출하고, {@link JwtToken#from(Class, String)}을 통해
+ * 검증 및 역직렬화하여 토큰 객체를 반환한다.</p>
  */
 @Slf4j
 @Component
@@ -26,12 +27,14 @@ public class JwtArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final TokenHeaderResolver tokenHeaderResolver;
 
+    /** {@inheritDoc} */
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         return parameter.hasParameterAnnotation(Token.class)
             && JwtToken.class.isAssignableFrom(parameter.getParameterType());
     }
 
+    /** {@inheritDoc} */
     @Override
     public Object resolveArgument(
         @NonNull MethodParameter parameter,

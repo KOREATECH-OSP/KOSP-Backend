@@ -1,10 +1,11 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.*;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,14 +15,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import io.swkoreatech.kosp.domain.auth.model.Permission;
-import io.swkoreatech.kosp.domain.auth.model.Policy;
-import io.swkoreatech.kosp.domain.auth.model.Role;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PermissionService 단위 테스트")
@@ -32,44 +32,6 @@ class PermissionServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    private User createUser(Long id) {
-        User user = User.builder()
-            .name("테스터")
-            .kutId("2024" + id)
-            .kutEmail("user" + id + "@koreatech.ac.kr")
-            .password("encoded_password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .policies(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
-
-    private Policy createPolicy(Long id, String name) {
-        Policy policy = Policy.builder()
-            .name(name)
-            .permissions(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(policy, "id", id);
-        return policy;
-    }
-
-    private Permission createPermission(Long id, String name) {
-        Permission permission = Permission.builder()
-            .name(name)
-            .build();
-        ReflectionTestUtils.setField(permission, "id", id);
-        return permission;
-    }
 
     @Nested
     @DisplayName("hasPermission 메서드")
@@ -108,11 +70,11 @@ class PermissionServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             user.getRoles().add(role);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when
@@ -130,11 +92,11 @@ class PermissionServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_WRITE");
             Permission permission = createPermission(1L, "PERM_WRITE");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             user.getRoles().add(role);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when
@@ -149,20 +111,20 @@ class PermissionServiceTest {
         void returnsTrue_whenAnyRoleHasPermission() {
             // given
             User user = createUser(1L);
-            
+
             Role role1 = createRole(1L, "ROLE_USER");
             Policy policy1 = createPolicy(1L, "POLICY_BASIC");
-            
+
             Role role2 = createRole(2L, "ROLE_EDITOR");
             Policy policy2 = createPolicy(2L, "POLICY_EDIT");
             Permission permission = createPermission(1L, "PERM_EDIT");
-            
+
             policy2.getPermissions().add(permission);
             role1.getPolicies().add(policy1);
             role2.getPolicies().add(policy2);
             user.getRoles().add(role1);
             user.getRoles().add(role2);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when

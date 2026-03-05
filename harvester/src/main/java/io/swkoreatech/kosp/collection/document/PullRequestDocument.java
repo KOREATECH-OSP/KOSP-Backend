@@ -9,6 +9,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * GitHub 풀 리퀘스트 데이터를 저장하는 MongoDB 문서.
+ *
+ * <p>사용자가 생성한 GitHub PR의 메타데이터, 코드 변경 통계,
+ * 병합 상태 등을 저장한다. 사용자-저장소-PR번호 유니크 인덱스를 포함한다.
+ */
 @Getter
 @Builder
 @Document(collection = "github_pull_requests")

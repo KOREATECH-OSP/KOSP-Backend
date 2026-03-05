@@ -17,12 +17,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * OAuth2 사용자 서비스.
+ * <p>GitHub OAuth2 인증 과정에서 사용자 정보를 로드하고,
+ * 기존 사용자의 프로필을 갱신하거나 신규 사용자 속성을 구성한다.</p>
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -33,6 +38,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private final GithubUserRepository githubUserRepository;
     private final TextEncryptor textEncryptor;
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -41,10 +47,10 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
         Long githubId = getGithubId(attributes);
         String githubAccessToken = userRequest.getAccessToken().getTokenValue();
 
-         Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
-         updateOrSaveGithubUser(userOptional, oAuth2User, githubAccessToken, githubId);
+        Optional<User> userOptional = userRepository.findByGithubUser_GithubId(githubId);
+        updateOrSaveGithubUser(userOptional, oAuth2User, githubAccessToken, githubId);
 
-         Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
+        Map<String, Object> modifiedAttributes = buildAttributes(attributes, userOptional);
 
         return new DefaultOAuth2User(Collections.emptyList(), modifiedAttributes, "id");
     }

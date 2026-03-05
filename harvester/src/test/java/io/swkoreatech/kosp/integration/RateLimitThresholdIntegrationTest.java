@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,8 +18,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.swkoreatech.kosp.client.RateLimitException;
 import io.swkoreatech.kosp.client.RateLimitManager;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Rate Limit Threshold Behavior Integration Test")
@@ -45,7 +44,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldNotThrowWhenRemainingAboveThreshold() {
             User user = createUserWithGithubAccount(1001L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 150);
 
@@ -61,7 +60,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWhenRemainingEqualsThreshold() {
             User user = createUserWithGithubAccount(1002L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 100);
 
@@ -77,7 +76,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWithWaitTimeWhenRemainingBelowThreshold() {
             User user = createUserWithGithubAccount(1003L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(1800);
             githubUser.updateRateLimit(futureResetTime, 50);
 
@@ -150,9 +149,8 @@ class RateLimitThresholdIntegrationTest {
                 .githubName(user.getGithubUser().getGithubName())
                 .githubToken(user.getGithubUser().getGithubToken())
                 .githubAvatarUrl(user.getGithubUser().getGithubAvatarUrl())
-                .lastCrawling(user.getGithubUser().getLastCrawling())
-                .rateLimitResetAt(resetTime)
                 .build();
+            simulatedReloadedUser.updateRateLimit(resetTime, null);
 
             assertThat(simulatedReloadedUser.getRateLimitRemaining()).isNull();
             assertThat(simulatedReloadedUser.getRateLimitResetAt()).isEqualTo(resetTime);
@@ -174,7 +172,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldNotThrowWhenRemainingAboveThreshold101() {
             User user = createUserWithGithubAccount(4001L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 102);
 
@@ -190,7 +188,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWhenRemainingEqualsThreshold101() {
             User user = createUserWithGithubAccount(4002L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 101);
 
@@ -209,7 +207,6 @@ class RateLimitThresholdIntegrationTest {
             .githubName("User " + githubId)
             .githubToken("dummy_token_" + githubId)
             .githubAvatarUrl("https://avatar.url/" + githubId)
-            .lastCrawling(LocalDateTime.now())
             .build();
 
         User user = User.builder()

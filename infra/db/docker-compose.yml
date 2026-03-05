@@ -21,7 +21,7 @@ services:
       - "${REDIS_PORT}:6379"
     volumes:
       - ${REDIS_VOLUME_PATH}:/data
-    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+    command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
     restart: "unless-stopped"
 
   mongo:
@@ -35,11 +35,11 @@ services:
     volumes:
       - ${MONGO_VOLUME_PATH1}:/data/db
       - ${MONGO_VOLUME_PATH2}:/data/configdb
-    command: ["mongod", "--auth", "--bind_ip_all"]
+    command: [ "mongod", "--auth", "--bind_ip_all" ]
     restart: "unless-stopped"
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: heidiks/rabbitmq-delayed-message-exchange:4.2.0-management
     container_name: rabbitmq-kosp-stage-compose
     hostname: rabbitmq
     environment:

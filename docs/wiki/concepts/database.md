@@ -1,15 +1,18 @@
 # 💾 데이터베이스 스키마 (Database Schema)
+
 프로젝트의 데이터베이스는 RDBMS(MySQL)와 NoSQL(MongoDB)을 혼용하는구조입니다.
 ERD 관리는 **[dbdiagram.io](https://dbdiagram.io/)**를 권장합니다.
 
 ## 1. ERD
 
 ### MySQL - Main Schema
+
 [![Main ERD](../imgs/mysql_kosp_erd.svg)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)
 
 **[🔗 [Main Schema] 인터랙티브 ERD 보기 (View Interactive Diagram)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)**
 
 ### MySQL - Batch Schema
+
 [![Batch ERD](../imgs/mysql_kosp_batch_erd.svg)](https://dbdiagram.io/d/69532e1539fa3db27bc5c2e8)
 
 **[🔗 [Batch Schema] 인터랙티브 ERD 보기 (View Interactive Diagram)](https://dbdiagram.io/d/6953276e39fa3db27bc581d4)**
@@ -19,6 +22,7 @@ ERD 관리는 **[dbdiagram.io](https://dbdiagram.io/)**를 권장합니다.
 ## 2. 상세 스키마 (Detailed Schema)
 
 ### 2.1. MySQL - Main Schema (`kosp`)
+
 비즈니스 로직을 담당하는 메인 RDBMS입니다.
 
 <details>
@@ -196,9 +200,11 @@ Table report {
   processed_at timestamp
 }
 ```
+
 </details>
 
 ### 2.2. MySQL - Batch Schema (`kosp_batch`)
+
 Spring Batch 메타데이터를 저장하는 별도 스키마입니다.
 
 <details>
@@ -253,13 +259,16 @@ Table BATCH_STEP_EXECUTION {
   EXIT_CODE varchar
 }
 ```
+
 </details>
 
 ### 2.3. MongoDB - Document Store (`kosp`)
+
 Github 크롤링 데이터와 같이 **비정형/반정형 데이터**를 저장합니다.
 Table이 아닌 **Collection(JSON Documents)** 형태로 관리됩니다.
 
 #### `github_profiles`
+
 사용자의 상세 GitHub 프로필 정보와 분석 결과입니다.
 
 ```json
@@ -288,6 +297,7 @@ Table이 아닌 **Collection(JSON Documents)** 형태로 관리됩니다.
 ```
 
 #### `github_repositories`
+
 사용자가 소유한 리포지토리의 상세 메타데이터입니다.
 
 ```json
@@ -314,6 +324,7 @@ Table이 아닌 **Collection(JSON Documents)** 형태로 관리됩니다.
 ```
 
 #### `github_trends`
+
 일별/월별 활동 내역입니다.
 
 ```json

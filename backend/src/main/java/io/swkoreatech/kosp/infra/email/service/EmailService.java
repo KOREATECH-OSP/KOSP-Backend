@@ -11,6 +11,11 @@ import io.swkoreatech.kosp.infra.email.form.EmailForm;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 
+/**
+ * 이메일 발송 서비스.
+ *
+ * <p>Thymeleaf 템플릿 엔진으로 HTML 본문을 렌더링하고 AWS SES를 통해 이메일을 발송한다.
+ */
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -20,6 +25,12 @@ public class EmailService {
     private final SesMailSender sesMailSender;
     private final TemplateEngine templateEngine;
 
+    /**
+     * 지정된 수신자에게 이메일을 발송한다.
+     *
+     * @param targetEmail 수신자 이메일 주소
+     * @param emailForm   이메일 양식 (제목, 콘텐츠, 템플릿 경로)
+     */
     public void sendEmail(String targetEmail, EmailForm emailForm) {
         SendEmailRequest request = createEmailRequest(targetEmail, emailForm);
         sesMailSender.sendMail(request);

@@ -12,18 +12,24 @@ import io.swkoreatech.kosp.domain.admin.report.service.AdminReportService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 신고 관리 컨트롤러.
+ * <p>{@link AdminReportApi}를 구현하여 신고 목록 조회 및 처리 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminReportController implements AdminReportApi {
 
     private final AdminReportService adminReportService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:reports:read", description = "신고 목록 조회")
     public ResponseEntity<List<ReportResponse>> getAllReports() {
         return ResponseEntity.ok(adminReportService.getAllReports());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:reports:process", description = "신고 처리")
     public ResponseEntity<Void> processReport(Long reportId, ReportProcessRequest request) {

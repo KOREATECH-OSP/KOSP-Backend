@@ -2,7 +2,6 @@ package io.swkoreatech.kosp.collection.step.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -27,7 +26,7 @@ import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
 import io.swkoreatech.kosp.collection.repository.CollectionMetadataRepository;
 import io.swkoreatech.kosp.collection.repository.ContributedRepoDocumentRepository;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.job.ContextValidationListener;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import reactor.core.publisher.Mono;
@@ -79,8 +78,8 @@ class RepositoryDiscoveryStepTest {
             String ownedRepoFullName = "testuser/my-owned-repo";
 
             UserBasicInfoResponse mockResponse = createMockUserBasicInfoResponse(
-                login, 
-                ownedRepoName, 
+                login,
+                ownedRepoName,
                 ownedRepoFullName,
                 false
             );
@@ -94,9 +93,9 @@ class RepositoryDiscoveryStepTest {
             Set<RepositoryInfo> result = invokeFetchOwnedRepositories(login, token);
 
             assertThat(result).isNotEmpty();
-            assertThat(result).anyMatch(repo -> 
+            assertThat(result).anyMatch(repo ->
                 repo.getName().equals(ownedRepoName) &&
-                repo.getNameWithOwner().equals(ownedRepoFullName)
+                    repo.getNameWithOwner().equals(ownedRepoFullName)
             );
         }
 
@@ -107,21 +106,21 @@ class RepositoryDiscoveryStepTest {
             String token = "test-token";
 
             UserBasicInfoResponse firstPage = createMockUserBasicInfoResponse(
-                login, 
-                "repo-1", 
+                login,
+                "repo-1",
                 "testuser/repo-1",
                 true
             );
             UserBasicInfoResponse secondPage = createMockUserBasicInfoResponse(
-                login, 
-                "repo-2", 
+                login,
+                "repo-2",
                 "testuser/repo-2",
                 false
             );
 
             GraphQLResponse<UserBasicInfoResponse> firstResponse = new GraphQLResponse<>();
             setGraphQLResponseData(firstResponse, firstPage);
-            
+
             GraphQLResponse<UserBasicInfoResponse> secondResponse = new GraphQLResponse<>();
             setGraphQLResponseData(secondResponse, secondPage);
 
@@ -155,23 +154,23 @@ class RepositoryDiscoveryStepTest {
 
     private Set<RepositoryInfo> invokeFetchOwnedRepositories(String login, String token) throws Exception {
         Method method = RepositoryDiscoveryStep.class.getDeclaredMethod(
-            "fetchOwnedRepositories", 
-            String.class, 
+            "fetchOwnedRepositories",
+            String.class,
             String.class
         );
         method.setAccessible(true);
-        
+
         @SuppressWarnings("unchecked")
-        Set<RepositoryInfo> result = (Set<RepositoryInfo>) method.invoke(
-            repositoryDiscoveryStep, 
-            login, 
+        Set<RepositoryInfo> result = (Set<RepositoryInfo>)method.invoke(
+            repositoryDiscoveryStep,
+            login,
             token
         );
         return result;
     }
 
     private UserBasicInfoResponse createMockUserBasicInfoResponse(
-        String login, 
+        String login,
         String repoName,
         String repoFullName,
         boolean hasNextPage

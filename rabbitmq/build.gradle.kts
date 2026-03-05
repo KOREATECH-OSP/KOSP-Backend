@@ -9,7 +9,7 @@ dependencies {
     implementation(libs.spring.boot.starter.amqp)
     implementation(libs.spring.boot.starter.web)
     implementation(libs.spring.boot.starter.data.jpa)
-    
+
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 }

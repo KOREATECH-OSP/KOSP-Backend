@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.challenge.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,9 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,17 +20,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
 import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import io.swkoreatech.kosp.domain.challenge.model.Challenge;
-import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChallengeService 단위 테스트")
@@ -59,18 +59,6 @@ class ChallengeServiceTest {
             .build();
         ReflectionTestUtils.setField(challenge, "id", id);
         return challenge;
-    }
-
-    private User createUser(Long id) {
-        User user = User.builder()
-            .name("테스터")
-            .kutId("2024" + id)
-            .kutEmail("user" + id + "@koreatech.ac.kr")
-            .password("encoded_password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
     }
 
     private ChallengeHistory createHistory(Long id, User user, Challenge challenge, boolean achieved) {
@@ -125,7 +113,8 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 조회하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.findById(999L)).willReturn(Optional.empty());
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> challengeService.getChallenge(999L))
@@ -137,7 +126,7 @@ class ChallengeServiceTest {
         void returnsChallenge_whenExists() {
             // given
             Challenge challenge = createChallenge(1L, "첫 커밋", 1);
-            given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
+            given(challengeRepository.getById(1L)).willReturn(challenge);
 
             // when
             AdminChallengeResponse result = challengeService.getChallenge(1L);
@@ -162,7 +151,7 @@ class ChallengeServiceTest {
                 "T(Math).min(totalCommits * 100 / 10, 100)",
                 1,
                 "https://image.url",
-                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
+                io.swkoreatech.kosp.common.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 
@@ -183,7 +172,7 @@ class ChallengeServiceTest {
                 "((( invalid spel",
                 1,
                 "https://image.url",
-                io.swkoreatech.kosp.domain.challenge.model.ImageResourceType.IMAGE_URL,
+                io.swkoreatech.kosp.common.challenge.model.ImageResourceType.IMAGE_URL,
                 100
             );
 
@@ -201,7 +190,8 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 삭제하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.findById(999L)).willReturn(Optional.empty());
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> challengeService.deleteChallenge(999L))
@@ -213,7 +203,7 @@ class ChallengeServiceTest {
         void deletesChallenge() {
             // given
             Challenge challenge = createChallenge(1L, "삭제할 챌린지", 1);
-            given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
+            given(challengeRepository.getById(1L)).willReturn(challenge);
 
             // when
             challengeService.deleteChallenge(1L);
@@ -231,8 +221,12 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 수정하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.findById(999L)).willReturn(Optional.empty());
-            ChallengeRequest request = new ChallengeRequest("수정", "설명", "T(Math).min(totalCommits * 100 / 10, 100)", 1, null, null, 100);
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+            ChallengeRequest request = new ChallengeRequest(
+                "수정", "설명",
+                "T(Math).min(totalCommits * 100 / 10, 100)",
+                1, null, null, 100);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(999L, request))
@@ -244,8 +238,11 @@ class ChallengeServiceTest {
         void updatesChallenge() {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
-            given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalCommits * 100 / 10, 100)", 2, null, null, 200);
+            given(challengeRepository.getById(1L)).willReturn(challenge);
+            ChallengeRequest request = new ChallengeRequest(
+                "수정된 챌린지", "새 설명",
+                "T(Math).min(totalCommits * 100 / 10, 100)",
+                2, null, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
@@ -261,8 +258,11 @@ class ChallengeServiceTest {
         void validatesSpel_whenConditionChanged() {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
-            given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "T(Math).min(totalPrs * 100 / 5, 100)", 2, null, null, 200);
+            given(challengeRepository.getById(1L)).willReturn(challenge);
+            ChallengeRequest request = new ChallengeRequest(
+                "수정된 챌린지", "새 설명",
+                "T(Math).min(totalPrs * 100 / 5, 100)",
+                2, null, null, 200);
 
             // when
             challengeService.updateChallenge(1L, request);
@@ -276,8 +276,10 @@ class ChallengeServiceTest {
         void throwsException_whenChangingToInvalidCondition() {
             // given
             Challenge challenge = createChallenge(1L, "기존 챌린지", 1);
-            given(challengeRepository.findById(1L)).willReturn(Optional.of(challenge));
-            ChallengeRequest request = new ChallengeRequest("수정된 챌린지", "새 설명", "((( invalid", 2, null, null, 200);
+            given(challengeRepository.getById(1L)).willReturn(challenge);
+            ChallengeRequest request = new ChallengeRequest(
+                "수정된 챌린지", "새 설명", "((( invalid",
+                2, null, null, 200);
 
             // when & then
             assertThatThrownBy(() -> challengeService.updateChallenge(1L, request))
@@ -331,7 +333,7 @@ class ChallengeServiceTest {
             User user = createUser(1L);
             Challenge challenge = createChallenge(1L, "완료 챌린지", 1);
             ChallengeHistory history = createHistory(1L, user, challenge, true);
-            
+
             given(challengeRepository.findAll()).willReturn(List.of(challenge));
             given(challengeHistoryRepository.findAllByUserId(1L)).willReturn(List.of(history));
 

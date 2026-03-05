@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.auth.api.AuthApi;
 import io.swkoreatech.kosp.domain.auth.dto.request.CheckMemberIdRequest;
 import io.swkoreatech.kosp.domain.auth.dto.request.EmailRequest;
@@ -20,7 +20,6 @@ import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.service.UserPasswordService;
 import io.swkoreatech.kosp.domain.user.service.UserService;
 import io.swkoreatech.kosp.global.auth.annotation.Token;
@@ -30,8 +29,13 @@ import io.swkoreatech.kosp.global.auth.token.SignupToken;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 인증 컨트롤러.
+ * <p>{@link AuthApi}를 구현하여 회원가입, 로그인, 토큰 관리, 비밀번호 재설정 등의 인증 기능을 제공한다.</p>
+ */
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor
@@ -41,16 +45,17 @@ public class AuthController implements AuthApi {
     private final UserPasswordService userPasswordService;
     private final UserService userService;
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/github/exchange")
     @Permit(permitAll = true, name = "auth:github:exchange", description = "Github 토큰 교환 (회원가입용)")
     public ResponseEntity<GithubVerificationResponse> exchangeGithubToken(
         @RequestBody @Valid GithubTokenRequest request
     ) {
-        String verificationToken = authService.exchangeGithubTokenForSignup(request.githubAccessToken());
-        return ResponseEntity.ok(new GithubVerificationResponse(verificationToken));
+        return ResponseEntity.ok(authService.exchangeGithubTokenForSignup(request.githubAccessToken()));
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/verify/identity")
     @Permit(permitAll = true, name = "auth:verify:identity", description = "학번/사번 중복 확인")
@@ -60,6 +65,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(userService.checkMemberIdAvailability(request.id()));
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/verify/token/signup")
     @Permit(permitAll = true, name = "auth:verify:signup", description = "회원가입 토큰 검증")
@@ -67,6 +73,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/verify/token/login")
     @Permit(permitAll = true, name = "auth:verify:login", description = "로그인 토큰 검증")
@@ -74,6 +81,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/verify/email")
     @Permit(permitAll = true, name = "auth:verify:email", description = "이메일 인증 코드 발송")
@@ -85,6 +93,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/verify/email/confirm")
     @Permit(permitAll = true, name = "auth:verify:email:confirm", description = "이메일 인증 코드 검증")
@@ -98,6 +107,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/login")
     @Permit(permitAll = true, name = "auth:login", description = "로그인")
@@ -107,6 +117,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/me")
     @Permit(description = "내 정보 조회")
@@ -114,6 +125,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(authService.getUserInfo(user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/reset/password")
     @Permit(permitAll = true, name = "auth:reset:password", description = "비밀번호 재설정 메일 발송")
@@ -125,6 +137,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/reset/password/confirm")
     @Permit(permitAll = true, name = "auth:reset:password:confirm", description = "비밀번호 재설정")
@@ -134,6 +147,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/login/github")
     @Permit(permitAll = true, name = "auth:login:github", description = "Github 로그인")
@@ -143,6 +157,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(authService.loginWithGithub(request.githubAccessToken()));
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/reissue")
     @Permit(permitAll = true, name = "auth:reissue", description = "토큰 재발급")
@@ -152,6 +167,7 @@ public class AuthController implements AuthApi {
         return ResponseEntity.ok(authService.reissue(token));
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/logout")
     @Permit(description = "로그아웃")

@@ -1,10 +1,8 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
@@ -15,8 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
@@ -27,7 +25,6 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
 import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RecruitApplyService 단위 테스트")
@@ -47,39 +44,39 @@ class RecruitApplyServiceTest {
 
     private User createUser(Long id, String name) {
         User user = mock(User.class);
-        given(user.getId()).willReturn(id);
-        given(user.getName()).willReturn(name);
+        lenient().when(user.getId()).thenReturn(id);
+        lenient().when(user.getName()).thenReturn(name);
         return user;
     }
 
     private Team createTeam(Long id, String name) {
         Team team = mock(Team.class);
-        given(team.getId()).willReturn(id);
-        given(team.getName()).willReturn(name);
+        lenient().when(team.getId()).thenReturn(id);
+        lenient().when(team.getName()).thenReturn(name);
         return team;
     }
 
     private Recruit createRecruit(Long id, Team team) {
         Recruit recruit = mock(Recruit.class);
-        given(recruit.getId()).willReturn(id);
-        given(recruit.getTeam()).willReturn(team);
+        lenient().when(recruit.getId()).thenReturn(id);
+        lenient().when(recruit.getTeam()).thenReturn(team);
         return recruit;
     }
 
     private RecruitApply createRecruitApply(Long id, Recruit recruit, User user) {
         RecruitApply apply = mock(RecruitApply.class);
-        given(apply.getId()).willReturn(id);
-        given(apply.getRecruit()).willReturn(recruit);
-        given(apply.getUser()).willReturn(user);
-        given(apply.getStatus()).willReturn(ApplyStatus.PENDING);
+        lenient().when(apply.getId()).thenReturn(id);
+        lenient().when(apply.getRecruit()).thenReturn(recruit);
+        lenient().when(apply.getUser()).thenReturn(user);
+        lenient().when(apply.getStatus()).thenReturn(ApplyStatus.PENDING);
         return apply;
     }
 
     private TeamMember createTeamMember(Team team, User user, TeamRole role) {
         TeamMember member = mock(TeamMember.class);
-        given(member.getTeam()).willReturn(team);
-        given(member.getUser()).willReturn(user);
-        given(member.getRole()).willReturn(role);
+        lenient().when(member.getTeam()).thenReturn(team);
+        lenient().when(member.getUser()).thenReturn(user);
+        lenient().when(member.getRole()).thenReturn(role);
         return member;
     }
 
@@ -97,14 +94,14 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String reason = "지원자의 역량이 우수하여 수락합니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.ACCEPTED, 
+                ApplyStatus.ACCEPTED,
                 reason
             );
 
-            given(recruitApplyRepository.findById(1L)).willReturn(Optional.of(apply));
+            given(recruitApplyRepository.getById(1L)).willReturn(apply);
             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
             given(teamMemberRepository.existsByTeamAndUser(team, applicant)).willReturn(false);
 
@@ -126,13 +123,13 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 null
             );
 
-            given(recruitApplyRepository.findById(1L)).willReturn(Optional.of(apply));
+            given(recruitApplyRepository.getById(1L)).willReturn(apply);
             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
 
             // when
@@ -153,13 +150,13 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 "   "
             );
 
-            given(recruitApplyRepository.findById(1L)).willReturn(Optional.of(apply));
+            given(recruitApplyRepository.getById(1L)).willReturn(apply);
             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
 
             // when
@@ -180,14 +177,14 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String acceptReason = "프로젝트 경험이 풍부하여 팀에 도움이 될 것으로 판단됩니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.ACCEPTED, 
+                ApplyStatus.ACCEPTED,
                 acceptReason
             );
 
-            given(recruitApplyRepository.findById(1L)).willReturn(Optional.of(apply));
+            given(recruitApplyRepository.getById(1L)).willReturn(apply);
             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
             given(teamMemberRepository.existsByTeamAndUser(team, applicant)).willReturn(false);
 
@@ -211,14 +208,14 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String rejectReason = "현재 팀 인원이 충분하여 추가 모집을 하지 않습니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 rejectReason
             );
 
-            given(recruitApplyRepository.findById(1L)).willReturn(Optional.of(apply));
+            given(recruitApplyRepository.getById(1L)).willReturn(apply);
             given(teamMemberRepository.findByTeamAndUser(team, leader)).willReturn(Optional.of(leaderMember));
 
             // when

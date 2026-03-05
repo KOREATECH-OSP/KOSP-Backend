@@ -17,10 +17,23 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.model.SearchFilter;
 
+/**
+ * 통합 검색 API.
+ * 키워드 기반 게시글, 모집글, 팀, 챌린지, 사용자, 저장소 통합 검색 기능을 정의한다.
+ */
 @Tag(name = "Search", description = "통합 검색 API")
 @RequestMapping("/v1/search")
 public interface SearchApi {
 
+    /**
+     * 키워드로 통합 검색을 수행한다.
+     *
+     * @param keyword 검색 키워드
+     * @param filter 검색 필터 (미지정 시 전체 검색)
+     * @param rsql RSQL 필터
+     * @param pageable 페이지 정보
+     * @return 통합 검색 결과
+     */
     @Operation(
         summary = "통합 검색",
         description = """

@@ -12,17 +12,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
+/**
+ * 관리자 전용 콘텐츠 관리 API 인터페이스.
+ * <p>게시글, 공지사항, 댓글의 삭제 및 공지사항 CRUD 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Content", description = "관리자 전용 콘텐츠 관리 API")
 @RequestMapping("/v1/admin")
 public interface AdminContentApi {
 
-    @Operation(summary = "게시글 삭제", description = "관리자 권한으로 게시글을 삭제(Soft Delete)합니다.")
+    @Operation(
+        summary = "게시글 삭제",
+        description = "관리자 권한으로 게시글을 삭제(Soft Delete)합니다."
+    )
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/articles/{articleId}")
     ResponseEntity<Void> deleteArticle(@PathVariable Long articleId);
@@ -32,7 +39,10 @@ public interface AdminContentApi {
     @DeleteMapping("/notices/{noticeId}")
     ResponseEntity<Void> deleteNotice(@PathVariable Long noticeId);
 
-    @Operation(summary = "댓글 삭제", description = "관리자 권한으로 댓글을 삭제(Soft Delete)합니다.")
+    @Operation(
+        summary = "댓글 삭제",
+        description = "관리자 권한으로 댓글을 삭제(Soft Delete)합니다."
+    )
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/comments/{commentId}")
     ResponseEntity<Void> deleteComment(@PathVariable Long commentId);

@@ -3,8 +3,8 @@ package io.swkoreatech.kosp.domain.upload.model;
 import java.time.LocalDateTime;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,6 +18,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 첨부파일 엔티티.
+ * 업로드된 파일의 메타데이터를 관리한다.
+ */
 @Entity
 @Table(name = "attachment")
 @Getter
@@ -73,6 +77,11 @@ public class Attachment extends BaseEntity {
         this.uploadedAt = uploadedAt;
     }
 
+    /**
+     * 첨부파일이 속한 게시글을 설정한다.
+     *
+     * @param article 게시글
+     */
     public void setArticle(Article article) {
         this.article = article;
     }

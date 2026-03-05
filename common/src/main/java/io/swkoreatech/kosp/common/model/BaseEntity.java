@@ -12,15 +12,17 @@ import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
+/**
+ * 엔티티 공통 기반 클래스.
+ *
+ * <p>모든 엔티티에 공통으로 필요한 생성 시각({@code createdAt})과
+ * 수정 시각({@code updatedAt})을 JPA Auditing으로 자동 관리한다.</p>
+ */
 @Getter
-@SuperBuilder(builderMethodName = "baseBuilder")
-@RequiredArgsConstructor
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
-public class BaseEntity implements Serializable {
+public abstract class BaseEntity implements Serializable {
 
     @NotNull
     @CreatedDate

@@ -18,6 +18,12 @@ import io.swkoreatech.kosp.collection.step.impl.StatisticsAggregationStep;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * GitHub 수집 배치 잡 설정 클래스.
+ *
+ * <p>저장소 발견, 커밋/PR/이슈 마이닝, 통계 집계, 점수 계산,
+ * 챌린지 평가, 플랫폼 평균 계산, 정리 단계로 구성된 배치 잡을 정의한다.
+ */
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -36,6 +42,11 @@ public class GithubCollectionJobConfig {
     private final PlatformAverageStep platformAverageStep;
     private final CleanupStep cleanupStep;
 
+    /**
+     * GitHub 수집 배치 잡 빈을 생성한다.
+     *
+     * @return 전체 수집 파이프라인이 구성된 Job 인스턴스
+     */
     @Bean
     public Job githubCollectionJob() {
         return new JobBuilder("githubCollectionJob", jobRepository)

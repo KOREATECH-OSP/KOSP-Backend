@@ -1,33 +1,54 @@
 package io.swkoreatech.kosp.domain.user.eventlistener;
 
-import java.time.Instant;
-import java.util.UUID;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
-import io.swkoreatech.kosp.common.queue.JobQueueService;
-import io.swkoreatech.kosp.common.queue.Priority;
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 사용자 회원가입 이벤트 리스너.
+ * 회원가입 완료 후 RabbitMQ를 통해 GitHub 데이터 수집 요청을 발행한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class UserSignupEventListener {
 
-    private final JobQueueService jobQueueService;
+    private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * 사용자 회원가입 이벤트를 처리한다.
+     * 트랜잭션 커밋 후 비동기로 GitHub 데이터 수집 메시지를 발행한다.
+     *
+     * @param event 회원가입 이벤트
+     */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserSignup(UserSignupEvent event) {
         Long userId = event.getUserId();
         log.info("UserSignupEvent for user {} (GitHub: {})", userId, event.getGithubLogin());
 
-        String runId = UUID.randomUUID().toString();
-        jobQueueService.enqueue(userId, runId, Instant.now(), Priority.HIGH);
-        log.info("Enqueued collection job for user {} with runId {}", userId, runId);
+        try {
+            GithubCollectionRequest dto = new GithubCollectionRequest(userId);
+            rabbitTemplate.convertAndSend(
+                QueueNames.GITHUB_COLLECTION_EXCHANGE,
+                QueueNames.GITHUB_COLLECTION,
+                dto,
+                message -> {
+                    message.getMessageProperties().setHeader("x-delay", 0);
+                    return message;
+                }
+            );
+            log.info("Published GitHub collection request for user {}", userId);
+        } catch (Exception exception) {
+            log.error("Failed to publish GitHub collection request for user {}", userId, exception);
+        }
     }
 }

@@ -4,6 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 팀 수정 요청 DTO.
+ *
+ * @param name 팀 이름
+ * @param description 팀 설명
+ * @param imageUrl 팀 이미지 URL
+ */
 public record TeamUpdateRequest(
     @Schema(description = "팀 이름", example = "KOSP Team")
     @NotBlank(message = "팀 이름은 필수입니다.")

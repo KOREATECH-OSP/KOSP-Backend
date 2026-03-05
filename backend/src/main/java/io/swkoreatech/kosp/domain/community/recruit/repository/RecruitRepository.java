@@ -8,11 +8,15 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
+/**
+ * 모집 공고 리포지토리.
+ * 모집 공고의 저장, 삭제 및 조건 조회 기능을 제공한다.
+ */
 public interface RecruitRepository extends Repository<Recruit, Long>, JpaSpecificationExecutor<Recruit> {
 
     Recruit save(Recruit recruit);
@@ -22,7 +26,7 @@ public interface RecruitRepository extends Repository<Recruit, Long>, JpaSpecifi
     void delete(Recruit recruit);
 
     Page<Recruit> findByBoard(Board board, Pageable pageable);
-    
+
     java.util.List<Recruit> findByTitleContainingAndIsDeletedFalse(String title);
 
     default Recruit getById(Long id) {

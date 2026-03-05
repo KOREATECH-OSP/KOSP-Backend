@@ -3,10 +3,10 @@ package io.swkoreatech.kosp.collection.util;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 
 /**
- * Utility factory for creating typed GraphQL response classes.
- * 
- * <p>This class provides a generic method to create Class references for GraphQL response
- * deserialization, handling Java's type erasure through unchecked casting.
+ * 타입이 지정된 GraphQL 응답 클래스를 생성하는 유틸리티 팩토리.
+ *
+ * <p>GraphQL 응답 역직렬화를 위한 Class 참조를 생성하는 제네릭 메서드를 제공하며,
+ * Java의 타입 소거(type erasure)를 unchecked 캐스팅으로 처리한다.
  */
 public final class GraphQLTypeFactory {
 
@@ -15,16 +15,16 @@ public final class GraphQLTypeFactory {
     }
 
     /**
-     * Creates a typed Class reference for GraphQL response deserialization.
-     * 
-     * <p>This method performs an unchecked cast due to Java's type erasure.
-     * The cast is safe as long as the GraphQL response matches the expected type T.
+     * GraphQL 응답 역직렬화를 위한 타입이 지정된 Class 참조를 생성한다.
      *
-     * @param <T> the expected response data type
-     * @return the typed GraphQLResponse class
+     * <p>Java의 타입 소거로 인해 unchecked 캐스팅을 수행한다.
+     * GraphQL 응답이 예상 타입 T와 일치하는 한 해당 캐스팅은 안전하다.
+     *
+     * @param <T> 예상되는 응답 데이터 타입
+     * @return 타입이 지정된 GraphQLResponse 클래스
      */
     @SuppressWarnings("unchecked")
     public static <T> Class<GraphQLResponse<T>> responseType() {
-        return (Class<GraphQLResponse<T>>) (Class<?>) GraphQLResponse.class;
+        return (Class<GraphQLResponse<T>>)(Class<?>)GraphQLResponse.class;
     }
 }

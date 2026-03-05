@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.community.comment.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +14,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 댓글 좋아요 엔티티.
+ * 사용자와 댓글 간의 좋아요 관계를 나타낸다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

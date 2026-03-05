@@ -3,11 +3,11 @@ package io.swkoreatech.kosp.collection.util;
 import java.util.List;
 import java.util.Map;
 
-import lombok.extern.slf4j.Slf4j;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utility class for handling GraphQL response errors with standardized logging.
+ * GraphQL 응답 에러를 표준화된 로깅으로 처리하는 유틸리티 클래스.
  */
 @Slf4j
 public final class GraphQLErrorHandler {
@@ -17,16 +17,15 @@ public final class GraphQLErrorHandler {
     }
 
     /**
-     * Classifies GraphQL response errors into actionable categories.
-     * 
-     * Returns null if no errors. Returns GraphQLErrorType enum for error classification.
-     * Logs WARN for partial errors (data present). Does NOT log for total errors
-     * (caller decides log level based on error type).
+     * GraphQL 응답 에러를 분류하여 처리 가능한 카테고리로 반환한다.
      *
-     * @param response the GraphQL response (nullable)
-     * @param entityType the type of entity being queried (e.g., "repo", "user")
-     * @param entityId the entity identifier (e.g., "owner/name", "login")
-     * @return GraphQLErrorType if error present, null if no error
+     * <p>에러가 없으면 null을 반환한다. 부분 에러(데이터 존재)는 WARN 로그를 남긴다.
+     * 전체 에러(데이터 없음)는 로그를 남기지 않고 호출자가 에러 타입에 따라 결정한다.
+     *
+     * @param response   GraphQL 응답 (nullable)
+     * @param entityType 조회 대상 엔티티 타입 (예: "repo", "user")
+     * @param entityId   엔티티 식별자 (예: "owner/name", "login")
+     * @return 에러가 존재하면 GraphQLErrorType, 아니면 null
      */
     public static GraphQLErrorType classifyErrors(GraphQLResponse<?> response, String entityType, String entityId) {
         if (response == null) {

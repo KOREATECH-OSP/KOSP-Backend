@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,7 +8,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
@@ -32,20 +32,20 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.security.Keys;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
 import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
 import io.swkoreatech.kosp.global.auth.token.RefreshToken;
 import io.swkoreatech.kosp.global.auth.token.TokenType;
 import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AuthService 단위 테스트")
@@ -97,18 +97,6 @@ class AuthServiceTest {
         tokenPropertiesProviderMock.close();
     }
 
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
     @Nested
     @DisplayName("sendCertificationMail 메서드")
     class SendCertificationMailTest {
@@ -144,7 +132,7 @@ class AuthServiceTest {
                 .isVerified(true)
                 .ttl(300L)
                 .build();
-            
+
             given(emailVerificationService.verifyCode(email, "123456")).willReturn(verification);
 
             // when
@@ -166,7 +154,7 @@ class AuthServiceTest {
             User user = createUser(1L, "testuser");
             LoginRequest request = new LoginRequest("test@koreatech.ac.kr", "password");
             Authentication auth = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            
+
             given(authenticationManager.authenticate(any())).willReturn(auth);
 
             // when
@@ -247,7 +235,7 @@ class AuthServiceTest {
             RefreshToken refreshToken = RefreshToken.builder()
                 .userId(999L)
                 .build();
-            
+
             given(userRepository.findById(999L)).willReturn(Optional.empty());
 
             // when & then
@@ -263,7 +251,7 @@ class AuthServiceTest {
             RefreshToken refreshToken = RefreshToken.builder()
                 .userId(1L)
                 .build();
-            
+
             given(userRepository.findById(1L)).willReturn(Optional.of(user));
 
             // when

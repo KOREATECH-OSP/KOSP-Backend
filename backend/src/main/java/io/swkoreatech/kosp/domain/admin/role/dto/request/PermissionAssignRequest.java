@@ -2,6 +2,11 @@ package io.swkoreatech.kosp.domain.admin.role.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 
+/**
+ * 정책에 권한을 할당하기 위한 요청 DTO.
+ *
+ * @param permissionName 할당할 권한 이름
+ */
 public record PermissionAssignRequest(
     @NotBlank(message = "권한 이름은 필수입니다.")
     String permissionName

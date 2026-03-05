@@ -9,6 +9,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * GitHub 이슈 데이터를 저장하는 MongoDB 문서.
+ *
+ * <p>사용자가 생성한 GitHub 이슈의 메타데이터를 저장하며,
+ * 사용자-저장소 복합 인덱스와 사용자-저장소-이슈번호 유니크 인덱스를 포함한다.
+ */
 @Getter
 @Builder
 @Document(collection = "github_issues")

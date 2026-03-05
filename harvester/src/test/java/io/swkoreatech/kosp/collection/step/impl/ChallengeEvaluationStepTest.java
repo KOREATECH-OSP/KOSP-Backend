@@ -3,10 +3,7 @@ package io.swkoreatech.kosp.collection.step.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -106,7 +103,7 @@ class ChallengeEvaluationStepTest {
         @DisplayName("발행된 이벤트에 userId가 포함된다")
         void eventContainsUserId() throws Exception {
             Long userId = 42L;
-            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor = 
+            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor =
                 ArgumentCaptor.forClass(ChallengeEvaluationRequest.class);
 
             // Execute the private method
@@ -129,7 +126,7 @@ class ChallengeEvaluationStepTest {
         @DisplayName("발행된 이벤트에 messageId가 포함된다")
         void eventContainsMessageId() throws Exception {
             Long userId = 1L;
-            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor = 
+            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor =
                 ArgumentCaptor.forClass(ChallengeEvaluationRequest.class);
 
             // Execute the private method
@@ -153,7 +150,7 @@ class ChallengeEvaluationStepTest {
         @DisplayName("발행된 이벤트에 timestamp가 포함된다")
         void eventContainsTimestamp() throws Exception {
             Long userId = 1L;
-            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor = 
+            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor =
                 ArgumentCaptor.forClass(ChallengeEvaluationRequest.class);
 
             // Execute the private method
@@ -176,7 +173,7 @@ class ChallengeEvaluationStepTest {
         @DisplayName("다양한 userId로 이벤트를 발행한다")
         void publishesEvent_withDifferentUserIds() throws Exception {
             Long userId = 999L;
-            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor = 
+            ArgumentCaptor<ChallengeEvaluationRequest> requestCaptor =
                 ArgumentCaptor.forClass(ChallengeEvaluationRequest.class);
 
             // Execute the private method

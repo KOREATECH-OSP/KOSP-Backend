@@ -15,24 +15,29 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthMeResponse;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
+import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
 import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.JwtToken;
 import io.swkoreatech.kosp.global.auth.token.RefreshToken;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 인증 서비스.
+ * <p>회원가입, 로그인, 토큰 발급/재발급, 로그아웃 등의 인증 비즈니스 로직을 처리한다.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -47,11 +52,24 @@ public class AuthService {
     private final TextEncryptor textEncryptor;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * 이메일 인증 코드를 발송한다.
+     *
+     * @param email       인증 대상 이메일
+     * @param signupToken 회원가입 토큰
+     */
     @Transactional
     public void sendCertificationMail(String email, String signupToken) {
         emailVerificationService.sendCertificationMail(email, signupToken);
     }
 
+    /**
+     * 이메일 인증 코드를 검증하고, 유효한 경우 이메일 인증이 포함된 새 회원가입 토큰을 반환한다.
+     *
+     * @param email 인증 대상 이메일
+     * @param code  인증 코드
+     * @return 이메일 인증이 포함된 새 회원가입 토큰 (회원가입 토큰이 없는 경우 null)
+     */
     @Transactional
     public String verifyCode(String email, String code) {
         EmailVerification verification = emailVerificationService.verifyCode(email, code);
@@ -71,7 +89,7 @@ public class AuthService {
      * GitHub Access Token으로 회원가입 토큰 발급
      */
     @Transactional
-    public String exchangeGithubTokenForSignup(String githubAccessToken) {
+    public GithubVerificationResponse exchangeGithubTokenForSignup(String githubAccessToken) {
         OAuth2UserRequest userRequest = createOAuth2UserRequest(githubAccessToken);
         OAuth2User oAuth2User = oAuth2UserService.loadUser(userRequest);
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -95,19 +113,19 @@ public class AuthService {
             encryptedToken
         );
 
-        return token.toString();
+        return GithubVerificationResponse.from(token.toString());
     }
 
     /**
      * 일반 로그인 (이메일 + 비밀번호)
      */
     public AuthTokenResponse login(LoginRequest request) {
-        log.info("🔐 Login attempt for email: {}", request.email());
+        log.info("Login attempt for email: {}", request.email());
         Authentication authentication = authenticate(request.email(), request.password());
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         User user = (User)authentication.getPrincipal();
-        log.info("✅ Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
+        log.info("Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 
@@ -130,29 +148,14 @@ public class AuthService {
      * 사용자 정보 조회
      */
     public AuthMeResponse getUserInfo(User user) {
-        String profileImage = extractProfileImage(user);
-
-        return new AuthMeResponse(
-            user.getId(),
-            user.getKutEmail(),
-            user.getName(),
-            profileImage,
-            user.getIntroduction()
-        );
-    }
-
-    private String extractProfileImage(User user) {
-        if (user.getGithubUser() == null) {
-            return null;
-        }
-        return user.getGithubUser().getGithubAvatarUrl();
+        return AuthMeResponse.from(user);
     }
 
     /**
      * User Entity 기반으로 토큰 생성
      */
     public AuthTokenResponse createTokensForUser(User user) {
-        log.info("🎫 Creating tokens for user: {} (ID: {})", user.getKutEmail(), user.getId());
+        log.info("Creating tokens for user: {} (ID: {})", user.getKutEmail(), user.getId());
         return createTokenResponse(user);
     }
 
@@ -176,6 +179,11 @@ public class AuthService {
         return new AuthTokenResponse(newAccessToken.toString(), refreshToken.toString());
     }
 
+    /**
+     * 사용자를 로그아웃 처리한다 (Redis의 Refresh Token 삭제).
+     *
+     * @param userId 사용자 식별자
+     */
     @Transactional
     public void logout(Long userId) {
         RefreshToken token = RefreshToken.builder()
