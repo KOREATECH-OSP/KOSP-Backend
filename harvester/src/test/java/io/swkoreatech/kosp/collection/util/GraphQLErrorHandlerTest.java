@@ -17,22 +17,22 @@ import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 class GraphQLErrorHandlerTest {
 
     @Nested
-    @DisplayName("logAndCheckErrors 메서드")
-    class LogAndCheckErrorsTest {
+    @DisplayName("classifyErrors 메서드 - 기본 동작")
+    class ClassifyErrorsBasicTest {
 
         @Test
-        @DisplayName("null 응답이면 true를 반환하고 warn 로그를 남긴다")
-        void returnsTrue_whenResponseIsNull() {
+        @DisplayName("null 응답이면 RETRYABLE을 반환한다")
+        void returnsRETRYABLE_whenResponseIsNull() {
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(null, "repo", "owner/name");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(null, "repo", "owner/name");
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
 
         @Test
-        @DisplayName("응답에 에러가 있으면 true를 반환하고 error 로그를 남긴다")
-        void returnsTrue_whenResponseHasErrors() {
+        @DisplayName("응답에 에러가 있으면 에러 타입을 반환한다")
+        void returnsErrorType_whenResponseHasErrors() {
             // given
             GraphQLResponse<Object> response = createResponseWithErrors(
                 List.of(
@@ -42,36 +42,36 @@ class GraphQLErrorHandlerTest {
             );
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "user", "octocat");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "user", "octocat");
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
 
         @Test
-        @DisplayName("응답에 에러가 없으면 false를 반환한다")
-        void returnsFalse_whenResponseHasNoErrors() {
+        @DisplayName("응답에 에러가 없으면 null을 반환한다")
+        void returnsNull_whenResponseHasNoErrors() {
             // given
             GraphQLResponse<Object> response = createResponseWithoutErrors();
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "repo", "owner/name");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "owner/name");
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result).isNull();
         }
 
         @Test
-        @DisplayName("응답에 빈 에러 리스트가 있으면 false를 반환한다")
-        void returnsFalse_whenResponseHasEmptyErrorList() {
+        @DisplayName("응답에 빈 에러 리스트가 있으면 null을 반환한다")
+        void returnsNull_whenResponseHasEmptyErrorList() {
             // given
             GraphQLResponse<Object> response = createResponseWithErrors(List.of());
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "issue", "123");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "issue", "123");
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result).isNull();
         }
 
         @ParameterizedTest
@@ -82,10 +82,10 @@ class GraphQLErrorHandlerTest {
             GraphQLResponse<Object> response = createResponseWithoutErrors();
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, entityType, "test-id");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, entityType, "test-id");
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result).isNull();
         }
 
         @ParameterizedTest
@@ -96,10 +96,10 @@ class GraphQLErrorHandlerTest {
             GraphQLResponse<Object> response = createResponseWithoutErrors();
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "repo", entityId);
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", entityId);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result).isNull();
         }
 
         @Test
@@ -111,10 +111,10 @@ class GraphQLErrorHandlerTest {
             );
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "repo", "owner/name");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "owner/name");
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
 
         @Test
@@ -130,10 +130,10 @@ class GraphQLErrorHandlerTest {
             );
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "user", "octocat");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "user", "octocat");
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
 
         @Test
@@ -148,23 +148,109 @@ class GraphQLErrorHandlerTest {
             );
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "repo", "owner/name");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "owner/name");
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
 
         @Test
-        @DisplayName("응답 객체가 유효하고 에러가 없으면 false를 반환한다")
-        void returnsFalse_whenResponseIsValidWithoutErrors() {
+        @DisplayName("응답 객체가 유효하고 에러가 없으면 null을 반환한다")
+        void returnsNull_whenResponseIsValidWithoutErrors() {
             // given
             GraphQLResponse<Object> response = new GraphQLResponse<>();
 
             // when
-            boolean result = GraphQLErrorHandler.logAndCheckErrors(response, "repo", "owner/name");
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "owner/name");
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result).isNull();
+        }
+    }
+
+    @Nested
+    @DisplayName("classifyErrors 메서드 - 에러 타입 분류")
+    class ClassifyErrorsTypeTest {
+
+        @Test
+        @DisplayName("에러 없음 → null 반환")
+        void noError_returnsNull() {
+            // given
+            GraphQLResponse<Object> response = createResponseWithoutErrors();
+
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "test");
+
+            // then
+            assertThat(result).isNull();
+        }
+
+        @Test
+        @DisplayName("데이터 있고 에러 있음 (partial) → PARTIAL 반환")
+        void partialError_returnsPARTIAL() {
+            // given
+            GraphQLResponse<Object> response = createResponseWithPartialError();
+
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "test");
+
+            // then
+            assertThat(result).isEqualTo(GraphQLErrorType.PARTIAL);
+        }
+
+        @Test
+        @DisplayName("Something went wrong 메시지 → NON_RETRYABLE 반환")
+        void somethingWentWrong_returnsNON_RETRYABLE() {
+            // given
+            GraphQLResponse<Object> response = createResponseWithErrors(
+                List.of(Map.of("message", "Something went wrong while processing"))
+            );
+
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "test");
+
+            // then
+            assertThat(result).isEqualTo(GraphQLErrorType.NON_RETRYABLE);
+        }
+
+        @Test
+        @DisplayName("Something went wrong (정확한 일치) → NON_RETRYABLE 반환")
+        void somethingWentWrongExact_returnsNON_RETRYABLE() {
+            // given
+            GraphQLResponse<Object> response = createResponseWithErrors(
+                List.of(Map.of("message", "Something went wrong"))
+            );
+
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "test");
+
+            // then
+            assertThat(result).isEqualTo(GraphQLErrorType.NON_RETRYABLE);
+        }
+
+        @Test
+        @DisplayName("다른 에러 메시지 (total error) → RETRYABLE 반환")
+        void otherTotalError_returnsRETRYABLE() {
+            // given
+            GraphQLResponse<Object> response = createResponseWithErrors(
+                List.of(Map.of("message", "Rate limit exceeded"))
+            );
+
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(response, "repo", "test");
+
+            // then
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
+        }
+
+        @Test
+        @DisplayName("null 응답 → RETRYABLE 반환")
+        void nullResponse_returnsRETRYABLE() {
+            // when
+            GraphQLErrorType result = GraphQLErrorHandler.classifyErrors(null, "repo", "test");
+
+            // then
+            assertThat(result).isEqualTo(GraphQLErrorType.RETRYABLE);
         }
     }
 
@@ -177,6 +263,13 @@ class GraphQLErrorHandlerTest {
     private GraphQLResponse<Object> createResponseWithoutErrors() {
         GraphQLResponse<Object> response = new GraphQLResponse<>();
         setFieldValue(response, "errors", null);
+        return response;
+    }
+
+    private GraphQLResponse<Object> createResponseWithPartialError() {
+        GraphQLResponse<Object> response = new GraphQLResponse<>();
+        setFieldValue(response, "data", new Object());
+        setFieldValue(response, "errors", List.of(Map.of("message", "Partial error")));
         return response;
     }
 

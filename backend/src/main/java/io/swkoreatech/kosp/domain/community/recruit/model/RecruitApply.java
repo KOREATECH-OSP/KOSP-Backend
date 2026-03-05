@@ -57,8 +57,8 @@ public class RecruitApply extends BaseEntity {
     @Column(name = "portfolio_url")
     private String portfolioUrl;
 
-    @Column(name = "decision_reason", length = 500)
-    private String decisionReason;
+    @Column(name = "decision_reason", nullable = false, length = 500)
+    private String decisionReason = "사유 미입력";
 
     /** 지원 상태. PENDING: 대기, ACCEPTED: 수락, REJECTED: 거절. */
     public enum ApplyStatus {

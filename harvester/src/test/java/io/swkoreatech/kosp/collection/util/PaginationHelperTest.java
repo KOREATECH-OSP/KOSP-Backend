@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -122,6 +124,7 @@ class PaginationHelperTest {
 
             when(fetcher.apply(null)).thenReturn(response);
             when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
 
             // when
             int result = PaginationHelper.paginate(
@@ -134,7 +137,7 @@ class PaginationHelperTest {
             );
 
             // then
-            assertThat(result).isZero();
+            assertThat(result).isEqualTo(-1);
             verify(fetcher, times(1)).apply(null);
             verify(dataProcessor, never()).apply(any(), any());
             verify(pageInfoExtractor, never()).apply(any());
@@ -407,6 +410,67 @@ class PaginationHelperTest {
         }
     }
 
+    @Nested
+    @DisplayName("paginate 메서드 - 에러 타입 처리")
+    class PaginateErrorTypeTest {
+
+        @Test
+        @DisplayName("NON_RETRYABLE 에러 → -2 반환")
+        void nonRetryableError_returnsMinusTwo() {
+            // given
+            GraphQLResponse<TestResponse> response = mock(GraphQLResponse.class);
+            List<Map<String, Object>> errors = List.of(
+                Map.of("message", "Something went wrong")
+            );
+
+            when(fetcher.apply(null)).thenReturn(response);
+            when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
+            when(response.getErrors()).thenReturn(errors);
+
+            // when
+            int result = PaginationHelper.paginate(
+                fetcher,
+                pageInfoExtractor,
+                dataProcessor,
+                "repo",
+                "owner/name",
+                TestResponse.class
+            );
+
+            // then
+            assertThat(result).isEqualTo(-2);
+        }
+
+        @Test
+        @DisplayName("RETRYABLE 에러 → -1 반환")
+        void retryableError_returnsMinusOne() {
+            // given
+            GraphQLResponse<TestResponse> response = mock(GraphQLResponse.class);
+            List<Map<String, Object>> errors = List.of(
+                Map.of("message", "Rate limit exceeded")
+            );
+
+            when(fetcher.apply(null)).thenReturn(response);
+            when(response.hasErrors()).thenReturn(true);
+            when(response.getData()).thenReturn(null);
+            when(response.getErrors()).thenReturn(errors);
+
+            // when
+            int result = PaginationHelper.paginate(
+                fetcher,
+                pageInfoExtractor,
+                dataProcessor,
+                "repo",
+                "owner/name",
+                TestResponse.class
+            );
+
+            // then
+            assertThat(result).isEqualTo(-1);
+        }
+    }
+
     /**
      * Test data class representing a GraphQL response with pagination.
      */
@@ -424,7 +488,23 @@ class PaginationHelperTest {
 
     /**
      * Test PageInfo class simulating the inner class pattern used in actual response DTOs.
+     * Uses JavaBeans naming (isHasNextPage/getEndCursor) to match extractCursor reflection.
      */
-    record TestPageInfo(boolean hasNextPage, String endCursor) {
+    static class TestPageInfo {
+        private final boolean hasNextPage;
+        private final String endCursor;
+
+        TestPageInfo(boolean hasNextPage, String endCursor) {
+            this.hasNextPage = hasNextPage;
+            this.endCursor = endCursor;
+        }
+
+        public boolean isHasNextPage() {
+            return hasNextPage;
+        }
+
+        public String getEndCursor() {
+            return endCursor;
+        }
     }
 }

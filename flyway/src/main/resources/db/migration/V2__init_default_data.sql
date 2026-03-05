@@ -56,3 +56,10 @@ SELECT '모집공고',
        false,
        CURRENT_TIMESTAMP,
        CURRENT_TIMESTAMP WHERE NOT EXISTS (SELECT 1 FROM board WHERE name = '모집공고');
+
+-- ============================================
+-- Admin Contact
+-- ============================================
+INSERT INTO admin_contact (id, email)
+SELECT 1,
+       'contact@koreatech.ac.kr' WHERE NOT EXISTS (SELECT 1 FROM admin_contact WHERE id = 1);

@@ -29,6 +29,7 @@ spring:
       host: ${REDIS_HOST}
       password: ${REDIS_PASSWORD}
       lettuce:
+        shutdown-timeout: 5000ms
         pool:
           max-active: 20
           max-idle: 10
@@ -48,3 +49,6 @@ slack:
   logging:
     error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL:}
   event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL:}
+
+server:
+  shutdown: graceful

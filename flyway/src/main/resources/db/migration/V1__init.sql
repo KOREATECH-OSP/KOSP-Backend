@@ -322,7 +322,6 @@ CREATE TABLE challenge
     description         VARCHAR(255) NOT NULL,
     "condition"         TEXT         NOT NULL,
     tier                INT          NOT NULL,
-    icon                VARCHAR(255),
     image_resource      VARCHAR(255),
     image_resource_type VARCHAR(20),
     point               INT          NOT NULL,

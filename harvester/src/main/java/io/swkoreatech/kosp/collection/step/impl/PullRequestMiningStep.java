@@ -110,6 +110,10 @@ public class PullRequestMiningStep implements StepProvider {
         int saved = 0;
         int skipped = 0;
         for (PullRequestNode pr : prs) {
+            if (pr == null) {
+                skipped++;
+                continue;
+            }
             if (prDocumentRepository.existsByUserIdAndRepositoryNameAndPrNumber(userId, pr.getRepoName(),
                 pr.getNumber())) {
                 skipped++;
