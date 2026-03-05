@@ -1,10 +1,11 @@
 package io.swkoreatech.kosp.domain.admin.member.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -16,20 +17,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
 import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
+import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminMemberService 단위 테스트")
@@ -44,26 +47,11 @@ class AdminMemberServiceTest {
     @Mock
     private RoleRepository roleRepository;
 
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("encoded_password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
+    @Mock
+    private ApplicationEventPublisher eventPublisher;
 
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .description(name + " 역할")
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     @Nested
     @DisplayName("updateUserRoles 메서드")
@@ -73,7 +61,7 @@ class AdminMemberServiceTest {
         @DisplayName("존재하지 않는 사용자의 역할을 수정하면 예외가 발생한다")
         void throwsException_whenUserNotFound() {
             // given
-            given(userRepository.findById(999L)).willReturn(Optional.empty());
+            given(userRepository.getById(999L)).willThrow(GlobalException.class);
 
             // when & then
             assertThatThrownBy(() -> adminMemberService.updateUserRoles(999L, Set.of("ROLE_USER")))
@@ -85,7 +73,7 @@ class AdminMemberServiceTest {
         void throwsException_whenRoleNotFound() {
             // given
             User user = createUser(1L, "홍길동");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(roleRepository.findByName("INVALID_ROLE")).willReturn(Optional.empty());
 
             // when & then
@@ -101,7 +89,7 @@ class AdminMemberServiceTest {
             Role roleUser = createRole(1L, "ROLE_USER");
             Role roleAdmin = createRole(2L, "ROLE_ADMIN");
             
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(roleRepository.findByName("ROLE_USER")).willReturn(Optional.of(roleUser));
             given(roleRepository.findByName("ROLE_ADMIN")).willReturn(Optional.of(roleAdmin));
 
@@ -121,7 +109,7 @@ class AdminMemberServiceTest {
             Role existingRole = createRole(1L, "ROLE_USER");
             user.getRoles().add(existingRole);
             
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
 
             // when
             adminMemberService.updateUserRoles(1L, Set.of());
@@ -139,7 +127,7 @@ class AdminMemberServiceTest {
         @DisplayName("존재하지 않는 사용자를 삭제하면 예외가 발생한다")
         void throwsException_whenUserNotFound() {
             // given
-            given(userRepository.findById(999L)).willReturn(Optional.empty());
+            given(userRepository.getById(999L)).willThrow(GlobalException.class);
 
             // when & then
             assertThatThrownBy(() -> adminMemberService.deleteUser(999L))
@@ -151,7 +139,7 @@ class AdminMemberServiceTest {
         void softDeletesUserSuccessfully() {
             // given
             User user = createUser(1L, "홍길동");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
 
             // when
             adminMemberService.deleteUser(1L);
@@ -252,7 +240,7 @@ class AdminMemberServiceTest {
         @DisplayName("존재하지 않는 사용자를 수정하면 예외가 발생한다")
         void throwsException_whenUserNotFound() {
             // given
-            given(userRepository.findById(999L)).willReturn(Optional.empty());
+            given(userRepository.getById(999L)).willThrow(GlobalException.class);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
                 "홍길동", "2024123456", "test@koreatech.ac.kr", null, null
             );
@@ -267,7 +255,7 @@ class AdminMemberServiceTest {
         void throwsException_whenKutIdAlreadyExists() {
             // given
             User user = createUser(1L, "사용자A");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(userRepository.existsByKutIdAndIdNot("2024000002", 1L)).willReturn(true);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
                 "사용자A", "2024000002", "usera@koreatech.ac.kr", null, null
@@ -283,7 +271,7 @@ class AdminMemberServiceTest {
         void throwsException_whenKutEmailAlreadyExists() {
             // given
             User user = createUser(1L, "사용자A");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(userRepository.existsByKutEmailAndIdNot("userb@koreatech.ac.kr", 1L)).willReturn(true);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
                 "사용자A", "2024000001", "userb@koreatech.ac.kr", null, null
@@ -301,7 +289,7 @@ class AdminMemberServiceTest {
             User user = createUser(1L, "사용자A");
             ReflectionTestUtils.setField(user, "kutId", "2024000001");
             ReflectionTestUtils.setField(user, "kutEmail", "usera@koreatech.ac.kr");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(userRepository.existsByKutIdAndIdNot("2024000001", 1L)).willReturn(false);
             given(userRepository.existsByKutEmailAndIdNot("usera@koreatech.ac.kr", 1L)).willReturn(false);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
@@ -322,7 +310,7 @@ class AdminMemberServiceTest {
         void throwsException_whenKutEmailDiffersByCaseOnly() {
             // given
             User user = createUser(1L, "사용자A");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(userRepository.existsByKutEmailAndIdNot("userb@koreatech.ac.kr", 1L)).willReturn(true);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
                 "사용자A", "2024000001", "USERB@koreatech.ac.kr", null, null
@@ -344,7 +332,7 @@ class AdminMemberServiceTest {
                 .githubAvatarUrl("https://old.url")
                 .build();
             ReflectionTestUtils.setField(user, "githubUser", githubUser);
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             given(userRepository.existsByKutIdAndIdNot("2024999999", 1L)).willReturn(false);
             given(userRepository.existsByKutEmailAndIdNot("newemail@koreatech.ac.kr", 1L)).willReturn(false);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
@@ -370,7 +358,7 @@ class AdminMemberServiceTest {
             ReflectionTestUtils.setField(user, "kutId", "2024000001");
             ReflectionTestUtils.setField(user, "kutEmail", "usera@koreatech.ac.kr");
             ReflectionTestUtils.setField(user, "introduction", "기존 소개");
-            given(userRepository.findById(1L)).willReturn(Optional.of(user));
+            given(userRepository.getById(1L)).willReturn(user);
             AdminUserUpdateRequest request = new AdminUserUpdateRequest(
                 "사용자A", "2024000001", "usera@koreatech.ac.kr", null, null
             );

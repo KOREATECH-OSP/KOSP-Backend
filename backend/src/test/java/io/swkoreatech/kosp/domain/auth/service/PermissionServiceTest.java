@@ -1,10 +1,13 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
@@ -32,44 +34,6 @@ class PermissionServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    private User createUser(Long id) {
-        User user = User.builder()
-            .name("테스터")
-            .kutId("2024" + id)
-            .kutEmail("user" + id + "@koreatech.ac.kr")
-            .password("encoded_password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .policies(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
-
-    private Policy createPolicy(Long id, String name) {
-        Policy policy = Policy.builder()
-            .name(name)
-            .permissions(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(policy, "id", id);
-        return policy;
-    }
-
-    private Permission createPermission(Long id, String name) {
-        Permission permission = Permission.builder()
-            .name(name)
-            .build();
-        ReflectionTestUtils.setField(permission, "id", id);
-        return permission;
-    }
 
     @Nested
     @DisplayName("hasPermission 메서드")

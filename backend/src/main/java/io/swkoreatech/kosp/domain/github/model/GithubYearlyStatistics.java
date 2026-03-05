@@ -21,8 +21,8 @@ import lombok.NoArgsConstructor;
     name = "github_yearly_statistics",
     indexes = {
         @Index(name = "idx_github_id", columnList = "githubId"),
-        @Index(name = "idx_year", columnList = "year"),
-        @Index(name = "idx_github_id_year", columnList = "githubId,year", unique = true)
+        @Index(name = "idx_year", columnList = "\"year\""),
+        @Index(name = "idx_github_id_year", columnList = "githubId,\"year\"", unique = true)
     }
 )
 @Getter
@@ -36,7 +36,7 @@ public class GithubYearlyStatistics {
     @Column(nullable = false, length = 100)
     private String githubId;
 
-    @Column(nullable = false)
+    @Column(name = "\"year\"", nullable = false)
     private Integer year;
 
     // 연도별 통계

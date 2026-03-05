@@ -9,6 +9,7 @@ public enum SearchFilter {
     recruits,
     teams,
     challenges,
+    users,
     repositories;
 
     @JsonValue

@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
@@ -13,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
@@ -25,32 +27,6 @@ class AuthorityServiceTest {
 
     @InjectMocks
     private AuthorityService authorityService;
-
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .policies(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
-
-    private Policy createPolicy(Long id, String name) {
-        Policy policy = Policy.builder()
-            .name(name)
-            .permissions(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(policy, "id", id);
-        return policy;
-    }
-
-    private Permission createPermission(Long id, String name) {
-        Permission permission = Permission.builder()
-            .name(name)
-            .build();
-        ReflectionTestUtils.setField(permission, "id", id);
-        return permission;
-    }
 
     @Nested
     @DisplayName("getAuthorities 메서드")
@@ -82,8 +58,9 @@ class AuthorityServiceTest {
 
             // then
             assertThat(result).hasSize(1);
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))).isTrue();
+            assertThat(result)
+                .extracting(GrantedAuthority::getAuthority)
+                .contains("ROLE_USER");
         }
 
         @Test
@@ -103,10 +80,9 @@ class AuthorityServiceTest {
             Collection<? extends GrantedAuthority> result = authorityService.getAuthorities(roles);
 
             // then
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))).isTrue();
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("PERM_READ_ARTICLE"))).isTrue();
+            assertThat(result)
+                .extracting(GrantedAuthority::getAuthority)
+                .contains("ROLE_USER", "PERM_READ_ARTICLE");
         }
 
         @Test
@@ -134,14 +110,9 @@ class AuthorityServiceTest {
             Collection<? extends GrantedAuthority> result = authorityService.getAuthorities(roles);
 
             // then
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_USER"))).isTrue();
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))).isTrue();
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("PERM_READ"))).isTrue();
-            assertThat(result.stream()
-                .anyMatch(a -> a.getAuthority().equals("PERM_ADMIN"))).isTrue();
+            assertThat(result)
+                .extracting(GrantedAuthority::getAuthority)
+                .contains("ROLE_USER", "ROLE_ADMIN", "PERM_READ", "PERM_ADMIN");
         }
 
         @Test

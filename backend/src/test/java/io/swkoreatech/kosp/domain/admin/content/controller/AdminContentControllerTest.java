@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
@@ -60,6 +60,7 @@ class AdminContentControllerTest extends IntegrationTestSupport {
     void setUp() throws Exception {
         // 1. Create GitHub user (required for User entity)
         createGithubUser(1001L);
+        GithubUser adminGithubUser = githubUserRepository.getByGithubId(1001L);
 
         // 2. Create admin user with ROLE_ADMIN
         adminUser = User.builder()
@@ -67,9 +68,8 @@ class AdminContentControllerTest extends IntegrationTestSupport {
             .kutId("2024001")
             .kutEmail("admin@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
+            .githubUser(adminGithubUser)
             .build();
-        ReflectionTestUtils.setField(adminUser, "githubId", 1001L);
         adminUser = userRepository.save(adminUser);
 
         // 3. Assign ROLE_ADMIN (PermissionInitializer auto-creates this role in test env)
@@ -96,14 +96,14 @@ class AdminContentControllerTest extends IntegrationTestSupport {
 
         // 4. Create author user (for Article/Comment)
         createGithubUser(1002L);
+        GithubUser authorGithubUser = githubUserRepository.getByGithubId(1002L);
         authorUser = User.builder()
             .name("작성자")
             .kutId("2024002")
             .kutEmail("author@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
+            .githubUser(authorGithubUser)
             .build();
-        ReflectionTestUtils.setField(authorUser, "githubId", 1002L);
         authorUser = userRepository.save(authorUser);
 
         // 5. Create Board (required for Article)

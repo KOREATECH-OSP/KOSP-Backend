@@ -1,11 +1,13 @@
 package io.swkoreatech.kosp.domain.user.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,18 +18,22 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
+import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
+import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
 import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
@@ -65,17 +71,14 @@ class UserServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
+    @Mock
+    private EmailVerificationService emailVerificationService;
+
+    @Mock
+    private PointTransactionRepository pointTransactionRepository;
+
+    @Mock
+    private RabbitTemplate rabbitTemplate;
 
     private SignupToken createSignupToken(boolean emailVerified) {
         return SignupToken.builder()
@@ -97,7 +100,8 @@ class UserServiceTest {
         @DisplayName("이메일이 인증되지 않으면 예외가 발생한다")
         void throwsException_whenEmailNotVerified() {
             // given
-            UserSignupRequest request = new UserSignupRequest("홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
+            UserSignupRequest request = new UserSignupRequest(
+                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
             SignupToken token = createSignupToken(false);
 
             // when & then
@@ -109,7 +113,8 @@ class UserServiceTest {
         @DisplayName("이미 존재하는 활성 사용자가 있으면 예외가 발생한다")
         void throwsException_whenUserAlreadyExists() {
             // given
-            UserSignupRequest request = new UserSignupRequest("홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
+            UserSignupRequest request = new UserSignupRequest(
+                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
             SignupToken token = createSignupToken(true);
             User existingUser = createUser(1L, "기존유저");
             
@@ -273,8 +278,9 @@ class UserServiceTest {
             // given
             User user = createUser(1L, "홍길동");
             Pageable pageable = PageRequest.of(0, 10);
-            given(recruitApplyRepository.findByUser(user, pageable))
-                .willReturn(new PageImpl<>(List.of(), pageable, 0));
+            given(recruitApplyRepository.findAll(
+                any(Specification.class), eq(pageable))
+            ).willReturn(new PageImpl<>(List.of(), pageable, 0));
 
             // when
             MyApplicationListResponse response = userService.getMyApplications(user, pageable);

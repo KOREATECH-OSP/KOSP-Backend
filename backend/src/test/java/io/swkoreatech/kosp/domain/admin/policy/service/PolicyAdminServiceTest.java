@@ -1,12 +1,14 @@
 package io.swkoreatech.kosp.domain.admin.policy.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,35 +46,6 @@ class PolicyAdminServiceTest {
 
     @Mock
     private PermissionRepository permissionRepository;
-
-    private Policy createPolicy(Long id, String name) {
-        Policy policy = Policy.builder()
-            .name(name)
-            .description(name + " 정책")
-            .permissions(new HashSet<>())
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(policy, "id", id);
-        return policy;
-    }
-
-    private Permission createPermission(Long id, String name) {
-        Permission permission = Permission.builder()
-            .name(name)
-            .description(name + " 권한")
-            .build();
-        ReflectionTestUtils.setField(permission, "id", id);
-        return permission;
-    }
-
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .description(name + " 역할")
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
 
     @Nested
     @DisplayName("getAllPolicies 메서드")

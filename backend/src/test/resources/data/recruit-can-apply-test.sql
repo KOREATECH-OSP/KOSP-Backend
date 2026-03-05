@@ -57,8 +57,8 @@ INSERT INTO article (
 INSERT INTO recruit (
     id, team_id, status, start_date, end_date
 ) VALUES
-(200, 50, 'OPEN', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY)),
-(201, 50, 'CLOSED', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY));
+(200, 50, 'OPEN', NOW(), DATEADD('DAY', 30, NOW())),
+(201, 50, 'CLOSED', NOW(), DATEADD('DAY', 30, NOW()));
 
 -- ============================================
 -- 6. RecruitApply (applications)

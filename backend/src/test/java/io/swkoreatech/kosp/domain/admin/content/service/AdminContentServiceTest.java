@@ -1,5 +1,9 @@
 package io.swkoreatech.kosp.domain.admin.content.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createArticle;
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createBoard;
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createComment;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,44 +49,6 @@ class AdminContentServiceTest {
 
     @Mock
     private CommentRepository commentRepository;
-
-    private Article createArticle(Long id, String title) {
-        Article article = Article.builder()
-            .title(title)
-            .content("테스트 내용")
-            .build();
-        ReflectionTestUtils.setField(article, "id", id);
-        ReflectionTestUtils.setField(article, "isDeleted", false);
-        return article;
-    }
-
-    private Board createBoard(Long id, String name) {
-        Board board = Board.builder()
-            .name(name)
-            .description(name + " 게시판")
-            .build();
-        ReflectionTestUtils.setField(board, "id", id);
-        return board;
-    }
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .kutId("2024" + id)
-            .password("password")
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Comment createComment(Long id) {
-        Comment comment = Comment.builder()
-            .content("테스트 댓글")
-            .build();
-        ReflectionTestUtils.setField(comment, "id", id);
-        return comment;
-    }
 
     @Nested
     @DisplayName("deleteArticle 메서드")
@@ -172,7 +138,8 @@ class AdminContentServiceTest {
         void throwsException_whenNoticeBoardNotFound() {
             // given
             User user = createUser(1L, "관리자");
-            NoticeCreateRequest request = new NoticeCreateRequest("공지 제목", "공지 내용", true, List.of("태그"));
+            NoticeCreateRequest request = new NoticeCreateRequest(
+                "공지 제목", "공지 내용", true, List.of("태그"));
             given(boardRepository.findAll()).willReturn(List.of());
 
             // when & then
@@ -186,8 +153,9 @@ class AdminContentServiceTest {
             // given
             User user = createUser(1L, "관리자");
             Board noticeBoard = createBoard(1L, "공지사항");
-            NoticeCreateRequest request = new NoticeCreateRequest("공지 제목", "공지 내용", true, List.of("태그"));
-            
+            NoticeCreateRequest request = new NoticeCreateRequest(
+                "공지 제목", "공지 내용", true, List.of("태그"));
+
             given(boardRepository.findAll()).willReturn(List.of(noticeBoard));
 
             // when
@@ -256,7 +224,8 @@ class AdminContentServiceTest {
             // given
             Article notice = createArticle(1L, "기존 제목");
             given(articleRepository.findById(1L)).willReturn(Optional.of(notice));
-            NoticeUpdateRequest request = new NoticeUpdateRequest("수정 제목", "수정 내용", true, List.of("새태그"));
+            NoticeUpdateRequest request = new NoticeUpdateRequest(
+                "수정 제목", "수정 내용", true, List.of("새태그"));
 
             // when
             adminContentService.updateNotice(1L, request);

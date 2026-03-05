@@ -63,8 +63,6 @@ public abstract class IntegrationTestSupport {
             .githubName("name" + id)
             .githubToken("dummy_token_" + id)
             .githubAvatarUrl("https://dummy.url/" + id)
-            .createdAt(java.time.LocalDateTime.now())
-            .updatedAt(java.time.LocalDateTime.now())
             .build());
     }
 

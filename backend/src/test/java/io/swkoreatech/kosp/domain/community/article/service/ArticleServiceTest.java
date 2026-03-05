@@ -1,12 +1,14 @@
 package io.swkoreatech.kosp.domain.community.article.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createArticle;
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createBoard;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +28,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
@@ -55,41 +59,6 @@ class ArticleServiceTest {
 
     @Mock
     private AttachmentRepository attachmentRepository;
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Board createBoard(Long id, String name, boolean isNotice) {
-        Board board = Board.builder()
-            .name(name)
-            .description(name + " 게시판")
-            .build();
-        ReflectionTestUtils.setField(board, "id", id);
-        ReflectionTestUtils.setField(board, "isNotice", isNotice);
-        return board;
-    }
-
-    private Article createArticle(Long id, User author, Board board, String title) {
-        Article article = Article.builder()
-            .author(author)
-            .board(board)
-            .title(title)
-            .content("내용")
-            .build();
-        ReflectionTestUtils.setField(article, "id", id);
-        ReflectionTestUtils.setField(article, "isDeleted", false);
-        ReflectionTestUtils.setField(article, "createdAt", java.time.LocalDateTime.now());
-        return article;
-    }
 
     @Nested
     @DisplayName("create 메서드")
@@ -187,10 +156,10 @@ class ArticleServiceTest {
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
             // when
-            boolean result = articleService.toggleLike(user, 1L);
+            ToggleLikeResponse result = articleService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isLiked()).isTrue();
             assertThat(article.getLikes()).isEqualTo(1);
             verify(articleLikeRepository).save(any(ArticleLike.class));
         }
@@ -210,10 +179,10 @@ class ArticleServiceTest {
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(existingLike));
 
             // when
-            boolean result = articleService.toggleLike(user, 1L);
+            ToggleLikeResponse result = articleService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isLiked()).isFalse();
             assertThat(article.getLikes()).isEqualTo(0);
             verify(articleLikeRepository).delete(existingLike);
         }
@@ -235,10 +204,10 @@ class ArticleServiceTest {
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
             // when
-            boolean result = articleService.toggleBookmark(user, 1L);
+            ToggleBookmarkResponse result = articleService.toggleBookmark(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isBookmarked()).isTrue();
             verify(articleBookmarkRepository).save(any(ArticleBookmark.class));
         }
 
@@ -255,10 +224,10 @@ class ArticleServiceTest {
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(bookmark));
 
             // when
-            boolean result = articleService.toggleBookmark(user, 1L);
+            ToggleBookmarkResponse result = articleService.toggleBookmark(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isBookmarked()).isFalse();
             verify(articleBookmarkRepository).delete(bookmark);
         }
     }
@@ -291,7 +260,8 @@ class ArticleServiceTest {
             User author = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "기존 제목");
-            ArticleRequest request = new ArticleRequest(1L, "수정 제목", "수정 내용", List.of("새태그"), null);
+            ArticleRequest request = new ArticleRequest(
+                1L, "수정 제목", "수정 내용", List.of("새태그"), null);
             
             given(articleRepository.getById(1L)).willReturn(article);
 
@@ -331,14 +301,14 @@ class ArticleServiceTest {
             User author = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when
             articleService.delete(author, 1L);
 
             // then
-            verify(articleRepository).delete(article);
+            assertThat(article.isDeleted()).isTrue();
         }
     }
 

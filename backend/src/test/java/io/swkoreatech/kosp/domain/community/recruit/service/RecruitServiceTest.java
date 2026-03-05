@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -8,7 +9,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -70,18 +70,6 @@ class RecruitServiceTest {
     @Mock
     private TeamMemberRepository teamMemberRepository;
 
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
     private Board createBoard(Long id, String name) {
         Board board = Board.builder()
             .name(name)
@@ -102,7 +90,7 @@ class RecruitServiceTest {
     }
 
     private Recruit createRecruit(Long id, User author, Board board, Team team) {
-        Recruit recruit = Recruit.builder()
+        Recruit recruit = Recruit.recruitBuilder()
             .author(author)
             .board(board)
             .title("모집 공고")
@@ -129,7 +117,9 @@ class RecruitServiceTest {
             User author = createUser(1L, "작성자");
             Board board = createBoard(1L, "모집게시판");
             Team team = createTeam(1L, "테스트팀");
-            RecruitRequest request = new RecruitRequest(1L, "모집 제목", "모집 내용", List.of(), 1L, LocalDateTime.now(), LocalDateTime.now().plusDays(7));
+            RecruitRequest request = new RecruitRequest(
+                1L, "모집 제목", "모집 내용", List.of(),
+                1L, LocalDateTime.now(), LocalDateTime.now().plusDays(7));
             Recruit savedRecruit = createRecruit(1L, author, board, team);
             
             given(teamRepository.getById(1L)).willReturn(team);
@@ -238,7 +228,7 @@ class RecruitServiceTest {
             Board board = createBoard(1L, "모집게시판");
             Team team = createTeam(1L, "테스트팀");
             Recruit recruit = createRecruit(1L, author, board, team);
-            
+
             given(recruitRepository.getById(1L)).willReturn(recruit);
 
             // when
@@ -246,7 +236,7 @@ class RecruitServiceTest {
 
             // then
             assertThat(recruit.getStatus()).isEqualTo(RecruitStatus.CLOSED);
-            verify(recruitRepository).delete(recruit);
+            assertThat(recruit.isDeleted()).isTrue();
         }
     }
 
@@ -359,7 +349,9 @@ class RecruitServiceTest {
             Board board = createBoard(1L, "모집게시판");
             Team team = createTeam(1L, "테스트팀");
             Recruit recruit = createRecruit(1L, author, board, team);
-            RecruitRequest request = new RecruitRequest(1L, "수정된 제목", "수정된 내용", List.of("java"), 1L, LocalDateTime.now(), LocalDateTime.now().plusDays(14));
+            RecruitRequest request = new RecruitRequest(
+                1L, "수정된 제목", "수정된 내용", List.of("java"),
+                1L, LocalDateTime.now(), LocalDateTime.now().plusDays(14));
             
             given(recruitRepository.getById(1L)).willReturn(recruit);
             given(teamRepository.getById(1L)).willReturn(team);
@@ -381,7 +373,9 @@ class RecruitServiceTest {
             Board board = createBoard(1L, "모집게시판");
             Team team = createTeam(1L, "테스트팀");
             Recruit recruit = createRecruit(1L, author, board, team);
-            RecruitRequest request = new RecruitRequest(1L, "수정된 제목", "수정된 내용", List.of(), 1L, LocalDateTime.now(), LocalDateTime.now().plusDays(14));
+            RecruitRequest request = new RecruitRequest(
+                1L, "수정된 제목", "수정된 내용", List.of(),
+                1L, LocalDateTime.now(), LocalDateTime.now().plusDays(14));
             
             given(recruitRepository.getById(1L)).willReturn(recruit);
 

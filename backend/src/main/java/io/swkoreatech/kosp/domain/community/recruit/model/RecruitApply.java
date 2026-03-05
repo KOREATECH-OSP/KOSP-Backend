@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,7 +24,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "recruit_apply")
+@Table(
+    name = "recruit_apply",
+    uniqueConstraints = @UniqueConstraint(
+        name = "uk_recruit_user",
+        columnNames = {"recruit_id", "user_id"}
+    )
+)
 public class RecruitApply extends BaseEntity {
 
     @Id
@@ -48,7 +55,7 @@ public class RecruitApply extends BaseEntity {
      @Column(name = "portfolio_url")
      private String portfolioUrl;
 
-     @Column(name = "decision_reason", nullable = false, length = 500)
+     @Column(name = "decision_reason", length = 500)
      private String decisionReason;
 
      public enum ApplyStatus {

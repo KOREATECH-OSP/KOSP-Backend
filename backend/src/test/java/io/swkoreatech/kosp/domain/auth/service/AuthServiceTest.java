@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,7 +8,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
@@ -95,18 +95,6 @@ class AuthServiceTest {
     @AfterEach
     void tearDown() {
         tokenPropertiesProviderMock.close();
-    }
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
     }
 
     @Nested

@@ -7,8 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -61,7 +59,6 @@ class TeamInviteIntegrationTest extends IntegrationTestSupport {
             .kutId("2024201")
             .kutEmail("invite-leader@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
         leader = userRepository.save(leader);
         ReflectionTestUtils.setField(leader, "githubUser", githubUserRepository.getByGithubId(3001L));
@@ -72,7 +69,6 @@ class TeamInviteIntegrationTest extends IntegrationTestSupport {
             .kutId("2024202")
             .kutEmail("invitee@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
         invitee = userRepository.save(invitee);
         ReflectionTestUtils.setField(invitee, "githubUser", githubUserRepository.getByGithubId(3002L));

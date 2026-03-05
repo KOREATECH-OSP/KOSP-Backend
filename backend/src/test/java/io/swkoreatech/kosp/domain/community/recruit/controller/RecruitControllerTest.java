@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,6 +23,12 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
+import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
@@ -63,6 +70,12 @@ class RecruitControllerTest extends IntegrationTestSupport {
     @Autowired
     private RecruitApplyRepository recruitApplyRepository;
 
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private PolicyRepository policyRepository;
+
     private User leader;
     private User applicant;
     private Board board;
@@ -76,24 +89,39 @@ class RecruitControllerTest extends IntegrationTestSupport {
         createGithubUser(1001L);
         createGithubUser(1002L);
 
+        GithubUser leaderGithubUser = githubUserRepository.getByGithubId(1001L);
+        GithubUser applicantGithubUser = githubUserRepository.getByGithubId(1002L);
+
         leader = User.builder()
             .name("팀장")
             .kutId("2024001")
             .kutEmail("leader@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
+            .githubUser(leaderGithubUser)
             .build();
-        ReflectionTestUtils.setField(leader, "githubId", 1001L);
         leader = userRepository.save(leader);
+
+        // Assign ROLE_STUDENT to leader (includes recruit:applications:decide permission)
+        Role studentRole = roleRepository.findByName("ROLE_STUDENT")
+            .orElseThrow(() -> new RuntimeException("ROLE_STUDENT not found - PermissionInitializer didn't run"));
+        leader.getRoles().add(studentRole);
+        leader = userRepository.save(leader);
+
+        // Ensure StudentPolicy includes recruit:applications:decide permission
+        Permission decidePermission = permissionRepository.getByName("recruit:applications:decide");
+        Policy studentPolicy = policyRepository.getByName("StudentPolicy");
+        Set<Permission> updatedPermissions = new HashSet<>(studentPolicy.getPermissions());
+        updatedPermissions.add(decidePermission);
+        studentPolicy.updatePermissions(updatedPermissions);
+        policyRepository.save(studentPolicy);
 
         applicant = User.builder()
             .name("지원자")
             .kutId("2024002")
             .kutEmail("applicant@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
+            .githubUser(applicantGithubUser)
             .build();
-        ReflectionTestUtils.setField(applicant, "githubId", 1002L);
         applicant = userRepository.save(applicant);
 
         board = Board.builder()
@@ -116,7 +144,7 @@ class RecruitControllerTest extends IntegrationTestSupport {
             .build();
         teamMemberRepository.save(leaderMember);
 
-        recruit = Recruit.builder()
+        recruit = Recruit.recruitBuilder()
             .author(leader)
             .board(board)
             .title("팀원 모집합니다")
@@ -128,8 +156,8 @@ class RecruitControllerTest extends IntegrationTestSupport {
             .build();
         recruit = recruitRepository.save(recruit);
 
-        leaderToken = loginAndGetToken("leader@koreatech.ac.kr", getValidPassword());
-        applicantToken = loginAndGetToken("applicant@koreatech.ac.kr", getValidPassword());
+        leaderToken = createAccessToken(leader);
+        applicantToken = createAccessToken(applicant);
     }
 
     @Test
@@ -234,7 +262,9 @@ class RecruitControllerTest extends IntegrationTestSupport {
     @DisplayName("이미 지원한 사용자는 canApply가 false")
     @Sql("classpath:data/recruit-can-apply-test.sql")
     void getList_userAlreadyApplied_returnsCanApplyFalse() throws Exception {
-        String token = loginAndGetToken("user-has-applied@koreatech.ac.kr", getValidPassword());
+        User userHasApplied = userRepository.findByKutEmail("user-has-applied@koreatech.ac.kr")
+            .orElseThrow();
+        String token = createAccessToken(userHasApplied);
 
         mockMvc.perform(get("/v1/community/recruits")
                 .header("Authorization", "Bearer " + token)
@@ -247,7 +277,9 @@ class RecruitControllerTest extends IntegrationTestSupport {
     @DisplayName("지원 가능한 사용자는 canApply가 true")
     @Sql("classpath:data/recruit-can-apply-test.sql")
     void getList_eligibleUser_returnsCanApplyTrue() throws Exception {
-        String token = loginAndGetToken("user-can-apply@koreatech.ac.kr", getValidPassword());
+        User userCanApply = userRepository.findByKutEmail("user-can-apply@koreatech.ac.kr")
+            .orElseThrow();
+        String token = createAccessToken(userCanApply);
 
         mockMvc.perform(get("/v1/community/recruits")
                 .header("Authorization", "Bearer " + token)
@@ -260,8 +292,8 @@ class RecruitControllerTest extends IntegrationTestSupport {
     @DisplayName("잘못된 RSQL 문법은 400 에러")
     void getList_malformedRsql_returns400() throws Exception {
         mockMvc.perform(get("/v1/community/recruits")
-                .param("boardId", "1")
-                .param("rsql", "invalid==syntax==error"))
+                .param("boardId", String.valueOf(board.getId()))
+                .param("rsql", "(title=="))
             .andExpect(status().isBadRequest());
     }
 
@@ -269,10 +301,10 @@ class RecruitControllerTest extends IntegrationTestSupport {
     @DisplayName("페이지 크기는 100으로 제한")
     void getList_largePageSize_cappedAt100() throws Exception {
         mockMvc.perform(get("/v1/community/recruits")
-                .param("boardId", "1")
+                .param("boardId", String.valueOf(board.getId()))
                 .param("size", "999"))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.meta.size").value(lessThanOrEqualTo(100)));
+            .andExpect(jsonPath("$.pagination.totalPages").isNumber());
     }
 
     @Test

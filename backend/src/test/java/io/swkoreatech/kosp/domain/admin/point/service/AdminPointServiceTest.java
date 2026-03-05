@@ -1,12 +1,12 @@
 package io.swkoreatech.kosp.domain.admin.point.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUserWithPoint;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -50,19 +50,6 @@ class AdminPointServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
-    private User createUser(Long id, Integer point) {
-        User user = User.builder()
-            .name("테스트유저")
-            .kutId("2024" + id)
-            .kutEmail("test" + id + "@koreatech.ac.kr")
-            .password("encoded_password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        ReflectionTestUtils.setField(user, "point", point);
-        return user;
-    }
-
     private PointTransaction createTransaction(Long id, User user, Integer amount, PointSource source) {
         PointTransaction transaction = PointTransaction.builder()
             .user(user)
@@ -85,7 +72,7 @@ class AdminPointServiceTest {
         @DisplayName("포인트 변경 이벤트를 발행한다")
         void publishesPointChangeEvent() {
             // given
-            User user = createUser(1L, 100);
+            User user = createUserWithPoint(1L, 100);
             given(userRepository.getById(1L)).willReturn(user);
             PointTransactionRequest request = new PointTransactionRequest(50, "테스트 지급");
 
@@ -105,7 +92,7 @@ class AdminPointServiceTest {
         @DisplayName("음수 포인트로 차감 이벤트를 발행한다")
         void publishesDeductEvent() {
             // given
-            User user = createUser(1L, 100);
+            User user = createUserWithPoint(1L, 100);
             given(userRepository.getById(1L)).willReturn(user);
             PointTransactionRequest request = new PointTransactionRequest(-30, "테스트 차감");
 
@@ -140,7 +127,7 @@ class AdminPointServiceTest {
         @DisplayName("포인트 거래 내역을 조회한다")
         void returnsPointHistory() {
             // given
-            User user = createUser(1L, 150);
+            User user = createUserWithPoint(1L, 150);
             PointTransaction tx1 = createTransaction(1L, user, 100, PointSource.ADMIN);
             PointTransaction tx2 = createTransaction(2L, user, 50, PointSource.CHALLENGE);
             Pageable pageable = PageRequest.of(0, 10);
@@ -163,7 +150,7 @@ class AdminPointServiceTest {
         @DisplayName("거래 내역이 없으면 빈 목록을 반환한다")
         void returnsEmptyList_whenNoTransactions() {
             // given
-            User user = createUser(1L, 0);
+            User user = createUserWithPoint(1L, 0);
             Pageable pageable = PageRequest.of(0, 10);
             Page<PointTransaction> emptyPage = new PageImpl<>(List.of(), pageable, 0);
 

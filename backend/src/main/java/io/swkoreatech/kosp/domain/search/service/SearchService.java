@@ -244,6 +244,9 @@ public class SearchService {
             String rsql,
             Pageable pageable
     ) {
+        if (!filters.contains(SearchFilter.users)) {
+            return Collections.emptyList();
+        }
         Specification<User> spec = createUserSpec(keyword, rsql);
         Page<User> page = userRepository.findAll(spec, pageable);
 

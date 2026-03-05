@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.community.comment.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createComment;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,7 +9,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,6 +30,7 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
@@ -52,18 +54,6 @@ class CommentServiceTest {
     @Mock
     private ArticleRepository articleRepository;
 
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
     private Board createBoard(Long id) {
         Board board = Board.builder()
             .name("자유게시판")
@@ -84,17 +74,6 @@ class CommentServiceTest {
         ReflectionTestUtils.setField(article, "id", id);
         ReflectionTestUtils.setField(article, "commentsCount", 0);
         return article;
-    }
-
-    private Comment createComment(Long id, User author, Article article) {
-        Comment comment = Comment.builder()
-            .author(author)
-            .article(article)
-            .content("댓글 내용")
-            .build();
-        ReflectionTestUtils.setField(comment, "id", id);
-        ReflectionTestUtils.setField(comment, "createdAt", java.time.LocalDateTime.now());
-        return comment;
     }
 
     @Nested
@@ -155,7 +134,7 @@ class CommentServiceTest {
             Article article = createArticle(1L, author);
             ReflectionTestUtils.setField(article, "commentsCount", 1);
             Comment comment = createComment(1L, author, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
 
             // when
@@ -163,8 +142,7 @@ class CommentServiceTest {
 
             // then
             assertThat(article.getCommentsCount()).isEqualTo(0);
-            verify(commentRepository).delete(comment);
-            verify(articleRepository).save(article);
+            assertThat(comment.isDeleted()).isTrue();
         }
     }
 
@@ -181,8 +159,9 @@ class CommentServiceTest {
             Comment comment = createComment(1L, author, article);
             Pageable pageable = PageRequest.of(0, 10);
             Page<Comment> page = new PageImpl<>(List.of(comment), pageable, 1);
-            
-            given(commentRepository.findByArticleId(1L, pageable)).willReturn(page);
+
+            given(commentRepository.findByArticleIdAndIsDeletedFalse(1L, pageable)).willReturn(page);
+            given(commentLikeRepository.existsByUserAndComment(author, comment)).willReturn(false);
 
             // when
             CommentListResponse result = commentService.getList(1L, pageable, author);
@@ -200,8 +179,8 @@ class CommentServiceTest {
             Comment comment = createComment(1L, author, article);
             Pageable pageable = PageRequest.of(0, 10);
             Page<Comment> page = new PageImpl<>(List.of(comment), pageable, 1);
-            
-            given(commentRepository.findByArticleId(1L, pageable)).willReturn(page);
+
+            given(commentRepository.findByArticleIdAndIsDeletedFalse(1L, pageable)).willReturn(page);
 
             // when
             CommentListResponse result = commentService.getList(1L, pageable, null);
@@ -227,10 +206,10 @@ class CommentServiceTest {
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.empty());
 
             // when
-            boolean result = commentService.toggleLike(user, 1L);
+            CommentToggleLikeResponse result = commentService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isLiked()).isTrue();
             verify(commentLikeRepository).save(any(CommentLike.class));
         }
 
@@ -247,10 +226,10 @@ class CommentServiceTest {
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.of(like));
 
             // when
-            boolean result = commentService.toggleLike(user, 1L);
+            CommentToggleLikeResponse result = commentService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isLiked()).isFalse();
             verify(commentLikeRepository).delete(like);
         }
     }

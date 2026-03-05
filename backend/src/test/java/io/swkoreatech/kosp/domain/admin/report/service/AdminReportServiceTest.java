@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.report.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.verify;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,8 +28,9 @@ import io.swkoreatech.kosp.domain.report.model.enums.ReportReason;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminReportService 단위 테스트")
@@ -43,17 +44,6 @@ class AdminReportServiceTest {
 
     @Mock
     private AdminContentService adminContentService;
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
 
     private Report createReport(Long id, ReportTargetType targetType, ReportStatus status) {
         User reporter = createUser(id, "reporter" + id);
@@ -110,7 +100,8 @@ class AdminReportServiceTest {
         @DisplayName("존재하지 않는 신고를 처리하면 예외가 발생한다")
         void throwsException_whenReportNotFound() {
             // given
-            given(reportRepository.findById(anyLong())).willReturn(Optional.empty());
+            given(reportRepository.getById(anyLong()))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
             ReportProcessRequest request = new ReportProcessRequest(ReportProcessRequest.Action.REJECT);
 
             // when & then
@@ -123,7 +114,7 @@ class AdminReportServiceTest {
         void throwsException_whenReportAlreadyProcessed() {
             // given
             Report report = createReport(1L, ReportTargetType.ARTICLE, ReportStatus.ACCEPTED);
-            given(reportRepository.findById(1L)).willReturn(Optional.of(report));
+            given(reportRepository.getById(1L)).willReturn(report);
             ReportProcessRequest request = new ReportProcessRequest(ReportProcessRequest.Action.REJECT);
 
             // when & then
@@ -136,7 +127,7 @@ class AdminReportServiceTest {
         void changesStatusToRejected_whenRejectAction() {
             // given
             Report report = createReport(1L, ReportTargetType.ARTICLE, ReportStatus.PENDING);
-            given(reportRepository.findById(1L)).willReturn(Optional.of(report));
+            given(reportRepository.getById(1L)).willReturn(report);
             ReportProcessRequest request = new ReportProcessRequest(ReportProcessRequest.Action.REJECT);
 
             // when
@@ -153,7 +144,7 @@ class AdminReportServiceTest {
         void deletesArticleAndChangesStatusToAccepted_whenDeleteContentActionForArticle() {
             // given
             Report report = createReport(1L, ReportTargetType.ARTICLE, ReportStatus.PENDING);
-            given(reportRepository.findById(1L)).willReturn(Optional.of(report));
+            given(reportRepository.getById(1L)).willReturn(report);
             ReportProcessRequest request = new ReportProcessRequest(ReportProcessRequest.Action.DELETE_CONTENT);
 
             // when
@@ -170,7 +161,7 @@ class AdminReportServiceTest {
         void deletesCommentAndChangesStatusToAccepted_whenDeleteContentActionForComment() {
             // given
             Report report = createReport(1L, ReportTargetType.COMMENT, ReportStatus.PENDING);
-            given(reportRepository.findById(1L)).willReturn(Optional.of(report));
+            given(reportRepository.getById(1L)).willReturn(report);
             ReportProcessRequest request = new ReportProcessRequest(ReportProcessRequest.Action.DELETE_CONTENT);
 
             // when

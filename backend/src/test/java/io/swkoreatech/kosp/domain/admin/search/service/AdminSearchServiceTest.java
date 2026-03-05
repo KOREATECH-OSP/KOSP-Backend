@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.admin.search.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createBoard;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
@@ -37,26 +39,6 @@ class AdminSearchServiceTest {
 
     @Mock
     private ArticleRepository articleRepository;
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .kutId("2024" + id)
-            .password("password")
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Board createBoard(Long id, String name) {
-        Board board = Board.builder()
-            .name(name)
-            .description(name + " 게시판")
-            .build();
-        ReflectionTestUtils.setField(board, "id", id);
-        return board;
-    }
 
     private Article createArticle(Long id, String title) {
         User author = createUser(id, "author" + id);
