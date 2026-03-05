@@ -181,7 +181,6 @@ class RateLimitPersistenceIntegrationTest {
             .githubName("User " + githubId)
             .githubToken("dummy_token_" + githubId)
             .githubAvatarUrl("https://avatar.url/" + githubId)
-            .lastCrawling(LocalDateTime.now())
             .build();
 
         User user = User.builder()

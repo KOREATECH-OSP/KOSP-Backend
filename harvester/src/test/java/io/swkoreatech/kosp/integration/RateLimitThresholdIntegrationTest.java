@@ -150,9 +150,8 @@ class RateLimitThresholdIntegrationTest {
                 .githubName(user.getGithubUser().getGithubName())
                 .githubToken(user.getGithubUser().getGithubToken())
                 .githubAvatarUrl(user.getGithubUser().getGithubAvatarUrl())
-                .lastCrawling(user.getGithubUser().getLastCrawling())
-                .rateLimitResetAt(resetTime)
                 .build();
+            simulatedReloadedUser.updateRateLimit(resetTime, null);
 
             assertThat(simulatedReloadedUser.getRateLimitRemaining()).isNull();
             assertThat(simulatedReloadedUser.getRateLimitResetAt()).isEqualTo(resetTime);
@@ -209,7 +208,6 @@ class RateLimitThresholdIntegrationTest {
             .githubName("User " + githubId)
             .githubToken("dummy_token_" + githubId)
             .githubAvatarUrl("https://avatar.url/" + githubId)
-            .lastCrawling(LocalDateTime.now())
             .build();
 
         User user = User.builder()
