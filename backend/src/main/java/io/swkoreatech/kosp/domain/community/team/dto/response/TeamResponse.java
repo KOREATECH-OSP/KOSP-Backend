@@ -22,6 +22,13 @@ public record TeamResponse(
     int memberCount,
     AuthorResponse createdBy
 ) {
+    /**
+     * {@link Team} 엔티티와 팀장 정보로부터 응답을 생성한다.
+     *
+     * @param team   팀 엔티티
+     * @param leader 팀장 사용자
+     * @return 팀 응답
+     */
     public static TeamResponse from(Team team, User leader) {
         return new TeamResponse(
             team.getId(),

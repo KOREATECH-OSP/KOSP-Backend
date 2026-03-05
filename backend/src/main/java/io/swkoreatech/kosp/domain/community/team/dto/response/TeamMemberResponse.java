@@ -17,6 +17,12 @@ public record TeamMemberResponse(
     String profileImage,
     TeamRole role
 ) {
+    /**
+     * {@link TeamMember} 엔티티로부터 응답을 생성한다.
+     *
+     * @param member 팀 멤버 엔티티
+     * @return 팀 멤버 응답
+     */
     public static TeamMemberResponse from(TeamMember member) {
         return new TeamMemberResponse(
             member.getUser().getId(),

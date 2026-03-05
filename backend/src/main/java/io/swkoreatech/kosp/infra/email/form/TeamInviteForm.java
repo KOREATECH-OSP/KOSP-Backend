@@ -17,6 +17,7 @@ public class TeamInviteForm implements EmailForm {
     private final String serverUrl;
     private final Long inviteId;
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, String> getContent() {
         return Map.of(
@@ -27,11 +28,13 @@ public class TeamInviteForm implements EmailForm {
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getSubject() {
         return String.format("[KOSP] %s 팀에 초대되었습니다.", teamName);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getFilePath() {
         return "team_invite";

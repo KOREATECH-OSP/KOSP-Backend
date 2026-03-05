@@ -23,6 +23,7 @@ public class AdminChallengeController implements AdminChallengeApi {
 
     private final ChallengeService challengeService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:read", description = "챌린지 목록 조회")
     public ResponseEntity<AdminChallengeListResponse> getChallenges() {
@@ -30,6 +31,7 @@ public class AdminChallengeController implements AdminChallengeApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:read", description = "챌린지 단일 조회")
     public ResponseEntity<AdminChallengeResponse> getChallenge(Long challengeId) {
@@ -37,6 +39,7 @@ public class AdminChallengeController implements AdminChallengeApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:create", description = "챌린지 생성")
     public ResponseEntity<Void> createChallenge(ChallengeRequest request) {
@@ -44,6 +47,7 @@ public class AdminChallengeController implements AdminChallengeApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:update", description = "챌린지 수정")
     public ResponseEntity<Void> updateChallenge(Long challengeId, ChallengeRequest request) {
@@ -51,6 +55,7 @@ public class AdminChallengeController implements AdminChallengeApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:delete", description = "챌린지 삭제")
     public ResponseEntity<Void> deleteChallenge(Long challengeId) {
@@ -58,6 +63,7 @@ public class AdminChallengeController implements AdminChallengeApi {
         return ResponseEntity.noContent().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:challenges:read", description = "SpEL 변수 목록 조회")
     public ResponseEntity<SpelVariableResponse> getSpelVariables() {

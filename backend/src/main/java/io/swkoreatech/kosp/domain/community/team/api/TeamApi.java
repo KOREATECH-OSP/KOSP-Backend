@@ -25,11 +25,11 @@ import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 
-@Tag(name = "Team", description = "팀 관리 API")
 /**
  * 팀 API 인터페이스.
  * 팀의 CRUD, 멤버 관리, 초대 관련 엔드포인트를 정의한다.
  */
+@Tag(name = "Team", description = "팀 관리 API")
 public interface TeamApi {
 
     @Operation(summary = "팀 목록 조회", description = "팀 목록을 조회합니다.")

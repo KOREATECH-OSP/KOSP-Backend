@@ -38,6 +38,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private final GithubUserRepository githubUserRepository;
     private final TextEncryptor textEncryptor;
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {

@@ -24,6 +24,7 @@ public class ResetPasswordForm implements EmailForm {
         this.resetToken = resetToken;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, String> getContent() {
         return Map.of(
@@ -32,11 +33,13 @@ public class ResetPasswordForm implements EmailForm {
         );
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getSubject() {
         return SUBJECT;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getFilePath() {
         return PATH;

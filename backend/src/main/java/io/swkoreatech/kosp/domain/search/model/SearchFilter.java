@@ -17,11 +17,22 @@ public enum SearchFilter {
     users,
     repositories;
 
+    /**
+     * JSON 직렬화 시 사용되는 필터 값을 반환한다.
+     *
+     * @return 필터 이름 문자열
+     */
     @JsonValue
     public String getValue() {
         return name();
     }
 
+    /**
+     * 문자열 값으로부터 {@link SearchFilter}를 생성한다.
+     *
+     * @param value 필터 이름 문자열
+     * @return 대응하는 {@link SearchFilter} 열거값
+     */
     @JsonCreator
     public static SearchFilter fromValue(String value) {
         return valueOf(value.toLowerCase());

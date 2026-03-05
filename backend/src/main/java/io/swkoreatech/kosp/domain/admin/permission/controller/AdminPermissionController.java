@@ -21,12 +21,14 @@ public class AdminPermissionController implements AdminPermissionApi {
 
     private final PolicyAdminService policyAdminService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:permissions:read", description = "권한 목록 조회")
     public ResponseEntity<List<PermissionResponse>> getAllPermissions() {
         return ResponseEntity.ok(policyAdminService.getAllPermissions());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:permissions:read", description = "권한 단일 조회")
     public ResponseEntity<PermissionResponse> getPermission(String permissionName) {

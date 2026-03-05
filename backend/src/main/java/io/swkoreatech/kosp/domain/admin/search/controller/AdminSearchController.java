@@ -19,6 +19,7 @@ public class AdminSearchController implements AdminSearchApi {
 
     private final AdminSearchService adminSearchService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:search", description = "통합 검색")
     public ResponseEntity<AdminSearchResponse> search(String keyword, String type) {

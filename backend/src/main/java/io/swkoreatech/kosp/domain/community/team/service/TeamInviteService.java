@@ -8,17 +8,23 @@ import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import lombok.RequiredArgsConstructor;
 
-@Service
-@RequiredArgsConstructor
 /**
  * 팀 초대 서비스.
  * 팀 초대 정보 조회 기능을 담당한다.
  */
+@Service
+@RequiredArgsConstructor
 public class TeamInviteService {
 
     private final TeamInviteRepository teamInviteRepository;
     private final TeamMemberRepository teamMemberRepository;
 
+    /**
+     * 팀 초대 상세 정보를 조회한다.
+     *
+     * @param inviteId 초대 ID
+     * @return 팀 초대 응답
+     */
     public TeamInviteResponse getInvite(Long inviteId) {
         TeamInvite invite = teamInviteRepository.getById(inviteId);
         int memberCount = countActiveMembers(invite);

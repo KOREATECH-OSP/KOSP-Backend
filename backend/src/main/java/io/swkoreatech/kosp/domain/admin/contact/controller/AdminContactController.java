@@ -20,12 +20,14 @@ public class AdminContactController implements AdminContactApi {
 
     private final AdminContactService adminContactService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "contact:read", description = "관리자 연락처 조회")
     public ResponseEntity<AdminContactResponse> getContact() {
         return ResponseEntity.ok(adminContactService.getContact());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "contact:update", description = "관리자 연락처 수정")
     public ResponseEntity<AdminContactResponse> updateContact(AdminContactUpdateRequest request) {

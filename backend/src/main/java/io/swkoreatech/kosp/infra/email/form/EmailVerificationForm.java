@@ -21,16 +21,19 @@ public class EmailVerificationForm implements EmailForm {
         this.verificationCode = verificationCode;
     }
 
+    /** {@inheritDoc} */
     @Override
     public Map<String, String> getContent() {
         return Map.of("code", verificationCode);
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getSubject() {
         return SUBJECT;
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getFilePath() {
         return PATH;

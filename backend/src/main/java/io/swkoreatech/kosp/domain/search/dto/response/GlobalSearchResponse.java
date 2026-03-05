@@ -56,6 +56,12 @@ public record GlobalSearchResponse(
         String authorName,
         LocalDateTime createdAt
     ) {
+        /**
+         * {@link Article} 엔티티로부터 요약 정보를 생성한다.
+         *
+         * @param article 게시글 엔티티
+         * @return 게시글 요약 정보
+         */
         public static ArticleSummary from(Article article) {
             return new ArticleSummary(
                 article.getId(),
@@ -82,6 +88,12 @@ public record GlobalSearchResponse(
         LocalDateTime createdAt,
         LocalDateTime endDate
     ) {
+        /**
+         * {@link Recruit} 엔티티로부터 요약 정보를 생성한다.
+         *
+         * @param recruit 모집글 엔티티
+         * @return 모집글 요약 정보
+         */
         public static RecruitSummary from(Recruit recruit) {
             return new RecruitSummary(
                 recruit.getId(),
@@ -107,6 +119,12 @@ public record GlobalSearchResponse(
         String description,
         Integer memberCount
     ) {
+        /**
+         * {@link Team} 엔티티로부터 요약 정보를 생성한다.
+         *
+         * @param team 팀 엔티티
+         * @return 팀 요약 정보
+         */
         public static TeamSummary from(Team team) {
             return new TeamSummary(
                 team.getId(),
@@ -131,6 +149,12 @@ public record GlobalSearchResponse(
         String description,
         Integer tier
     ) {
+        /**
+         * {@link Challenge} 엔티티로부터 요약 정보를 생성한다.
+         *
+         * @param challenge 챌린지 엔티티
+         * @return 챌린지 요약 정보
+         */
         public static ChallengeSummary from(Challenge challenge) {
             return new ChallengeSummary(
                 challenge.getId(),

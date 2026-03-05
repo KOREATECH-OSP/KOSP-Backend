@@ -32,6 +32,12 @@ public record TeamInviteResponse(
     ) {
     }
 
+    /**
+     * {@link TeamInvite} 엔티티로부터 응답을 생성한다.
+     *
+     * @param invite 팀 초대 엔티티
+     * @return 팀 초대 응답, invite가 null이면 null
+     */
     public static TeamInviteResponse from(TeamInvite invite) {
         if (invite == null) {
             return null;
@@ -51,6 +57,13 @@ public record TeamInviteResponse(
         );
     }
 
+    /**
+     * {@link TeamInvite} 엔티티와 멤버 수로부터 응답을 생성한다.
+     *
+     * @param invite      팀 초대 엔티티
+     * @param memberCount 현재 활성 멤버 수
+     * @return 팀 초대 응답, invite가 null이면 null
+     */
     public static TeamInviteResponse from(TeamInvite invite, int memberCount) {
         if (invite == null) {
             return null;

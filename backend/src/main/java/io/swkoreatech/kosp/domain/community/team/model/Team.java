@@ -16,14 +16,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "team")
 /**
  * 팀 엔티티.
  * 팀의 기본 정보를 관리한다.
  */
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "team")
 public class Team extends BaseEntity {
 
     @Id

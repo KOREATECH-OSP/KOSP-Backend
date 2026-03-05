@@ -36,6 +36,10 @@ public class ArticleLike extends BaseEntity {
     @JoinColumn(name = "article_id")
     private Article article;
 
+    /**
+     * @param user    좋아요한 사용자
+     * @param article 좋아요 대상 게시글
+     */
     @Builder
     public ArticleLike(User user, Article article) {
         this.user = user;

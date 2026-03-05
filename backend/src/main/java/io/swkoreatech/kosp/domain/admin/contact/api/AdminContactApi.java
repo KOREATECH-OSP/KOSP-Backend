@@ -21,31 +21,31 @@ import jakarta.validation.Valid;
 @RequestMapping("/v1/admin/contact")
 public interface AdminContactApi {
 
+    /**
+     * 관리자 연락처를 조회한다.
+     *
+     * @return 관리자 연락처 응답
+     */
     @Operation(
         summary = "관리자 연락처 조회",
         description = "Footer에 표시할 관리자 이메일을 조회합니다."
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
-    /**
-     * 관리자 연락처를 조회한다.
-     *
-     * @return 관리자 연락처 응답
-     */
     ResponseEntity<AdminContactResponse> getContact();
 
-    @Operation(
-        summary = "관리자 연락처 수정",
-        description = "Footer에 표시할 관리자 이메일을 수정합니다."
-    )
-    @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping
     /**
      * 관리자 연락처를 수정한다.
      *
      * @param request 연락처 수정 요청
      * @return 수정된 연락처 응답
      */
+    @Operation(
+        summary = "관리자 연락처 수정",
+        description = "Footer에 표시할 관리자 이메일을 수정합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping
     ResponseEntity<AdminContactResponse> updateContact(
         @RequestBody @Valid AdminContactUpdateRequest request
     );

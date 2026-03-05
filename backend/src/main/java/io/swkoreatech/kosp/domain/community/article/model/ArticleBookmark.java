@@ -36,6 +36,10 @@ public class ArticleBookmark extends BaseEntity {
     @JoinColumn(name = "article_id")
     private Article article;
 
+    /**
+     * @param user    북마크한 사용자
+     * @param article 북마크 대상 게시글
+     */
     @Builder
     public ArticleBookmark(User user, Article article) {
         this.user = user;

@@ -20,6 +20,12 @@ public record TeamDetailResponse(
     String imageUrl,
     List<TeamMemberResponse> members
 ) {
+    /**
+     * {@link Team} 엔티티로부터 상세 응답을 생성한다.
+     *
+     * @param team 팀 엔티티
+     * @return 팀 상세 응답
+     */
     public static TeamDetailResponse from(Team team) {
         return new TeamDetailResponse(
             team.getId(),

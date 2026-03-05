@@ -17,13 +17,13 @@ import io.swkoreatech.kosp.domain.admin.banner.dto.response.BannerSettingRespons
 @RequestMapping("/v1/admin/banner")
 public interface BannerApi {
 
-    @Operation(summary = "배너 설정 토글", description = "배너 표시 여부를 토글합니다.")
-    @ApiResponse(responseCode = "200", description = "토글 성공")
-    @PatchMapping("/toggle")
     /**
      * 배너 표시 여부를 토글한다.
      *
      * @return 토글 후 배너 설정 응답
      */
+    @Operation(summary = "배너 설정 토글", description = "배너 표시 여부를 토글합니다.")
+    @ApiResponse(responseCode = "200", description = "토글 성공")
+    @PatchMapping("/toggle")
     ResponseEntity<BannerSettingResponse> toggle();
 }

@@ -9,16 +9,17 @@ import io.swkoreatech.kosp.domain.community.team.service.TeamInviteService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
-@RestController
-@RequiredArgsConstructor
 /**
  * 팀 초대 컨트롤러.
  * {@link TeamInviteApi}를 구현하여 팀 초대 관련 요청을 처리한다.
  */
+@RestController
+@RequiredArgsConstructor
 public class TeamInviteController implements TeamInviteApi {
 
     private final TeamInviteService teamInviteService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, description = "초대 상세 조회")
     public ResponseEntity<TeamInviteResponse> getInvite(Long inviteId) {

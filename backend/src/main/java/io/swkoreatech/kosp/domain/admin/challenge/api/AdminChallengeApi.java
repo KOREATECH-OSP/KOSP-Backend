@@ -27,19 +27,25 @@ import jakarta.validation.Valid;
 @RequestMapping("/v1/admin/challenges")
 public interface AdminChallengeApi {
 
+    /**
+     * 모든 챌린지 목록을 조회한다.
+     *
+     * @return 챌린지 목록 응답
+     */
     @Operation(
         summary = "챌린지 목록 조회",
         description = "관리자 권한으로 모든 챌린지 목록을 조회합니다."
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
-    /**
-     * 모든 챌린지 목록을 조회한다.
-     *
-     * @return 챌린지 목록 응답
-     */
     ResponseEntity<AdminChallengeListResponse> getChallenges();
 
+    /**
+     * 특정 챌린지의 상세 정보를 조회한다.
+     *
+     * @param challengeId 챌린지 식별자
+     * @return 챌린지 상세 응답
+     */
     @Operation(
         summary = "챌린지 단일 조회",
         description = "관리자 권한으로 특정 챌린지의 상세 정보를 조회합니다."
@@ -47,36 +53,24 @@ public interface AdminChallengeApi {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음")
     @GetMapping("/{challengeId}")
-    /**
-     * 특정 챌린지의 상세 정보를 조회한다.
-     *
-     * @param challengeId 챌린지 식별자
-     * @return 챌린지 상세 응답
-     */
     ResponseEntity<AdminChallengeResponse> getChallenge(
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId
     );
 
-    @Operation(
-        summary = "챌린지 생성",
-        description = "관리자 권한으로 새로운 챌린지를 생성합니다. (SpEL 조건식 검증 포함)"
-    )
-    @ApiResponse(responseCode = "201", description = "생성 성공")
-    @PostMapping
     /**
      * 새로운 챌린지를 생성한다.
      *
      * @param request 챌린지 생성 요청
      * @return 생성 결과 (201 Created)
      */
+    @Operation(
+        summary = "챌린지 생성",
+        description = "관리자 권한으로 새로운 챌린지를 생성합니다. (SpEL 조건식 검증 포함)"
+    )
+    @ApiResponse(responseCode = "201", description = "생성 성공")
+    @PostMapping
     ResponseEntity<Void> createChallenge(@RequestBody @Valid ChallengeRequest request);
 
-    @Operation(
-        summary = "챌린지 수정",
-        description = "관리자 권한으로 챌린지 정보를 수정합니다. SpEL 조건을 변경하는 경우 유효성을 검증합니다."
-    )
-    @ApiResponse(responseCode = "200", description = "수정 성공")
-    @PutMapping("/{challengeId}")
     /**
      * 챌린지 정보를 수정한다.
      *
@@ -84,6 +78,12 @@ public interface AdminChallengeApi {
      * @param request     챌린지 수정 요청
      * @return 수정 결과
      */
+    @Operation(
+        summary = "챌린지 수정",
+        description = "관리자 권한으로 챌린지 정보를 수정합니다. SpEL 조건을 변경하는 경우 유효성을 검증합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PutMapping("/{challengeId}")
     ResponseEntity<Void> updateChallenge(
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId,
         @RequestBody @Valid ChallengeRequest request
@@ -100,16 +100,16 @@ public interface AdminChallengeApi {
     @DeleteMapping("/{challengeId}")
     ResponseEntity<Void> deleteChallenge(@PathVariable Long challengeId);
 
+    /**
+     * 챌린지 조건 작성 시 사용 가능한 SpEL 변수 목록을 조회한다.
+     *
+     * @return SpEL 변수 목록 응답
+     */
     @Operation(
         summary = "SpEL 변수 목록 조회",
         description = "챌린지 조건 작성 시 사용 가능한 SpEL 변수 목록과 예제를 조회합니다."
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/spel-variables")
-    /**
-     * 챌린지 조건 작성 시 사용 가능한 SpEL 변수 목록을 조회한다.
-     *
-     * @return SpEL 변수 목록 응답
-     */
     ResponseEntity<SpelVariableResponse> getSpelVariables();
 }

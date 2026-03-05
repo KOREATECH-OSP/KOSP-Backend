@@ -18,14 +18,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "team_member")
 /**
  * 팀 멤버 엔티티.
  * 팀과 사용자 간의 소속 관계를 나타낸다.
  */
+@Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "team_member")
 public class TeamMember extends BaseEntity {
 
     @Id

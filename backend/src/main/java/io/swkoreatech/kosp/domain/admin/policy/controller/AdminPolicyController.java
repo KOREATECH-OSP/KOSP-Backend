@@ -26,18 +26,21 @@ public class AdminPolicyController implements AdminPolicyApi {
 
     private final PolicyAdminService policyAdminService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:read", description = "정책 목록 조회")
     public ResponseEntity<List<PolicyResponse>> getAllPolicies() {
         return ResponseEntity.ok(policyAdminService.getAllPolicies());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:read", description = "정책 단일 조회")
     public ResponseEntity<PolicyDetailResponse> getPolicy(String policyName) {
         return ResponseEntity.ok(policyAdminService.getPolicy(policyName));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:create", description = "정책 생성")
     public ResponseEntity<Void> createPolicy(PolicyCreateRequest request) {
@@ -45,6 +48,7 @@ public class AdminPolicyController implements AdminPolicyApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:update", description = "정책 수정")
     public ResponseEntity<Void> updatePolicy(String policyName, PolicyUpdateRequest request) {
@@ -52,6 +56,7 @@ public class AdminPolicyController implements AdminPolicyApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:delete", description = "정책 삭제")
     public ResponseEntity<Void> deletePolicy(String policyName) {
@@ -59,6 +64,7 @@ public class AdminPolicyController implements AdminPolicyApi {
         return ResponseEntity.noContent().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:assign-permission", description = "정책에 권한 할당")
     public ResponseEntity<Void> assignPermissionToPolicy(String policyName, PermissionAssignRequest request) {
@@ -66,6 +72,7 @@ public class AdminPolicyController implements AdminPolicyApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:policies:remove-permission", description = "정책에서 권한 제거")
     public ResponseEntity<Void> removePermission(String policyName, String permissionName) {

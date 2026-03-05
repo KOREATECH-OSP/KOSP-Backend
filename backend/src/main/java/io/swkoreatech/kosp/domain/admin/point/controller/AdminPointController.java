@@ -23,6 +23,7 @@ public class AdminPointController implements AdminPointApi {
 
     private final AdminPointService adminPointService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:points:change", description = "포인트 변경")
     public ResponseEntity<Void> changePoint(Long userId, PointTransactionRequest request, User admin) {
@@ -30,6 +31,7 @@ public class AdminPointController implements AdminPointApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:points:read", description = "포인트 내역 조회")
     public ResponseEntity<PointHistoryResponse> getPointHistory(Long userId, int page, int size) {

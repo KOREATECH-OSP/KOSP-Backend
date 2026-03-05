@@ -196,6 +196,7 @@ public class ContributedReposResponse {
             return watchers != null ? watchers.getTotalCount() : 0;
         }
 
+        /** {@inheritDoc} */
         @Override
         public boolean equals(Object o) {
             if (this == o) {
@@ -207,6 +208,7 @@ public class ContributedReposResponse {
             return nameWithOwner != null && nameWithOwner.equals(that.nameWithOwner);
         }
 
+        /** {@inheritDoc} */
         @Override
         public int hashCode() {
             return nameWithOwner != null ? nameWithOwner.hashCode() : 0;

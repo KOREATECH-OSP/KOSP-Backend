@@ -22,12 +22,14 @@ public class AdminReportController implements AdminReportApi {
 
     private final AdminReportService adminReportService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:reports:read", description = "신고 목록 조회")
     public ResponseEntity<List<ReportResponse>> getAllReports() {
         return ResponseEntity.ok(adminReportService.getAllReports());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:reports:process", description = "신고 처리")
     public ResponseEntity<Void> processReport(Long reportId, ReportProcessRequest request) {
