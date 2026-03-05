@@ -425,21 +425,6 @@ class PaginationHelperTest {
     /**
      * Test PageInfo class simulating the inner class pattern used in actual response DTOs.
      */
-    static class TestPageInfo {
-        private final boolean hasNextPage;
-        private final String endCursor;
-
-        TestPageInfo(boolean hasNextPage, String endCursor) {
-            this.hasNextPage = hasNextPage;
-            this.endCursor = endCursor;
-        }
-
-        public boolean isHasNextPage() {
-            return hasNextPage;
-        }
-
-        public String getEndCursor() {
-            return endCursor;
-        }
+    record TestPageInfo(boolean hasNextPage, String endCursor) {
     }
 }

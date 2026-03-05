@@ -28,8 +28,8 @@ public class S3EventListener {
     @EventListener
     @Async
     public void handleFileUpload(FileUploadEvent event) {
-        log.info("Uploading file to S3: {}", event.getStoredFileName());
-        s3Client.uploadFile(event.getStoredFileName(), event.getFile());
-        log.info("File uploaded successfully: {}", event.getStoredFileName());
+        log.info("Uploading file to S3: {}", event.storedFileName());
+        s3Client.uploadFile(event.storedFileName(), event.file());
+        log.info("File uploaded successfully: {}", event.storedFileName());
     }
 }

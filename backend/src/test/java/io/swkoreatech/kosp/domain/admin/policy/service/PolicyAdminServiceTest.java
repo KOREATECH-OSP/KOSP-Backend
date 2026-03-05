@@ -23,6 +23,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
@@ -87,7 +88,7 @@ class PolicyAdminServiceTest {
         void returnsPolicy_whenExists() {
             // given
             Policy policy = createPolicy(1L, "POLICY_READ");
-            given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
+            given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
 
             // when
             PolicyDetailResponse result = policyAdminService.getPolicy("POLICY_READ");
@@ -100,7 +101,8 @@ class PolicyAdminServiceTest {
         @DisplayName("존재하지 않는 정책을 조회하면 예외가 발생한다")
         void throwsException_whenPolicyNotFound() {
             // given
-            given(policyRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(policyRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.getPolicy("INVALID"))
@@ -148,7 +150,8 @@ class PolicyAdminServiceTest {
         @DisplayName("존재하지 않는 정책을 수정하면 예외가 발생한다")
         void throwsException_whenPolicyNotFound() {
             // given
-            given(policyRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(policyRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
             PolicyUpdateRequest request = new PolicyUpdateRequest("수정된 설명");
 
             // when & then
@@ -161,7 +164,7 @@ class PolicyAdminServiceTest {
         void updatesDescriptionSuccessfully() {
             // given
             Policy policy = createPolicy(1L, "POLICY_READ");
-            given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
+            given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
             PolicyUpdateRequest request = new PolicyUpdateRequest("수정된 설명");
 
             // when
@@ -180,7 +183,8 @@ class PolicyAdminServiceTest {
         @DisplayName("존재하지 않는 정책을 삭제하면 예외가 발생한다")
         void throwsException_whenPolicyNotFound() {
             // given
-            given(policyRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(policyRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.deletePolicy("INVALID"))
@@ -194,7 +198,7 @@ class PolicyAdminServiceTest {
             Policy policy = createPolicy(1L, "POLICY_USED");
             Role role = createRole(1L, "ROLE_USER");
             ReflectionTestUtils.setField(policy, "roles", Set.of(role));
-            given(policyRepository.findByName("POLICY_USED")).willReturn(Optional.of(policy));
+            given(policyRepository.getByName("POLICY_USED")).willReturn(policy);
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.deletePolicy("POLICY_USED"))
@@ -206,7 +210,7 @@ class PolicyAdminServiceTest {
         void deletesPolicySuccessfully() {
             // given
             Policy policy = createPolicy(1L, "POLICY_UNUSED");
-            given(policyRepository.findByName("POLICY_UNUSED")).willReturn(Optional.of(policy));
+            given(policyRepository.getByName("POLICY_UNUSED")).willReturn(policy);
 
             // when
             policyAdminService.deletePolicy("POLICY_UNUSED");
@@ -224,7 +228,8 @@ class PolicyAdminServiceTest {
         @DisplayName("존재하지 않는 정책에 권한을 할당하면 예외가 발생한다")
         void throwsException_whenPolicyNotFound() {
             // given
-            given(policyRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(policyRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.assignPermission("INVALID", "PERM_READ"))
@@ -236,8 +241,9 @@ class PolicyAdminServiceTest {
         void throwsException_whenPermissionNotFound() {
             // given
             Policy policy = createPolicy(1L, "POLICY_READ");
-            given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
-            given(permissionRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
+            given(permissionRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.assignPermission("POLICY_READ", "INVALID"))
@@ -250,8 +256,8 @@ class PolicyAdminServiceTest {
             // given
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ");
-            given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
-            given(permissionRepository.findByName("PERM_READ")).willReturn(Optional.of(permission));
+            given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
+            given(permissionRepository.getByName("PERM_READ")).willReturn(permission);
 
             // when
             policyAdminService.assignPermission("POLICY_READ", "PERM_READ");
@@ -274,8 +280,8 @@ class PolicyAdminServiceTest {
             Permission permission = createPermission(1L, "PERM_READ");
             policy.getPermissions().add(permission);
 
-            given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
-            given(permissionRepository.findByName("PERM_READ")).willReturn(Optional.of(permission));
+            given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
+            given(permissionRepository.getByName("PERM_READ")).willReturn(permission);
 
             // when
             policyAdminService.removePermission("POLICY_READ", "PERM_READ");
@@ -328,7 +334,7 @@ class PolicyAdminServiceTest {
         void returnsPermission_whenExists() {
             // given
             Permission permission = createPermission(1L, "PERM_READ");
-            given(permissionRepository.findByName("PERM_READ")).willReturn(Optional.of(permission));
+            given(permissionRepository.getByName("PERM_READ")).willReturn(permission);
 
             // when
             PermissionResponse result = policyAdminService.getPermission("PERM_READ");
@@ -341,7 +347,8 @@ class PolicyAdminServiceTest {
         @DisplayName("존재하지 않는 권한을 조회하면 예외가 발생한다")
         void throwsException_whenPermissionNotFound() {
             // given
-            given(permissionRepository.findByName("INVALID")).willReturn(Optional.empty());
+            given(permissionRepository.getByName("INVALID"))
+                .willThrow(new GlobalException(ExceptionMessage.NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> policyAdminService.getPermission("INVALID"))

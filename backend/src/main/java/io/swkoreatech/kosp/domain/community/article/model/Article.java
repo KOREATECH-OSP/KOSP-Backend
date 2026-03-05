@@ -80,7 +80,7 @@ public class Article extends BaseEntity {
     private List<String> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "article")
-    private List<Attachment> attachments = new ArrayList<>();
+    private final List<Attachment> attachments = new ArrayList<>();
 
     @Builder
     protected Article(User author, Board board, String title, String content, List<String> tags, Boolean isPinned) {

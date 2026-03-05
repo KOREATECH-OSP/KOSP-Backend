@@ -49,7 +49,7 @@ public class Policy extends BaseEntity {
     private Set<Permission> permissions = new HashSet<>();
 
     @ManyToMany(mappedBy = "policies")
-    private Set<Role> roles = new HashSet<>();
+    private final Set<Role> roles = new HashSet<>();
 
     @Builder
     private Policy(String name, String description, Set<Permission> permissions) {

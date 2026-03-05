@@ -1,9 +1,14 @@
 package io.swkoreatech.kosp.challenge;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.Map;
+import java.util.UUID;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -13,18 +18,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.UUID;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import io.swkoreatech.kosp.common.event.ChallengeEvaluationRequest;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 
 /**
  * Baseline comparison test for challenge score verification.
- * 
+ *
  * <p>Ensures MSA migration produces identical challenge scores as the monolithic implementation.
  * Loads baseline scores from test resources and compares them against newly evaluated scores
  * after processing RabbitMQ evaluation requests.
@@ -54,7 +56,8 @@ class BaselineComparisonTest {
 
     private Map<String, Integer> loadBaselineScores() throws IOException {
         ClassPathResource resource = new ClassPathResource("baseline-scores.json");
-        return objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {});
+        return objectMapper.readValue(resource.getInputStream(), new TypeReference<>() {
+        });
     }
 
     private void sendEvaluationRequests(Map<String, Integer> baselineScores) {
@@ -68,9 +71,9 @@ class BaselineComparisonTest {
 
     private ChallengeEvaluationRequest createEvaluationRequest(String userId) {
         return new ChallengeEvaluationRequest(
-                Long.parseLong(userId),
-                UUID.randomUUID().toString(),
-                LocalDateTime.now()
+            Long.parseLong(userId),
+            UUID.randomUUID().toString(),
+            LocalDateTime.now()
         );
     }
 }

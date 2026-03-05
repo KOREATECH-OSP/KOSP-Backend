@@ -136,15 +136,6 @@ public final class PaginationHelper {
      *
      * @param <T> the data type
      */
-    private static class PageResult<T> {
-        final int saved;
-        final String nextCursor;
-        final boolean hasError;
-
-        PageResult(int saved, String nextCursor, boolean hasError) {
-            this.saved = saved;
-            this.nextCursor = nextCursor;
-            this.hasError = hasError;
-        }
+    private record PageResult<T>(int saved, String nextCursor, boolean hasError) {
     }
 }

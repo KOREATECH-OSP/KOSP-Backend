@@ -39,7 +39,7 @@ public class Permission extends BaseEntity {
     private String description;
 
     @ManyToMany(mappedBy = "permissions")
-    private Set<Policy> policies = new HashSet<>();
+    private final Set<Policy> policies = new HashSet<>();
 
     @Builder
     private Permission(String name, String description) {

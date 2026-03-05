@@ -206,10 +206,7 @@ public class RecruitService {
             return false;
         }
         Team team = recruit.getTeam();
-        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user)) {
-            return false;
-        }
-        return true;
+        return !teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, user);
     }
 
     private boolean isActiveApplication(RecruitApply apply) {

@@ -50,7 +50,7 @@ public class TimeChunkGenerator {
      * @param start 청크 시작 시간
      * @param end   청크 종료 시간
      */
-    public static record TimeChunk(
+    public record TimeChunk(
         ZonedDateTime start,
         ZonedDateTime end
     ) {

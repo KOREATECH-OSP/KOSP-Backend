@@ -40,7 +40,7 @@ public class Team extends BaseEntity {
     private String imageUrl;
 
     @OneToMany(mappedBy = "team")
-    private List<TeamMember> members = new ArrayList<>();
+    private final List<TeamMember> members = new ArrayList<>();
 
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;

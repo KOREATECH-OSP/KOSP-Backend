@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.challenge.config;
 
-import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
+import static org.mockito.Mockito.mock;
+
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,7 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.redis.core.StringRedisTemplate;
 
-import static org.mockito.Mockito.mock;
+import io.swkoreatech.kosp.challenge.publisher.ChallengeEventPublisher;
 
 @TestConfiguration
 public class TestConfig {

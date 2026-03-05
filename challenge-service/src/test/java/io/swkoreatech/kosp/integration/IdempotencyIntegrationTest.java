@@ -3,8 +3,8 @@ package io.swkoreatech.kosp.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.swkoreatech.kosp.common.entity.ProcessedMessage;
-import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
+import java.util.UUID;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +12,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.UUID;
+import io.swkoreatech.kosp.common.entity.ProcessedMessage;
+import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
 
 /**
  * Integration test verifying idempotency pattern in challenge-service.
