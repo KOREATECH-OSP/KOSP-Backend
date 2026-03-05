@@ -19,6 +19,13 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 잡 완료 후 다음 실행을 스케줄링하는 리스너.
+ *
+ * <p>잡 성공 시 Rate Limit 리셋 시간 이후로 다음 실행을 예약하고,
+ * 실패 시 에러 유형에 따라 재시도를 스케줄링한다.
+ * RabbitMQ의 지연 메시지 기능을 활용하여 예약 발행한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,12 +34,18 @@ public class JobSchedulingListener implements JobExecutionListener {
     private final RabbitTemplate rabbitTemplate;
     private final RateLimitManager rateLimitManager;
 
+    /**
+     * 잡 시작 시 로그를 기록한다.
+     */
     @Override
     public void beforeJob(JobExecution jobExecution) {
         Long userId = jobExecution.getJobParameters().getLong("userId");
         log.info("========== [User {}] JOB STARTED ==========", userId);
     }
 
+    /**
+     * 잡 완료 후 결과에 따라 다음 실행 또는 재시도를 스케줄링한다.
+     */
     @Override
     public void afterJob(JobExecution jobExecution) {
         Long userId = jobExecution.getJobParameters().getLong("userId");

@@ -39,6 +39,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 통합 검색 서비스.
+ * 키워드 기반 게시글, 모집글, 팀, 챌린지, 사용자, 저장소 통합 검색 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -51,14 +55,36 @@ public class SearchService {
     private final UserRepository userRepository;
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
 
+    /**
+     * 키워드로 전체 카테고리를 통합 검색한다.
+     *
+     * @param keyword 검색 키워드
+     * @return 통합 검색 결과
+     */
     public GlobalSearchResponse search(String keyword) {
         return search(keyword, null, null, Pageable.unpaged());
     }
 
+    /**
+     * 키워드와 필터로 통합 검색한다.
+     *
+     * @param keyword 검색 키워드
+     * @param filters 검색 필터
+     * @return 통합 검색 결과
+     */
     public GlobalSearchResponse search(String keyword, Set<SearchFilter> filters) {
         return search(keyword, filters, null, Pageable.unpaged());
     }
 
+    /**
+     * 키워드, 필터, RSQL, 페이지 정보로 통합 검색한다.
+     *
+     * @param keyword 검색 키워드
+     * @param filters 검색 필터
+     * @param rsql RSQL 필터
+     * @param pageable 페이지 정보
+     * @return 통합 검색 결과
+     */
     public GlobalSearchResponse search(String keyword, Set<SearchFilter> filters, String rsql, Pageable pageable) {
         Set<SearchFilter> effectiveFilters = resolveFilters(filters);
 

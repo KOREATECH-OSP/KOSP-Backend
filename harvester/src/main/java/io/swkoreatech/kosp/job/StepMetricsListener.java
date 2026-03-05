@@ -9,8 +9,10 @@ import org.springframework.batch.core.StepExecutionListener;
 import org.springframework.stereotype.Component;
 
 /**
- * Automatically logs step execution metrics after each step completes.
- * Extracts duration, read/write/skip counts from StepExecution.
+ * 스텝 실행 메트릭을 자동으로 로깅하는 리스너.
+ *
+ * <p>각 스텝 완료 후 소요 시간, 읽기/쓰기/건너뛰기 횟수를
+ * StepExecution에서 추출하여 로그로 기록한다.
  */
 @Component
 public class StepMetricsListener implements StepExecutionListener {
@@ -18,12 +20,18 @@ public class StepMetricsListener implements StepExecutionListener {
     private static final Logger log = LoggerFactory.getLogger(StepMetricsListener.class);
     private long startTime;
 
+    /**
+     * 스텝 시작 시 MDC에 스텝 이름을 설정하고 시작 시각을 기록한다.
+     */
     @Override
     public void beforeStep(StepExecution stepExecution) {
         MDC.put("stepName", stepExecution.getStepName());
         startTime = System.currentTimeMillis();
     }
 
+    /**
+     * 스텝 완료 후 메트릭을 로깅하고 MDC를 정리한다.
+     */
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         try {

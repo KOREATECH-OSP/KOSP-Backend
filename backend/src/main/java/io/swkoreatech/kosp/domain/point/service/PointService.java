@@ -13,6 +13,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 포인트 서비스.
+ * 포인트 변경 및 거래 기록 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -20,6 +24,15 @@ public class PointService {
 
     private final PointTransactionRepository pointTransactionRepository;
 
+    /**
+     * 사용자의 포인트를 변경하고 거래를 기록한다.
+     *
+     * @param user 대상 사용자
+     * @param amount 변경 포인트 (양수: 지급, 음수: 차감)
+     * @param reason 변경 사유
+     * @param source 포인트 출처
+     * @throws GlobalException 금액이 0이거나 잔액이 부족한 경우
+     */
     public void changePoint(User user, Integer amount, String reason, PointSource source) {
         validateNonZeroAmount(amount);
         validateSufficientBalanceIfDeduct(user, amount);

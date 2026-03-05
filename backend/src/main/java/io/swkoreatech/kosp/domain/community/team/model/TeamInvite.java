@@ -33,6 +33,10 @@ import lombok.NoArgsConstructor;
         )
     }
 )
+/**
+ * 팀 초대 엔티티.
+ * 팀 초대 정보와 만료 여부를 관리한다.
+ */
 public class TeamInvite extends BaseEntity {
 
     @Id
@@ -65,10 +69,16 @@ public class TeamInvite extends BaseEntity {
         this.expiresAt = expiresAt;
     }
 
+    /**
+     * 초대 만료 여부를 확인한다.
+     *
+     * @return 만료 여부
+     */
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }
 
+    /** 초대를 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }

@@ -16,6 +16,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 챌린지 엔티티.
+ *
+ * <p>사용자가 달성할 수 있는 챌린지를 정의한다.
+ * SpEL 표현식으로 작성된 달성 조건과 티어별 보상 포인트를 포함한다.</p>
+ */
 @Getter
 @Entity
 @Table(name = "challenge")
@@ -67,6 +73,17 @@ public class Challenge extends BaseEntity {
         this.point = point;
     }
 
+    /**
+     * 챌린지 정보를 수정한다.
+     *
+     * @param name              챌린지 이름
+     * @param description       챌린지 설명
+     * @param condition         달성 조건 (SpEL 표현식)
+     * @param tier              챌린지 티어
+     * @param imageResource     이미지 리소스 (아이콘 이름 또는 URL)
+     * @param imageResourceType 이미지 리소스 유형
+     * @param point             보상 포인트
+     */
     public void update(
             String name,
             String description,

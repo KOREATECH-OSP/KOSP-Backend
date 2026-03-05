@@ -20,6 +20,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 포인트 관리 API 인터페이스.
+ * <p>사용자 포인트 변경 및 거래 내역 조회 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Point", description = "관리자 전용 포인트 관리 API")
 @RequestMapping("/v1/admin/points")
 public interface AdminPointApi {

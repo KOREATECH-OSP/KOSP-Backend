@@ -3,6 +3,10 @@ package io.swkoreatech.kosp.domain.github.dto;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * 통계 비교 응답 DTO.
+ * 평균 통계, 사용자 통계, 순위, 백분위 정보를 포함한다.
+ */
 @Getter
 @Builder
 public class StatisticsComparisonResponse {

@@ -37,6 +37,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 모집 공고 컨트롤러.
+ * {@link RecruitApi}를 구현하여 모집 공고 관련 요청을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/community/recruits")
@@ -46,6 +50,7 @@ public class RecruitController implements RecruitApi {
     private final RecruitApplyService recruitApplyService;
     private final BoardService boardService;
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping
     @Permit(permitAll = true, name = "recruits:list", description = "모집 공고 목록 조회")
@@ -60,6 +65,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/{id}")
     @Permit(permitAll = true, name = "recruits:read", description = "모집 공고 상세 조회")
@@ -71,6 +77,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping
     @Permit(name = "recruit:create", description = "모집 공고 작성")
@@ -83,6 +90,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.created(URI.create("/v1/community/recruits/" + id)).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PutMapping("/{id}")
     @Permit(name = "recruit:update", description = "모집 공고 수정")
@@ -95,6 +103,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @DeleteMapping("/{id}")
     @Permit(name = "recruit:delete", description = "모집 공고 삭제")
@@ -106,6 +115,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.noContent().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PatchMapping("/{id}/status")
     @Permit(name = "recruit:status", description = "모집 상태 변경")
@@ -118,6 +128,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/{recruitId}/apply")
     @Permit(name = "community:recruits:apply", description = "공고 지원")
@@ -130,6 +141,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/{recruitId}/applications")
     @Permit(name = "recruit:applications:list", description = "지원자 목록 조회")
@@ -143,6 +155,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/applications/{applicationId}")
     @Permit(name = "recruit:applications:read", description = "지원 상세 조회")
@@ -154,6 +167,7 @@ public class RecruitController implements RecruitApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @PatchMapping("/applications/{applicationId}")
     @Permit(name = "recruit:applications:decide", description = "지원 수락/거절")

@@ -24,6 +24,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Spring Security UserDetailsService 구현체.
+ * <p>이메일(kutEmail)을 기반으로 사용자를 조회하고 권한을 설정한다.
+ * SUPERUSER 역할을 가진 사용자에게는 와일드카드(*) 권한이 부여된다.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor

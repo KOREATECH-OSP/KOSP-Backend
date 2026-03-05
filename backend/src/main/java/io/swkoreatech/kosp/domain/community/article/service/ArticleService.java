@@ -30,6 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 게시글 서비스.
+ * 게시글의 CRUD, 좋아요, 북마크 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -40,6 +44,15 @@ public class ArticleService {
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final AttachmentRepository attachmentRepository;
 
+    /**
+     * 게시글을 작성한다.
+     *
+     * @param author 작성자
+     * @param board 게시판
+     * @param request 게시글 작성 요청
+     * @return 생성된 게시글 ID
+     * @throws GlobalException 공지사항 게시판에 작성 시도 시 또는 첨부파일 소유자가 아닌 경우
+     */
     @Transactional
     public Long create(User author, Board board, ArticleRequest request) {
         if (board.isNotice()) {
@@ -73,6 +86,14 @@ public class ArticleService {
         return savedArticle.getId();
     }
 
+    /**
+     * 게시글 상세 정보를 조회한다. 조회 시 조회수가 증가한다.
+     *
+     * @param id 게시글 ID
+     * @param user 조회하는 사용자
+     * @return 게시글 응답
+     * @throws GlobalException 삭제된 게시글인 경우
+     */
     @Transactional
     public ArticleResponse getOne(Long id, User user) {
         Article article = articleRepository.getById(id);
@@ -90,11 +111,27 @@ public class ArticleService {
         return ArticleResponse.from(article, isLiked, isBookmarked);
     }
 
+    /**
+     * 게시판의 게시글 목록을 조회한다.
+     *
+     * @param board 게시판
+     * @param pageable 페이징 정보
+     * @param user 조회하는 사용자
+     * @return 게시글 목록 응답
+     */
     public ArticleListResponse<ArticleResponse> getList(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoardAndIsDeletedFalse(board, pageable);
         return toResponse(page, user);
     }
 
+    /**
+     * 게시판의 고정 게시글 목록을 조회한다.
+     *
+     * @param board 게시판
+     * @param pageable 페이징 정보
+     * @param user 조회하는 사용자
+     * @return 고정 게시글 목록 응답
+     */
     public ArticleListResponse<ArticleResponse> getPinnedList(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoardAndIsPinnedTrueAndIsDeletedFalse(board, pageable);
         return toResponse(page, user);
@@ -107,12 +144,26 @@ public class ArticleService {
         return new ArticleListResponse<>(posts, PageMeta.from(page));
     }
     
-    // Admin methods - include deleted articles
+    /**
+     * 관리자용 게시글 목록을 조회한다. 삭제된 게시글도 포함된다.
+     *
+     * @param board 게시판
+     * @param pageable 페이징 정보
+     * @param user 관리자 사용자
+     * @return 관리자용 게시글 목록 응답
+     */
     public ArticleListResponse<AdminArticleResponse> getListForAdmin(Board board, Pageable pageable, User user) {
         Page<Article> page = articleRepository.findByBoard(board, pageable);
         return toAdminResponse(page, user);
     }
     
+    /**
+     * 관리자용 게시글 상세를 조회한다. 삭제된 게시글도 조회 가능하다.
+     *
+     * @param id 게시글 ID
+     * @param user 관리자 사용자
+     * @return 관리자용 게시글 응답
+     */
     @Transactional
     public AdminArticleResponse getOneForAdmin(Long id, User user) {
         Article article = articleRepository.getById(id);
@@ -131,6 +182,13 @@ public class ArticleService {
         return new ArticleListResponse<>(posts, PageMeta.from(page));
     }
 
+    /**
+     * 게시글 좋아요를 토글한다.
+     *
+     * @param user 사용자
+     * @param id 게시글 ID
+     * @return 좋아요 토글 응답
+     */
     @Transactional
     public ToggleLikeResponse toggleLike(User user, Long id) {
         Article article = articleRepository.getById(id);
@@ -145,6 +203,13 @@ public class ArticleService {
         return ToggleLikeResponse.from(true);
     }
 
+    /**
+     * 게시글 북마크를 토글한다.
+     *
+     * @param user 사용자
+     * @param id 게시글 ID
+     * @return 북마크 토글 응답
+     */
     @Transactional
     public ToggleBookmarkResponse toggleBookmark(User user, Long id) {
         Article article = articleRepository.getById(id);
@@ -157,6 +222,14 @@ public class ArticleService {
         return ToggleBookmarkResponse.from(true);
     }
 
+    /**
+     * 게시글을 수정한다.
+     *
+     * @param author 수정 요청 사용자
+     * @param id 게시글 ID
+     * @param request 수정 요청
+     * @throws GlobalException 작성자가 아닌 경우
+     */
     @Transactional
     public void update(User author, Long id, ArticleRequest request) {
         Article article = articleRepository.getById(id);
@@ -164,6 +237,13 @@ public class ArticleService {
         article.updateArticle(request.title(), request.content(), request.tags());
     }
 
+    /**
+     * 게시글을 삭제한다.
+     *
+     * @param author 삭제 요청 사용자
+     * @param id 게시글 ID
+     * @throws GlobalException 작성자가 아닌 경우
+     */
     @Transactional
     public void delete(User author, Long id) {
         Article article = articleRepository.getById(id);

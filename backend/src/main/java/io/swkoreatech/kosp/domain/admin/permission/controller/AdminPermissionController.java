@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 권한 조회 컨트롤러.
+ * <p>{@link AdminPermissionApi}를 구현하여 권한 목록 및 단일 조회 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminPermissionController implements AdminPermissionApi {

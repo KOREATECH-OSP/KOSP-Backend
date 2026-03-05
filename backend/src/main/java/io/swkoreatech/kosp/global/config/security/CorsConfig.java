@@ -10,12 +10,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * CORS 설정 구성 클래스.
+ * <p>{@link CorsProperties}로부터 허용 출처를 읽어 CORS 정책을 구성한다.</p>
+ */
 @Configuration
 @RequiredArgsConstructor
 public class CorsConfig {
 
     private final CorsProperties corsProperties;
 
+    /**
+     * CORS 설정 소스 빈을 생성한다.
+     * <p>모든 경로에 대해 허용 출처, HTTP 메서드, 헤더, 자격 증명 포함 여부를 설정한다.</p>
+     *
+     * @return CORS 설정 소스
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();

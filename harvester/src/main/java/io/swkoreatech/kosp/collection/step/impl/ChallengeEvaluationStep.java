@@ -21,12 +21,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Publishes challenge evaluation event to RabbitMQ after score calculation.
+ * 점수 계산 완료 후 챌린지 평가 이벤트를 RabbitMQ에 발행하는 스텝.
+ *
+ * <p>챌린지 서비스에 사용자 챌린지 확인 및 포인트 부여를 알린다.
  *
  * @StepContract
- * REQUIRES: userId from job parameters, score calculation completed
- * PROVIDES: Event published to challenge evaluation queue
- * PURPOSE: Notifies challenge-service to check user challenges and award points
+ * REQUIRES: 잡 파라미터의 userId, 점수 계산 완료
+ * PROVIDES: 챌린지 평가 큐에 이벤트 발행
  */
 @Slf4j
 @Component
@@ -40,6 +41,7 @@ public class ChallengeEvaluationStep implements StepProvider {
     private final RabbitTemplate rabbitTemplate;
     private final StepCompletionListener stepCompletionListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -55,6 +57,7 @@ public class ChallengeEvaluationStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;

@@ -25,6 +25,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 신고 엔티티.
+ * 게시글 또는 댓글에 대한 신고 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -68,6 +72,11 @@ public class Report extends BaseEntity {
         this.status = ReportStatus.PENDING;
     }
 
+    /**
+     * 신고를 처리한다.
+     *
+     * @param status 처리 상태
+     */
     public void process(ReportStatus status) {
         this.status = status;
         this.processedAt = LocalDateTime.now();

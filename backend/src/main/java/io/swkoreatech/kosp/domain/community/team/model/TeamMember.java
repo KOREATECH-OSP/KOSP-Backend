@@ -24,6 +24,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "team_member")
+/**
+ * 팀 멤버 엔티티.
+ * 팀과 사용자 간의 소속 관계를 나타낸다.
+ */
 public class TeamMember extends BaseEntity {
 
     @Id
@@ -52,6 +56,7 @@ public class TeamMember extends BaseEntity {
         this.role = role;
     }
 
+    /** 멤버를 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }

@@ -6,20 +6,23 @@ import org.slf4j.MDC;
 import org.springframework.core.task.TaskDecorator;
 
 /**
- * Propagates SLF4J MDC context to worker threads.
+ * SLF4J MDC 컨텍스트를 워커 스레드로 전파하는 TaskDecorator.
  *
- * <p>For future multi-threaded Spring Batch jobs (e.g., partitioned steps),
- * this decorator ensures MDC values (jobExecutionId, stepName, userId) are
- * available in worker threads spawned by task executors.
+ * <p>향후 멀티스레드 Spring Batch 잡(예: 파티션 스텝) 사용 시,
+ * MDC 값(jobExecutionId, stepName, userId)이 TaskExecutor가 생성한
+ * 워커 스레드에서도 사용 가능하도록 보장한다.
  *
- * <p>Current job is single-threaded, so this is NOT currently used.
- * To enable: configure AsyncConfigurer or TaskExecutor with this decorator.
+ * <p>현재 잡은 단일 스레드이므로 사용되지 않는다.
+ * 활성화하려면 AsyncConfigurer 또는 TaskExecutor에 이 데코레이터를 설정한다.
  *
  * @see org.springframework.batch.core.partition.support.Partitioner
  * @see org.springframework.scheduling.annotation.AsyncConfigurer
  */
 public class MdcTaskDecorator implements TaskDecorator {
 
+    /**
+     * MDC 컨텍스트를 캡처하여 워커 스레드에 전파하는 Runnable을 반환한다.
+     */
     @Override
     public Runnable decorate(Runnable runnable) {
         Map<String, String> contextMap = MDC.getCopyOfContextMap();

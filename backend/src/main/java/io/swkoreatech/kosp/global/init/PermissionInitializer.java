@@ -26,6 +26,11 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 애플리케이션 시작 시 권한을 초기화하는 컴포넌트.
+ * <p>{@link Permit} 어노테이션이 붙은 컨트롤러 메서드를 스캔하여 권한을 자동 등록하고,
+ * 기본 역할(SUPERUSER, ADMIN, STUDENT, EMPLOYEE)과 정책을 생성한다.</p>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -36,6 +41,7 @@ public class PermissionInitializer implements CommandLineRunner {
     private final PolicyRepository policyRepository;
     private final RoleRepository roleRepository;
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void run(String... args) {

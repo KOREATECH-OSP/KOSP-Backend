@@ -38,6 +38,10 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+/**
+ * 팀 서비스.
+ * 팀의 CRUD, 멤버 관리, 초대 기능을 담당한다.
+ */
 public class TeamService {
 
     private final TeamRepository teamRepository;

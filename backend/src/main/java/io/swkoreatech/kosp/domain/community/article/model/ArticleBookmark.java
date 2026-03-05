@@ -16,6 +16,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 게시글 북마크 엔티티.
+ * 사용자와 게시글 간의 북마크 관계를 나타낸다.
+ */
 @Getter
 @Entity
 @Table(name = "article_bookmark")

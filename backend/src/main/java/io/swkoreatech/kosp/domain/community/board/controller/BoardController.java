@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 게시판 컨트롤러.
+ * {@link BoardApi}를 구현하여 게시판 관련 요청을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/community/boards")
@@ -19,6 +23,7 @@ public class BoardController implements BoardApi {
 
     private final BoardService boardService;
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping
     @Permit(permitAll = true, name = "boards:list", description = "게시판 목록 조회")

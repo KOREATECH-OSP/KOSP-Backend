@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 챌린지 관리 컨트롤러.
+ * <p>{@link AdminChallengeApi}를 구현하여 챌린지 CRUD 및 SpEL 변수 조회 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminChallengeController implements AdminChallengeApi {

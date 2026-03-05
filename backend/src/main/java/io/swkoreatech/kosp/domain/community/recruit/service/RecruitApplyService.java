@@ -28,6 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 모집 지원 서비스.
+ * 모집 지원, 지원자 조회, 수락/거절 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -37,6 +41,14 @@ public class RecruitApplyService {
     private final RecruitApplyRepository recruitApplyRepository;
     private final TeamMemberRepository teamMemberRepository;
 
+    /**
+     * 모집 공고에 지원한다.
+     *
+     * @param recruitId 모집 공고 ID
+     * @param user 지원자
+     * @param request 지원 요청
+     * @throws GlobalException 모집이 마감되었거나 이미 지원한 경우
+     */
     @Transactional
     public void applyRecruit(Long recruitId, User user, RecruitApplyRequest request) {
         Recruit recruit = recruitRepository.findById(recruitId)
@@ -60,6 +72,16 @@ public class RecruitApplyService {
         recruitApplyRepository.save(recruitApply);
     }
 
+    /**
+     * 지원자 목록을 조회한다 (팀장 전용).
+     *
+     * @param recruitId 모집 공고 ID
+     * @param user 요청 사용자 (팀장)
+     * @param filter RSQL 필터
+     * @param pageable 페이징 정보
+     * @return 지원자 목록 응답
+     * @throws GlobalException 팀장이 아닌 경우
+     */
     public RecruitApplyListResponse getApplicants(Long recruitId, User user, String filter, Pageable pageable) {
         Recruit recruit = recruitRepository.findById(recruitId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.RECRUITMENT_NOT_FOUND));
@@ -73,6 +95,14 @@ public class RecruitApplyService {
         return RecruitApplyListResponse.from(page);
     }
 
+    /**
+     * 지원 상세 정보를 조회한다 (팀장 전용).
+     *
+     * @param applicationId 지원 ID
+     * @param user 요청 사용자 (팀장)
+     * @return 지원 응답
+     * @throws GlobalException 팀장이 아닌 경우
+     */
     public RecruitApplyResponse getApplication(Long applicationId, User user) {
         RecruitApply apply = recruitApplyRepository.getById(applicationId);
 
@@ -81,6 +111,14 @@ public class RecruitApplyService {
         return RecruitApplyResponse.from(apply);
     }
 
+    /**
+     * 지원을 수락 또는 거절한다 (팀장 전용).
+     *
+     * @param applicationId 지원 ID
+     * @param user 요청 사용자 (팀장)
+     * @param request 결정 요청
+     * @throws GlobalException 팀장이 아니거나 이미 결정된 지원인 경우
+     */
     @Transactional
     public void decideApplication(Long applicationId, User user, RecruitApplyDecisionRequest request) {
         RecruitApply apply = recruitApplyRepository.getById(applicationId);

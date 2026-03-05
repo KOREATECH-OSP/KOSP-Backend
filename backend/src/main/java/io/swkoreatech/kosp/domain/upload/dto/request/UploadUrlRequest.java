@@ -7,6 +7,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * 업로드 URL 요청 DTO.
+ *
+ * @param fileName 파일 이름
+ * @param contentLength 파일 크기 (바이트)
+ * @param contentType 파일 MIME 타입
+ */
 @JsonNaming(SnakeCaseStrategy.class)
 public record UploadUrlRequest(
     @Schema(description = "파일 이름", example = "hello.png")

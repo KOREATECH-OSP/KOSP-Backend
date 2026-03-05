@@ -35,6 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 인증 서비스.
+ * <p>회원가입, 로그인, 토큰 발급/재발급, 로그아웃 등의 인증 비즈니스 로직을 처리한다.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -49,11 +53,24 @@ public class AuthService {
     private final TextEncryptor textEncryptor;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * 이메일 인증 코드를 발송한다.
+     *
+     * @param email       인증 대상 이메일
+     * @param signupToken 회원가입 토큰
+     */
     @Transactional
     public void sendCertificationMail(String email, String signupToken) {
         emailVerificationService.sendCertificationMail(email, signupToken);
     }
 
+    /**
+     * 이메일 인증 코드를 검증하고, 유효한 경우 이메일 인증이 포함된 새 회원가입 토큰을 반환한다.
+     *
+     * @param email 인증 대상 이메일
+     * @param code  인증 코드
+     * @return 이메일 인증이 포함된 새 회원가입 토큰 (회원가입 토큰이 없는 경우 null)
+     */
     @Transactional
     public String verifyCode(String email, String code) {
         EmailVerification verification = emailVerificationService.verifyCode(email, code);
@@ -163,6 +180,11 @@ public class AuthService {
         return new AuthTokenResponse(newAccessToken.toString(), refreshToken.toString());
     }
 
+    /**
+     * 사용자를 로그아웃 처리한다 (Redis의 Refresh Token 삭제).
+     *
+     * @param userId 사용자 식별자
+     */
     @Transactional
     public void logout(Long userId) {
         RefreshToken token = RefreshToken.builder()

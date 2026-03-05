@@ -20,6 +20,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 알림 엔티티.
+ * 사용자에게 전달되는 알림 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -60,6 +64,7 @@ public class Notification extends BaseEntity {
         this.isRead = false;
     }
 
+    /** 알림을 읽음 상태로 변경한다. */
     public void markAsRead() {
         this.isRead = true;
     }

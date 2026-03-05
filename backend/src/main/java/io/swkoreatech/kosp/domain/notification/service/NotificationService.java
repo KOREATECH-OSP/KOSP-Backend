@@ -25,6 +25,10 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 알림 서비스.
+ * SSE 구독, 알림 생성/전송, 조회, 읽음 처리, 삭제 기능을 담당한다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -37,6 +41,12 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
 
+    /**
+     * SSE 알림을 구독한다.
+     *
+     * @param userId 사용자 ID
+     * @return SSE 이미터
+     */
     public SseEmitter subscribe(Long userId) {
         SseEmitter emitter = new SseEmitter(SSE_TIMEOUT);
 
@@ -58,6 +68,11 @@ public class NotificationService {
         return emitter;
     }
 
+    /**
+     * 알림을 생성하고 SSE로 전송한다.
+     *
+     * @param event 알림 이벤트
+     */
     @Transactional
     public void createAndSend(NotificationEvent event) {
         User user = findUser(event.getUserId());
@@ -118,16 +133,35 @@ public class NotificationService {
           }
       }
 
+    /**
+     * 사용자의 알림 목록을 조회한다.
+     *
+     * @param user 사용자
+     * @param pageable 페이지 정보
+     * @return 알림 목록 응답
+     */
     public NotificationListResponse getNotifications(User user, Pageable pageable) {
         Page<Notification> page = notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
 
         return NotificationListResponse.from(page);
     }
 
+    /**
+     * 읽지 않은 알림 수를 조회한다.
+     *
+     * @param user 사용자
+     * @return 읽지 않은 알림 수 응답
+     */
     public UnreadCountResponse getUnreadCount(User user) {
         return UnreadCountResponse.from(notificationRepository.countByUserIdAndIsReadFalse(user.getId()));
     }
 
+    /**
+     * 특정 알림을 읽음 처리한다.
+     *
+     * @param user 사용자
+     * @param notificationId 알림 ID
+     */
     @Transactional
     public void markAsRead(User user, Long notificationId) {
         Notification notification = notificationRepository.getById(notificationId);
@@ -137,6 +171,12 @@ public class NotificationService {
         notification.markAsRead();
     }
 
+    /**
+     * 특정 알림을 삭제한다.
+     *
+     * @param user 사용자
+     * @param notificationId 알림 ID
+     */
     @Transactional
     public void deleteNotification(User user, Long notificationId) {
         Notification notification = notificationRepository.getById(notificationId);
@@ -146,11 +186,23 @@ public class NotificationService {
         notificationRepository.delete(notification);
     }
 
+    /**
+     * 모든 알림을 읽음 처리한다.
+     *
+     * @param user 사용자
+     * @return 읽음 처리된 알림 수
+     */
     @Transactional
     public int markAllAsRead(User user) {
         return notificationRepository.markAllAsRead(user.getId());
     }
 
+    /**
+     * 모든 알림을 삭제한다.
+     *
+     * @param user 사용자
+     * @return 삭제된 알림 수
+     */
     @Transactional
     public int deleteAll(User user) {
         return notificationRepository.deleteAllByUserId(user.getId());
@@ -180,6 +232,7 @@ public class NotificationService {
         return isDisconnectError(error.getCause());
     }
 
+     /** SSE 연결 유지를 위한 하트비트를 30초마다 전송한다. */
      @Scheduled(fixedRate = 30000)
      public void sendHeartbeat() {
          // Errors are handled by onError() callback (async)

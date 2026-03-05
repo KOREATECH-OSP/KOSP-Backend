@@ -7,7 +7,11 @@ import java.util.Map;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
- * JWT 설정 (Secret Key + 만료 시간)
+ * JWT 토큰 설정 프로퍼티.
+ * <p>{@code jwt} 접두사로 바인딩되는 비밀 키와 토큰 타입별 만료 시간 설정을 보유한다.</p>
+ *
+ * @param secretKey  JWT 서명에 사용할 비밀 키
+ * @param expiration 토큰 타입별 만료 시간 (밀리초 단위)
  */
 @ConfigurationProperties(prefix = "jwt")
 public record TokenProperties(

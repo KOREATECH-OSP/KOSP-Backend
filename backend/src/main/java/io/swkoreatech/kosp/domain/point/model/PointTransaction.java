@@ -22,6 +22,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 포인트 거래 엔티티.
+ * 사용자의 포인트 변동 내역을 기록한다.
+ */
 @Getter
 @Entity
 @Table(name = "point_transactions")

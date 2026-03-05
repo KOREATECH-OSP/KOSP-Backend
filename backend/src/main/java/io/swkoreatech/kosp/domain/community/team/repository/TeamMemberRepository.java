@@ -8,6 +8,10 @@ import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
 
+/**
+ * 팀 멤버 리포지토리.
+ * 팀 멤버의 저장, 삭제 및 조건 조회 기능을 제공한다.
+ */
 public interface TeamMemberRepository extends Repository<TeamMember, Long> {
 
     TeamMember save(TeamMember teamMember);

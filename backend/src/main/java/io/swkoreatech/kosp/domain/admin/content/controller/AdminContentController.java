@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 콘텐츠 관리 컨트롤러.
+ * <p>{@link AdminContentApi}를 구현하여 게시글, 공지사항, 댓글 관리 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminContentController implements AdminContentApi {

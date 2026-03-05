@@ -12,6 +12,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 통합 검색 서비스.
+ * <p>키워드 및 검색 유형에 따라 사용자 또는 게시글을 검색하는 비즈니스 로직을 처리한다.</p>
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -20,6 +24,13 @@ public class AdminSearchService {
     private final UserRepository userRepository;
     private final ArticleRepository articleRepository;
 
+    /**
+     * 키워드로 사용자 및 게시글을 통합 검색한다.
+     *
+     * @param keyword 검색어
+     * @param type    검색 유형 (USER, ARTICLE, ALL)
+     * @return 통합 검색 응답 DTO
+     */
     public AdminSearchResponse search(String keyword, String type) {
         if (keyword == null || keyword.isBlank()) {
             return AdminSearchResponse.empty();

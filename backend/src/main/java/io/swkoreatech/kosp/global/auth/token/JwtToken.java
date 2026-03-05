@@ -14,11 +14,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+/**
+ * JWT 토큰의 추상 기반 클래스.
+ * <p>토큰 생성({@link #toString()})과 파싱({@link #from(Class, String)}) 기능을 제공한다.
+ * 하위 클래스는 {@link TokenSpec} 어노테이션으로 토큰 타입을 지정해야 한다.</p>
+ */
 public abstract class JwtToken {
 
     @JsonIgnore
     protected String value;
 
+    /**
+     * 이 토큰 클래스의 {@link TokenSpec} 어노테이션으로부터 토큰 타입을 반환한다.
+     *
+     * @return 토큰 타입
+     * @throws IllegalStateException {@code @TokenSpec} 어노테이션이 없는 경우
+     */
     public TokenType getTokenType() {
         TokenSpec spec = this.getClass().getAnnotation(TokenSpec.class);
         if (spec == null) {
@@ -27,8 +38,17 @@ public abstract class JwtToken {
         return spec.value();
     }
 
+    /**
+     * JWT의 subject 클레임으로 사용할 값을 반환한다.
+     *
+     * @return subject 값
+     */
     public abstract String getSubject();
 
+    /**
+     * 토큰 객체를 JWT 문자열로 직렬화한다.
+     * <p>한 번 생성된 JWT 문자열은 캐시되어 재사용된다.</p>
+     */
     @Override
     public String toString() {
         if (value != null) {
@@ -49,6 +69,16 @@ public abstract class JwtToken {
         return value;
     }
 
+    /**
+     * JWT 문자열을 파싱하여 지정한 토큰 클래스의 인스턴스를 생성한다.
+     *
+     * @param <T>        토큰 타입
+     * @param tokenClass 생성할 토큰 클래스
+     * @param jwt        JWT 문자열
+     * @return 파싱된 토큰 인스턴스
+     * @throws InvalidTokenException 토큰 검증에 실패한 경우
+     * @throws TokenParseException   클레임 변환에 실패한 경우
+     */
     public static <T extends JwtToken> T from(Class<T> tokenClass, String jwt) {
         Claims claims = parseJwt(jwt);
 

@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 파일 업로드 서비스.
+ * Presigned URL 생성 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,6 +26,12 @@ public class UploadService {
     private final S3StorageClient s3Client;
     private final Clock clock;
 
+    /**
+     * S3 업로드용 presigned URL을 생성한다.
+     *
+     * @param request 업로드 URL 요청
+     * @return 업로드 URL 응답
+     */
     public UploadUrlResponse getPresignedUrl(UploadUrlRequest request) {
         String filePath = generateFilePath(request.fileName());
         return s3Client.getPresignedUrl(filePath, request.contentLength(), request.contentType());

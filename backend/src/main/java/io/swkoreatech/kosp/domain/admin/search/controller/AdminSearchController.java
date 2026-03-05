@@ -10,6 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 통합 검색 컨트롤러.
+ * <p>{@link AdminSearchApi}를 구현하여 사용자 및 게시글 통합 검색 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminSearchController implements AdminSearchApi {

@@ -13,6 +13,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
 
+/**
+ * 모집 공고 리포지토리.
+ * 모집 공고의 저장, 삭제 및 조건 조회 기능을 제공한다.
+ */
 public interface RecruitRepository extends Repository<Recruit, Long>, JpaSpecificationExecutor<Recruit> {
 
     Recruit save(Recruit recruit);

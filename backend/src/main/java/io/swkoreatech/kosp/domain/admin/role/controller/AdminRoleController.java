@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 역할 관리 컨트롤러.
+ * <p>{@link AdminRoleApi}를 구현하여 역할 CRUD 및 정책 할당/제거 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminRoleController implements AdminRoleApi {

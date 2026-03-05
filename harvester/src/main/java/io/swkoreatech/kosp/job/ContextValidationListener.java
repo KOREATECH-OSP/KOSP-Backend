@@ -11,10 +11,19 @@ import org.springframework.stereotype.Component;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 스텝 실행 전에 ExecutionContext의 필수 키를 검증하는 리스너.
+ *
+ * <p>각 마이닝 스텝(커밋, PR, 이슈)이 실행되기 전에 필요한 컨텍스트 키가
+ * 존재하는지 확인하고, 누락된 경우 {@link IllegalStateException}을 발생시킨다.
+ */
 @Slf4j
 @Component
 public class ContextValidationListener implements StepExecutionListener {
 
+    /**
+     * 스텝 실행 전에 소비자 스텝의 전제 조건을 검증한다.
+     */
     @Override
     public void beforeStep(StepExecution stepExecution) {
         String stepName = stepExecution.getStepName();

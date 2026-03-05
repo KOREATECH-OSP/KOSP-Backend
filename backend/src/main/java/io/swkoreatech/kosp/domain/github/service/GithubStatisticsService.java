@@ -23,6 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * GitHub 통계 서비스.
+ * GitHub 기여 활동, 비교 통계, 점수 조회 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -35,11 +39,23 @@ public class GithubStatisticsService {
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final PlatformStatisticsRepository platformStatisticsRepository;
 
+    /**
+     * 사용자의 전체 기여 내역을 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 전체 기여 내역 응답
+     */
     public GithubOverallHistoryResponse getOverallHistory(Long userId) {
         GithubUserStatistics stats = getStatisticsByUserId(userId);
         return GithubOverallHistoryResponse.from(stats);
     }
 
+    /**
+     * 사용자와 전체 평균의 기여 내역을 비교 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 기여 내역 비교 응답
+     */
     public GithubContributionComparisonResponse getComparison(Long userId) {
         GithubUserStatistics userStats = getStatisticsByUserId(userId);
         PlatformStatistics platformStats = platformStatisticsRepository.getGlobal();
@@ -65,11 +81,23 @@ public class GithubStatisticsService {
         );
     }
 
+    /**
+     * 사용자의 GitHub 기여 점수를 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 기여 점수 응답
+     */
     public GithubContributionScoreResponse getScore(Long userId) {
         GithubUserStatistics stats = getStatisticsByUserId(userId);
         return GithubContributionScoreResponse.from(stats);
     }
 
+    /**
+     * 사용자의 최근 기여 활동을 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 최근 기여 활동 목록
+     */
     public List<GithubRecentActivityResponse> getRecentActivity(Long userId) {
         User user = userRepository.getById(userId);
 
@@ -83,6 +111,11 @@ public class GithubStatisticsService {
         return repositories.stream().map(GithubRecentActivityResponse::from).toList();
     }
 
+    /**
+     * 전체 사용자의 평균 기여 통계를 조회한다.
+     *
+     * @return 전체 통계 응답
+     */
     public GlobalStatisticsResponse getGlobalStatistics() {
         PlatformStatistics stats = platformStatisticsRepository.getGlobal();
         if (stats == null) {

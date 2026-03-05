@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 import lombok.RequiredArgsConstructor;
 
 /**
- * RefreshToken Redis 저장소
- * Level 3 검증: 비즈니스 로직
+ * RefreshToken을 Redis에 저장하고 관리하는 저장소.
+ * <p>토큰의 저장, 존재 여부 검증, 삭제 기능을 제공한다.</p>
  */
 @Repository
 @RequiredArgsConstructor
@@ -22,7 +22,10 @@ public class RefreshTokenRepository {
     private final StringRedisTemplate redisTemplate;
     
     /**
-     * RefreshToken 저장
+     * RefreshToken을 Redis에 저장한다.
+     * <p>만료 시간이 설정된 상태로 저장된다.</p>
+     *
+     * @param token 저장할 RefreshToken
      */
     public void save(RefreshToken token) {
         redisTemplate.opsForValue().set(
@@ -34,7 +37,10 @@ public class RefreshTokenRepository {
     }
     
     /**
-     * ✅ Level 3: Redis 검증 (비즈니스 로직)
+     * Redis에 저장된 RefreshToken과 일치하는지 검증한다.
+     *
+     * @param token 검증할 RefreshToken
+     * @throws InvalidTokenException 토큰이 존재하지 않거나 일치하지 않는 경우
      */
     public void verifyExists(RefreshToken token) {
         String storedToken = redisTemplate.opsForValue().get(getKey(token.getUserId()));
@@ -45,7 +51,10 @@ public class RefreshTokenRepository {
     }
     
     /**
-     * RefreshToken 삭제 (로그아웃)
+     * Redis에서 RefreshToken을 삭제한다.
+     * <p>로그아웃 시 호출된다.</p>
+     *
+     * @param token 삭제할 RefreshToken
      */
     public void delete(RefreshToken token) {
         redisTemplate.delete(getKey(token.getUserId()));

@@ -20,10 +20,20 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 알림 API.
+ * SSE 구독, 알림 조회, 읽음 처리, 삭제 기능을 정의한다.
+ */
 @Tag(name = "Notification", description = "알림 API")
 @RequestMapping("/v1/notifications")
 public interface NotificationApi {
 
+    /**
+     * 실시간 알림을 수신하기 위한 SSE 연결을 생성한다.
+     *
+     * @param user 인증된 사용자
+     * @return SSE 이미터
+     */
     @Operation(
         summary = "SSE 구독",
         description = "실시간 알림을 수신하기 위한 SSE 연결을 생성합니다."
@@ -32,6 +42,14 @@ public interface NotificationApi {
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     SseEmitter subscribe(@Parameter(hidden = true) @AuthUser User user);
 
+    /**
+     * 사용자의 알림 목록을 페이지네이션하여 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param page 페이지 번호
+     * @param size 페이지 크기
+     * @return 알림 목록 응답
+     */
     @Operation(
         summary = "알림 목록 조회",
         description = "사용자의 알림 목록을 페이지네이션하여 조회합니다."
@@ -44,6 +62,12 @@ public interface NotificationApi {
         @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size
     );
 
+    /**
+     * 읽지 않은 알림의 개수를 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @return 읽지 않은 알림 수 응답
+     */
     @Operation(
         summary = "읽지 않은 알림 수 조회",
         description = "읽지 않은 알림의 개수를 조회합니다."
@@ -52,6 +76,13 @@ public interface NotificationApi {
     @GetMapping("/unread-count")
     ResponseEntity<UnreadCountResponse> getUnreadCount(@Parameter(hidden = true) @AuthUser User user);
 
+    /**
+     * 특정 알림을 읽음으로 처리한다.
+     *
+     * @param user 인증된 사용자
+     * @param notificationId 알림 ID
+     * @return 처리 결과
+     */
     @Operation(summary = "알림 읽음 처리", description = "특정 알림을 읽음으로 처리합니다.")
     @ApiResponse(responseCode = "200", description = "처리 성공")
     @PostMapping("/{notificationId}/read")
@@ -60,6 +91,13 @@ public interface NotificationApi {
         @Parameter(description = "알림 ID") @PathVariable Long notificationId
     );
 
+    /**
+     * 특정 알림을 삭제한다.
+     *
+     * @param user 인증된 사용자
+     * @param notificationId 알림 ID
+     * @return 삭제 결과
+     */
     @Operation(summary = "알림 삭제", description = "특정 알림을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/{notificationId}")
@@ -68,11 +106,23 @@ public interface NotificationApi {
         @Parameter(description = "알림 ID") @PathVariable Long notificationId
     );
 
+    /**
+     * 모든 알림을 읽음으로 처리한다.
+     *
+     * @param user 인증된 사용자
+     * @return 처리 결과
+     */
     @Operation(summary = "모든 알림 읽음 처리", description = "모든 알림을 읽음으로 처리합니다.")
     @ApiResponse(responseCode = "200", description = "처리 성공")
     @PostMapping("/read-all")
     ResponseEntity<Void> markAllAsRead(@Parameter(hidden = true) @AuthUser User user);
 
+    /**
+     * 모든 알림을 삭제한다.
+     *
+     * @param user 인증된 사용자
+     * @return 삭제 결과
+     */
     @Operation(summary = "모든 알림 삭제", description = "모든 알림을 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping

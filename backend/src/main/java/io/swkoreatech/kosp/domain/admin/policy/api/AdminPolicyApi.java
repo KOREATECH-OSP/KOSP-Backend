@@ -24,6 +24,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 정책 관리 API 인터페이스.
+ * <p>정책의 CRUD 및 권한 할당/제거 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Policy", description = "관리자 전용 정책 관리 API")
 @RequestMapping("/v1/admin/policies")
 public interface AdminPolicyApi {

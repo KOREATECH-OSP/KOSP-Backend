@@ -16,6 +16,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * GitHub 연도별 통계 엔티티.
+ * 사용자의 연도별 기여 통계, 점수, 순위 정보를 관리한다.
+ */
 @Entity
 @Table(
     name = "github_yearly_statistics",
@@ -108,6 +112,16 @@ public class GithubYearlyStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 연도별 통계 수치를 갱신한다.
+     *
+     * @param commits 커밋 수
+     * @param lines 코드 라인 수
+     * @param additions 추가 라인 수
+     * @param deletions 삭제 라인 수
+     * @param prs PR 수
+     * @param issues 이슈 수
+     */
     public void updateStatistics(
         Integer commits,
         Integer lines,
@@ -125,6 +139,14 @@ public class GithubYearlyStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 연도별 점수를 갱신한다.
+     *
+     * @param mainRepoScore 메인 저장소 점수
+     * @param otherRepoScore 기타 저장소 점수
+     * @param prIssueScore PR/이슈 점수
+     * @param reputationScore 평판 점수
+     */
     public void updateScores(
         BigDecimal mainRepoScore,
         BigDecimal otherRepoScore,
@@ -141,11 +163,24 @@ public class GithubYearlyStatistics {
             .add(reputationScore);
     }
 
+    /**
+     * 순위 정보를 갱신한다.
+     *
+     * @param rank 순위
+     * @param percentile 백분위
+     */
     public void updateRanking(Integer rank, Integer percentile) {
         this.rank = rank;
         this.percentile = percentile;
     }
 
+    /**
+     * 최고 저장소 정보를 갱신한다.
+     *
+     * @param owner 저장소 소유자
+     * @param name 저장소 이름
+     * @param commits 커밋 수
+     */
     public void updateBestRepository(String owner, String name, Integer commits) {
         this.bestRepoOwner = owner;
         this.bestRepoName = name;

@@ -9,6 +9,14 @@ import jakarta.validation.constraints.Size;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * 회원가입 요청 DTO.
+ *
+ * @param name 이름
+ * @param kutId 학번 또는 사번
+ * @param kutEmail 한국기술교육대학교 이메일
+ * @param password 비밀번호
+ */
 public record UserSignupRequest(
 
     @Schema(description = "이름", example = "박성빈", requiredMode = REQUIRED)

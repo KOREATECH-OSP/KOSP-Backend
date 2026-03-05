@@ -23,6 +23,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 역할 관리 API 인터페이스.
+ * <p>역할의 CRUD 및 정책 할당/제거 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Role", description = "관리자 전용 역할 관리 API")
 @RequestMapping("/v1/admin/roles")
 public interface AdminRoleApi {

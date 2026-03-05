@@ -6,6 +6,16 @@ import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+/**
+ * 팀 초대 응답 DTO.
+ *
+ * @param id 초대 ID
+ * @param team 팀 기본 정보
+ * @param inviter 초대자 정보
+ * @param invitee 피초대자 정보
+ * @param expiresAt 만료 시간
+ * @param createdAt 생성 일시
+ */
 public record TeamInviteResponse(
     Long id,
     TeamBasicInfo team,

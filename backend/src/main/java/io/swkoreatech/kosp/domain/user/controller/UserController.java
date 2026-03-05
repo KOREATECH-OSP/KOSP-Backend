@@ -30,6 +30,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 관리 컨트롤러.
+ * {@link UserApi}의 구현체로, 회원가입/탈퇴/수정/조회/비밀번호 변경 등의 요청을 처리한다.
+ */
 @RestController
 @RequestMapping("/v1/users")
 @RequiredArgsConstructor
@@ -37,6 +41,7 @@ public class UserController implements UserApi {
 
     private final UserService userService;
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/signup")
     @Permit(permitAll = true, name = "users:signup", description = "회원가입")
@@ -47,6 +52,7 @@ public class UserController implements UserApi {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.signup(request, token));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = false, description = "사용자 정보 수정")
     public ResponseEntity<Void> update(@AuthUser User user, Long userId, UserUpdateRequest request) {
@@ -57,6 +63,7 @@ public class UserController implements UserApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(description = "회원 탈퇴")
     public ResponseEntity<Void> delete(@AuthUser User user, Long userId) {
@@ -67,12 +74,14 @@ public class UserController implements UserApi {
         return ResponseEntity.noContent().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "users:profile", description = "사용자 상세 조회")
     public ResponseEntity<UserProfileResponse> getProfile(Long userId) {
         return ResponseEntity.ok(userService.getProfile(userId));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(description = "비밀번호 변경")
     public ResponseEntity<Void> updatePassword(@AuthUser User user, @Valid UserPasswordChangeRequest request) {
@@ -80,6 +89,7 @@ public class UserController implements UserApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(description = "본인 지원 내역 조회")
     public ResponseEntity<MyApplicationListResponse> getMyApplications(
@@ -90,6 +100,7 @@ public class UserController implements UserApi {
         return ResponseEntity.ok(userService.getMyApplications(user, filter, pageable));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(description = "본인 포인트 내역 조회")
     public ResponseEntity<MyPointHistoryResponse> getMyPointHistory(@AuthUser User user, Pageable pageable) {

@@ -12,6 +12,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
 
+/**
+ * 팀 리포지토리.
+ * 팀의 저장 및 조건 조회 기능을 제공한다.
+ */
 public interface TeamRepository extends Repository<Team, Long>, JpaSpecificationExecutor<Team> {
 
     Team save(Team team);

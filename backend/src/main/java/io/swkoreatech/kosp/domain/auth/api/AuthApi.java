@@ -29,6 +29,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 인증 및 세션 관리 API 인터페이스.
+ * <p>GitHub 토큰 교환, 이메일 인증, 로그인, 토큰 재발급, 로그아웃 등의 인증 흐름을 정의한다.</p>
+ */
 @Tag(name = "Auth", description = "인증 및 세션 관리 API")
 @RequestMapping("/v1/auth")
 public interface AuthApi {

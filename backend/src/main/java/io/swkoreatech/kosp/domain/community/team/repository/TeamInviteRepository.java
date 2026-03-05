@@ -10,6 +10,10 @@ import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
 
+/**
+ * 팀 초대 리포지토리.
+ * 팀 초대의 저장, 삭제 및 조회 기능을 제공한다.
+ */
 public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
 
     TeamInvite save(TeamInvite teamInvite);

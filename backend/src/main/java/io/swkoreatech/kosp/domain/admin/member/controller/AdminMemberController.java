@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 사용자 관리 컨트롤러.
+ * <p>{@link AdminMemberApi}를 구현하여 사용자 관리 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminMemberController implements AdminMemberApi {

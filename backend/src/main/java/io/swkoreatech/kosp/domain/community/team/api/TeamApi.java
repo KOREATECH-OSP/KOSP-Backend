@@ -28,6 +28,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @Tag(name = "Team", description = "팀 관리 API")
+/**
+ * 팀 API 인터페이스.
+ * 팀의 CRUD, 멤버 관리, 초대 관련 엔드포인트를 정의한다.
+ */
 public interface TeamApi {
 
     @Operation(summary = "팀 목록 조회", description = "팀 목록을 조회합니다.")

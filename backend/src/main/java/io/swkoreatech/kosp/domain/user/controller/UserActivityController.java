@@ -14,30 +14,38 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 활동 조회 컨트롤러.
+ * {@link UserActivityApi}의 구현체로, 사용자의 게시글/즐겨찾기/댓글/GitHub 활동 조회 요청을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 public class UserActivityController implements UserActivityApi {
 
     private final UserActivityService userActivityService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "users:posts:list", description = "사용자 작성 글 목록")
     public ResponseEntity<ArticleListResponse> getPosts(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getPosts(userId, pageable, user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "users:bookmarks:list", description = "사용자 즐겨찾기 목록")
     public ResponseEntity<ArticleListResponse> getBookmarks(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getBookmarks(userId, pageable, user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "users:comments:list", description = "사용자 작성 댓글 목록")
     public ResponseEntity<CommentListResponse> getComments(User user, Long userId, Pageable pageable) {
         return ResponseEntity.ok(userActivityService.getComments(userId, pageable, user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "users:github:activities", description = "사용자 활동 조회 (GitHub)")
     public ResponseEntity<GithubActivityResponse> getGithubActivities(User user, Long userId, Pageable pageable) {

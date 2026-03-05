@@ -8,39 +8,20 @@ import java.util.function.Function;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utility class for handling GraphQL pagination with generic data types.
+ * 제네릭 데이터 타입을 지원하는 GraphQL 페이지네이션 처리 유틸리티 클래스.
  *
- * <p>This utility abstracts the common pagination pattern used across multiple mining steps
- * (PullRequestMiningStep, IssueMiningStep, CommitMiningStep). It manages cursor-based pagination
- * using a do-while loop and integrates with GraphQLErrorHandler for error checking.
+ * <p>여러 마이닝 스텝(PullRequestMiningStep, IssueMiningStep, CommitMiningStep)에서
+ * 공통으로 사용되는 페이지네이션 패턴을 추상화한다. 커서 기반 페이지네이션을
+ * do-while 루프로 관리하며, GraphQLErrorHandler와 통합하여 에러를 처리한다.
  *
- * <p><b>Generic Type Parameters:</b>
+ * <p><b>제네릭 타입 파라미터:</b>
  * <ul>
- *   <li>{@code T} - The data class type extracted from GraphQL response (e.g., UserPullRequestsResponse,
- *       UserIssuesResponse, RepositoryCommitsResponse). Must contain a PageInfo object for pagination metadata.</li>
- *   <li>{@code P} - The PageInfo type (inner class of T, e.g., UserPullRequestsResponse.PageInfo).</li>
+ *   <li>{@code T} - GraphQL 응답에서 추출된 데이터 클래스 타입
+ *       (예: UserPullRequestsResponse, UserIssuesResponse, RepositoryCommitsResponse).
+ *       페이지네이션 메타데이터를 위한 PageInfo 객체를 포함해야 한다.</li>
  * </ul>
  *
- * <p><b>Parameters:</b>
- * <ul>
- *   <li>{@code fetcher} - Function that fetches a single page of data. Takes cursor (nullable) and returns
- *       GraphQLResponse containing data of type T. Responsible for making the actual GraphQL API call.</li>
- *   <li>{@code pageInfoExtractor} - Function that extracts PageInfo from the data object. Takes the deserialized
- *       data (type T) and returns its PageInfo for determining if more pages exist.</li>
- *   <li>{@code dataProcessor} - BiFunction that processes the fetched data and returns the count of items saved.
- *       Takes the data object (type T) and current cursor, returns count of saved items. Accumulates across pages.</li>
- *   <li>{@code entityType} - String identifier for the entity type being queried (e.g., "user", "repo").
- *       Used in error logging for context.</li>
- *   <li>{@code entityId} - String identifier for the specific entity (e.g., "octocat", "owner/repo").
- *       Used in error logging for context.</li>
- * </ul>
- *
- * <p><b>Return Value:</b>
- * <ul>
- *   <li>Total count of items saved across all pages. Returns 0 if errors occur on first page.</li>
- * </ul>
- *
- * <p><b>Example Usage:</b>
+ * <p><b>사용 예시:</b>
  * <pre>{@code
  * private int fetchAllPullRequests(Long userId, String login, String token) {
  *     Instant now = Instant.now();
@@ -63,16 +44,16 @@ public final class PaginationHelper {
     }
 
     /**
-     * Paginates through GraphQL responses using cursor-based pagination.
+     * 커서 기반 페이지네이션으로 GraphQL 응답을 순회한다.
      *
-     * @param <T> the data type contained in the GraphQL response
-     * @param fetcher function to fetch a page of data
-     * @param pageInfoExtractor function to extract PageInfo from data
-     * @param dataProcessor function to process data and return saved count
-     * @param entityType the type of entity being queried
-     * @param entityId the identifier of the entity
-     * @param dataClass the Class object for the data type T
-     * @return total count of items saved across all pages
+     * @param <T>               GraphQL 응답에 포함된 데이터 타입
+     * @param fetcher           단일 페이지 데이터를 가져오는 함수
+     * @param pageInfoExtractor 데이터에서 PageInfo를 추출하는 함수
+     * @param dataProcessor     데이터를 처리하고 저장 건수를 반환하는 함수
+     * @param entityType        조회 대상 엔티티 타입 (예: "user", "repo")
+     * @param entityId          엔티티 식별자 (예: 로그인 이름, "owner/name")
+     * @param dataClass         데이터 타입 T의 Class 객체
+     * @return 전체 페이지에서 저장된 항목의 총 수
      */
     public static <T> int paginate(
             Function<String, GraphQLResponse<T>> fetcher,

@@ -33,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 도전 과제 서비스.
+ * 도전 과제의 CRUD 및 사용자 진행도 조회, SpEL 조건 평가를 담당한다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -44,16 +48,33 @@ public class ChallengeService {
     private final GithubUserStatisticsRepository statisticsRepository;
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
+    /**
+     * 모든 도전 과제를 조회한다 (관리자용).
+     *
+     * @return 관리자용 도전 과제 목록 응답
+     */
     public AdminChallengeListResponse getAllChallenges() {
         return AdminChallengeListResponse.from(challengeRepository.findAll());
     }
 
+    /**
+     * 도전 과제 상세 정보를 조회한다 (관리자용).
+     *
+     * @param challengeId 도전 과제 ID
+     * @return 관리자용 도전 과제 응답
+     */
     public AdminChallengeResponse getChallenge(Long challengeId) {
         Challenge challenge = challengeRepository.getById(challengeId);
         return AdminChallengeResponse.from(challenge);
     }
 
 
+    /**
+     * 새로운 도전 과제를 생성한다.
+     *
+     * @param request 도전 과제 생성 요청
+     * @throws GlobalException SpEL 조건식이 유효하지 않은 경우
+     */
     @Transactional
     public void createChallenge(ChallengeRequest request) {
         validateSpelCondition(request.condition());
@@ -72,6 +93,11 @@ public class ChallengeService {
         log.info("Created challenge: {}", challenge.getName());
     }
 
+    /**
+     * 도전 과제를 삭제한다.
+     *
+     * @param challengeId 삭제할 도전 과제 ID
+     */
     @Transactional
     public void deleteChallenge(Long challengeId) {
         Challenge challenge = challengeRepository.getById(challengeId);
@@ -82,6 +108,13 @@ public class ChallengeService {
 
 
 
+    /**
+     * 도전 과제를 수정한다.
+     *
+     * @param challengeId 수정할 도전 과제 ID
+     * @param request 도전 과제 수정 요청
+     * @throws GlobalException SpEL 조건식이 유효하지 않은 경우
+     */
     @Transactional
     public void updateChallenge(Long challengeId, ChallengeRequest request) {
         Challenge challenge = challengeRepository.getById(challengeId);
@@ -111,6 +144,13 @@ public class ChallengeService {
         }
     }
 
+    /**
+     * 사용자의 도전 과제 목록과 진행도를 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param tier 필터링할 티어 (null이면 전체 조회)
+     * @return 도전 과제 목록 응답
+     */
     public ChallengeListResponse getChallenges(User user, Integer tier) {
         List<Challenge> challenges = findChallengesByTier(tier);
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
@@ -196,6 +236,11 @@ public class ChallengeService {
         return (double) completedCount / totalChallenges * 100.0;
     }
 
+    /**
+     * SpEL 조건식에서 사용 가능한 변수 목록과 예제를 조회한다.
+     *
+     * @return SpEL 변수 정보 응답
+     */
     public SpelVariableResponse getSpelVariables() {
         List<SpelVariableResponse.VariableInfo> variables = buildVariablesFromEntity();
 

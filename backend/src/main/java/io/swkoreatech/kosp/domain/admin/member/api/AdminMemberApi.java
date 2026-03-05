@@ -21,6 +21,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 사용자 관리 API 인터페이스.
+ * <p>사용자 목록 조회, 삭제, 정보 수정, 역할 변경, GitHub 수집 트리거 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Member", description = "관리자 전용 사용자 관리 API")
 @RequestMapping("/v1/admin/users")
 public interface AdminMemberApi {

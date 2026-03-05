@@ -23,6 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * OAuth2 사용자 서비스.
+ * <p>GitHub OAuth2 인증 과정에서 사용자 정보를 로드하고,
+ * 기존 사용자의 프로필을 갱신하거나 신규 사용자 속성을 구성한다.</p>
+ */
 @Slf4j
 @Service
 @Transactional(readOnly = true)

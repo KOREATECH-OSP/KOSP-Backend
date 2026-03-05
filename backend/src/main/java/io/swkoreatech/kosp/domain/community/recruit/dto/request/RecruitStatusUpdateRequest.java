@@ -7,6 +7,9 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 모집 상태 업데이트 요청 DTO (클래스 기반).
+ */
 @Getter
 @NoArgsConstructor
 public class RecruitStatusUpdateRequest {

@@ -15,6 +15,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * GitHub 저장소별 통계 정보를 저장하는 JPA 엔티티.
+ *
+ * <p>저장소 소유자, 저장소 이름, 기여자 GitHub ID로 유니크 제약조건이 설정되어 있으며,
+ * 저장소 기본 정보(스타, 포크, 워처 수), 사용자 기여 통계(커밋, PR, 이슈 수),
+ * 전체 통계를 관리한다.
+ */
 @Entity
 @Table(
     name = "github_repository_statistics",
@@ -103,6 +110,16 @@ public class GithubRepositoryStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 저장소 기본 정보를 업데이트한다.
+     *
+     * @param stargazersCount 스타 수
+     * @param forksCount      포크 수
+     * @param watchersCount   워처 수
+     * @param description     저장소 설명
+     * @param primaryLanguage 주 사용 언어
+     * @param repoCreatedAt   저장소 생성 시각
+     */
     public void updateRepositoryInfo(
         Integer stargazersCount,
         Integer forksCount,
@@ -119,10 +136,23 @@ public class GithubRepositoryStatistics {
         this.repoCreatedAt = repoCreatedAt;
     }
 
+    /**
+     * 저장소 소유 여부를 업데이트한다.
+     *
+     * @param isOwned 소유 여부
+     */
     public void updateOwnership(Boolean isOwned) {
         this.isOwned = isOwned;
     }
 
+    /**
+     * 사용자의 저장소별 기여 통계를 업데이트한다.
+     *
+     * @param userCommitsCount 사용자 커밋 수
+     * @param userPrsCount     사용자 PR 수
+     * @param userIssuesCount  사용자 이슈 수
+     * @param lastCommitDate   마지막 커밋 시각
+     */
     public void updateUserContributions(
         Integer userCommitsCount,
         Integer userPrsCount,
@@ -135,6 +165,13 @@ public class GithubRepositoryStatistics {
         this.lastCommitDate = lastCommitDate;
     }
 
+    /**
+     * 저장소 전체 통계(총 커밋, PR, 이슈 수)를 업데이트한다.
+     *
+     * @param totalCommitsCount 총 커밋 수
+     * @param totalPrsCount     총 PR 수
+     * @param totalIssuesCount  총 이슈 수
+     */
     public void updateTotalCounts(
         Integer totalCommitsCount,
         Integer totalPrsCount,

@@ -21,6 +21,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 챌린지 관리 API 인터페이스.
+ * <p>챌린지의 CRUD 및 SpEL 변수 조회 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Challenge", description = "관리자 전용 챌린지 관리 API")
 @RequestMapping("/v1/admin/challenges")
 public interface AdminChallengeApi {
@@ -31,6 +35,11 @@ public interface AdminChallengeApi {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
+    /**
+     * 모든 챌린지 목록을 조회한다.
+     *
+     * @return 챌린지 목록 응답
+     */
     ResponseEntity<AdminChallengeListResponse> getChallenges();
 
     @Operation(
@@ -40,6 +49,12 @@ public interface AdminChallengeApi {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @ApiResponse(responseCode = "404", description = "챌린지를 찾을 수 없음")
     @GetMapping("/{challengeId}")
+    /**
+     * 특정 챌린지의 상세 정보를 조회한다.
+     *
+     * @param challengeId 챌린지 식별자
+     * @return 챌린지 상세 응답
+     */
     ResponseEntity<AdminChallengeResponse> getChallenge(
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId
     );
@@ -51,6 +66,12 @@ public interface AdminChallengeApi {
     )
     @ApiResponse(responseCode = "201", description = "생성 성공")
     @PostMapping
+    /**
+     * 새로운 챌린지를 생성한다.
+     *
+     * @param request 챌린지 생성 요청
+     * @return 생성 결과 (201 Created)
+     */
     ResponseEntity<Void> createChallenge(@RequestBody @Valid ChallengeRequest request);
 
     @Operation(
@@ -59,11 +80,24 @@ public interface AdminChallengeApi {
     )
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping("/{challengeId}")
+    /**
+     * 챌린지 정보를 수정한다.
+     *
+     * @param challengeId 챌린지 식별자
+     * @param request     챌린지 수정 요청
+     * @return 수정 결과
+     */
     ResponseEntity<Void> updateChallenge(
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId,
         @RequestBody @Valid ChallengeRequest request
     );
 
+    /**
+     * 챌린지를 삭제한다.
+     *
+     * @param challengeId 챌린지 식별자
+     * @return 삭제 결과 (204 No Content)
+     */
     @Operation(summary = "챌린지 삭제", description = "관리자 권한으로 챌린지를 삭제합니다.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/{challengeId}")
@@ -75,5 +109,10 @@ public interface AdminChallengeApi {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/spel-variables")
+    /**
+     * 챌린지 조건 작성 시 사용 가능한 SpEL 변수 목록을 조회한다.
+     *
+     * @return SpEL 변수 목록 응답
+     */
     ResponseEntity<SpelVariableResponse> getSpelVariables();
 }

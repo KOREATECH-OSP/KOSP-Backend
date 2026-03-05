@@ -21,6 +21,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 모집 지원 엔티티.
+ * 사용자의 모집 공고 지원 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -58,6 +62,7 @@ public class RecruitApply extends BaseEntity {
      @Column(name = "decision_reason", length = 500)
      private String decisionReason;
 
+     /** 지원 상태. PENDING: 대기, ACCEPTED: 수락, REJECTED: 거절. */
      public enum ApplyStatus {
         PENDING, ACCEPTED, REJECTED
     }
@@ -71,10 +76,20 @@ public class RecruitApply extends BaseEntity {
         this.portfolioUrl = portfolioUrl;
     }
 
+     /**
+      * 지원 상태를 변경한다.
+      *
+      * @param status 변경할 상태
+      */
      public void updateStatus(ApplyStatus status) {
          this.status = status;
      }
 
+     /**
+      * 결정 사유를 업데이트한다.
+      *
+      * @param reason 결정 사유
+      */
      public void updateDecisionReason(String reason) {
          if (reason == null || reason.isBlank()) {
              this.decisionReason = "사유 미입력";

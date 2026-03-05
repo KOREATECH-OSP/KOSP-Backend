@@ -3,6 +3,12 @@ package io.swkoreatech.kosp.domain.user.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+/**
+ * 비밀번호 변경 요청 DTO.
+ *
+ * @param currentPassword 현재 비밀번호
+ * @param newPassword 새 비밀번호
+ */
 public record UserPasswordChangeRequest(
     @NotBlank(message = "현재 비밀번호는 필수입니다.")
     String currentPassword,

@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 신고 관리 컨트롤러.
+ * <p>{@link AdminReportApi}를 구현하여 신고 목록 조회 및 처리 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminReportController implements AdminReportApi {

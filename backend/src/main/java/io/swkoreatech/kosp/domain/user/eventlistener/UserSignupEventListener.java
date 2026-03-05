@@ -13,6 +13,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 사용자 회원가입 이벤트 리스너.
+ * 회원가입 완료 후 RabbitMQ를 통해 GitHub 데이터 수집 요청을 발행한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,6 +24,12 @@ public class UserSignupEventListener {
 
     private final RabbitTemplate rabbitTemplate;
 
+    /**
+     * 사용자 회원가입 이벤트를 처리한다.
+     * 트랜잭션 커밋 후 비동기로 GitHub 데이터 수집 메시지를 발행한다.
+     *
+     * @param event 회원가입 이벤트
+     */
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleUserSignup(UserSignupEvent event) {

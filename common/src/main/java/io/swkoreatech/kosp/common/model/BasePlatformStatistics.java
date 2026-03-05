@@ -11,6 +11,12 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 플랫폼 통계 기반 클래스.
+ *
+ * <p>GitHub 등 외부 플랫폼 사용자들의 평균 활동 지표(커밋, 스타, PR, 이슈)와
+ * 총 사용자 수를 관리하는 추상 엔티티이다.</p>
+ */
 @Getter
 @MappedSuperclass
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,11 +44,25 @@ public abstract class BasePlatformStatistics {
     @Column(name = "calculated_at", nullable = false)
     private LocalDateTime calculatedAt;
 
+    /**
+     * 통계 키를 초기화하고 계산 시각을 현재 시각으로 설정한다.
+     *
+     * @param statKey 통계 식별 키
+     */
     protected void initializeStatKey(String statKey) {
         this.statKey = statKey;
         this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 플랫폼 평균 지표와 총 사용자 수를 갱신한다.
+     *
+     * @param avgCommitCount 평균 커밋 수
+     * @param avgStarCount   평균 스타 수
+     * @param avgPrCount     평균 PR 수
+     * @param avgIssueCount  평균 이슈 수
+     * @param totalUserCount 총 사용자 수
+     */
     public void updateAverages(
         BigDecimal avgCommitCount,
         BigDecimal avgStarCount,

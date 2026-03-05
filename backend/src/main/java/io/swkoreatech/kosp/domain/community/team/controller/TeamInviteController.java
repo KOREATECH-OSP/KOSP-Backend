@@ -12,6 +12,10 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+/**
+ * 팀 초대 컨트롤러.
+ * {@link TeamInviteApi}를 구현하여 팀 초대 관련 요청을 처리한다.
+ */
 public class TeamInviteController implements TeamInviteApi {
 
     private final TeamInviteService teamInviteService;

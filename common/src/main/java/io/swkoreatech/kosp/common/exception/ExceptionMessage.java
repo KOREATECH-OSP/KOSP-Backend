@@ -4,6 +4,12 @@ import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
 
+/**
+ * 애플리케이션 예외 메시지 열거형.
+ *
+ * <p>사전 정의된 예외 메시지와 HTTP 상태 코드를 관리한다.
+ * {@link GlobalException}과 함께 사용되어 일관된 에러 응답을 제공한다.</p>
+ */
 @Getter
 public enum ExceptionMessage {
 

@@ -15,6 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
+/**
+ * 모집 지원 리포지토리.
+ * 모집 지원의 CRUD 및 조건 조회 기능을 제공한다.
+ */
 public interface RecruitApplyRepository
         extends JpaRepository<RecruitApply, Long>, JpaSpecificationExecutor<RecruitApply> {
 

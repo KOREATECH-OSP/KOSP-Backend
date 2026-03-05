@@ -11,6 +11,10 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+/**
+ * 팀 초대 서비스.
+ * 팀 초대 정보 조회 기능을 담당한다.
+ */
 public class TeamInviteService {
 
     private final TeamInviteRepository teamInviteRepository;

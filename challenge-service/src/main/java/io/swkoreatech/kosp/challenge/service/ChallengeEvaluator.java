@@ -23,6 +23,12 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 챌린지 달성 여부를 평가하는 서비스.
+ *
+ * <p>사용자의 GitHub 활동 통계를 기반으로 등록된 모든 챌린지의 달성 조건을
+ * SpEL(Spring Expression Language)로 평가하고, 달성 시 포인트를 지급한다.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -35,6 +41,14 @@ public class ChallengeEvaluator {
 
     private final ExpressionParser parser = new SpelExpressionParser();
 
+    /**
+     * 주어진 사용자에 대해 모든 챌린지의 달성 여부를 평가한다.
+     *
+     * <p>사용자의 GitHub 계정이 연동되어 있지 않거나 통계 데이터가 없으면
+     * 평가를 건너뛴다. 이미 달성한 챌린지는 재평가하지 않는다.</p>
+     *
+     * @param user 챌린지를 평가할 대상 사용자
+     */
     @Transactional
     public void evaluate(User user) {
         log.info("Starting challenge evaluation for user: {}", user.getId());
@@ -80,6 +94,16 @@ public class ChallengeEvaluator {
         return context;
     }
 
+    /**
+     * 현재 값과 목표 값을 기반으로 진행률(백분율)을 계산한다.
+     *
+     * <p>SpEL 표현식 내에서 헬퍼 함수로 사용된다.
+     * 목표 값이 0 이하이면 100%를 반환하며, 최대값은 100으로 제한된다.</p>
+     *
+     * @param current 현재 달성 값
+     * @param target 목표 값
+     * @return 0~100 범위의 진행률 (백분율)
+     */
     public static int calculateProgressPercentage(int current, int target) {
         if (target <= 0) {
             return 100;
@@ -87,6 +111,15 @@ public class ChallengeEvaluator {
         return Math.min(current * 100 / target, 100);
     }
 
+    /**
+     * 주어진 정수 배열에서 최솟값을 반환한다.
+     *
+     * <p>SpEL 표현식 내에서 헬퍼 함수로 사용된다.</p>
+     *
+     * @param values 비교할 정수 배열
+     * @return 배열 내 최솟값
+     * @throws IllegalArgumentException 배열이 비어 있을 경우
+     */
     public static int min(int... values) {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value required");
@@ -98,6 +131,15 @@ public class ChallengeEvaluator {
         return result;
     }
 
+    /**
+     * 주어진 정수 배열에서 최댓값을 반환한다.
+     *
+     * <p>SpEL 표현식 내에서 헬퍼 함수로 사용된다.</p>
+     *
+     * @param values 비교할 정수 배열
+     * @return 배열 내 최댓값
+     * @throws IllegalArgumentException 배열이 비어 있을 경우
+     */
     public static int max(int... values) {
         if (values.length == 0) {
             throw new IllegalArgumentException("At least one value required");

@@ -19,6 +19,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 신고 관리 API 인터페이스.
+ * <p>신고 목록 조회 및 신고 처리 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Report", description = "관리자 전용 신고 관리 API")
 @RequestMapping("/v1/admin/reports")
 public interface AdminReportApi {

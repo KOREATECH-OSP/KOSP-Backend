@@ -27,8 +27,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * JWT 인증 필터
- * Authorization 헤더의 ACCESS 토큰 처리
+ * JWT 기반 인증 필터.
+ * <p>HTTP 요청의 Authorization 헤더 또는 X-Access-Token 헤더에서 ACCESS 토큰을 추출하고,
+ * 유효한 토큰이면 SecurityContext에 인증 정보를 설정한다.
+ * 비동기 SSE 디스패치에서는 필터를 건너뛴다.</p>
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
     private final TokenHeaderResolver tokenHeaderResolver;
     
+    /** {@inheritDoc} */
     @Override
     protected void doFilterInternal(
         @NonNull HttpServletRequest request,
@@ -64,6 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
     }
     
+    /** SSE 비동기 디스패치 시 JWT 검증을 건너뛴다. */
     @Override
     protected boolean shouldNotFilterAsyncDispatch() {
         return true; // Skip JWT validation on SSE async dispatches

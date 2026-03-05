@@ -32,13 +32,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Mines pull request data created by the user.
+ * 사용자가 생성한 풀 리퀘스트 데이터를 마이닝하는 스텝.
+ *
+ * <p>GraphQL 페이지네이션을 사용하여 사용자의 모든 PR을 조회하고,
+ * PullRequestDocument 컬렉션에 저장한다. 기여 분석에 사용된다.
  *
  * @StepContract
- * REQUIRES: githubLogin, githubToken (from RepositoryDiscoveryStep)
- * PROVIDES: (none - writes to MongoDB only)
- * PURPOSE: Fetches all pull requests created by user using GraphQL pagination,
- *          saves to PullRequestDocument collection for contribution analysis.
+ * REQUIRES: githubLogin, githubToken (RepositoryDiscoveryStep에서)
+ * PROVIDES: (없음 - MongoDB에만 기록)
  */
 @Slf4j
 @Component
@@ -53,6 +54,7 @@ public class PullRequestMiningStep implements StepProvider {
     private final PullRequestDocumentRepository prDocumentRepository;
     private final StepCompletionListener stepCompletionListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -64,6 +66,7 @@ public class PullRequestMiningStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;

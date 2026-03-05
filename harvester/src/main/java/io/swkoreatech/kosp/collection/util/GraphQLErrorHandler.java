@@ -5,7 +5,7 @@ import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Utility class for handling GraphQL response errors with standardized logging.
+ * GraphQL 응답 에러를 표준화된 로깅으로 처리하는 유틸리티 클래스.
  */
 @Slf4j
 public final class GraphQLErrorHandler {
@@ -15,12 +15,12 @@ public final class GraphQLErrorHandler {
     }
 
     /**
-     * Logs GraphQL errors if present and returns whether errors exist.
+     * GraphQL 에러가 존재하면 로그를 기록하고 에러 존재 여부를 반환한다.
      *
-     * @param response the GraphQL response (nullable)
-     * @param entityType the type of entity being queried (e.g., "repo", "user")
-     * @param entityId the entity identifier (e.g., "owner/name", "login")
-     * @return true if errors exist, false otherwise
+     * @param response   GraphQL 응답 (nullable)
+     * @param entityType 조회 대상 엔티티 타입 (예: "repo", "user")
+     * @param entityId   엔티티 식별자 (예: "owner/name", "login")
+     * @return 에러가 존재하면 true, 아니면 false
      */
     public static boolean logAndCheckErrors(GraphQLResponse<?> response, String entityType, String entityId) {
         if (response == null) {

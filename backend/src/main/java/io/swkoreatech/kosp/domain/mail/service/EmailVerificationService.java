@@ -16,6 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 이메일 인증 서비스.
+ * 인증 코드 발송, 코드 검증, 회원가입 인증 완료 기능을 담당한다.
+ */
 @Slf4j
 @Service
 public class EmailVerificationService {
@@ -33,6 +37,12 @@ public class EmailVerificationService {
         this.eventPublisher = eventPublisher;
     }
 
+    /**
+     * 인증 코드를 생성하여 이메일로 발송한다.
+     *
+     * @param email 이메일 주소
+     * @param signupToken 회원가입 토큰
+     */
     @Transactional
     public void sendCertificationMail(String email, String signupToken) {
         String code = generateCode();
@@ -52,6 +62,14 @@ public class EmailVerificationService {
         eventPublisher.publishEvent(new EmailVerificationSendEvent(email, code));
     }
 
+    /**
+     * 인증 코드를 검증한다.
+     *
+     * @param email 이메일 주소
+     * @param code 인증 코드
+     * @return 검증된 이메일 인증 정보
+     * @throws GlobalException 인증 코드가 일치하지 않는 경우
+     */
     @Transactional
     public EmailVerification verifyCode(String email, String code) {
         EmailVerification verification = emailVerificationRepository.getById(email);
@@ -66,6 +84,12 @@ public class EmailVerificationService {
         return verification;
     }
 
+    /**
+     * 회원가입 인증을 완료 처리한다.
+     *
+     * @param email 이메일 주소
+     * @throws GlobalException 이메일이 인증되지 않은 경우
+     */
     @Transactional
     public void completeSignupVerification(String email) {
         EmailVerification verification = emailVerificationRepository.getById(email);
@@ -77,6 +101,12 @@ public class EmailVerificationService {
         emailVerificationRepository.delete(verification);
     }
 
+    /**
+     * 이메일 인증 정보를 조회한다.
+     *
+     * @param email 이메일 주소
+     * @return 이메일 인증 정보
+     */
     public EmailVerification getVerification(String email) {
         return emailVerificationRepository.getById(email);
     }

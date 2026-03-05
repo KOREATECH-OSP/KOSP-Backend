@@ -4,6 +4,16 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
 
+/**
+ * 팀 응답 DTO.
+ *
+ * @param id 팀 ID
+ * @param name 팀 이름
+ * @param description 팀 설명
+ * @param imageUrl 팀 이미지 URL
+ * @param memberCount 멤버 수
+ * @param createdBy 생성자 정보
+ */
 public record TeamResponse(
     Long id,
     String name,

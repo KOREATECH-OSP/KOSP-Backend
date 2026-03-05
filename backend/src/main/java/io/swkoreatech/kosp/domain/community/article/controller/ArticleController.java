@@ -31,6 +31,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 게시글 컨트롤러.
+ * {@link ArticleApi}를 구현하여 게시글 관련 요청을 처리한다.
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/community/articles")
@@ -39,6 +43,7 @@ public class ArticleController implements ArticleApi {
     private final ArticleService articleService;
     private final BoardService boardService;
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping
     @Permit(permitAll = true, name = "articles:list", description = "게시글 목록 조회")
@@ -55,6 +60,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok(articleService.getList(board, pageable, user));
     }
 
+    /** {@inheritDoc} */
     @Override
     @GetMapping("/{id}")
     @Permit(permitAll = true, name = "articles:read", description = "게시글 상세 조회")
@@ -66,6 +72,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok(response);
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping
     @Permit(name = "article:create", description = "게시글 작성")
@@ -78,6 +85,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.created(URI.create("/v1/community/articles/" + id)).build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @PutMapping("/{id}")
     @Permit(name = "article:update", description = "게시글 수정")
@@ -90,6 +98,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok().build();
     }
 
+    /** {@inheritDoc} */
     @Override
     @DeleteMapping("/{id}")
     @Permit(name = "article:delete", description = "게시글 삭제")
@@ -100,6 +109,7 @@ public class ArticleController implements ArticleApi {
         articleService.delete(user, id);
         return ResponseEntity.noContent().build();
     }
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/{id}/likes")
     @Permit(name = "article:like", description = "게시글 좋아요")
@@ -110,6 +120,7 @@ public class ArticleController implements ArticleApi {
         return ResponseEntity.ok(articleService.toggleLike(user, id));
     }
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/{id}/bookmarks")
     @Permit(name = "article:bookmark", description = "게시글 북마크")

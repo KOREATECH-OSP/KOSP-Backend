@@ -42,14 +42,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Discovers repositories contributed to by the user within the past year.
+ * 사용자가 기여한 저장소를 발견하는 파이프라인 초기 스텝.
+ *
+ * <p>GitHub에서 사용자가 기여한 모든 저장소를 조회하고,
+ * 저장소 메타데이터를 MongoDB에 저장하며, 후속 스텝을 위해
+ * ExecutionContext에 인증 정보와 저장소 목록을 저장한다.
  *
  * @StepContract
- * REQUIRES: (none - initial step in pipeline)
+ * REQUIRES: (없음 - 파이프라인 초기 스텝)
  * PROVIDES: githubLogin, githubToken, githubNodeId, discoveredRepos
- * PURPOSE: Queries GitHub for all repositories the user has contributed to,
- *          stores repository metadata in MongoDB, and populates ExecutionContext
- *          with credentials and repository list for downstream steps.
  */
 @Slf4j
 @Component
@@ -68,6 +69,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final StepCompletionListener stepCompletionListener;
     private final ContextValidationListener contextValidationListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -81,6 +83,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;

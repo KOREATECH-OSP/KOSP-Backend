@@ -34,6 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 인증 컨트롤러.
+ * <p>{@link AuthApi}를 구현하여 회원가입, 로그인, 토큰 관리, 비밀번호 재설정 등의 인증 기능을 제공한다.</p>
+ */
 @RestController
 @RequestMapping("/v1/auth")
 @RequiredArgsConstructor

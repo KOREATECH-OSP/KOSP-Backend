@@ -40,6 +40,11 @@ import io.swagger.v3.oas.models.tags.Tag;
         )
     )
 )
+/**
+ * Swagger/OpenAPI 문서 설정 클래스.
+ * <p>API 그룹(사용자, 커뮤니티, 팀, 부가기능, 관리자)별로 분류하고,
+ * JWT 토큰 기반 보안 스키마(ACCESS, REFRESH, SIGNUP)를 구성한다.</p>
+ */
 public class SwaggerConfig {
 
     private static final String ACCESS_TOKEN = "ACCESS";
@@ -88,6 +93,12 @@ public class SwaggerConfig {
         "Admin - Banner"
     );
 
+    /**
+     * 커스텀 OpenAPI 설정 빈을 생성한다.
+     * <p>JWT 토큰 기반 보안 스키마와 서버 정보를 포함한다.</p>
+     *
+     * @return OpenAPI 설정 객체
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         SecurityRequirement securityRequirement = new SecurityRequirement()
@@ -122,6 +133,11 @@ public class SwaggerConfig {
             .components(components);
     }
 
+    /**
+     * 사용자 관련 API 그룹을 생성한다.
+     *
+     * @return 사용자 API 그룹
+     */
     @Bean
     public GroupedOpenApi userApi() {
         return GroupedOpenApi.builder()
@@ -133,6 +149,11 @@ public class SwaggerConfig {
             .build();
     }
 
+    /**
+     * 커뮤니티 관련 API 그룹을 생성한다.
+     *
+     * @return 커뮤니티 API 그룹
+     */
     @Bean
     public GroupedOpenApi communityApi() {
         return GroupedOpenApi.builder()
@@ -144,6 +165,11 @@ public class SwaggerConfig {
             .build();
     }
 
+    /**
+     * 팀 관련 API 그룹을 생성한다.
+     *
+     * @return 팀 API 그룹
+     */
     @Bean
     public GroupedOpenApi teamApi() {
         return GroupedOpenApi.builder()
@@ -155,6 +181,11 @@ public class SwaggerConfig {
             .build();
     }
 
+    /**
+     * 부가기능 관련 API 그룹을 생성한다.
+     *
+     * @return 부가기능 API 그룹
+     */
     @Bean
     public GroupedOpenApi utilityApi() {
         return GroupedOpenApi.builder()
@@ -167,6 +198,11 @@ public class SwaggerConfig {
             .build();
     }
 
+    /**
+     * 관리자 관련 API 그룹을 생성한다.
+     *
+     * @return 관리자 API 그룹
+     */
     @Bean
     public GroupedOpenApi adminApi() {
         return GroupedOpenApi.builder()

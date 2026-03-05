@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 정책 관리 컨트롤러.
+ * <p>{@link AdminPolicyApi}를 구현하여 정책 CRUD 및 권한 할당/제거 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminPolicyController implements AdminPolicyApi {

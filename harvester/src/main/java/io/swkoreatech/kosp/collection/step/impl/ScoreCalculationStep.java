@@ -32,6 +32,13 @@ import org.springframework.transaction.PlatformTransactionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 사용자의 오픈소스 기여 점수를 계산하는 스텝.
+ *
+ * <p>활동 점수(Activity), 다양성 점수(Diversity), 영향력 점수(Impact)를
+ * MongoDB에 저장된 커밋, PR, 이슈, 저장소 데이터를 기반으로 계산하고
+ * GithubUserStatistics에 저장한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -52,6 +59,7 @@ public class ScoreCalculationStep implements StepProvider {
     private final GithubUserStatisticsRepository statisticsRepository;
     private final StepCompletionListener stepCompletionListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -64,6 +72,7 @@ public class ScoreCalculationStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;

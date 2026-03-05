@@ -7,6 +7,12 @@ import jakarta.validation.constraints.NotBlank;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * 로그인 요청 DTO.
+ *
+ * @param email    이메일
+ * @param password 비밀번호
+ */
 public record LoginRequest(
 
     @Schema(description = "이메일", example = "kosp@koreatech.ac.kr", requiredMode = REQUIRED)

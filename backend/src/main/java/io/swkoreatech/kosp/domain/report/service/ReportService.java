@@ -18,6 +18,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 신고 서비스.
+ * 게시글 신고 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -27,6 +31,14 @@ public class ReportService {
     private final ArticleRepository articleRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * 게시글을 신고한다.
+     *
+     * @param reporter 신고자
+     * @param articleId 게시글 ID
+     * @param request 신고 요청
+     * @throws GlobalException 자기 게시글 신고 또는 중복 신고인 경우
+     */
     @Transactional
     public void reportArticle(User reporter, Long articleId, ReportRequest request) {
         Article article = findArticle(articleId);

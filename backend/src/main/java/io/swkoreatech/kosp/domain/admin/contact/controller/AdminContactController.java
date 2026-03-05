@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 연락처 관리 컨트롤러.
+ * <p>{@link AdminContactApi}를 구현하여 관리자 연락처 조회 및 수정 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminContactController implements AdminContactApi {

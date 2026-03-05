@@ -1,8 +1,10 @@
 package io.swkoreatech.kosp.collection.util;
 
 /**
- * Utility class for null-safe conversions from nullable wrapper types to primitive types.
- * Provides helper methods to safely convert Integer/Long to int/long with zero as default.
+ * null 안전한 래퍼 타입-기본형 변환 유틸리티 클래스.
+ *
+ * <p>nullable Integer/Long 값을 int/long 기본형으로 안전하게 변환하며,
+ * null인 경우 0을 기본값으로 반환한다.
  */
 public final class NullSafeGetters {
 
@@ -11,10 +13,10 @@ public final class NullSafeGetters {
     }
 
     /**
-     * Returns the integer value or zero if null.
+     * 정수 값을 반환하되, null이면 0을 반환한다.
      *
-     * @param value the nullable integer
-     * @return the value or 0 if null
+     * @param value nullable 정수 값
+     * @return 값 또는 null인 경우 0
      */
     public static int intOrZero(Integer value) {
         if (value == null) {
@@ -24,10 +26,10 @@ public final class NullSafeGetters {
     }
 
     /**
-     * Returns the long value or zero if null.
+     * long 값을 반환하되, null이면 0L을 반환한다.
      *
-     * @param value the nullable long
-     * @return the value or 0L if null
+     * @param value nullable long 값
+     * @return 값 또는 null인 경우 0L
      */
     public static long longOrZero(Long value) {
         if (value == null) {

@@ -33,6 +33,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 모집 공고 서비스.
+ * 모집 공고의 CRUD 및 상태 관리 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -45,6 +49,14 @@ public class RecruitService {
     private final RecruitApplyRepository recruitApplyRepository;
     private final TeamMemberRepository teamMemberRepository;
 
+    /**
+     * 모집 공고를 작성한다.
+     *
+     * @param author 작성자
+     * @param board 게시판
+     * @param request 모집 공고 작성 요청
+     * @return 생성된 모집 공고 ID
+     */
     @Transactional
     public Long create(User author, Board board, RecruitRequest request) {
         Recruit recruit = Recruit.recruitBuilder()
@@ -62,6 +74,13 @@ public class RecruitService {
         return recruitRepository.save(recruit).getId();
     }
 
+    /**
+     * 모집 공고 상세 정보를 조회한다.
+     *
+     * @param id 모집 공고 ID
+     * @param user 조회하는 사용자
+     * @return 모집 공고 응답
+     */
     public RecruitResponse getOne(Long id, User user) {
         Recruit recruit = recruitRepository.getById(id);
         recruit.increaseViews();
@@ -73,6 +92,15 @@ public class RecruitService {
         return RecruitResponse.from(recruit, isLiked, isBookmarked, userCanApply);
     }
 
+    /**
+     * 모집 공고 목록을 조회한다.
+     *
+     * @param board 게시판
+     * @param pageable 페이징 정보
+     * @param user 조회하는 사용자
+     * @param rsql RSQL 필터 문자열
+     * @return 모집 공고 목록 응답
+     */
     public RecruitListResponse getList(Board board, Pageable pageable, User user, String rsql) {
         Pageable validatedPageable = validatePageSize(pageable);
         Specification<Recruit> spec = createSpecification(board, rsql);
@@ -103,6 +131,14 @@ public class RecruitService {
             .toList();
     }
 
+    /**
+     * 모집 상태를 변경한다.
+     *
+     * @param author 요청 사용자
+     * @param id 모집 공고 ID
+     * @param status 변경할 상태
+     * @throws GlobalException 작성자가 아닌 경우
+     */
     @Transactional
     public void updateStatus(User author, Long id, RecruitStatus status) {
         Recruit recruit = recruitRepository.getById(id);
@@ -110,6 +146,14 @@ public class RecruitService {
         recruit.updateStatus(status);
     }
 
+    /**
+     * 모집 공고를 수정한다.
+     *
+     * @param author 요청 사용자
+     * @param id 모집 공고 ID
+     * @param request 수정 요청
+     * @throws GlobalException 작성자가 아닌 경우
+     */
     @Transactional
     public void update(User author, Long id, RecruitRequest request) {
         Recruit recruit = recruitRepository.getById(id);
@@ -125,6 +169,13 @@ public class RecruitService {
         );
     }
 
+    /**
+     * 모집 공고를 삭제한다.
+     *
+     * @param author 요청 사용자
+     * @param id 모집 공고 ID
+     * @throws GlobalException 작성자가 아닌 경우
+     */
     @Transactional
     public void delete(User author, Long id) {
         Recruit recruit = recruitRepository.getById(id);

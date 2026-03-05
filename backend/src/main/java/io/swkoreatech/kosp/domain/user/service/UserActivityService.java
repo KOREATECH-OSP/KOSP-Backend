@@ -30,6 +30,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 사용자 활동 조회 서비스.
+ * 사용자의 게시글, 즐겨찾기, 댓글, GitHub 활동 내역 조회 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -43,6 +47,14 @@ public class UserActivityService {
     private final UserRepository userRepository;
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
 
+    /**
+     * 사용자가 작성한 게시글 목록을 조회한다.
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @param pageable 페이지 정보
+     * @param user 인증된 사용자 (좋아요/즐겨찾기 여부 확인용, null 가능)
+     * @return 게시글 목록 응답
+     */
     public ArticleListResponse getPosts(Long userId, Pageable pageable, User user) {
         User author = User.builder().id(userId).build();
         Page<Article> page = articleRepository.findByAuthor(author, pageable);
@@ -50,16 +62,39 @@ public class UserActivityService {
         return toArticleResponse(page, user);
     }
 
+    /**
+     * 사용자가 즐겨찾기한 게시글 목록을 조회한다.
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @param pageable 페이지 정보
+     * @param user 인증된 사용자 (좋아요/즐겨찾기 여부 확인용, null 가능)
+     * @return 즐겨찾기 게시글 목록 응답
+     */
     public ArticleListResponse getBookmarks(Long userId, Pageable pageable, User user) {
         Page<Article> page = articleBookmarkRepository.findArticlesByUserId(userId, pageable);
         return toArticleResponse(page, user);
     }
 
+    /**
+     * 사용자가 작성한 댓글 목록을 조회한다.
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @param pageable 페이지 정보
+     * @param user 인증된 사용자 (좋아요 여부 확인용, null 가능)
+     * @return 댓글 목록 응답
+     */
     public CommentListResponse getComments(Long userId, Pageable pageable, User user) {
         Page<Comment> page = commentRepository.findByAuthorIdAndIsDeletedFalse(userId, pageable);
         return toCommentResponse(page, user);
     }
 
+    /**
+     * 사용자의 GitHub 활동 내역을 조회한다.
+     * GitHub 계정이 연동되지 않은 경우 빈 응답을 반환한다.
+     *
+     * @param userId 조회 대상 사용자 ID
+     * @return GitHub 활동 응답
+     */
     public GithubActivityResponse getGithubActivities(Long userId) {
         User targetUser = userRepository.getById(userId);
 

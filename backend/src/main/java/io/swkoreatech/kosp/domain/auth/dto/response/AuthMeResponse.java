@@ -4,6 +4,15 @@ import io.swkoreatech.kosp.common.user.model.User;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+/**
+ * 현재 로그인한 사용자의 기본 정보 응답 DTO.
+ *
+ * @param id           사용자 식별자
+ * @param email        이메일
+ * @param name         사용자 이름
+ * @param profileImage 프로필 이미지 URL
+ * @param introduction 자기소개
+ */
 @Schema(description = "현재 로그인한 사용자의 기본 정보 응답 DTO 임.")
 public record AuthMeResponse(
 
@@ -22,6 +31,12 @@ public record AuthMeResponse(
     @Schema(description = "자기소개", example = "안녕하세요")
     String introduction
 ) {
+    /**
+     * {@link User} 엔티티로부터 응답 DTO를 생성한다.
+     *
+     * @param user 사용자 엔티티
+     * @return 사용자 기본 정보 응답 DTO
+     */
     public static AuthMeResponse from(User user) {
         String profileImage = user.getGithubUser() != null ? user.getGithubUser().getGithubAvatarUrl() : null;
         return new AuthMeResponse(

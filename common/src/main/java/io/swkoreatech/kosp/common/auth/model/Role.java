@@ -21,6 +21,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 역할(Role) 엔티티.
+ *
+ * <p>사용자에게 부여되는 역할을 나타내며, 여러 {@link Policy}를 포함한다.
+ * RBAC(역할 기반 접근 제어) 모델의 최상위 계층으로,
+ * 관리자 페이지 접근 권한 여부를 결정하는 플래그를 포함한다.</p>
+ */
 @Entity
 @Table(name = "role")
 @Getter
@@ -55,10 +62,20 @@ public class Role extends BaseEntity {
         this.policies = policies != null ? policies : new HashSet<>();
     }
 
+    /**
+     * 역할 설명을 수정한다.
+     *
+     * @param description 새로운 역할 설명
+     */
     public void updateDescription(String description) {
         this.description = description;
     }
 
+    /**
+     * 관리자 페이지 접근 권한 여부를 수정한다.
+     *
+     * @param canAccessAdmin 관리자 접근 가능 여부 ({@code null}이면 변경하지 않음)
+     */
     public void updateCanAccessAdmin(Boolean canAccessAdmin) {
         if (canAccessAdmin != null) {
             this.canAccessAdmin = canAccessAdmin;

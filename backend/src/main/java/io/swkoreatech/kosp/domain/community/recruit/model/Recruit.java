@@ -23,6 +23,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 모집 공고 엔티티.
+ * {@link Article}을 상속하여 모집 관련 추가 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -54,6 +58,16 @@ public class Recruit extends Article {
         this.endDate = endDate;
     }
 
+    /**
+     * 모집 공고를 수정한다.
+     *
+     * @param title 제목
+     * @param content 내용
+     * @param tags 태그 목록
+     * @param team 팀
+     * @param startDate 모집 시작일
+     * @param endDate 모집 종료일
+     */
     public void updateRecruit(
         String title,
         String content,
@@ -68,6 +82,11 @@ public class Recruit extends Article {
         this.endDate = endDate;
     }
 
+    /**
+     * 모집 상태를 변경한다.
+     *
+     * @param status 변경할 상태
+     */
     public void updateStatus(RecruitStatus status) {
         this.status = status;
     }

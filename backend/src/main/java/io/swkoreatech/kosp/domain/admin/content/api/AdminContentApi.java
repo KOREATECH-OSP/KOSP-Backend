@@ -20,6 +20,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 콘텐츠 관리 API 인터페이스.
+ * <p>게시글, 공지사항, 댓글의 삭제 및 공지사항 CRUD 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Content", description = "관리자 전용 콘텐츠 관리 API")
 @RequestMapping("/v1/admin")
 public interface AdminContentApi {

@@ -17,6 +17,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 게시글 관리 API 인터페이스.
+ * <p>관리자 권한으로 게시글 목록 조회 및 상세 조회 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Article", description = "관리자 전용 게시글 관리 API")
 @RequestMapping("/v1/admin/articles")
 public interface AdminArticleApi {

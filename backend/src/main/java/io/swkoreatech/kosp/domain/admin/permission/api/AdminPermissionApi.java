@@ -14,6 +14,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 권한 조회 API 인터페이스.
+ * <p>시스템에 등록된 권한(Permission)의 목록 및 단일 조회 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Permission", description = "관리자 전용 권한 조회 API")
 @RequestMapping("/v1/admin/permissions")
 public interface AdminPermissionApi {

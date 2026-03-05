@@ -38,13 +38,15 @@ import org.springframework.transaction.PlatformTransactionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 /**
- * Aggregates platform-wide statistics from collected GitHub data.
+ * 수집된 GitHub 데이터로부터 사용자별 통계를 집계하는 스텝.
+ *
+ * <p>MongoDB 컬렉션에서 커밋, PR, 이슈, 저장소 데이터를 읽어
+ * 총 커밋 수, PR 수, 이슈 수, 저장소 수 등의 집계 메트릭을 계산하고,
+ * GithubUserStatistics와 GithubRepositoryStatistics에 저장한다.
  *
  * @StepContract
- * REQUIRES: (none - reads from MongoDB collections)
- * PROVIDES: (none - writes to MongoDB statistics collection)
- * PURPOSE: Calculates aggregate metrics across all users including total commits,
- *          PRs, issues, and repository counts for platform analytics dashboard.
+ * REQUIRES: (없음 - MongoDB 컬렉션에서 읽음)
+ * PROVIDES: (없음 - 통계 컬렉션에 기록)
  */
 
 @Slf4j
@@ -68,6 +70,7 @@ public class StatisticsAggregationStep implements StepProvider {
     private final GithubRepositoryStatisticsRepository repoStatsRepository;
     private final StepCompletionListener stepCompletionListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -80,6 +83,7 @@ public class StatisticsAggregationStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;
@@ -327,6 +331,16 @@ public class StatisticsAggregationStep implements StepProvider {
          return value != null ? value : 0;
      }
 
+      /**
+       * 메트릭 계산 중간 결과를 담는 레코드.
+       *
+       * @param totalAdditions 총 추가 라인 수
+       * @param totalDeletions 총 삭제 라인 수
+       * @param nightCommits   야간 커밋 수
+       * @param ownedRepos     소유 저장소 수
+       * @param totalStars     총 스타 수
+       * @param totalForks     총 포크 수
+       */
       private record CalculationResults(
           int totalAdditions,
           int totalDeletions,
@@ -336,6 +350,14 @@ public class StatisticsAggregationStep implements StepProvider {
           int totalForks
       ) {}
 
+      /**
+       * 사용자의 모든 활동 데이터를 담는 레코드.
+       *
+       * @param repos   기여 저장소 목록
+       * @param commits 커밋 목록
+       * @param prs     PR 목록
+       * @param issues  이슈 목록
+       */
       private record UserActivityData(
           List<ContributedRepoDocument> repos,
           List<CommitDocument> commits,
@@ -343,6 +365,22 @@ public class StatisticsAggregationStep implements StepProvider {
           List<IssueDocument> issues
       ) {}
 
+      /**
+       * 집계된 통계 결과를 담는 레코드.
+       *
+       * @param totalCommits          총 커밋 수
+       * @param totalLines            총 변경 라인 수
+       * @param totalAdditions        총 추가 라인 수
+       * @param totalDeletions        총 삭제 라인 수
+       * @param totalPrs              총 PR 수
+       * @param totalIssues           총 이슈 수
+       * @param ownedReposCount       소유 저장소 수
+       * @param contributedReposCount 기여 저장소 수
+       * @param totalStarsReceived    총 수신 스타 수
+       * @param totalForksReceived    총 수신 포크 수
+       * @param nightCommits          야간 커밋 수
+       * @param dayCommits            주간 커밋 수
+       */
       private record AggregatedStats(
         int totalCommits,
         int totalLines,

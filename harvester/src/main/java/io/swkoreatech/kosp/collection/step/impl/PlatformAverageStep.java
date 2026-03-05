@@ -18,6 +18,12 @@ import org.springframework.transaction.PlatformTransactionManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 플랫폼 전체 사용자의 평균 통계를 계산하는 스텝.
+ *
+ * <p>현재 사용자 수와 이전 계산 시 사용자 수의 차이가 임계값 이상일 때만
+ * 재계산을 수행하여 불필요한 계산을 방지한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -33,6 +39,7 @@ public class PlatformAverageStep implements StepProvider {
     private final PlatformStatisticsRepository platformStatisticsRepository;
     private final StepCompletionListener stepCompletionListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -44,6 +51,7 @@ public class PlatformAverageStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;

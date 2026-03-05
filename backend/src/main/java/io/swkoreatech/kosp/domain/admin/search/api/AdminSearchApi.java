@@ -12,6 +12,10 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 전용 통합 검색 API 인터페이스.
+ * <p>키워드를 사용하여 사용자 및 게시글을 통합 검색하는 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Search", description = "관리자 전용 통합 검색 API")
 @RequestMapping("/v1/admin/search")
 public interface AdminSearchApi {

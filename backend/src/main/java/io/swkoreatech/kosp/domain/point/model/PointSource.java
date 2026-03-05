@@ -1,5 +1,9 @@
 package io.swkoreatech.kosp.domain.point.model;
 
+/**
+ * 포인트 발생 출처.
+ * ADMIN: 관리자 포인트 조정, CHALLENGE: 챌린지 달성 보상, ACTIVITY: 활동 보상.
+ */
 public enum PointSource {
 
     ADMIN("관리자 포인트 조정"),
@@ -12,6 +16,11 @@ public enum PointSource {
         this.title = title;
     }
 
+    /**
+     * 포인트 출처의 제목을 반환한다.
+     *
+     * @return 제목
+     */
     public String getTitle() {
         return title;
     }

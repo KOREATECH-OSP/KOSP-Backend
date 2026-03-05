@@ -29,6 +29,10 @@ import com.rabbitmq.client.Channel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 알림 이벤트 리스너.
+ * 알림 이벤트, 챌린지 완료 메시지, 포인트 변경 메시지를 처리한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -41,6 +45,11 @@ public class NotificationEventListener {
     private final PointService pointService;
     private final UserRepository userRepository;
 
+    /**
+     * 알림 이벤트를 비동기로 처리하여 알림을 생성하고 전송한다.
+     *
+     * @param event 알림 이벤트
+     */
     @Async
     @EventListener
     public void handleNotificationEvent(NotificationEvent event) {
@@ -49,6 +58,14 @@ public class NotificationEventListener {
         notificationService.createAndSend(event);
     }
 
+    /**
+     * 챌린지 완료 메시지를 수신하여 알림을 발행한다.
+     *
+     * @param event 챌린지 완료 이벤트
+     * @param channel RabbitMQ 채널
+     * @param deliveryTag 메시지 전달 태그
+     * @throws IOException 메시지 ACK/NACK 처리 중 예외
+     */
     @RabbitListener(queues = QueueNames.CHALLENGE_COMPLETED)
     @Transactional
     public void handleChallengeCompleted(
@@ -83,6 +100,14 @@ public class NotificationEventListener {
         }
     }
 
+    /**
+     * 포인트 변경 메시지를 수신하여 포인트를 처리하고 알림을 발행한다.
+     *
+     * @param event 포인트 변경 이벤트
+     * @param channel RabbitMQ 채널
+     * @param deliveryTag 메시지 전달 태그
+     * @throws IOException 메시지 ACK/NACK 처리 중 예외
+     */
     @RabbitListener(queues = QueueNames.POINT_CHANGED)
     @Transactional
     public void handlePointChanged(

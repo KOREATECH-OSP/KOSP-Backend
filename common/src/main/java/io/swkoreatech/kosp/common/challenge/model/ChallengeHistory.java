@@ -20,6 +20,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 챌린지 이력 엔티티.
+ *
+ * <p>사용자별 챌린지 달성 이력을 관리한다.
+ * 달성 여부, 달성 시각, 달성 시점의 진행도 등을 기록한다.</p>
+ */
 @Getter
 @Entity
 @Table(name = "challenge_history")
@@ -62,11 +68,21 @@ public class ChallengeHistory extends BaseEntity {
         this.progressAtAchievement = progressAtAchievement;
     }
 
+    /**
+     * 챌린지를 달성 상태로 변경한다.
+     *
+     * <p>달성 플래그를 {@code true}로 설정하고, 달성 시각을 현재 시각으로 기록한다.</p>
+     */
     public void achieve() {
         this.isAchieved = true;
         this.achievedAt = LocalDateTime.now();
     }
 
+    /**
+     * 챌린지 진행도를 갱신한다.
+     *
+     * @param progress 현재 진행 수치
+     */
     public void updateProgress(int progress) {
         this.progressAtAchievement = progress;
     }

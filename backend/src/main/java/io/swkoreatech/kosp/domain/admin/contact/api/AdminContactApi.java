@@ -15,6 +15,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 관리자 연락처 관리 API 인터페이스.
+ * <p>Footer에 표시되는 관리자 이메일의 조회 및 수정 기능을 정의한다.</p>
+ */
 @Tag(name = "Admin - Contact", description = "관리자 연락처 관리 API")
 @RequestMapping("/v1/admin/contact")
 public interface AdminContactApi {
@@ -25,6 +29,11 @@ public interface AdminContactApi {
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
+    /**
+     * 관리자 연락처를 조회한다.
+     *
+     * @return 관리자 연락처 응답
+     */
     ResponseEntity<AdminContactResponse> getContact();
 
     @Operation(
@@ -33,6 +42,12 @@ public interface AdminContactApi {
     )
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @PutMapping
+    /**
+     * 관리자 연락처를 수정한다.
+     *
+     * @param request 연락처 수정 요청
+     * @return 수정된 연락처 응답
+     */
     ResponseEntity<AdminContactResponse> updateContact(
         @RequestBody @Valid AdminContactUpdateRequest request
     );

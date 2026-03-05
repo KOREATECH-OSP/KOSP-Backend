@@ -23,6 +23,10 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
+/**
+ * 팀 컨트롤러.
+ * {@link TeamApi}를 구현하여 팀 관련 요청을 처리한다.
+ */
 public class TeamController implements TeamApi {
 
     private final TeamService teamService;

@@ -20,6 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 게시글 관리 컨트롤러.
+ * <p>{@link AdminArticleApi}를 구현하여 관리자 게시글 조회 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/v1/admin/articles")

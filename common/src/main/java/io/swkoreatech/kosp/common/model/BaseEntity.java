@@ -14,6 +14,12 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import lombok.Getter;
 
+/**
+ * 엔티티 공통 기반 클래스.
+ *
+ * <p>모든 엔티티에 공통으로 필요한 생성 시각({@code createdAt})과
+ * 수정 시각({@code updatedAt})을 JPA Auditing으로 자동 관리한다.</p>
+ */
 @Getter
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)

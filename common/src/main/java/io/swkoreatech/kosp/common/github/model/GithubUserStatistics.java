@@ -16,6 +16,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * GitHub 사용자 통계 엔티티.
+ *
+ * <p>GitHub 사용자의 활동 통계(커밋, PR, 이슈, 스타 등)와
+ * 활동 점수, 다양성 점수, 영향력 점수 등의 계산된 점수를 관리한다.</p>
+ */
 @Entity
 @Table(name = "github_user_statistics")
 @Getter
@@ -129,6 +135,22 @@ public class GithubUserStatistics {
         this.dataPeriodEnd = dataPeriodEnd;
     }
 
+    /**
+     * GitHub 활동 통계를 갱신한다.
+     *
+     * @param totalCommits          총 커밋 수
+     * @param totalLines            총 코드 라인 수
+     * @param totalAdditions        총 추가 라인 수
+     * @param totalDeletions        총 삭제 라인 수
+     * @param totalPrs              총 PR 수
+     * @param totalIssues           총 이슈 수
+     * @param ownedReposCount       소유 저장소 수
+     * @param contributedReposCount 기여 저장소 수
+     * @param totalStarsReceived    총 받은 스타 수
+     * @param totalForksReceived    총 받은 포크 수
+     * @param nightCommits          야간 커밋 수
+     * @param dayCommits            주간 커밋 수
+     */
     public void updateStatistics(
         Integer totalCommits,
         Integer totalLines,
@@ -158,6 +180,13 @@ public class GithubUserStatistics {
         this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 활동 점수, 다양성 점수, 영향력 점수를 갱신하고 총점을 재계산한다.
+     *
+     * @param activityScore  활동 점수
+     * @param diversityScore 다양성 점수
+     * @param impactScore    영향력 점수
+     */
     public void updateScores(
         BigDecimal activityScore,
         BigDecimal diversityScore,
@@ -169,6 +198,12 @@ public class GithubUserStatistics {
         this.totalScore = activityScore.add(diversityScore).add(impactScore);
     }
 
+    /**
+     * 통계 데이터의 수집 기간을 갱신한다.
+     *
+     * @param start 데이터 수집 시작일
+     * @param end   데이터 수집 종료일
+     */
     public void updateDataPeriod(LocalDate start, LocalDate end) {
         this.dataPeriodStart = start;
         this.dataPeriodEnd = end;

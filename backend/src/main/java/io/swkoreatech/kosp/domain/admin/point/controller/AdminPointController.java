@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 포인트 관리 컨트롤러.
+ * <p>{@link AdminPointApi}를 구현하여 포인트 변경 및 내역 조회 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminPointController implements AdminPointApi {

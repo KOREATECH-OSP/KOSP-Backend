@@ -6,6 +6,17 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+/**
+ * 도전 과제 생성/수정 요청 DTO.
+ *
+ * @param name 챌린지 이름
+ * @param description 챌린지 설명
+ * @param condition SpEL 조건식
+ * @param tier 챌린지 티어
+ * @param imageResource 이미지 리소스 경로
+ * @param imageResourceType 이미지 리소스 타입
+ * @param point 보상 포인트
+ */
 public record ChallengeRequest(
     @NotBlank(message = "챌린지 이름은 필수입니다.")
     String name,

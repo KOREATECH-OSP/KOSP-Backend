@@ -28,6 +28,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+/**
+ * 모집 공고 API 인터페이스.
+ * 모집 공고의 CRUD, 지원, 지원 관리 엔드포인트를 정의한다.
+ */
 @Tag(name = "Community - Recruit", description = "모집 공고 관리 API")
 public interface RecruitApi {
 

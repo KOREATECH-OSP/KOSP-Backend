@@ -19,6 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 신고 컨트롤러.
+ * {@link ReportApi}의 구현체로, 신고 관련 요청을 처리한다.
+ */
 @RestController
 @RequestMapping("/v1/community")
 @RequiredArgsConstructor
@@ -26,6 +30,7 @@ public class ReportController implements ReportApi {
 
     private final ReportService reportService;
 
+    /** {@inheritDoc} */
     @Override
     @PostMapping("/articles/{articleId}/reports")
     @Permit(name = "community:article:report", description = "게시글 신고")

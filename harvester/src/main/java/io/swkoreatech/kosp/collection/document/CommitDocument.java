@@ -9,6 +9,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * GitHub 커밋 데이터를 저장하는 MongoDB 문서.
+ *
+ * <p>사용자가 작성한 GitHub 커밋의 메타데이터, 작성자 정보,
+ * 코드 변경 통계를 저장한다. 사용자-저장소-SHA 유니크 인덱스를 포함한다.
+ */
 @Getter
 @Builder
 @Document(collection = "github_commits")

@@ -20,6 +20,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 댓글 엔티티.
+ * 게시글에 달린 댓글 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -57,6 +61,7 @@ public class Comment extends BaseEntity {
         this.isDeleted = false;
     }
 
+    /** 댓글을 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }
