@@ -4,9 +4,11 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
@@ -17,7 +19,13 @@ import io.swkoreatech.kosp.domain.notification.model.Notification;
  * 알림 리포지토리.
  * 알림의 저장, 조회, 읽음 처리, 삭제 기능을 제공한다.
  */
-public interface NotificationRepository extends CrudRepository<Notification, Long> {
+public interface NotificationRepository extends Repository<Notification, Long> {
+
+    Optional<Notification> findById(Long id);
+
+    Notification save(Notification notification);
+
+    void delete(Notification notification);
 
     /** 사용자 ID로 알림 목록을 생성일시 내림차순 조회한다. */
     Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);

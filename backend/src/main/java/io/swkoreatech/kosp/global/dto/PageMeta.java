@@ -5,7 +5,7 @@ import org.springframework.data.domain.Page;
 /**
  * 페이지 메타 정보 DTO.
  *
- * @param currentPage 현재 페이지 번호
+ * @param currentPage 현재 페이지 번호 (0-based)
  * @param totalPages  전체 페이지 수
  * @param totalItems  전체 항목 수
  */
