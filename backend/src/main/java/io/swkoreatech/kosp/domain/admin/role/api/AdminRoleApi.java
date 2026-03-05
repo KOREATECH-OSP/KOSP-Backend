@@ -1,13 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.role.api;
 
-import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
-
 import java.util.List;
-
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,6 +15,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyAssignRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 역할 관리 API 인터페이스.

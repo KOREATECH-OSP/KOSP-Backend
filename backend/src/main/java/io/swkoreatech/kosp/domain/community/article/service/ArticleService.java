@@ -1,5 +1,13 @@
 package io.swkoreatech.kosp.domain.community.article.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -19,15 +27,6 @@ import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
 import io.swkoreatech.kosp.global.dto.PageMeta;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -58,7 +57,7 @@ public class ArticleService {
         if (board.isNotice()) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
-        
+
         Article article = Article.builder()
             .author(author)
             .board(board)
@@ -66,14 +65,14 @@ public class ArticleService {
             .content(request.content())
             .tags(request.tags())
             .build();
-        
+
         Article savedArticle = articleRepository.save(article);
-        
+
         // Link attachments if provided
         if (request.attachmentIds() != null && !request.attachmentIds().isEmpty()) {
             List<Attachment> attachments =
                 attachmentRepository.findAllById(request.attachmentIds());
-            
+
             // Verify uploader and link to article
             attachments.forEach(attachment -> {
                 if (!attachment.getUploadedBy().equals(author)) {
@@ -82,7 +81,7 @@ public class ArticleService {
                 attachment.setArticle(savedArticle);
             });
         }
-        
+
         return savedArticle.getId();
     }
 
@@ -97,12 +96,12 @@ public class ArticleService {
     @Transactional
     public ArticleResponse getOne(Long id, User user) {
         Article article = articleRepository.getById(id);
-        
+
         // Check if article is deleted - regular users cannot see deleted articles
         if (article.isDeleted()) {
             throw new GlobalException(ExceptionMessage.NOT_FOUND);
         }
-        
+
         article.increaseViews();
 
         boolean isLiked = isLiked(user, article);
@@ -136,14 +135,14 @@ public class ArticleService {
         Page<Article> page = articleRepository.findByBoardAndIsPinnedTrueAndIsDeletedFalse(board, pageable);
         return toResponse(page, user);
     }
-    
+
     private ArticleListResponse<ArticleResponse> toResponse(Page<Article> page, User user) {
         List<ArticleResponse> posts = page.getContent().stream()
             .map(article -> ArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))
             .toList();
         return new ArticleListResponse<>(posts, PageMeta.from(page));
     }
-    
+
     /**
      * 관리자용 게시글 목록을 조회한다. 삭제된 게시글도 포함된다.
      *
@@ -156,7 +155,7 @@ public class ArticleService {
         Page<Article> page = articleRepository.findByBoard(board, pageable);
         return toAdminResponse(page, user);
     }
-    
+
     /**
      * 관리자용 게시글 상세를 조회한다. 삭제된 게시글도 조회 가능하다.
      *
@@ -168,13 +167,13 @@ public class ArticleService {
     public AdminArticleResponse getOneForAdmin(Long id, User user) {
         Article article = articleRepository.getById(id);
         article.increaseViews();
-        
+
         boolean isLiked = isLiked(user, article);
         boolean isBookmarked = isBookmarked(user, article);
-        
+
         return AdminArticleResponse.from(article, isLiked, isBookmarked);
     }
-    
+
     private ArticleListResponse<AdminArticleResponse> toAdminResponse(Page<Article> page, User user) {
         List<AdminArticleResponse> posts = page.getContent().stream()
             .map(article -> AdminArticleResponse.from(article, isLiked(user, article), isBookmarked(user, article)))

@@ -1,7 +1,5 @@
 package io.swkoreatech.kosp.domain.github.repository;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -10,13 +8,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+
 /**
  * GitHub 저장소 통계 리포지토리.
  * 저장소별 기여 통계의 저장 및 조회 기능을 제공한다.
  */
 public interface GithubRepositoryStatisticsRepository
-        extends Repository<GithubRepositoryStatistics, Long>,
-        JpaSpecificationExecutor<GithubRepositoryStatistics> {
+    extends Repository<GithubRepositoryStatistics, Long>,
+    JpaSpecificationExecutor<GithubRepositoryStatistics> {
 
     /** 저장소 통계를 저장한다. */
     GithubRepositoryStatistics save(GithubRepositoryStatistics statistics);

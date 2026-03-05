@@ -29,7 +29,7 @@ public class GithubGraphQLClient {
 
     private final WebClient webClient;
     private final ResourceLoader resourceLoader;
-    
+
     private String userBasicInfoQuery;
     private String userContributionsQuery;
     private String contributedReposQuery;

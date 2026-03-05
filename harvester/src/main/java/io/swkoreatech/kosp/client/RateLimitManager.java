@@ -1,15 +1,14 @@
 package io.swkoreatech.kosp.client;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.user.GithubUserRepository;
-
 import java.time.Duration;
 import java.time.Instant;
 
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.user.GithubUserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -49,14 +48,14 @@ public class RateLimitManager {
             int remaining = githubUser.getRemainingOrDefault();
             if (remaining <= threshold) {
                 Instant resetTime = githubUser.getRateLimitResetAt();
-                
+
                 if (resetTime == null) {
                     return Mono.empty();
                 }
 
                 Duration waitTime = Duration.between(Instant.now(), resetTime);
-                
-                log.warn("Rate limit threshold reached for user {}. Remaining: {}, Threshold: {}", 
+
+                log.warn("Rate limit threshold reached for user {}. Remaining: {}, Threshold: {}",
                     userId, remaining, threshold);
                 return Mono.error(new RateLimitException(
                     "Rate limit threshold reached. Reset at: " + resetTime,

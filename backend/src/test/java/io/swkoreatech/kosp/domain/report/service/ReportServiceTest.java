@@ -106,7 +106,7 @@ class ReportServiceTest {
             User reporter = createUser(2L, "신고자");
             Article article = createArticle(1L, author);
             ReportRequest request = new ReportRequest(ReportReason.SPAM, "스팸입니다");
-            
+
             given(articleRepository.findById(1L)).willReturn(Optional.of(article));
             given(reportRepository.existsByReporterAndTargetTypeAndTargetId(reporter, ReportTargetType.ARTICLE, 1L))
                 .willReturn(true);
@@ -124,7 +124,7 @@ class ReportServiceTest {
             User reporter = createUser(2L, "신고자");
             Article article = createArticle(1L, author);
             ReportRequest request = new ReportRequest(ReportReason.SPAM, "스팸입니다");
-            
+
             given(articleRepository.findById(1L)).willReturn(Optional.of(article));
             given(reportRepository.existsByReporterAndTargetTypeAndTargetId(reporter, ReportTargetType.ARTICLE, 1L))
                 .willReturn(false);

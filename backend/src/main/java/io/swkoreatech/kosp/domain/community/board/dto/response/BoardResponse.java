@@ -1,7 +1,6 @@
 package io.swkoreatech.kosp.domain.community.board.dto.response;
 
 import io.swkoreatech.kosp.domain.community.board.model.Board;
-
 import lombok.Builder;
 
 /**

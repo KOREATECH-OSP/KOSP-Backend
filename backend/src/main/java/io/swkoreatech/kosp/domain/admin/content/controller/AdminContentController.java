@@ -1,16 +1,15 @@
 package io.swkoreatech.kosp.domain.admin.content.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.content.api.AdminContentApi;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.content.service.AdminContentService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 
 /**

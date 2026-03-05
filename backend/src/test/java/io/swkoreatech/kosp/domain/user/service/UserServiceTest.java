@@ -26,10 +26,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.dto.response.CheckMemberIdResponse;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.auth.service.AuthService;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
@@ -38,10 +40,7 @@ import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
 import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserService 단위 테스트")
@@ -117,7 +116,7 @@ class UserServiceTest {
                 "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
             SignupToken token = createSignupToken(true);
             User existingUser = createUser(1L, "기존유저");
-            
+
             given(githubUserRepository.findByGithubId(123L)).willReturn(Optional.empty());
             given(userRepository.findByKutEmail("test@koreatech.ac.kr")).willReturn(Optional.of(existingUser));
 

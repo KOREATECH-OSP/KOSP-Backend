@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.member.api;
 
-import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.member.dto.request.UserRoleUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +14,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.member.dto.request.AdminUserUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.member.dto.request.UserRoleUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 사용자 관리 API 인터페이스.
@@ -47,7 +45,6 @@ public interface AdminMemberApi {
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/{userId}")
     ResponseEntity<Void> deleteUser(@PathVariable Long userId);
-
 
     @Operation(
         summary = "사용자 정보 수정 (관리자)",

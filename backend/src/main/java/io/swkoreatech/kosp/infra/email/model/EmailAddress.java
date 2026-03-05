@@ -2,7 +2,6 @@ package io.swkoreatech.kosp.infra.email.model;
 
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
-
 import jakarta.validation.constraints.Email;
 
 /**

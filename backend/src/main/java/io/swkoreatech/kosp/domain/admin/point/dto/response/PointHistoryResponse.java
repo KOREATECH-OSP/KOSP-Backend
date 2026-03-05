@@ -1,11 +1,11 @@
 package io.swkoreatech.kosp.domain.admin.point.dto.response;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.point.model.PointTransaction;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 
 /**
  * 포인트 내역 응답 DTO.

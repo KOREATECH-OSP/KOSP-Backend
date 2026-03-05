@@ -1,20 +1,5 @@
 package io.swkoreatech.kosp.domain.challenge.service;
 
-import io.swkoreatech.kosp.common.challenge.model.Challenge;
-import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
-import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
-
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -30,6 +15,20 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
+import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,7 +67,6 @@ public class ChallengeService {
         return AdminChallengeResponse.from(challenge);
     }
 
-
     /**
      * 새로운 도전 과제를 생성한다.
      *
@@ -105,8 +103,6 @@ public class ChallengeService {
         challengeRepository.delete(challenge);
         log.info("Deleted challenge: {}", challengeId);
     }
-
-
 
     /**
      * 도전 과제를 수정한다.
@@ -154,7 +150,7 @@ public class ChallengeService {
     public ChallengeListResponse getChallenges(User user, Integer tier) {
         List<Challenge> challenges = findChallengesByTier(tier);
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
-        
+
         Map<Long, ChallengeHistory> historyMap = histories.stream()
             .collect(Collectors.toMap(h -> h.getChallenge().getId(), h -> h));
 
@@ -181,7 +177,7 @@ public class ChallengeService {
         return ChallengeListResponse.from(
             challengeResponses,
             ChallengeListResponse.ChallengeSummary.from(
-                    totalChallenges, completedCount, overallProgress, totalEarnedPoints
+                totalChallenges, completedCount, overallProgress, totalEarnedPoints
             )
         );
     }
@@ -233,7 +229,7 @@ public class ChallengeService {
         if (totalChallenges <= 0) {
             return 0.0;
         }
-        return (double) completedCount / totalChallenges * 100.0;
+        return (double)completedCount / totalChallenges * 100.0;
     }
 
     /**
@@ -246,16 +242,16 @@ public class ChallengeService {
 
         List<SpelVariableResponse.ExampleExpression> examples = List.of(
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalCommits * 100 / 100, 100)", 
+                "T(Math).min(totalCommits * 100 / 100, 100)",
                 "커밋 100회 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalPrs * 100 / 10, 100)", 
+                "T(Math).min(totalPrs * 100 / 10, 100)",
                 "PR 10개 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalStarsReceived * 100 / 50, 100)", 
+                "T(Math).min(totalStarsReceived * 100 / 50, 100)",
                 "스타 50개 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "(T(Math).min(totalCommits * 100 / 50, 100) + T(Math).min(totalPrs * 100 / 5, 100)) / 2", 
+                "(T(Math).min(totalCommits * 100 / 50, 100) + T(Math).min(totalPrs * 100 / 5, 100)) / 2",
                 "커밋 50회 + PR 5개 복합 조건 (평균)")
         );
 
@@ -264,7 +260,7 @@ public class ChallengeService {
 
     private List<SpelVariableResponse.VariableInfo> buildVariablesFromEntity() {
         List<SpelVariableResponse.VariableInfo> variables = new ArrayList<>();
-        
+
         Map<String, String> descriptions = Map.ofEntries(
             Map.entry("totalCommits", "총 커밋 수"),
             Map.entry("totalLines", "총 라인 수"),
@@ -287,22 +283,22 @@ public class ChallengeService {
         for (Field field : GithubUserStatistics.class.getDeclaredFields()) {
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
-            
+
             if (!isSpelCompatibleType(fieldType)) {
                 continue;
             }
 
             String description = descriptions.getOrDefault(fieldName, fieldName);
             String typeName = mapToSimpleTypeName(fieldType);
-            
+
             variables.add(new SpelVariableResponse.VariableInfo(fieldName, description, typeName));
         }
-        
+
         return variables;
     }
 
     private boolean isSpelCompatibleType(Class<?> type) {
-        return type == Integer.class || type == int.class 
+        return type == Integer.class || type == int.class
             || type == Long.class || type == long.class
             || type == BigDecimal.class
             || type == Double.class || type == double.class;

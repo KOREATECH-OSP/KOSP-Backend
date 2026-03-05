@@ -1,18 +1,18 @@
 package io.swkoreatech.kosp.global.auth.token;
 
-import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
-import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
-import io.swkoreatech.kosp.global.auth.exception.TokenParseException;
-import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
-
 import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
+import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
+import io.swkoreatech.kosp.global.auth.exception.TokenParseException;
+import io.swkoreatech.kosp.global.config.jwt.TokenPropertiesProvider;
 
 /**
  * JWT 토큰의 추상 기반 클래스.
@@ -56,7 +56,8 @@ public abstract class JwtToken {
         }
 
         Map<String, Object> claims = TokenPropertiesProvider.objectMapper()
-                .convertValue(this, new TypeReference<>() {});
+            .convertValue(this, new TypeReference<>() {
+            });
 
         value = Jwts.builder()
             .subject(getSubject())

@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
-
 import java.math.BigDecimal;
 
 import org.springframework.batch.core.Step;
@@ -15,6 +9,11 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.job.StepCompletionListener;
+import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
+import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -70,7 +69,7 @@ public class PlatformAverageStep implements StepProvider {
         PlatformStatistics platformStats = platformStatisticsRepository.getOrCreate(STAT_KEY);
         int lastCalculatedCount = platformStats.getTotalUserCount();
 
-        int delta = (int) (currentUserCount - lastCalculatedCount);
+        int delta = (int)(currentUserCount - lastCalculatedCount);
         if (delta < RECOMPUTE_THRESHOLD) {
             log.info("Threshold not met (delta: {}), skipping", delta);
             return false;
@@ -84,7 +83,7 @@ public class PlatformAverageStep implements StepProvider {
         BigDecimal avgPrs = getAverageOrZero(statisticsRepository.findAveragePrs());
         BigDecimal avgIssues = getAverageOrZero(statisticsRepository.findAverageIssues());
         BigDecimal avgStars = getAverageOrZero(statisticsRepository.findAverageStars());
-        int totalUserCount = (int) statisticsRepository.count();
+        int totalUserCount = (int)statisticsRepository.count();
 
         PlatformStatistics platformStats = platformStatisticsRepository.getOrCreate(STAT_KEY);
         platformStats.updateAverages(avgCommits, avgStars, avgPrs, avgIssues, totalUserCount);

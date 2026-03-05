@@ -2,10 +2,9 @@ package io.swkoreatech.kosp.domain.auth.dto.request;
 
 import static io.swagger.v3.oas.annotations.media.Schema.RequiredMode.REQUIRED;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 로그인 요청 DTO.

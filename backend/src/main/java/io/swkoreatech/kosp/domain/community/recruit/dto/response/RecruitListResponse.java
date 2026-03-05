@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.recruit.dto.response;
 
-import io.swkoreatech.kosp.global.dto.PageMeta;
-
 import java.util.List;
+
+import io.swkoreatech.kosp.global.dto.PageMeta;
 
 /**
  * 모집 공고 목록 응답 DTO.

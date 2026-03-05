@@ -1,10 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.contact.api;
 
-import io.swkoreatech.kosp.domain.admin.contact.dto.request.AdminContactUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.contact.dto.response.AdminContactResponse;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.contact.dto.request.AdminContactUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.contact.dto.response.AdminContactResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 연락처 관리 API 인터페이스.

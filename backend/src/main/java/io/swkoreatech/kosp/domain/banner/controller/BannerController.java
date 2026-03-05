@@ -1,13 +1,12 @@
 package io.swkoreatech.kosp.domain.banner.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swkoreatech.kosp.domain.admin.banner.dto.response.BannerSettingResponse;
 import io.swkoreatech.kosp.domain.admin.banner.service.BannerService;
 import io.swkoreatech.kosp.domain.banner.api.BannerApi;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 
 /**

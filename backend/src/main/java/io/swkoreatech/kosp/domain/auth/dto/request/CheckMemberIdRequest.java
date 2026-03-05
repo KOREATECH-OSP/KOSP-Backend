@@ -1,9 +1,8 @@
 package io.swkoreatech.kosp.domain.auth.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 학번/사번 중복 확인 요청 DTO.

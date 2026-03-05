@@ -18,4 +18,5 @@ public record PointChangedEvent(
     String reason,
     String source,
     String messageId
-) {}
+) {
+}

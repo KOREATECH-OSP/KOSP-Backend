@@ -1,5 +1,11 @@
 package io.swkoreatech.kosp.domain.community.comment.controller;
 
+import java.net.URI;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.comment.api.CommentApi;
 import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
@@ -8,13 +14,6 @@ import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLi
 import io.swkoreatech.kosp.domain.community.comment.service.CommentService;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
-
-import java.net.URI;
-
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 
 /**

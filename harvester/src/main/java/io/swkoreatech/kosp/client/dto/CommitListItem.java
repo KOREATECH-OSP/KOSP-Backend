@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Getter;
 
 /**

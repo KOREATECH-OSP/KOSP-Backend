@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.board.dto.response;
 
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-
 import java.util.List;
+
+import io.swkoreatech.kosp.domain.community.board.model.Board;
 
 /**
  * 게시판 목록 응답 DTO.

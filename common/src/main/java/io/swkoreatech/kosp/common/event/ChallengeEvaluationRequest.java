@@ -15,4 +15,5 @@ public record ChallengeEvaluationRequest(
     Long userId,
     String messageId,
     LocalDateTime timestamp
-) {}
+) {
+}

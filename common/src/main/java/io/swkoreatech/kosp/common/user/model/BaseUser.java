@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.common.user.model;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-import io.swkoreatech.kosp.common.model.BaseEntity;
-
 import static lombok.AccessLevel.PROTECTED;
 
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
@@ -15,7 +14,6 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -96,7 +94,8 @@ public abstract class BaseUser extends BaseEntity {
      * @param kutId 새로운 학번
      */
     public void updateKutId(String kutId) {
-        if (kutId != null) this.kutId = kutId;
+        if (kutId != null)
+            this.kutId = kutId;
     }
 
     /**
@@ -105,7 +104,8 @@ public abstract class BaseUser extends BaseEntity {
      * @param kutEmail 새로운 학교 이메일
      */
     public void updateKutEmail(String kutEmail) {
-        if (kutEmail != null) this.kutEmail = kutEmail.toLowerCase();
+        if (kutEmail != null)
+            this.kutEmail = kutEmail.toLowerCase();
     }
 
     /**

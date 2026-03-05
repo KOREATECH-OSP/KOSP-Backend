@@ -1,9 +1,9 @@
 package io.swkoreatech.kosp.domain.admin.challenge.dto;
 
+import java.util.List;
+
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.model.ImageResourceType;
-
-import java.util.List;
 
 /**
  * 관리자 챌린지 목록 응답 DTO.

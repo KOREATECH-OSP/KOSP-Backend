@@ -1,13 +1,12 @@
 package io.swkoreatech.kosp.domain.community.team.api;
 
-import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
 
 @Tag(name = "Team", description = "팀 및 초대 관리 API")
 /**

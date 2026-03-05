@@ -1,21 +1,5 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
-import io.swkoreatech.kosp.client.GithubGraphQLClient;
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse.PageInfo;
-import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse.PullRequestNode;
-import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse;
-import io.swkoreatech.kosp.collection.document.PullRequestDocument;
-import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
-import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
-import io.swkoreatech.kosp.collection.util.PaginationHelper;
-import io.swkoreatech.kosp.collection.util.StepContextHelper;
-import io.swkoreatech.kosp.job.LoggingConstants;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -28,6 +12,19 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse;
+import io.swkoreatech.kosp.client.dto.UserPullRequestsResponse.PullRequestNode;
+import io.swkoreatech.kosp.collection.document.PullRequestDocument;
+import io.swkoreatech.kosp.collection.repository.PullRequestDocumentRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.job.LoggingConstants;
+import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -76,10 +73,10 @@ public class PullRequestMiningStep implements StepProvider {
     private int totalSkippedCount;
 
     private void execute(ChunkContext chunkContext) {
-         ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
-         Long userId = StepContextHelper.extractUserId(chunkContext);
-         String login = context.getString(StepContextKeys.GITHUB_LOGIN);
-         String token = context.getString(StepContextKeys.GITHUB_TOKEN);
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
+        String login = context.getString(StepContextKeys.GITHUB_LOGIN);
+        String token = context.getString(StepContextKeys.GITHUB_TOKEN);
 
         if (login == null || token == null) {
             log.warn("GitHub credentials not found in context for user {}", userId);
@@ -93,38 +90,40 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private int fetchAllPullRequests(Long userId, String login, String token) {
-         Instant now = Instant.now();
-         return PaginationHelper.paginate(
-             cursor -> fetchPullRequestsPage(login, cursor, token),
-             UserPullRequestsResponse::getPageInfo,
-             (data, c) -> savePullRequests(userId, data.getPullRequests(), now),
-             "user",
-             login,
-             UserPullRequestsResponse.class
-         );
-     }
-
-    private GraphQLResponse<UserPullRequestsResponse> fetchPullRequestsPage(String login, String cursor, String token) {
-        return graphQLClient.getUserPullRequests(login, cursor, token, GraphQLTypeFactory.<UserPullRequestsResponse>responseType()).block();
+        Instant now = Instant.now();
+        return PaginationHelper.paginate(
+            cursor -> fetchPullRequestsPage(login, cursor, token),
+            UserPullRequestsResponse::getPageInfo,
+            (data, c) -> savePullRequests(userId, data.getPullRequests(), now),
+            "user",
+            login,
+            UserPullRequestsResponse.class
+        );
     }
 
-     private int savePullRequests(Long userId, List<PullRequestNode> prs, Instant now) {
-          int saved = 0;
-          int skipped = 0;
-          for (PullRequestNode pr : prs) {
-              if (prDocumentRepository.existsByUserIdAndRepositoryNameAndPrNumber(userId, pr.getRepoName(), pr.getNumber())) {
-                  skipped++;
-                  continue;
-              }
+    private GraphQLResponse<UserPullRequestsResponse> fetchPullRequestsPage(String login, String cursor, String token) {
+        return graphQLClient.getUserPullRequests(login, cursor, token,
+            GraphQLTypeFactory.<UserPullRequestsResponse>responseType()).block();
+    }
 
-             PullRequestDocument document = buildDocument(userId, pr, now);
-             prDocumentRepository.save(document);
-             saved++;
-         }
-         totalSavedCount += saved;
-         totalSkippedCount += skipped;
-         return saved + skipped;
-     }
+    private int savePullRequests(Long userId, List<PullRequestNode> prs, Instant now) {
+        int saved = 0;
+        int skipped = 0;
+        for (PullRequestNode pr : prs) {
+            if (prDocumentRepository.existsByUserIdAndRepositoryNameAndPrNumber(userId, pr.getRepoName(),
+                pr.getNumber())) {
+                skipped++;
+                continue;
+            }
+
+            PullRequestDocument document = buildDocument(userId, pr, now);
+            prDocumentRepository.save(document);
+            saved++;
+        }
+        totalSavedCount += saved;
+        totalSkippedCount += skipped;
+        return saved + skipped;
+    }
 
     private PullRequestDocument buildDocument(Long userId, PullRequestNode pr, Instant now) {
         PullRequestDocument.PullRequestDocumentBuilder builder = PullRequestDocument.builder();
@@ -135,9 +134,9 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private PullRequestDocument.PullRequestDocumentBuilder buildBasicFields(
-            PullRequestDocument.PullRequestDocumentBuilder builder,
-            Long userId,
-            PullRequestNode pr) {
+        PullRequestDocument.PullRequestDocumentBuilder builder,
+        Long userId,
+        PullRequestNode pr) {
         return builder
             .userId(userId)
             .prNumber(pr.getNumber())
@@ -148,8 +147,8 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private PullRequestDocument.PullRequestDocumentBuilder buildStatisticsFields(
-            PullRequestDocument.PullRequestDocumentBuilder builder,
-            PullRequestNode pr) {
+        PullRequestDocument.PullRequestDocumentBuilder builder,
+        PullRequestNode pr) {
         return builder
             .additions(pr.getAdditions())
             .deletions(pr.getDeletions())
@@ -160,9 +159,9 @@ public class PullRequestMiningStep implements StepProvider {
     }
 
     private PullRequestDocument.PullRequestDocumentBuilder buildMetadataFields(
-            PullRequestDocument.PullRequestDocumentBuilder builder,
-            PullRequestNode pr,
-            Instant now) {
+        PullRequestDocument.PullRequestDocumentBuilder builder,
+        PullRequestNode pr,
+        Instant now) {
         return builder
             .merged(pr.isMerged())
             .isCrossRepository(pr.isCrossRepository())

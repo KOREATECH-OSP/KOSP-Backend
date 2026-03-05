@@ -1,13 +1,5 @@
 package io.swkoreatech.kosp.domain.community.comment.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +11,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
 /**
  * 댓글 API 인터페이스.

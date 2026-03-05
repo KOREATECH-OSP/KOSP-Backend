@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.global.auth.resolver;
 
-import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
-import io.swkoreatech.kosp.global.auth.token.JwtToken;
-
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Component;
 import org.thymeleaf.util.StringUtils;
+
+import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
+import io.swkoreatech.kosp.global.auth.token.JwtToken;
 
 /**
  * 토큰 클래스로부터 HTTP 헤더 이름을 결정하는 리졸버.

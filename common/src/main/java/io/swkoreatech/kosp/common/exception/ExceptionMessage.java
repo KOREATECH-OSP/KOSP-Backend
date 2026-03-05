@@ -36,7 +36,7 @@ public enum ExceptionMessage {
     GITHUB_USER_NOT_FOUND("연동된 깃허브 계정이 없습니다.", HttpStatus.NOT_FOUND),
     GITHUB_USER_ALREADY_EXISTS("이미 가입된 깃허브 계정입니다.", HttpStatus.CONFLICT),
     GITHUB_CLIENT_REGISTRATION_ERROR(
-            "깃허브 클라이언트 설정을 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR
+        "깃허브 클라이언트 설정을 찾을 수 없습니다.", HttpStatus.INTERNAL_SERVER_ERROR
     ),
     EMAIL_SEND_FAILED("이메일 전송에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     EMAIL_NOT_FOUND("이메일 인증 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),

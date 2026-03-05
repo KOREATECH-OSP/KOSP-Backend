@@ -1,13 +1,12 @@
 package io.swkoreatech.kosp.global.host;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -24,9 +23,9 @@ public class ClientURLInterceptor implements HandlerInterceptor {
     /** {@inheritDoc} */
     @Override
     public boolean preHandle(
-            @NonNull HttpServletRequest request,
-            @NonNull HttpServletResponse response,
-            @NonNull Object handler
+        @NonNull HttpServletRequest request,
+        @NonNull HttpServletResponse response,
+        @NonNull Object handler
     ) {
         String clientURL = getClientURL(request);
         clientURLContext.setClientURL(clientURL);

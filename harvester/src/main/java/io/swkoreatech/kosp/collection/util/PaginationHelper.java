@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.collection.util;
 
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -56,20 +55,21 @@ public final class PaginationHelper {
      * @return 전체 페이지에서 저장된 항목의 총 수
      */
     public static <T> int paginate(
-            Function<String, GraphQLResponse<T>> fetcher,
-            Function<T, Object> pageInfoExtractor,
-            BiFunction<T, String, Integer> dataProcessor,
-            String entityType,
-            String entityId,
-            Class<T> dataClass
+        Function<String, GraphQLResponse<T>> fetcher,
+        Function<T, Object> pageInfoExtractor,
+        BiFunction<T, String, Integer> dataProcessor,
+        String entityType,
+        String entityId,
+        Class<T> dataClass
     ) {
         int totalSaved = 0;
         String cursor = null;
         do {
             PageResult<T> result = fetchAndProcessPage(
-                    fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass
+                fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass
             );
-            if (result.hasError) break;
+            if (result.hasError)
+                break;
             totalSaved += result.saved;
             cursor = result.nextCursor;
         } while (cursor != null);
@@ -90,13 +90,13 @@ public final class PaginationHelper {
      * @return page result with saved count and next cursor
      */
     private static <T> PageResult<T> fetchAndProcessPage(
-            Function<String, GraphQLResponse<T>> fetcher,
-            Function<T, Object> pageInfoExtractor,
-            BiFunction<T, String, Integer> dataProcessor,
-            String entityType,
-            String entityId,
-            String cursor,
-            Class<T> dataClass
+        Function<String, GraphQLResponse<T>> fetcher,
+        Function<T, Object> pageInfoExtractor,
+        BiFunction<T, String, Integer> dataProcessor,
+        String entityType,
+        String entityId,
+        String cursor,
+        Class<T> dataClass
     ) {
         GraphQLResponse<T> response = fetcher.apply(cursor);
         if (GraphQLErrorHandler.logAndCheckErrors(response, entityType, entityId)) {
@@ -120,11 +120,11 @@ public final class PaginationHelper {
             return null;
         }
         try {
-            boolean hasNextPage = (boolean) pageInfo.getClass().getMethod("isHasNextPage").invoke(pageInfo);
+            boolean hasNextPage = (boolean)pageInfo.getClass().getMethod("isHasNextPage").invoke(pageInfo);
             if (!hasNextPage) {
                 return null;
             }
-            return (String) pageInfo.getClass().getMethod("getEndCursor").invoke(pageInfo);
+            return (String)pageInfo.getClass().getMethod("getEndCursor").invoke(pageInfo);
         } catch (Exception exception) {
             log.warn("Failed to extract cursor from PageInfo", exception);
             return null;

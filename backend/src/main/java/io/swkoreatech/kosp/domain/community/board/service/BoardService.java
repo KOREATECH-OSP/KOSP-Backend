@@ -1,14 +1,13 @@
 package io.swkoreatech.kosp.domain.community.board.service;
 
-import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
-
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 
 /**

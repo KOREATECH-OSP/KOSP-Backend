@@ -1,5 +1,12 @@
 package io.swkoreatech.kosp.domain.auth.controller;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.auth.api.AuthApi;
 import io.swkoreatech.kosp.domain.auth.dto.request.CheckMemberIdRequest;
@@ -22,16 +29,7 @@ import io.swkoreatech.kosp.global.auth.token.SignupToken;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
-
 import jakarta.validation.Valid;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 
 /**

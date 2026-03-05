@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.user.repository;
 
+import org.springframework.data.repository.CrudRepository;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.user.model.PasswordResetToken;
-
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * 비밀번호 재설정 토큰 리포지토리.

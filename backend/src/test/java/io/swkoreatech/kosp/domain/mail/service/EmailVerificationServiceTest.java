@@ -61,7 +61,7 @@ class EmailVerificationServiceTest {
             // then
             ArgumentCaptor<EmailVerification> verificationCaptor = ArgumentCaptor.forClass(EmailVerification.class);
             verify(emailVerificationRepository).save(verificationCaptor.capture());
-            
+
             EmailVerification captured = verificationCaptor.getValue();
             assertThat(captured.getEmail()).isEqualTo(email);
             assertThat(captured.getCode()).hasSize(6);

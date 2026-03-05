@@ -1,21 +1,6 @@
 package io.swkoreatech.kosp.domain.community.article.controller;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.api.ArticleApi;
-import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
-import io.swkoreatech.kosp.domain.community.article.service.ArticleService;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
-
 import java.net.URI;
-
-import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +14,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.api.ArticleApi;
+import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
+import io.swkoreatech.kosp.domain.community.article.service.ArticleService;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.board.service.BoardService;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -109,6 +107,7 @@ public class ArticleController implements ArticleApi {
         articleService.delete(user, id);
         return ResponseEntity.noContent().build();
     }
+
     /** {@inheritDoc} */
     @Override
     @PostMapping("/{id}/likes")

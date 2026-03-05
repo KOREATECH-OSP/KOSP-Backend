@@ -1,16 +1,5 @@
 package io.swkoreatech.kosp.domain.notification.service;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
-import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
-import io.swkoreatech.kosp.domain.notification.model.Notification;
-import io.swkoreatech.kosp.domain.notification.repository.NotificationRepository;
-
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,6 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.Notification;
+import io.swkoreatech.kosp.domain.notification.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -82,7 +81,7 @@ public class NotificationService {
 
         Notification notification = buildNotification(user, event);
         notificationRepository.save(notification);
-        
+
         logNotificationCreation(user, notification);
         sendSseNotification(user.getId(), notification);
     }
@@ -112,26 +111,26 @@ public class NotificationService {
     private void sendSseNotification(Long userId, Notification notification) {
         SseEmitter emitter = emitters.get(userId);
 
-         if (emitter == null) {
-             log.debug("No active SSE connection for user {}", userId);
-             return;
-         }
+        if (emitter == null) {
+            log.debug("No active SSE connection for user {}", userId);
+            return;
+        }
 
         NotificationResponse response = NotificationResponse.from(notification);
         sendToClient(userId, emitter, "notification", response);
     }
 
-      private void sendToClient(Long userId, SseEmitter emitter, String eventName, Object data) {
-          // Note: emitter.send() is async - errors are handled by onError() callback
-          // try-catch here only catches synchronous errors (rare)
-          try {
-              emitter.send(SseEmitter.event()
-                  .name(eventName)
-                  .data(data));
-          } catch (IOException e) {
-              log.debug("IOException in sendToClient for user {}: {}", userId, e.getMessage());
-          }
-      }
+    private void sendToClient(Long userId, SseEmitter emitter, String eventName, Object data) {
+        // Note: emitter.send() is async - errors are handled by onError() callback
+        // try-catch here only catches synchronous errors (rare)
+        try {
+            emitter.send(SseEmitter.event()
+                .name(eventName)
+                .data(data));
+        } catch (IOException e) {
+            log.debug("IOException in sendToClient for user {}: {}", userId, e.getMessage());
+        }
+    }
 
     /**
      * 사용자의 알림 목록을 조회한다.
@@ -218,30 +217,30 @@ public class NotificationService {
         if (error == null) {
             return false;
         }
-        
+
         String className = error.getClass().getName();
         if (className.contains("AsyncRequestNotUsableException")) {
             return true;
         }
-        
+
         if (error instanceof IOException) {
             return true;
         }
-        
+
         // Check cause chain recursively
         return isDisconnectError(error.getCause());
     }
 
-     /** SSE 연결 유지를 위한 하트비트를 30초마다 전송한다. */
-     @Scheduled(fixedRate = 30000)
-     public void sendHeartbeat() {
-         // Errors are handled by onError() callback (async)
-         emitters.forEach((userId, emitter) -> {
-             try {
-                 emitter.send(SseEmitter.event().comment("heartbeat"));
-             } catch (IOException e) {
-                 log.debug("IOException in sendHeartbeat for user {}: {}", userId, e.getMessage());
-             }
-         });
-     }
+    /** SSE 연결 유지를 위한 하트비트를 30초마다 전송한다. */
+    @Scheduled(fixedRate = 30000)
+    public void sendHeartbeat() {
+        // Errors are handled by onError() callback (async)
+        emitters.forEach((userId, emitter) -> {
+            try {
+                emitter.send(SseEmitter.event().comment("heartbeat"));
+            } catch (IOException e) {
+                log.debug("IOException in sendHeartbeat for user {}: {}", userId, e.getMessage());
+            }
+        });
+    }
 }

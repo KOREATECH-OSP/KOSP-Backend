@@ -1,12 +1,12 @@
 package io.swkoreatech.kosp.domain.community.article.repository;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
 
 /**
  * 게시글 좋아요 리포지토리.

@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.upload.dto.response;
 
-import io.swkoreatech.kosp.domain.upload.model.Attachment;
-
 import java.time.LocalDateTime;
+
+import io.swkoreatech.kosp.domain.upload.model.Attachment;
 
 /**
  * 파일 응답 DTO.

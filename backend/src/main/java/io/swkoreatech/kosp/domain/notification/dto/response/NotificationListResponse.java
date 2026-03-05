@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.notification.dto.response;
 
-import io.swkoreatech.kosp.domain.notification.model.Notification;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+
+import io.swkoreatech.kosp.domain.notification.model.Notification;
 
 /**
  * 알림 목록 응답 DTO.

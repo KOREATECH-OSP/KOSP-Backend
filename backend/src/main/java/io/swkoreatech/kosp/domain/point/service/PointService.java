@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.domain.point.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -7,10 +10,6 @@ import io.swkoreatech.kosp.domain.point.model.PointSource;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.model.TransactionType;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**

@@ -9,4 +9,5 @@ import jakarta.validation.constraints.NotBlank;
  */
 public record PolicyAssignRequest(
     @NotBlank String policyName
-) {}
+) {
+}

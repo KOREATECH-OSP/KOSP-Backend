@@ -23,6 +23,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.admin.point.dto.request.PointTransactionRequest;
 import io.swkoreatech.kosp.domain.admin.point.dto.response.PointHistoryResponse;
 import io.swkoreatech.kosp.domain.point.event.PointChangeEvent;
@@ -30,9 +33,6 @@ import io.swkoreatech.kosp.domain.point.model.PointSource;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.model.TransactionType;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminPointService 단위 테스트")
@@ -82,9 +82,9 @@ class AdminPointServiceTest {
             // then
             then(eventPublisher).should().publishEvent(argThat((PointChangeEvent event) ->
                 event.user().equals(user) &&
-                event.amount().equals(50) &&
-                event.reason().equals("테스트 지급") &&
-                event.source() == PointSource.ADMIN
+                    event.amount().equals(50) &&
+                    event.reason().equals("테스트 지급") &&
+                    event.source() == PointSource.ADMIN
             ));
         }
 
@@ -102,7 +102,7 @@ class AdminPointServiceTest {
             // then
             then(eventPublisher).should().publishEvent(argThat((PointChangeEvent event) ->
                 event.amount().equals(-30) &&
-                event.source() == PointSource.ADMIN
+                    event.source() == PointSource.ADMIN
             ));
         }
 

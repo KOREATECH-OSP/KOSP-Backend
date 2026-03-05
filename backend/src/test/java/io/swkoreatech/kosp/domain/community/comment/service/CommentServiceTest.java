@@ -25,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
@@ -35,8 +37,6 @@ import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommentService 단위 테스트")
@@ -87,7 +87,7 @@ class CommentServiceTest {
             User author = createUser(1L, "작성자");
             Article article = createArticle(1L, author);
             CommentCreateRequest request = new CommentCreateRequest("새 댓글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             doAnswer(invocation -> {
                 Comment comment = invocation.getArgument(0);
@@ -118,7 +118,7 @@ class CommentServiceTest {
             User other = createUser(2L, "다른 사용자");
             Article article = createArticle(1L, author);
             Comment comment = createComment(1L, author, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
 
             // when & then
@@ -201,7 +201,7 @@ class CommentServiceTest {
             User user = createUser(1L, "사용자");
             Article article = createArticle(1L, user);
             Comment comment = createComment(1L, user, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.empty());
 
@@ -221,7 +221,7 @@ class CommentServiceTest {
             Article article = createArticle(1L, user);
             Comment comment = createComment(1L, user, article);
             CommentLike like = CommentLike.builder().user(user).comment(comment).build();
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.of(like));
 

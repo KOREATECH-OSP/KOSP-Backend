@@ -1,9 +1,5 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
-import io.swkoreatech.kosp.common.auth.model.Permission;
-import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.common.auth.model.Role;
-
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -13,6 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import lombok.RequiredArgsConstructor;
 
 /**

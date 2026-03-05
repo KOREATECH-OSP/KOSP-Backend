@@ -1,26 +1,5 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
-import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
-import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
-import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
-import io.swkoreatech.kosp.domain.community.team.model.Team;
-import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
-import io.swkoreatech.kosp.global.dto.PageMeta;
-import io.swkoreatech.kosp.global.util.RsqlUtils;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +10,26 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
+import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitApplyRepository;
+import io.swkoreatech.kosp.domain.community.recruit.repository.RecruitRepository;
+import io.swkoreatech.kosp.domain.community.team.model.Team;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
+import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
+import io.swkoreatech.kosp.global.dto.PageMeta;
+import io.swkoreatech.kosp.global.util.RsqlUtils;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -70,7 +69,7 @@ public class RecruitService {
             .startDate(request.startDate())
             .endDate(request.endDate())
             .build();
-            
+
         return recruitRepository.save(recruit).getId();
     }
 
@@ -84,11 +83,11 @@ public class RecruitService {
     public RecruitResponse getOne(Long id, User user) {
         Recruit recruit = recruitRepository.getById(id);
         recruit.increaseViews();
-        
+
         boolean isLiked = isLiked(user, recruit);
         boolean isBookmarked = isBookmarked(user, recruit);
         boolean userCanApply = canApply(user, recruit);
-        
+
         return RecruitResponse.from(recruit, isLiked, isBookmarked, userCanApply);
     }
 
@@ -115,7 +114,7 @@ public class RecruitService {
     }
 
     private Specification<Recruit> createSpecification(Board board, String rsql) {
-        Specification<Recruit> boardSpec = (root, query, builder) -> 
+        Specification<Recruit> boardSpec = (root, query, builder) ->
             builder.equal(root.get("board"), board);
         return RsqlUtils.toSpecification(rsql, boardSpec);
     }
@@ -123,8 +122,8 @@ public class RecruitService {
     private List<RecruitResponse> mapToResponses(Page<Recruit> page, User user) {
         return page.getContent().stream()
             .map(recruit -> RecruitResponse.from(
-                recruit, 
-                isLiked(user, recruit), 
+                recruit,
+                isLiked(user, recruit),
                 isBookmarked(user, recruit),
                 canApply(user, recruit)
             ))
@@ -158,10 +157,10 @@ public class RecruitService {
     public void update(User author, Long id, RecruitRequest request) {
         Recruit recruit = recruitRepository.getById(id);
         validateOwner(recruit, author.getId());
-        
+
         recruit.updateRecruit(
-            request.title(), 
-            request.content(), 
+            request.title(),
+            request.content(),
             request.tags(),
             teamRepository.getById(request.teamId()),
             request.startDate(),

@@ -1,12 +1,12 @@
 package io.swkoreatech.kosp.domain.auth.repository;
 
-import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 /**
  * 정책(Policy) 저장소.

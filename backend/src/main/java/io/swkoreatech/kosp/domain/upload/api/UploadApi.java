@@ -1,12 +1,5 @@
 package io.swkoreatech.kosp.domain.upload.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
-import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -15,6 +8,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.upload.dto.request.UploadUrlRequest;
+import io.swkoreatech.kosp.domain.upload.dto.response.UploadUrlResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
 /**
  * 파일 업로드 API.

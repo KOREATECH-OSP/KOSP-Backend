@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.domain.auth.repository;
 
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 /**
  * 역할(Role) 저장소.

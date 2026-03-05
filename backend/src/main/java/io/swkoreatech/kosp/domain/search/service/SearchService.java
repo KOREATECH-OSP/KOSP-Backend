@@ -1,5 +1,15 @@
 package io.swkoreatech.kosp.domain.search.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
@@ -13,30 +23,18 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
+import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ChallengeSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.RecruitSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.TeamSummary;
-import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.RepositorySummary;
 import io.swkoreatech.kosp.domain.search.dto.response.UserSummary;
 import io.swkoreatech.kosp.domain.search.model.SearchFilter;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -108,10 +106,10 @@ public class SearchService {
     }
 
     private List<ArticleSummary> searchArticles(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.articles)) {
             return Collections.emptyList();
@@ -148,10 +146,10 @@ public class SearchService {
     }
 
     private List<RecruitSummary> searchRecruits(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.recruits)) {
             return Collections.emptyList();
@@ -187,10 +185,10 @@ public class SearchService {
     }
 
     private List<TeamSummary> searchTeams(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.teams)) {
             return Collections.emptyList();
@@ -226,10 +224,10 @@ public class SearchService {
     }
 
     private List<ChallengeSummary> searchChallenges(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.challenges)) {
             return Collections.emptyList();
@@ -265,10 +263,10 @@ public class SearchService {
     }
 
     private List<UserSummary> searchUsers(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.users)) {
             return Collections.emptyList();
@@ -315,10 +313,10 @@ public class SearchService {
     }
 
     private List<RepositorySummary> searchRepositories(
-            String keyword,
-            Set<SearchFilter> filters,
-            String rsql,
-            Pageable pageable
+        String keyword,
+        Set<SearchFilter> filters,
+        String rsql,
+        Pageable pageable
     ) {
         if (!filters.contains(SearchFilter.repositories)) {
             return Collections.emptyList();
@@ -357,12 +355,12 @@ public class SearchService {
     }
 
     private PageMeta createPageMeta(
-            List<ArticleSummary> articles,
-            List<RecruitSummary> recruits,
-            List<TeamSummary> teams,
-            List<ChallengeSummary> challenges,
-            List<UserSummary> users,
-            List<RepositorySummary> repositories
+        List<ArticleSummary> articles,
+        List<RecruitSummary> recruits,
+        List<TeamSummary> teams,
+        List<ChallengeSummary> challenges,
+        List<UserSummary> users,
+        List<RepositorySummary> repositories
     ) {
         long totalItems = articles.size() + recruits.size() + teams.size()
             + challenges.size() + users.size() + repositories.size();

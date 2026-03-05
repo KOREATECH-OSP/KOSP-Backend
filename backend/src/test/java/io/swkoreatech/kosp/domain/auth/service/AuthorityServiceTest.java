@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
@@ -71,7 +69,7 @@ class AuthorityServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ_ARTICLE");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             roles.add(role);
@@ -90,19 +88,19 @@ class AuthorityServiceTest {
         void includesAllAuthorities_fromMultipleRoles() {
             // given
             Set<Role> roles = new HashSet<>();
-            
+
             Role role1 = createRole(1L, "ROLE_USER");
             Policy policy1 = createPolicy(1L, "POLICY_READ");
             Permission perm1 = createPermission(1L, "PERM_READ");
             policy1.getPermissions().add(perm1);
             role1.getPolicies().add(policy1);
-            
+
             Role role2 = createRole(2L, "ROLE_ADMIN");
             Policy policy2 = createPolicy(2L, "POLICY_ADMIN");
             Permission perm2 = createPermission(2L, "PERM_ADMIN");
             policy2.getPermissions().add(perm2);
             role2.getPolicies().add(policy2);
-            
+
             roles.add(role1);
             roles.add(role2);
 
@@ -120,18 +118,18 @@ class AuthorityServiceTest {
         void deduplicates_samePermissions() {
             // given
             Set<Role> roles = new HashSet<>();
-            
+
             Role role1 = createRole(1L, "ROLE_USER");
             Policy policy1 = createPolicy(1L, "POLICY_READ");
             Permission sharedPerm = createPermission(1L, "PERM_SHARED");
             policy1.getPermissions().add(sharedPerm);
             role1.getPolicies().add(policy1);
-            
+
             Role role2 = createRole(2L, "ROLE_ADMIN");
             Policy policy2 = createPolicy(2L, "POLICY_ADMIN");
             policy2.getPermissions().add(sharedPerm); // same permission
             role2.getPolicies().add(policy2);
-            
+
             roles.add(role1);
             roles.add(role2);
 

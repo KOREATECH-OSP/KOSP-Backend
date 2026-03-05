@@ -1,7 +1,6 @@
 package io.swkoreatech.kosp.common.challenge.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,13 +54,13 @@ public class Challenge extends BaseEntity {
 
     @Builder
     private Challenge(
-            String name,
-            String description,
-            String condition,
-            Integer tier,
-            String imageResource,
-            ImageResourceType imageResourceType,
-            Integer point
+        String name,
+        String description,
+        String condition,
+        Integer tier,
+        String imageResource,
+        ImageResourceType imageResourceType,
+        Integer point
     ) {
         this.name = name;
         this.description = description;
@@ -85,13 +83,13 @@ public class Challenge extends BaseEntity {
      * @param point             보상 포인트
      */
     public void update(
-            String name,
-            String description,
-            String condition,
-            Integer tier,
-            String imageResource,
-            ImageResourceType imageResourceType,
-            Integer point
+        String name,
+        String description,
+        String condition,
+        Integer tier,
+        String imageResource,
+        ImageResourceType imageResourceType,
+        Integer point
     ) {
         this.name = name;
         this.description = description;

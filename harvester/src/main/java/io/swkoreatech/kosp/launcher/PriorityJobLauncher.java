@@ -3,8 +3,6 @@ package io.swkoreatech.kosp.launcher;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import jakarta.annotation.PreDestroy;
-
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
@@ -12,6 +10,7 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,11 +24,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class PriorityJobLauncher {
-    
+
     private final JobLauncher jobLauncher;
     private final @Lazy Job githubCollectionJob;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
-    
+
     /**
      * 지정된 사용자에 대한 GitHub 수집 작업을 비동기로 실행한다.
      *
@@ -39,21 +38,21 @@ public class PriorityJobLauncher {
     public void run(Long userId, String runId) {
         executor.submit(() -> executeJob(userId, runId));
     }
-    
+
     private void executeJob(Long userId, String runId) {
         try {
             JobParameters params = new JobParametersBuilder()
                 .addLong("userId", userId, false)
                 .addString("runId", runId, true)
                 .toJobParameters();
-            
+
             log.info("Launching job for user {} (runId: {})", userId, runId);
             jobLauncher.run(githubCollectionJob, params);
         } catch (Exception e) {
             log.error("Failed to launch job for user {}", userId, e);
         }
     }
-    
+
     /**
      * 애플리케이션 종료 시 ExecutorService를 정상적으로 종료한다.
      */

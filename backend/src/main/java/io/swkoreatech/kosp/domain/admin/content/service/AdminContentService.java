@@ -1,5 +1,8 @@
 package io.swkoreatech.kosp.domain.admin.content.service;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -9,10 +12,6 @@ import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -39,7 +38,7 @@ public class AdminContentService {
     public void deleteArticle(Long articleId) {
         Article article = articleRepository.findById(articleId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ARTICLE_NOT_FOUND));
-        
+
         article.delete();
     }
 
@@ -103,9 +102,8 @@ public class AdminContentService {
     public void updateNotice(Long noticeId, NoticeUpdateRequest request) {
         Article notice = articleRepository.findById(noticeId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ARTICLE_NOT_FOUND));
-        
+
         notice.updateArticle(request.title(), request.content(), request.isPinned(), request.tags());
     }
-
 
 }

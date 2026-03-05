@@ -2,7 +2,6 @@ package io.swkoreatech.kosp.domain.community.recruit.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.common.user.model.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,7 +14,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -56,14 +54,14 @@ public class RecruitApply extends BaseEntity {
     @Column(nullable = false)
     private String reason;
 
-     @Column(name = "portfolio_url")
-     private String portfolioUrl;
+    @Column(name = "portfolio_url")
+    private String portfolioUrl;
 
-     @Column(name = "decision_reason", length = 500)
-     private String decisionReason;
+    @Column(name = "decision_reason", length = 500)
+    private String decisionReason;
 
-     /** 지원 상태. PENDING: 대기, ACCEPTED: 수락, REJECTED: 거절. */
-     public enum ApplyStatus {
+    /** 지원 상태. PENDING: 대기, ACCEPTED: 수락, REJECTED: 거절. */
+    public enum ApplyStatus {
         PENDING, ACCEPTED, REJECTED
     }
 
@@ -76,25 +74,25 @@ public class RecruitApply extends BaseEntity {
         this.portfolioUrl = portfolioUrl;
     }
 
-     /**
-      * 지원 상태를 변경한다.
-      *
-      * @param status 변경할 상태
-      */
-     public void updateStatus(ApplyStatus status) {
-         this.status = status;
-     }
+    /**
+     * 지원 상태를 변경한다.
+     *
+     * @param status 변경할 상태
+     */
+    public void updateStatus(ApplyStatus status) {
+        this.status = status;
+    }
 
-     /**
-      * 결정 사유를 업데이트한다.
-      *
-      * @param reason 결정 사유
-      */
-     public void updateDecisionReason(String reason) {
-         if (reason == null || reason.isBlank()) {
-             this.decisionReason = "사유 미입력";
-             return;
-         }
-         this.decisionReason = reason;
-     }
+    /**
+     * 결정 사유를 업데이트한다.
+     *
+     * @param reason 결정 사유
+     */
+    public void updateDecisionReason(String reason) {
+        if (reason == null || reason.isBlank()) {
+            this.decisionReason = "사유 미입력";
+            return;
+        }
+        this.decisionReason = reason;
+    }
 }

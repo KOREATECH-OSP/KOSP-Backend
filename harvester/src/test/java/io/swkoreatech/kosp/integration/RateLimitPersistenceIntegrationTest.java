@@ -1,12 +1,9 @@
 package io.swkoreatech.kosp.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +47,7 @@ class RateLimitPersistenceIntegrationTest {
         void shouldPersistResetTimeToDatabase() {
             User user = createUserWithGithubAccount(1001L);
             long resetTimeMillis = Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli();
-            
+
             when(userRepository.getById(user.getId())).thenReturn(user);
 
             rateLimitManager.updateRateLimitFromHeaders(user.getId(), resetTimeMillis, 5000);
@@ -69,7 +66,7 @@ class RateLimitPersistenceIntegrationTest {
 
             GithubUser githubUser = user.getGithubUser();
             githubUser.updateRateLimit(expectedResetTime, null);
-            
+
             when(userRepository.getById(user.getId())).thenReturn(user);
 
             Instant actualResetTime = rateLimitManager.getResetTime(user.getId());
@@ -135,7 +132,7 @@ class RateLimitPersistenceIntegrationTest {
         @DisplayName("기존 사용자는 rate limit 없이도 정상 동작해야 함")
         void shouldWorkWithoutRateLimitData() {
             User user = createUserWithGithubAccount(5001L);
-            
+
             when(userRepository.getById(user.getId())).thenReturn(user);
 
             Instant resetTime = rateLimitManager.getResetTime(user.getId());
@@ -148,7 +145,7 @@ class RateLimitPersistenceIntegrationTest {
         @DisplayName("waitIfNeeded()는 NULL resetTime일 때 에러 없이 실행되어야 함")
         void shouldNotThrowWhenWaitIfNeededWithNullResetTime() {
             User user = createUserWithGithubAccount(5002L);
-            
+
             when(userRepository.getById(user.getId())).thenReturn(user);
 
             rateLimitManager.waitIfNeeded(user.getId(), 5000).block();

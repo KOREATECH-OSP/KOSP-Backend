@@ -1,11 +1,8 @@
 package io.swkoreatech.kosp.domain.community.recruit.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
@@ -16,8 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
@@ -28,7 +25,6 @@ import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
 import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
-import io.swkoreatech.kosp.common.user.model.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RecruitApplyService 단위 테스트")
@@ -98,10 +94,10 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String reason = "지원자의 역량이 우수하여 수락합니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.ACCEPTED, 
+                ApplyStatus.ACCEPTED,
                 reason
             );
 
@@ -127,9 +123,9 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 null
             );
 
@@ -154,9 +150,9 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 "   "
             );
 
@@ -181,10 +177,10 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String acceptReason = "프로젝트 경험이 풍부하여 팀에 도움이 될 것으로 판단됩니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.ACCEPTED, 
+                ApplyStatus.ACCEPTED,
                 acceptReason
             );
 
@@ -212,10 +208,10 @@ class RecruitApplyServiceTest {
             Recruit recruit = createRecruit(1L, team);
             RecruitApply apply = createRecruitApply(1L, recruit, applicant);
             TeamMember leaderMember = createTeamMember(team, leader, TeamRole.LEADER);
-            
+
             String rejectReason = "현재 팀 인원이 충분하여 추가 모집을 하지 않습니다.";
             RecruitApplyDecisionRequest request = new RecruitApplyDecisionRequest(
-                ApplyStatus.REJECTED, 
+                ApplyStatus.REJECTED,
                 rejectReason
             );
 

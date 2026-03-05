@@ -1,13 +1,11 @@
 package io.swkoreatech.kosp.global.util;
 
-import io.swkoreatech.kosp.common.exception.GlobalException;
-
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 
 import cz.jirutka.rsql.parser.RSQLParser;
-
 import io.github.perplexhub.rsql.RSQLJPASupport;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 /**
  * RSQL 필터 문자열을 JPA {@link Specification}으로 변환하는 유틸리티 클래스.

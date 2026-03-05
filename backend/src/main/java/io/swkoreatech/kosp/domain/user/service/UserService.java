@@ -1,5 +1,16 @@
 package io.swkoreatech.kosp.domain.user.service;
 
+import java.util.Optional;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
@@ -24,18 +35,6 @@ import io.swkoreatech.kosp.domain.user.dto.response.UserProfileResponse;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
-
-import java.util.Optional;
-
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -90,7 +89,7 @@ public class UserService {
             .orElseGet(() -> GithubUser.builder()
                 .githubId(githubId)
                 .build());
-        
+
         // GitHub 정보 업데이트 (암호화된 토큰 그대로 저장)
         githubUser.updateProfile(githubLogin, githubName, githubAvatarUrl, encryptedGithubToken);
         githubUserRepository.save(githubUser);
@@ -113,16 +112,16 @@ public class UserService {
         user.getRoles().add(role);
 
         log.info("사용자 생성/복구 완료: userId={}, kutEmail={}", user.getId(), user.getKutEmail());
-        
-         // 6. GitHub 데이터 수집 이벤트 발행
-          if (githubUser.getGithubLogin() != null) {
-              eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
-              log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
-           }
-           
-           emailVerificationService.completeSignupVerification(kutEmail);
-           log.info("Redis cleanup completed for email: {}", kutEmail);
-          return authService.createTokensForUser(user);
+
+        // 6. GitHub 데이터 수집 이벤트 발행
+        if (githubUser.getGithubLogin() != null) {
+            eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
+            log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
+        }
+
+        emailVerificationService.completeSignupVerification(kutEmail);
+        log.info("Redis cleanup completed for email: {}", kutEmail);
+        return authService.createTokensForUser(user);
     }
 
     /**
@@ -147,6 +146,7 @@ public class UserService {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
     }
+
     /**
      * 사용자 계정을 탈퇴(Soft Delete) 처리한다.
      *
@@ -176,6 +176,7 @@ public class UserService {
 
         user.changePassword(newPassword, passwordEncoder);
     }
+
     /**
      * 학번/사번의 사용 가능 여부를 확인한다.
      *
@@ -187,7 +188,7 @@ public class UserService {
         boolean exists = userRepository.existsByKutIdAndIsDeletedFalse(memberId);
         String label = extractMemberLabel(memberId);
         String message = buildAvailabilityMessage(exists, label);
-        
+
         return CheckMemberIdResponse.from(!exists, message);
     }
 

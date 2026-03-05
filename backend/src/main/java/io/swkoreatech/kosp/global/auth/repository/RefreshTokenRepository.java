@@ -1,14 +1,13 @@
 package io.swkoreatech.kosp.global.auth.repository;
 
-import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
-import io.swkoreatech.kosp.global.auth.token.RefreshToken;
-import io.swkoreatech.kosp.global.auth.token.TokenType;
-
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
 
+import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
+import io.swkoreatech.kosp.global.auth.token.RefreshToken;
+import io.swkoreatech.kosp.global.auth.token.TokenType;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -18,9 +17,9 @@ import lombok.RequiredArgsConstructor;
 @Repository
 @RequiredArgsConstructor
 public class RefreshTokenRepository {
-    
+
     private final StringRedisTemplate redisTemplate;
-    
+
     /**
      * RefreshToken을 Redis에 저장한다.
      * <p>만료 시간이 설정된 상태로 저장된다.</p>
@@ -35,7 +34,7 @@ public class RefreshTokenRepository {
             TimeUnit.MILLISECONDS
         );
     }
-    
+
     /**
      * Redis에 저장된 RefreshToken과 일치하는지 검증한다.
      *
@@ -44,12 +43,12 @@ public class RefreshTokenRepository {
      */
     public void verifyExists(RefreshToken token) {
         String storedToken = redisTemplate.opsForValue().get(getKey(token.getUserId()));
-        
+
         if (storedToken == null || !storedToken.equals(token.toString())) {
             throw new InvalidTokenException("Invalid or expired refresh token");
         }
     }
-    
+
     /**
      * Redis에서 RefreshToken을 삭제한다.
      * <p>로그아웃 시 호출된다.</p>
@@ -59,7 +58,7 @@ public class RefreshTokenRepository {
     public void delete(RefreshToken token) {
         redisTemplate.delete(getKey(token.getUserId()));
     }
-    
+
     private String getKey(Long userId) {
         return "refresh:" + userId;
     }

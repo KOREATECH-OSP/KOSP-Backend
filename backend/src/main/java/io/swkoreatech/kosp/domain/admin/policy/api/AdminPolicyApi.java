@@ -1,14 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.policy.api;
 
-import io.swkoreatech.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
-import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
-import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
-
 import java.util.List;
-
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +15,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.PermissionAssignRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 정책 관리 API 인터페이스.

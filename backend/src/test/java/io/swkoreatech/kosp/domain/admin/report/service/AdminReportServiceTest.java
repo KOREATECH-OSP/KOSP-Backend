@@ -20,6 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.content.service.AdminContentService;
 import io.swkoreatech.kosp.domain.admin.report.dto.request.ReportProcessRequest;
 import io.swkoreatech.kosp.domain.admin.report.dto.response.ReportResponse;
@@ -28,9 +31,6 @@ import io.swkoreatech.kosp.domain.report.model.enums.ReportReason;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminReportService 단위 테스트")

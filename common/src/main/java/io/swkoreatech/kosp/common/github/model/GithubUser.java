@@ -1,18 +1,16 @@
 package io.swkoreatech.kosp.common.github.model;
 
-import io.swkoreatech.kosp.common.model.BaseEntity;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Persistable;
+
+import io.swkoreatech.kosp.common.model.BaseEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-
-import org.springframework.data.domain.Persistable;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -56,11 +54,11 @@ public class GithubUser extends BaseEntity implements Persistable<Long> {
 
     @Builder
     private GithubUser(
-            Long githubId,
-            String githubLogin,
-            String githubName,
-            String githubAvatarUrl,
-            String githubToken
+        Long githubId,
+        String githubLogin,
+        String githubName,
+        String githubAvatarUrl,
+        String githubToken
     ) {
         this.githubId = githubId;
         this.githubLogin = githubLogin;

@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.admin.role.dto.response;
 
-import io.swkoreatech.kosp.common.auth.model.Policy;
-
 import java.util.List;
+
+import io.swkoreatech.kosp.common.auth.model.Policy;
 
 /**
  * 정책(Policy) 상세 응답 DTO.

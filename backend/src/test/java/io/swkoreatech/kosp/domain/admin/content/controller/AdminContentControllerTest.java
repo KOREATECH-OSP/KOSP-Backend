@@ -16,6 +16,8 @@ import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
@@ -24,8 +26,6 @@ import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @DisplayName("AdminContentController 통합 테스트")

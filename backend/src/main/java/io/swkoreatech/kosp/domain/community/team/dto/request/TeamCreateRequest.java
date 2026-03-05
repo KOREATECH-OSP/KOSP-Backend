@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.team.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
-
 import org.hibernate.validator.constraints.Length;
+
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * 팀 생성 요청 DTO.
@@ -18,7 +18,7 @@ public record TeamCreateRequest(
 
     @NotBlank(message = "팀 설명은 필수입니다.")
     String description,
-    
+
     String imageUrl
 ) {
 }

@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.domain.community.board.repository;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
 
 /**
  * 게시판 리포지토리.

@@ -1,14 +1,14 @@
 package io.swkoreatech.kosp.domain.community.comment.repository;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.domain.community.comment.model.Comment;
-
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 
 /**
  * 댓글 리포지토리.

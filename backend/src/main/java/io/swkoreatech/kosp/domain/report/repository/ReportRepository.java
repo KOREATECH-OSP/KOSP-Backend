@@ -1,16 +1,16 @@
 package io.swkoreatech.kosp.domain.report.repository;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.repository.Repository;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.repository.Repository;
 
 /**
  * 신고 리포지토리.

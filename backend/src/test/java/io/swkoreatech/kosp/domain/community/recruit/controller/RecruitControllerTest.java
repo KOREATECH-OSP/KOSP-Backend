@@ -1,10 +1,8 @@
 package io.swkoreatech.kosp.domain.community.recruit.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -21,18 +19,17 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MvcResult;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply.ApplyStatus;
@@ -45,8 +42,6 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @DisplayName("RecruitController 통합 테스트")

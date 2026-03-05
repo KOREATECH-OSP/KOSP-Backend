@@ -1,9 +1,8 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-
 import java.time.LocalDate;
 
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 import lombok.Builder;
 
 /**

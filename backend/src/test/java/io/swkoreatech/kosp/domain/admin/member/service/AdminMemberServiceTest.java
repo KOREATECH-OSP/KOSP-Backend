@@ -88,7 +88,7 @@ class AdminMemberServiceTest {
             User user = createUser(1L, "홍길동");
             Role roleUser = createRole(1L, "ROLE_USER");
             Role roleAdmin = createRole(2L, "ROLE_ADMIN");
-            
+
             given(userRepository.getById(1L)).willReturn(user);
             given(roleRepository.findByName("ROLE_USER")).willReturn(Optional.of(roleUser));
             given(roleRepository.findByName("ROLE_ADMIN")).willReturn(Optional.of(roleAdmin));
@@ -108,7 +108,7 @@ class AdminMemberServiceTest {
             User user = createUser(1L, "홍길동");
             Role existingRole = createRole(1L, "ROLE_USER");
             user.getRoles().add(existingRole);
-            
+
             given(userRepository.getById(1L)).willReturn(user);
 
             // when
@@ -161,7 +161,7 @@ class AdminMemberServiceTest {
             User user2 = createUser(2L, "김철수");
             Pageable pageable = PageRequest.of(0, 10);
             Page<User> userPage = new PageImpl<>(List.of(user1, user2), pageable, 2);
-            
+
             given(userRepository.findAll(pageable)).willReturn(userPage);
 
             // when
@@ -181,7 +181,7 @@ class AdminMemberServiceTest {
             // given
             Pageable pageable = PageRequest.of(0, 10);
             Page<User> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-            
+
             given(userRepository.findAll(pageable)).willReturn(emptyPage);
 
             // when
@@ -203,7 +203,7 @@ class AdminMemberServiceTest {
                 .githubAvatarUrl("https://avatar.url")
                 .build();
             ReflectionTestUtils.setField(user, "githubUser", githubUser);
-            
+
             Pageable pageable = PageRequest.of(0, 10);
             Page<User> userPage = new PageImpl<>(List.of(user), pageable, 1);
             given(userRepository.findAll(pageable)).willReturn(userPage);

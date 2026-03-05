@@ -1,15 +1,5 @@
 package io.swkoreatech.kosp.domain.community.article.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +13,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
 /**
  * 게시글 API 인터페이스.

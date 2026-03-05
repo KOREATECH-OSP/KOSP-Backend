@@ -1,14 +1,13 @@
 package io.swkoreatech.kosp.infra.email.service;
 
-import io.swkoreatech.kosp.infra.email.client.SesMailSender;
-import io.swkoreatech.kosp.infra.email.form.EmailForm;
-
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import io.swkoreatech.kosp.infra.email.client.SesMailSender;
+import io.swkoreatech.kosp.infra.email.form.EmailForm;
 import lombok.RequiredArgsConstructor;
 import software.amazon.awssdk.services.ses.model.SendEmailRequest;
 

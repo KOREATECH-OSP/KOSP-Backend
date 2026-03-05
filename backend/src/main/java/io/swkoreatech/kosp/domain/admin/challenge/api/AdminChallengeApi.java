@@ -1,12 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.challenge.api;
 
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
-import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +13,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
+import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 챌린지 관리 API 인터페이스.
@@ -58,7 +56,6 @@ public interface AdminChallengeApi {
     ResponseEntity<AdminChallengeResponse> getChallenge(
         @Parameter(description = "챌린지 ID") @PathVariable Long challengeId
     );
-
 
     @Operation(
         summary = "챌린지 생성",

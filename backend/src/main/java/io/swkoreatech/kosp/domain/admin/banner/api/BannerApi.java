@@ -1,7 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.banner.api;
 
-import io.swkoreatech.kosp.domain.admin.banner.dto.response.BannerSettingResponse;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.banner.dto.response.BannerSettingResponse;
 
 /**
  * 배너 관리 API 인터페이스 (관리자 전용).

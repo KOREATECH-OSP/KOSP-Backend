@@ -1,11 +1,10 @@
 package io.swkoreatech.kosp.domain.community.article.dto.response;
 
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
 import lombok.Builder;
 
 /**

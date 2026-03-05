@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.banner.repository;
 
-import io.swkoreatech.kosp.domain.admin.banner.model.BannerSetting;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.domain.admin.banner.model.BannerSetting;
 
 /**
  * 배너 설정 저장소.

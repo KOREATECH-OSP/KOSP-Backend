@@ -1,14 +1,17 @@
 package io.swkoreatech.kosp.common.user.model;
 
-import io.swkoreatech.kosp.common.auth.model.Role;
-import io.swkoreatech.kosp.common.github.model.GithubUser;
-
 import static lombok.AccessLevel.PROTECTED;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,11 +21,6 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.validation.constraints.NotNull;
-
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

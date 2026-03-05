@@ -31,7 +31,7 @@ public class StepCompletionListener implements StepExecutionListener {
     @Override
     public ExitStatus afterStep(StepExecution stepExecution) {
         Long userId = stepExecution.getJobParameters().getLong("userId");
-        log.info("<<< [User {}] Completed step: {} - status: {}", 
+        log.info("<<< [User {}] Completed step: {} - status: {}",
             userId, stepExecution.getStepName(), stepExecution.getStatus());
         return null;
     }

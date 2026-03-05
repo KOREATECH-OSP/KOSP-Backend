@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.github.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
@@ -15,12 +20,6 @@ import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**

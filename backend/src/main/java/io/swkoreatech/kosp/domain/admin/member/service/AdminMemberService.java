@@ -1,5 +1,14 @@
 package io.swkoreatech.kosp.domain.admin.member.service;
 
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
@@ -11,16 +20,6 @@ import io.swkoreatech.kosp.domain.admin.member.dto.response.AdminUserListRespons
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
-
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -49,11 +48,11 @@ public class AdminMemberService {
     @Transactional
     public void updateUserRoles(Long userId, Set<String> roleNames) {
         User user = userRepository.getById(userId);
-        
+
         Set<Role> roles = roleNames.stream()
             .map(this::findRole)
             .collect(Collectors.toSet());
-            
+
         user.getRoles().clear();
         user.getRoles().addAll(roles);
 
@@ -67,7 +66,7 @@ public class AdminMemberService {
     @Transactional
     public void deleteUser(Long userId) {
         User user = userRepository.getById(userId);
-        
+
         user.delete();
     }
 
@@ -85,7 +84,6 @@ public class AdminMemberService {
     public AdminUserListResponse getUsers(org.springframework.data.domain.Pageable pageable) {
         return AdminUserListResponse.from(userRepository.findAll(pageable));
     }
-
 
     /**
      * 사용자 정보를 관리자 권한으로 수정한다.

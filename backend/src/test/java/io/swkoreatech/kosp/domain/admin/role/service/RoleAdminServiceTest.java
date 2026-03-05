@@ -18,16 +18,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
-import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RoleAdminService 단위 테스트")
@@ -259,7 +259,7 @@ class RoleAdminServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             role.getPolicies().add(policy);
-            
+
             given(roleRepository.getByName("ROLE_USER")).willReturn(role);
             given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
 

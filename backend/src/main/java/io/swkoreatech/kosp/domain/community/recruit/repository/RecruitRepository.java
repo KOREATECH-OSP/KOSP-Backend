@@ -1,10 +1,5 @@
 package io.swkoreatech.kosp.domain.community.recruit.repository;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +7,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
+import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 
 /**
  * 모집 공고 리포지토리.
@@ -26,7 +26,7 @@ public interface RecruitRepository extends Repository<Recruit, Long>, JpaSpecifi
     void delete(Recruit recruit);
 
     Page<Recruit> findByBoard(Board board, Pageable pageable);
-    
+
     java.util.List<Recruit> findByTitleContainingAndIsDeletedFalse(String title);
 
     default Recruit getById(Long id) {

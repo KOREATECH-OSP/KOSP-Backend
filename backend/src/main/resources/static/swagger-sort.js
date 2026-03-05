@@ -23,14 +23,20 @@ window.addEventListener('load', function () {
                 return keyA - keyB;
             });
 
-            var changed = sorted.some(function (el, i) { return el !== items[i]; });
+            var changed = sorted.some(function (el, i) {
+                return el !== items[i];
+            });
             if (!changed) return;
-            sorted.forEach(function (el) { container.appendChild(el); });
+            sorted.forEach(function (el) {
+                container.appendChild(el);
+            });
         });
     }
 
-    var observer = new MutationObserver(function () { sortOperations(); });
-    observer.observe(document.body, { childList: true, subtree: true });
+    var observer = new MutationObserver(function () {
+        sortOperations();
+    });
+    observer.observe(document.body, {childList: true, subtree: true});
 
     setTimeout(sortOperations, 500);
     setTimeout(sortOperations, 1500);

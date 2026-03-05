@@ -1,9 +1,9 @@
 package io.swkoreatech.kosp.domain.notification.dto.response;
 
+import java.time.LocalDateTime;
+
 import io.swkoreatech.kosp.domain.notification.model.Notification;
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
-
-import java.time.LocalDateTime;
 
 /**
  * 알림 응답 DTO.

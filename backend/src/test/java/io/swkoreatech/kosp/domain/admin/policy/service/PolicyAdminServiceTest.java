@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.policy.service;
 
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,17 +20,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyCreateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.PolicyUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PermissionResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
-import io.swkoreatech.kosp.common.auth.model.Permission;
-import io.swkoreatech.kosp.common.auth.model.Policy;
-import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PolicyAdminService 단위 테스트")
@@ -275,7 +273,7 @@ class PolicyAdminServiceTest {
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ");
             policy.getPermissions().add(permission);
-            
+
             given(policyRepository.findByName("POLICY_READ")).willReturn(Optional.of(policy));
             given(permissionRepository.findByName("PERM_READ")).willReturn(Optional.of(permission));
 

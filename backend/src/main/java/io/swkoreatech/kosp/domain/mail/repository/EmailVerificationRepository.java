@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.mail.repository;
 
+import org.springframework.data.repository.CrudRepository;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
-
-import org.springframework.data.repository.CrudRepository;
 
 /**
  * 이메일 인증 리포지토리.

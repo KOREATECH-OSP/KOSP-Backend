@@ -1,9 +1,8 @@
 package io.swkoreatech.kosp.domain.community.team.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-
-import io.swagger.v3.oas.annotations.media.Schema;
 
 /**
  * 팀 초대 요청 DTO.

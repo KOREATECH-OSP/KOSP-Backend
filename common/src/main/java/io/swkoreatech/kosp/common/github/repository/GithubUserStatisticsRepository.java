@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.common.github.repository;
 
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 /**
  * {@link GithubUserStatistics} 엔티티의 데이터 접근 리포지토리.

@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import lombok.Builder;
 
 /**
@@ -49,7 +48,8 @@ public record RepositoryStatsResponse(
         String primaryLanguage,
         LocalDateTime lastCommitDate,
         Double contributionPercentage
-    ) {}
+    ) {
+    }
 
     /**
      * 저장소 요약 정보.
@@ -63,7 +63,8 @@ public record RepositoryStatsResponse(
         Integer totalRepositories,
         Integer ownedRepositories,
         Integer contributedRepositories
-    ) {}
+    ) {
+    }
 
     /**
      * 저장소 통계 목록과 메인 저장소 키 목록으로부터 응답을 생성한다.
@@ -80,16 +81,16 @@ public record RepositoryStatsResponse(
             .map(repo -> {
                 String fullName = repo.getRepoOwner() + "/" + repo.getRepoName();
                 boolean isMain = mainRepoKeys.contains(fullName);
-                
+
                 // 기여 비율 계산
                 double contributionPercentage = 0.0;
                 if (repo.getTotalCommitsCount() != null && repo.getTotalCommitsCount() > 0) {
-                    contributionPercentage = (double) repo.getUserCommitsCount() / repo.getTotalCommitsCount() * 100;
+                    contributionPercentage = (double)repo.getUserCommitsCount() / repo.getTotalCommitsCount() * 100;
                 }
 
                 // 저장소 타입 결정
-                String repoType = repo.getRepoOwner().equalsIgnoreCase(repo.getContributorGithubId()) 
-                    ? "OWNED" 
+                String repoType = repo.getRepoOwner().equalsIgnoreCase(repo.getContributorGithubId())
+                    ? "OWNED"
                     : "CONTRIBUTED";
 
                 return RepositoryInfo.builder()
@@ -120,8 +121,8 @@ public record RepositoryStatsResponse(
 
         SummaryInfo summary = SummaryInfo.builder()
             .totalRepositories(repoInfos.size())
-            .ownedRepositories((int) ownedCount)
-            .contributedRepositories((int) contributedCount)
+            .ownedRepositories((int)ownedCount)
+            .contributedRepositories((int)contributedCount)
             .build();
 
         return new RepositoryStatsResponse(repoInfos, summary);

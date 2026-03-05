@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.*;
 import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,9 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PermissionService 단위 테스트")
@@ -72,11 +70,11 @@ class PermissionServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             user.getRoles().add(role);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when
@@ -94,11 +92,11 @@ class PermissionServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_WRITE");
             Permission permission = createPermission(1L, "PERM_WRITE");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             user.getRoles().add(role);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when
@@ -113,20 +111,20 @@ class PermissionServiceTest {
         void returnsTrue_whenAnyRoleHasPermission() {
             // given
             User user = createUser(1L);
-            
+
             Role role1 = createRole(1L, "ROLE_USER");
             Policy policy1 = createPolicy(1L, "POLICY_BASIC");
-            
+
             Role role2 = createRole(2L, "ROLE_EDITOR");
             Policy policy2 = createPolicy(2L, "POLICY_EDIT");
             Permission permission = createPermission(1L, "PERM_EDIT");
-            
+
             policy2.getPermissions().add(permission);
             role1.getPolicies().add(policy1);
             role2.getPolicies().add(policy2);
             user.getRoles().add(role1);
             user.getRoles().add(role2);
-            
+
             given(userRepository.findByIdWithRolesAndPermissions(1L)).willReturn(Optional.of(user));
 
             // when

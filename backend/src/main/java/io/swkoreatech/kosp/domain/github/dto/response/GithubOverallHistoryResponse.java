@@ -1,8 +1,7 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 /**
  * GitHub 전체 기여 내역 응답 DTO.

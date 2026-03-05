@@ -15,11 +15,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.point.model.PointSource;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("PointService 단위 테스트")

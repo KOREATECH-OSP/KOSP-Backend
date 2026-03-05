@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
-
 import java.math.BigDecimal;
 
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
+import io.swkoreatech.kosp.domain.github.model.GithubYearlyStatistics;
 import lombok.Builder;
 
 /**
@@ -39,7 +38,8 @@ public record YearlyAnalysisResponse(
         BigDecimal reputationScore,
         Integer rank,
         Integer percentile
-    ) {}
+    ) {
+    }
 
     /**
      * 최고 기여 정보.
@@ -57,7 +57,8 @@ public record YearlyAnalysisResponse(
         Integer pullRequests,
         Integer issues,
         BestRepository bestRepository
-    ) {}
+    ) {
+    }
 
     /**
      * 최고 저장소 정보.
@@ -73,7 +74,8 @@ public record YearlyAnalysisResponse(
         String name,
         Integer commits,
         Integer stars
-    ) {}
+    ) {
+    }
 
     /**
      * 연도별 통계와 최고 저장소 통계로부터 분석 응답을 생성한다.

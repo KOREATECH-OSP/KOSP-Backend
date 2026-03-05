@@ -1,10 +1,5 @@
 package io.swkoreatech.kosp.domain.notification.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,6 +14,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 /**
  * 알림 API.

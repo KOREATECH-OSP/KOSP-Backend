@@ -25,6 +25,6 @@ public final class GraphQLTypeFactory {
      */
     @SuppressWarnings("unchecked")
     public static <T> Class<GraphQLResponse<T>> responseType() {
-        return (Class<GraphQLResponse<T>>) (Class<?>) GraphQLResponse.class;
+        return (Class<GraphQLResponse<T>>)(Class<?>)GraphQLResponse.class;
     }
 }

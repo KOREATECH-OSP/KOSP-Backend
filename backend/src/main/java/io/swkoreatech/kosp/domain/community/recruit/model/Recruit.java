@@ -1,13 +1,12 @@
 package io.swkoreatech.kosp.domain.community.recruit.model;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
@@ -17,7 +16,6 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,7 +48,7 @@ public class Recruit extends Article {
 
     @Builder(builderMethodName = "recruitBuilder")
     private Recruit(User author, Board board, String title, String content, List<String> tags,
-                    Team team, RecruitStatus status, LocalDateTime startDate, LocalDateTime endDate) {
+        Team team, RecruitStatus status, LocalDateTime startDate, LocalDateTime endDate) {
         super(author, board, title, content, tags, null);
         this.team = team;
         this.status = status;

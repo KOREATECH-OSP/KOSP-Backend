@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.upload.repository;
 
-import io.swkoreatech.kosp.domain.upload.model.Attachment;
-
 import java.util.List;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.domain.upload.model.Attachment;
 
 /**
  * 첨부파일 리포지토리.

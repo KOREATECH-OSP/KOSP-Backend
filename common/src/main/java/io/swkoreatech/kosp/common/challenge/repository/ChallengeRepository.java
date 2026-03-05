@@ -1,13 +1,13 @@
 package io.swkoreatech.kosp.common.challenge.repository;
 
-import io.swkoreatech.kosp.common.challenge.model.Challenge;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 
 /**
  * {@link Challenge} 엔티티의 데이터 접근 리포지토리.

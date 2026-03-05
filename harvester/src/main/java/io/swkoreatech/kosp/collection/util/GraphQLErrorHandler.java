@@ -1,7 +1,6 @@
 package io.swkoreatech.kosp.collection.util;
 
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-
 import lombok.extern.slf4j.Slf4j;
 
 /**

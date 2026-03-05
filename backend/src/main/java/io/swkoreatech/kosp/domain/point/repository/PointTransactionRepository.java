@@ -1,14 +1,14 @@
 package io.swkoreatech.kosp.domain.point.repository;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.point.model.PointTransaction;
-
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 
 /**
  * 포인트 거래 리포지토리.

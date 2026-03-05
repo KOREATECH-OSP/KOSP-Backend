@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.article.dto.response;
 
-import io.swkoreatech.kosp.global.dto.PageMeta;
-
 import java.util.List;
+
+import io.swkoreatech.kosp.global.dto.PageMeta;
 
 /**
  * 게시글 목록 응답 DTO.

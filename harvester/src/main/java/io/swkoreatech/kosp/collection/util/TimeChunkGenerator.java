@@ -23,27 +23,27 @@ public class TimeChunkGenerator {
     public static List<TimeChunk> generateMonthlyChunks(ZonedDateTime start, ZonedDateTime end) {
         List<TimeChunk> chunks = new ArrayList<>();
         ZonedDateTime cursor = start;
-        
+
         while (cursor.isBefore(end)) {
             ZonedDateTime chunkEnd = cursor.plusMonths(1);
-            
+
             if (chunkEnd.isAfter(end)) {
                 chunkEnd = end;
             }
-            
+
             chunks.add(new TimeChunk(cursor, chunkEnd.plusSeconds(1)));
-            
+
             cursor = chunkEnd;
-            
+
             // Explicit termination to prevent infinite loop
             if (cursor.equals(end)) {
                 break;
             }
         }
-        
+
         return chunks;
     }
-    
+
     /**
      * 시간 청크를 나타내는 레코드.
      *
@@ -62,7 +62,7 @@ public class TimeChunkGenerator {
         public String getStartFormatted() {
             return start.format(DateTimeFormatter.ISO_INSTANT);
         }
-        
+
         /**
          * 종료 시간을 ISO 인스턴트 형식 문자열로 반환한다.
          *

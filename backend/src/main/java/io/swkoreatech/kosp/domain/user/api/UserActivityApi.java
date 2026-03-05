@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.domain.user.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
-import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
-import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +9,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.user.dto.response.GithubActivityResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 /**
  * 사용자 활동 조회 API.

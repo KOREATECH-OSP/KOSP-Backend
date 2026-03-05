@@ -1,7 +1,6 @@
 package io.swkoreatech.kosp.domain.notification.event;
 
 import io.swkoreatech.kosp.domain.notification.model.NotificationType;
-
 import lombok.Getter;
 
 /**
@@ -18,11 +17,11 @@ public class NotificationEvent {
     private final Long referenceId;
 
     private NotificationEvent(
-            Long userId,
-            NotificationType type,
-            String title,
-            String message,
-            Long referenceId
+        Long userId,
+        NotificationType type,
+        String title,
+        String message,
+        Long referenceId
     ) {
         this.userId = userId;
         this.type = type;
@@ -42,11 +41,11 @@ public class NotificationEvent {
      * @return 알림 이벤트
      */
     public static NotificationEvent of(
-            Long userId,
-            NotificationType type,
-            String title,
-            String message,
-            Long referenceId
+        Long userId,
+        NotificationType type,
+        String title,
+        String message,
+        Long referenceId
     ) {
         return new NotificationEvent(userId, type, title, message, referenceId);
     }

@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.statistics.repository;
 
-import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
 
 /**
  * 플랫폼 통계 JPA 리포지토리.

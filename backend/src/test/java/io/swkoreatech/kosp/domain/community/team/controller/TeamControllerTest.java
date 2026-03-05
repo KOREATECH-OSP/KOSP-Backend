@@ -23,6 +23,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
@@ -32,8 +34,6 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @DisplayName("TeamController 통합 테스트")

@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.domain.community.article.repository;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.board.model.Board;
-
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -13,6 +7,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.board.model.Board;
 
 /**
  * 게시글 리포지토리.

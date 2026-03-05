@@ -1,9 +1,9 @@
 package io.swkoreatech.kosp.domain.admin.search.dto.response;
 
+import java.util.List;
+
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
-
-import java.util.List;
 
 /**
  * 관리자 통합 검색 응답 DTO.

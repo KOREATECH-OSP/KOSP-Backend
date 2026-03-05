@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
-
 import java.time.LocalDateTime;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 
 /**
  * GitHub 최근 기여 활동 응답 DTO.

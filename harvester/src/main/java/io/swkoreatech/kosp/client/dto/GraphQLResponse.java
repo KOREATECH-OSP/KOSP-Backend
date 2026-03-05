@@ -6,6 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import lombok.Getter;
 
 /**
@@ -48,7 +49,7 @@ public class GraphQLResponse<T> {
             return null;
         }
         if (type.isInstance(data)) {
-            return (R) data;
+            return (R)data;
         }
         return OBJECT_MAPPER.convertValue(data, type);
     }

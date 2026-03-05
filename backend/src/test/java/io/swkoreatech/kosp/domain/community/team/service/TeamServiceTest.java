@@ -28,6 +28,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
@@ -39,9 +42,6 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("TeamService 단위 테스트")
@@ -95,7 +95,7 @@ class TeamServiceTest {
             // given
             User leader = createUser(1L, "리더");
             TeamCreateRequest request = new TeamCreateRequest("테스트팀", "팀 설명", null);
-            
+
             doAnswer(invocation -> {
                 Team team = invocation.getArgument(0);
                 ReflectionTestUtils.setField(team, "id", 1L);
@@ -172,7 +172,7 @@ class TeamServiceTest {
             Team team = createTeam(1L, "테스트팀");
             TeamMember memberRole = createTeamMember(1L, team, member, TeamRole.MEMBER);
             TeamUpdateRequest request = new TeamUpdateRequest("수정된 이름", "수정된 설명", null);
-            
+
             given(teamRepository.getById(1L)).willReturn(team);
             given(teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, member))
                 .willReturn(Optional.of(memberRole));
@@ -190,7 +190,7 @@ class TeamServiceTest {
             Team team = createTeam(1L, "기존팀");
             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
             TeamUpdateRequest request = new TeamUpdateRequest("수정된 이름", "수정된 설명", null);
-            
+
             given(teamRepository.getById(1L)).willReturn(team);
             given(teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, leader))
                 .willReturn(Optional.of(leaderMember));
@@ -221,7 +221,7 @@ class TeamServiceTest {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
             ReflectionTestUtils.setField(invite, "id", 1L);
-            
+
             given(teamInviteRepository.findByIdAndIsDeletedFalse(1L)).willReturn(Optional.of(invite));
 
             // when & then
@@ -241,7 +241,7 @@ class TeamServiceTest {
                 .expiresAt(Instant.now().minusSeconds(3600))
                 .build();
             ReflectionTestUtils.setField(invite, "id", 1L);
-            
+
             given(teamInviteRepository.findByIdAndIsDeletedFalse(1L)).willReturn(Optional.of(invite));
 
             // when & then
@@ -261,7 +261,7 @@ class TeamServiceTest {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
             ReflectionTestUtils.setField(invite, "id", 1L);
-            
+
             given(teamInviteRepository.findByIdAndIsDeletedFalse(1L)).willReturn(Optional.of(invite));
             given(teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, invitee)).willReturn(false);
 
@@ -284,7 +284,7 @@ class TeamServiceTest {
             User leader = createUser(1L, "리더");
             Team team = createTeam(1L, "테스트팀");
             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
-            
+
             given(teamRepository.getById(1L)).willReturn(team);
             given(teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, leader))
                 .willReturn(Optional.of(leaderMember));
@@ -303,7 +303,7 @@ class TeamServiceTest {
             Team team = createTeam(1L, "테스트팀");
             TeamMember leaderMember = createTeamMember(1L, team, leader, TeamRole.LEADER);
             TeamMember memberRole = createTeamMember(2L, team, member, TeamRole.MEMBER);
-            
+
             given(teamRepository.getById(1L)).willReturn(team);
             given(teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, leader))
                 .willReturn(Optional.of(leaderMember));
@@ -335,7 +335,7 @@ class TeamServiceTest {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
             ReflectionTestUtils.setField(invite, "id", 1L);
-            
+
             given(teamInviteRepository.findByIdAndIsDeletedFalse(1L)).willReturn(Optional.of(invite));
 
             // when
@@ -358,7 +358,7 @@ class TeamServiceTest {
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
             ReflectionTestUtils.setField(invite, "id", 1L);
-            
+
             given(teamInviteRepository.findByIdAndIsDeletedFalse(1L)).willReturn(Optional.of(invite));
 
             // when & then
@@ -427,7 +427,7 @@ class TeamServiceTest {
             User user = createUser(1L, "사용자");
             Team team = createTeam(1L, "내 팀");
             TeamMember member = createTeamMember(1L, team, user, TeamRole.MEMBER);
-            
+
             given(teamMemberRepository.findByUser(user)).willReturn(Optional.of(member));
 
             // when

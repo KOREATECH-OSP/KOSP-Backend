@@ -22,4 +22,5 @@ public record ChallengeCompletedEvent(
     Integer pointsAwarded,
     LocalDateTime completedAt,
     String messageId
-) {}
+) {
+}

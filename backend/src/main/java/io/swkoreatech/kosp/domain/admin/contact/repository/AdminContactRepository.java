@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.contact.repository;
 
-import io.swkoreatech.kosp.domain.admin.contact.model.AdminContact;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.domain.admin.contact.model.AdminContact;
 
 /**
  * 관리자 연락처 저장소.

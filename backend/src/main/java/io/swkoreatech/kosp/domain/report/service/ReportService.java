@@ -1,5 +1,9 @@
 package io.swkoreatech.kosp.domain.report.service;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -11,11 +15,6 @@ import io.swkoreatech.kosp.domain.report.dto.request.ReportRequest;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -86,7 +85,7 @@ public class ReportService {
         Long authorId = article.getAuthor().getId();
         String title = "게시글 신고 접수";
         String message = "회원님의 게시글이 신고되었습니다.";
-        
+
         eventPublisher.publishEvent(
             NotificationEvent.of(authorId, NotificationType.ARTICLE_REPORTED, title, message, articleId)
         );

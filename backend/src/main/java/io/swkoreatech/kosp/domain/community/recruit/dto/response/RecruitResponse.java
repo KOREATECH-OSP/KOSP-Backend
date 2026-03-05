@@ -1,13 +1,12 @@
 package io.swkoreatech.kosp.domain.community.recruit.dto.response;
 
-import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
-import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
+import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
 import lombok.Builder;
 
 /**

@@ -17,12 +17,11 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import lombok.extern.slf4j.Slf4j;
-
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
+import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
@@ -60,7 +59,7 @@ public class GithubRestApiClient {
             .maxLifeTime(Duration.ofMinutes(5))
             .evictInBackground(Duration.ofSeconds(120))
             .build();
-        
+
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
             .responseTimeout(Duration.ofMinutes(5))
@@ -71,7 +70,7 @@ public class GithubRestApiClient {
                     conn.channel().pipeline().get(SslHandler.class).setHandshakeTimeoutMillis(60000);
                 }
             });
-        
+
         this.webClient = WebClient.builder()
             .baseUrl(baseUrl)
             .clientConnector(new ReactorClientHttpConnector(httpClient))
@@ -116,27 +115,27 @@ public class GithubRestApiClient {
                 .toEntity(responseType)
                 .retryWhen(Retry.backoff(5, Duration.ofSeconds(2))
                     .maxBackoff(Duration.ofSeconds(30))
-                    .filter(throwable -> 
+                    .filter(throwable ->
                         throwable instanceof WebClientResponseException.TooManyRequests ||
-                        (throwable.getMessage() != null && (
-                            throwable.getMessage().contains("prematurely closed") ||
-                            throwable.getMessage().contains("Connection reset") ||
-                            throwable.getMessage().contains("Connection refused")
-                        ))
+                            (throwable.getMessage() != null && (
+                                throwable.getMessage().contains("prematurely closed") ||
+                                    throwable.getMessage().contains("Connection reset") ||
+                                    throwable.getMessage().contains("Connection refused")
+                            ))
                     ))
                 .doOnSuccess(entity -> {
                     if (entity != null) {
                         HttpHeaders headers = entity.getHeaders();
                         String remaining = headers.getFirst("X-RateLimit-Remaining");
                         String reset = headers.getFirst("X-RateLimit-Reset");
-                        
+
                         if (remaining != null && reset != null) {
                             try {
                                 long resetLong = Long.parseLong(reset) * 1000;
                                 int remainingCount = Integer.parseInt(remaining);
                                 rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                             } catch (NumberFormatException e) {
-                                log.warn("Failed to parse rate limit headers: remaining={}, reset={}", 
+                                log.warn("Failed to parse rate limit headers: remaining={}, reset={}",
                                     remaining, reset);
                                 rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                             }
@@ -217,7 +216,7 @@ public class GithubRestApiClient {
                     HttpHeaders headers = entity.getHeaders();
                     String remaining = headers.getFirst("X-RateLimit-Remaining");
                     String reset = headers.getFirst("X-RateLimit-Reset");
-                    
+
                     if (remaining != null && reset != null) {
                         try {
                             long resetLong = Long.parseLong(reset) * 1000;
@@ -267,19 +266,19 @@ public class GithubRestApiClient {
         List<T> accumulator
     ) {
         String paginatedUri = buildPaginatedUri(uri, page);
-        
+
         return get(userId, paginatedUri, token, List.class)
             .flatMap(items -> {
                 if (items == null || items.isEmpty()) {
                     return Mono.empty();
                 }
-                
-                accumulator.addAll((List<T>) items);
-                
+
+                accumulator.addAll((List<T>)items);
+
                 if (items.size() < 100) {
                     return Mono.empty();
                 }
-                
+
                 return collectAllPages(userId, uri, token, itemType, page + 1, accumulator);
             })
             .then();

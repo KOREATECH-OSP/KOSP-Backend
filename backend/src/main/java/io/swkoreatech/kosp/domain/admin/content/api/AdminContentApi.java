@@ -1,12 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.content.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
-import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
-import jakarta.validation.Valid;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,6 +12,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
+import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 콘텐츠 관리 API 인터페이스.

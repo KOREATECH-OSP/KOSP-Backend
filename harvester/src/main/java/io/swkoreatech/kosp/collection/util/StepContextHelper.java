@@ -52,7 +52,7 @@ public final class StepContextHelper {
         ExecutionContext context = getExecutionContext(chunkContext);
         Object value = context.get(key);
         if (value instanceof String) {
-            return (String) value;
+            return (String)value;
         }
         return null;
     }

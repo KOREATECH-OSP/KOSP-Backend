@@ -1,21 +1,5 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
-import io.swkoreatech.kosp.client.GithubGraphQLClient;
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
-import io.swkoreatech.kosp.collection.document.CommitDocument;
-import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
-import io.swkoreatech.kosp.collection.step.StepContextKeys;
-import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
-import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
-import io.swkoreatech.kosp.collection.util.PaginationHelper;
-import io.swkoreatech.kosp.collection.util.StepContextHelper;
-import io.swkoreatech.kosp.job.LoggingConstants;
-import io.swkoreatech.kosp.job.StepCompletionListener;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -28,6 +12,19 @@ import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
+import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
+import io.swkoreatech.kosp.collection.document.CommitDocument;
+import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
+import io.swkoreatech.kosp.collection.step.StepContextKeys;
+import io.swkoreatech.kosp.collection.step.StepProvider;
+import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
+import io.swkoreatech.kosp.collection.util.PaginationHelper;
+import io.swkoreatech.kosp.collection.util.StepContextHelper;
+import io.swkoreatech.kosp.job.LoggingConstants;
+import io.swkoreatech.kosp.job.StepCompletionListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -75,11 +72,11 @@ public class CommitMiningStep implements StepProvider {
         return STEP_NAME;
     }
 
-     private void execute(ChunkContext chunkContext) {
-          ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
-          Long userId = StepContextHelper.extractUserId(chunkContext);
-         String token = context.getString(StepContextKeys.GITHUB_TOKEN);
-         String nodeId = context.getString(StepContextKeys.GITHUB_NODE_ID);
+    private void execute(ChunkContext chunkContext) {
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
+        String token = context.getString(StepContextKeys.GITHUB_TOKEN);
+        String nodeId = context.getString(StepContextKeys.GITHUB_NODE_ID);
 
         if (token == null || nodeId == null) {
             log.warn("GitHub credentials not found in context for user {}", userId);
@@ -96,76 +93,74 @@ public class CommitMiningStep implements StepProvider {
         totalSkippedCount = 0;
         int totalMined = mineCommitsFromRepos(userId, repos, nodeId, token);
         log.info(LoggingConstants.MINING_SUMMARY, totalMined, totalSavedCount, totalSkippedCount);
-     }
+    }
 
-     private String[] getDiscoveredRepos(ExecutionContext context) {
-         Object repos = context.get(StepContextKeys.DISCOVERED_REPOS);
-         if (repos instanceof String[]) {
-             return (String[]) repos;
-         }
-         return null;
-     }
+    private String[] getDiscoveredRepos(ExecutionContext context) {
+        Object repos = context.get(StepContextKeys.DISCOVERED_REPOS);
+        if (repos instanceof String[]) {
+            return (String[])repos;
+        }
+        return null;
+    }
 
     private int mineCommitsFromRepos(Long userId, String[] repos, String nodeId, String token) {
-         int total = 0;
-         for (String repoFullName : repos) {
-             total += mineCommitsForRepo(userId, repoFullName, nodeId, token);
-         }
-         return total;
-     }
+        int total = 0;
+        for (String repoFullName : repos) {
+            total += mineCommitsForRepo(userId, repoFullName, nodeId, token);
+        }
+        return total;
+    }
 
     private int mineCommitsForRepo(Long userId, String repoFullName, String nodeId, String token) {
-         String[] parts = repoFullName.split("/");
-         if (parts.length != 2) {
-             log.warn("Invalid repo name format: {}", repoFullName);
-             return 0;
-         }
+        String[] parts = repoFullName.split("/");
+        if (parts.length != 2) {
+            log.warn("Invalid repo name format: {}", repoFullName);
+            return 0;
+        }
 
-         String owner = parts[0];
-         String name = parts[1];
-         return fetchAllCommits(userId, owner, name, nodeId, token);
-     }
+        String owner = parts[0];
+        String name = parts[1];
+        return fetchAllCommits(userId, owner, name, nodeId, token);
+    }
 
     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-         Instant now = Instant.now();
-         return PaginationHelper.paginate(
-             cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token),
-             RepositoryCommitsResponse::getPageInfo,
-             (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
-             "repo",
-             owner + "/" + name,
-             RepositoryCommitsResponse.class
-         );
-     }
+        Instant now = Instant.now();
+        return PaginationHelper.paginate(
+            cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token),
+            RepositoryCommitsResponse::getPageInfo,
+            (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
+            "repo",
+            owner + "/" + name,
+            RepositoryCommitsResponse.class
+        );
+    }
 
+    private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
+        String owner,
+        String name,
+        String nodeId,
+        String cursor,
+        String token
+    ) {
+        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token,
+            GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
+    }
 
+    private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
+        int saved = 0;
+        for (CommitNode commit : commits) {
+            if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
+                totalSkippedCount++;
+                continue;
+            }
 
-
-     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
-         String owner,
-         String name,
-         String nodeId,
-         String cursor,
-         String token
-     ) {
-         return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
-     }
-
-      private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
-         int saved = 0;
-         for (CommitNode commit : commits) {
-              if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
-                 totalSkippedCount++;
-                 continue;
-             }
-
-             CommitDocument document = buildDocument(userId, owner, name, commit, now);
-             commitDocumentRepository.save(document);
-             saved++;
-             totalSavedCount++;
-         }
-         return saved;
-     }
+            CommitDocument document = buildDocument(userId, owner, name, commit, now);
+            commitDocumentRepository.save(document);
+            saved++;
+            totalSavedCount++;
+        }
+        return saved;
+    }
 
     private CommitDocument buildDocument(Long userId, String owner, String name, CommitNode commit, Instant now) {
         CommitDocument.CommitDocumentBuilder builder = CommitDocument.builder();

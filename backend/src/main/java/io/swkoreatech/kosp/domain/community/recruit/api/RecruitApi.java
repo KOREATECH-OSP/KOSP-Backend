@@ -1,18 +1,5 @@
 package io.swkoreatech.kosp.domain.community.recruit.api;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
-import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
-import io.swkoreatech.kosp.global.security.annotation.AuthUser;
-
-import jakarta.validation.Valid;
-
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,6 +14,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyDecisionRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitApplyRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.request.RecruitStatusRequest;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitApplyResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitListResponse;
+import io.swkoreatech.kosp.domain.community.recruit.dto.response.RecruitResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
 /**
  * 모집 공고 API 인터페이스.

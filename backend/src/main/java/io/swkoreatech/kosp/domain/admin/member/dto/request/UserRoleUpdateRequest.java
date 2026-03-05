@@ -11,4 +11,5 @@ import jakarta.validation.constraints.NotEmpty;
  */
 public record UserRoleUpdateRequest(
     @NotEmpty Set<String> roles
-) {}
+) {
+}

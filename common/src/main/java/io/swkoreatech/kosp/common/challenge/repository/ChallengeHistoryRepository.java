@@ -1,12 +1,12 @@
 package io.swkoreatech.kosp.common.challenge.repository;
 
-import io.swkoreatech.kosp.common.challenge.model.Challenge;
-import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.common.user.model.User;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.user.model.User;
 
 /**
  * {@link ChallengeHistory} 엔티티의 데이터 접근 리포지토리.

@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.global.config.jwt;
 
-import io.swkoreatech.kosp.global.auth.token.TokenType;
-
 import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+
+import io.swkoreatech.kosp.global.auth.token.TokenType;
 
 /**
  * JWT 토큰 설정 프로퍼티.

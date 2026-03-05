@@ -1,5 +1,13 @@
 package io.swkoreatech.kosp.domain.community.comment.service;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -13,15 +21,6 @@ import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -54,11 +53,11 @@ public class CommentService {
             .content(request.content())
             .build();
         commentRepository.save(comment);
-        
+
         // Increment article comment count
         article.incrementCommentsCount();
         articleRepository.save(article);
-        
+
         return comment.getId();
     }
 
@@ -75,10 +74,10 @@ public class CommentService {
         if (!comment.getAuthor().getId().equals(user.getId())) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
-        
+
         Article article = comment.getArticle();
         article.decrementCommentsCount();
-        
+
         comment.delete();
     }
 

@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.domain.auth.service;
 
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPermission;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
-import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.*;
 import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUserWithEmail;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -23,9 +21,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserDetailsServiceImpl 단위 테스트")
@@ -124,11 +122,11 @@ class UserDetailsServiceImplTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             Permission permission = createPermission(1L, "PERM_READ_ARTICLE");
-            
+
             policy.getPermissions().add(permission);
             role.getPolicies().add(policy);
             user.getRoles().add(role);
-            
+
             given(userRepository.findByKutEmail("user@koreatech.ac.kr")).willReturn(Optional.of(user));
 
             // when

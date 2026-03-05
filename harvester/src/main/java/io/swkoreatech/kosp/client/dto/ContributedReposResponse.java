@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Getter;
 
 /**
@@ -152,48 +153,48 @@ public class ContributedReposResponse {
         private int totalCount;
     }
 
-     /** 저장소 상세 정보를 담는 내부 DTO. */
-     @Getter
-     @JsonIgnoreProperties(ignoreUnknown = true)
-     public static class RepositoryInfo {
-         private String name;
-         private String description;
-         private Owner owner;
-         private String nameWithOwner;
-         private boolean isFork;
-         private boolean isPrivate;
-         private PrimaryLanguage primaryLanguage;
-         private int stargazerCount;
-         private int forkCount;
-         private String createdAt;
-         private WatchersInfo watchers;
+    /** 저장소 상세 정보를 담는 내부 DTO. */
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RepositoryInfo {
+        private String name;
+        private String description;
+        private Owner owner;
+        private String nameWithOwner;
+        private boolean isFork;
+        private boolean isPrivate;
+        private PrimaryLanguage primaryLanguage;
+        private int stargazerCount;
+        private int forkCount;
+        private String createdAt;
+        private WatchersInfo watchers;
 
-         /**
-          * 저장소 소유자의 로그인 이름을 반환한다.
-          *
-          * @return 소유자 로그인 이름, 정보 없으면 null
-          */
-         public String getOwnerLogin() {
-             return owner != null ? owner.getLogin() : null;
-         }
+        /**
+         * 저장소 소유자의 로그인 이름을 반환한다.
+         *
+         * @return 소유자 로그인 이름, 정보 없으면 null
+         */
+        public String getOwnerLogin() {
+            return owner != null ? owner.getLogin() : null;
+        }
 
-         /**
-          * 주 사용 언어 이름을 반환한다.
-          *
-          * @return 언어 이름, 정보 없으면 null
-          */
-         public String getLanguageName() {
-             return primaryLanguage != null ? primaryLanguage.getName() : null;
-         }
+        /**
+         * 주 사용 언어 이름을 반환한다.
+         *
+         * @return 언어 이름, 정보 없으면 null
+         */
+        public String getLanguageName() {
+            return primaryLanguage != null ? primaryLanguage.getName() : null;
+        }
 
-         /**
-          * 워처 수를 반환한다.
-          *
-          * @return 워처 수, 정보 없으면 0
-          */
-         public Integer getWatchersCount() {
-             return watchers != null ? watchers.getTotalCount() : 0;
-         }
+        /**
+         * 워처 수를 반환한다.
+         *
+         * @return 워처 수, 정보 없으면 0
+         */
+        public Integer getWatchersCount() {
+            return watchers != null ? watchers.getTotalCount() : 0;
+        }
 
         @Override
         public boolean equals(Object o) {
@@ -212,24 +213,24 @@ public class ContributedReposResponse {
         }
     }
 
-     /** 워처 수 정보를 담는 내부 DTO. */
-     @Getter
-     @JsonIgnoreProperties(ignoreUnknown = true)
-     public static class WatchersInfo {
-         private int totalCount;
-     }
+    /** 워처 수 정보를 담는 내부 DTO. */
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class WatchersInfo {
+        private int totalCount;
+    }
 
-     /** 저장소 소유자 정보를 담는 내부 DTO. */
-     @Getter
-     @JsonIgnoreProperties(ignoreUnknown = true)
-     public static class Owner {
-         private String login;
-     }
+    /** 저장소 소유자 정보를 담는 내부 DTO. */
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Owner {
+        private String login;
+    }
 
-     /** 주 사용 프로그래밍 언어 정보를 담는 내부 DTO. */
-     @Getter
-     @JsonIgnoreProperties(ignoreUnknown = true)
-     public static class PrimaryLanguage {
-         private String name;
-     }
+    /** 주 사용 프로그래밍 언어 정보를 담는 내부 DTO. */
+    @Getter
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class PrimaryLanguage {
+        private String name;
+    }
 }

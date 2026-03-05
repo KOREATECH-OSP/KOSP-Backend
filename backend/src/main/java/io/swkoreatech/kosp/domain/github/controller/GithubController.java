@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.github.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swkoreatech.kosp.domain.github.api.GithubApi;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
@@ -7,12 +12,6 @@ import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryRespon
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 import io.swkoreatech.kosp.domain.github.service.GithubStatisticsService;
-
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RestController;
-
 import lombok.RequiredArgsConstructor;
 
 /**

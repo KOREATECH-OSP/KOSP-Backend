@@ -1,15 +1,14 @@
 package io.swkoreatech.kosp.domain.user.eventlistener;
 
-import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
-import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
+import io.swkoreatech.kosp.domain.user.event.UserSignupEvent;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 

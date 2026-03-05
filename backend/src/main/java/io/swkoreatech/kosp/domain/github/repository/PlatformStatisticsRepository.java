@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.github.repository;
 
-import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 
 /**
  * 플랫폼 통계 리포지토리.

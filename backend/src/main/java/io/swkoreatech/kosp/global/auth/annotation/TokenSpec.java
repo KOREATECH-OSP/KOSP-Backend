@@ -1,11 +1,12 @@
 package io.swkoreatech.kosp.global.auth.annotation;
 
-import io.swkoreatech.kosp.global.auth.token.TokenType;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import io.swkoreatech.kosp.global.auth.token.JwtToken;
+import io.swkoreatech.kosp.global.auth.token.TokenType;
 
 /**
  * JWT 토큰 클래스에 토큰 타입을 지정하는 어노테이션.

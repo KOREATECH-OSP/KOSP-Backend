@@ -20,18 +20,18 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
-import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
-import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
-import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
+import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
+import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
+import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ChallengeService 단위 테스트")
@@ -113,7 +113,8 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 조회하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.getById(999L)).willThrow(new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> challengeService.getChallenge(999L))
@@ -189,7 +190,8 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 삭제하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.getById(999L)).willThrow(new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> challengeService.deleteChallenge(999L))
@@ -219,7 +221,8 @@ class ChallengeServiceTest {
         @DisplayName("존재하지 않는 챌린지를 수정하면 예외가 발생한다")
         void throwsException_whenChallengeNotFound() {
             // given
-            given(challengeRepository.getById(999L)).willThrow(new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+            given(challengeRepository.getById(999L)).willThrow(
+                new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
             ChallengeRequest request = new ChallengeRequest(
                 "수정", "설명",
                 "T(Math).min(totalCommits * 100 / 10, 100)",
@@ -330,7 +333,7 @@ class ChallengeServiceTest {
             User user = createUser(1L);
             Challenge challenge = createChallenge(1L, "완료 챌린지", 1);
             ChallengeHistory history = createHistory(1L, user, challenge, true);
-            
+
             given(challengeRepository.findAll()).willReturn(List.of(challenge));
             given(challengeHistoryRepository.findAllByUserId(1L)).willReturn(List.of(history));
 

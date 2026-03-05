@@ -37,5 +37,6 @@ public record GithubActivityResponse(
         String title, // Repo description or Event payload
         String date, // LocalDateTime string
         String url
-    ) {}
+    ) {
+    }
 }

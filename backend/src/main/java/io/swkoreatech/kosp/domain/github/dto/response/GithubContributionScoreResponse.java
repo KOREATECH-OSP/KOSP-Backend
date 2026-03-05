@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
-
 import java.math.BigDecimal;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
 
 /**
  * GitHub 기여 점수 응답 DTO.

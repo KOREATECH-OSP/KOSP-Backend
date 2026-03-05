@@ -1,11 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.report.api;
 
-import io.swkoreatech.kosp.domain.admin.report.dto.request.ReportProcessRequest;
-import io.swkoreatech.kosp.domain.admin.report.dto.response.ReportResponse;
-
 import java.util.List;
-
-import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +13,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.admin.report.dto.request.ReportProcessRequest;
+import io.swkoreatech.kosp.domain.admin.report.dto.response.ReportResponse;
+import jakarta.validation.Valid;
 
 /**
  * 관리자 전용 신고 관리 API 인터페이스.

@@ -13,4 +13,5 @@ public record RoleRequest(
     @NotBlank String name,
     String description,
     Boolean canAccessAdmin
-) {}
+) {
+}

@@ -2,6 +2,9 @@ package io.swkoreatech.kosp.infra.rabbitmq.config;
 
 import static io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.CustomExchange;
@@ -22,9 +25,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * RabbitMQ 인프라 설정 클래스.

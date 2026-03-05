@@ -1,15 +1,14 @@
 package io.swkoreatech.kosp.domain.community.board.controller;
 
-import io.swkoreatech.kosp.domain.community.board.api.BoardApi;
-import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
-import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.domain.community.board.api.BoardApi;
+import io.swkoreatech.kosp.domain.community.board.dto.response.BoardListResponse;
+import io.swkoreatech.kosp.domain.community.board.service.BoardService;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 /**

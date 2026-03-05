@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.collection.repository;
 
-import io.swkoreatech.kosp.collection.document.PullRequestDocument;
-
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import io.swkoreatech.kosp.collection.document.PullRequestDocument;
 
 /**
  * 풀 리퀘스트 문서 MongoDB 리포지토리.

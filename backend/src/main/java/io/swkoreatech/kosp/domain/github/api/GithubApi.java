@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.domain.github.api;
 
-import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
-import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
-import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
-import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
-import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
-
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -16,6 +10,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 
 /**
  * GitHub 통계 API.

@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.collection.repository;
 
-import io.swkoreatech.kosp.collection.document.CommitDocument;
-
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
+
+import io.swkoreatech.kosp.collection.document.CommitDocument;
 
 /**
  * 커밋 문서 MongoDB 리포지토리.

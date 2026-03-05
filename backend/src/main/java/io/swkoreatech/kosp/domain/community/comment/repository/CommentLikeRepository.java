@@ -1,12 +1,12 @@
 package io.swkoreatech.kosp.domain.community.comment.repository;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.comment.model.Comment;
-import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
+
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.comment.model.Comment;
+import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 
 /**
  * 댓글 좋아요 리포지토리.

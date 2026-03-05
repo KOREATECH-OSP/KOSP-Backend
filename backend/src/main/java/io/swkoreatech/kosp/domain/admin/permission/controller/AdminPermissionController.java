@@ -1,15 +1,14 @@
 package io.swkoreatech.kosp.domain.admin.permission.controller;
 
-import io.swkoreatech.kosp.domain.admin.permission.api.AdminPermissionApi;
-import io.swkoreatech.kosp.domain.admin.policy.service.PolicyAdminService;
-import io.swkoreatech.kosp.domain.admin.role.dto.response.PermissionResponse;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
-
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.domain.admin.permission.api.AdminPermissionApi;
+import io.swkoreatech.kosp.domain.admin.policy.service.PolicyAdminService;
+import io.swkoreatech.kosp.domain.admin.role.dto.response.PermissionResponse;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 /**

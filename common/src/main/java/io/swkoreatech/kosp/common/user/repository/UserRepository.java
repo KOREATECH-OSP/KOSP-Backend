@@ -1,9 +1,5 @@
 package io.swkoreatech.kosp.common.user.repository;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
-
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -12,6 +8,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.data.repository.query.Param;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 
 /**
  * {@link User} 엔티티의 데이터 접근 리포지토리.
@@ -52,10 +52,11 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
      * @return 역할과 권한이 페치 조인된 사용자
      */
     @Query("SELECT DISTINCT u FROM User u " +
-           "LEFT JOIN FETCH u.roles r " +
-           "LEFT JOIN FETCH r.policies p " +
-           "LEFT JOIN FETCH p.permissions " +
-           "WHERE u.id = :userId")
+        "LEFT JOIN FETCH u.roles r " +
+        "LEFT JOIN FETCH r.policies p " +
+        "LEFT JOIN FETCH p.permissions " +
+        "WHERE u.id = :userId"
+    )
     Optional<User> findByIdWithRolesAndPermissions(@Param("userId") Long userId);
 
     /**

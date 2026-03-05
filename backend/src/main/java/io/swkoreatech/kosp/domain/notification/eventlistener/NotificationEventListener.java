@@ -1,18 +1,5 @@
 package io.swkoreatech.kosp.domain.notification.eventlistener;
 
-import io.swkoreatech.kosp.common.entity.ProcessedMessage;
-import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
-import io.swkoreatech.kosp.common.event.PointChangedEvent;
-import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
-import io.swkoreatech.kosp.domain.notification.model.NotificationType;
-import io.swkoreatech.kosp.domain.notification.service.NotificationService;
-import io.swkoreatech.kosp.domain.point.model.PointSource;
-import io.swkoreatech.kosp.domain.point.service.PointService;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
-
 import java.io.IOException;
 
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -26,6 +13,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.rabbitmq.client.Channel;
+
+import io.swkoreatech.kosp.common.entity.ProcessedMessage;
+import io.swkoreatech.kosp.common.event.ChallengeCompletedEvent;
+import io.swkoreatech.kosp.common.event.PointChangedEvent;
+import io.swkoreatech.kosp.common.repository.ProcessedMessageRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.NotificationType;
+import io.swkoreatech.kosp.domain.notification.service.NotificationService;
+import io.swkoreatech.kosp.domain.point.model.PointSource;
+import io.swkoreatech.kosp.domain.point.service.PointService;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -53,7 +53,7 @@ public class NotificationEventListener {
     @Async
     @EventListener
     public void handleNotificationEvent(NotificationEvent event) {
-        log.info("Received NotificationEvent for user {}: {}", 
+        log.info("Received NotificationEvent for user {}: {}",
             event.getUserId(), event.getTitle());
         notificationService.createAndSend(event);
     }
@@ -69,16 +69,16 @@ public class NotificationEventListener {
     @RabbitListener(queues = QueueNames.CHALLENGE_COMPLETED)
     @Transactional
     public void handleChallengeCompleted(
-            ChallengeCompletedEvent event,
-            Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
-        
+        ChallengeCompletedEvent event,
+        Channel channel,
+        @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+
         if (processedMessageRepository.existsByMessageId(event.messageId())) {
             log.info("Duplicate message: {}", event.messageId());
             channel.basicAck(deliveryTag, false);
             return;
         }
-        
+
         try {
             NotificationEvent notificationEvent = NotificationEvent.of(
                 event.userId(),
@@ -88,11 +88,11 @@ public class NotificationEventListener {
                 event.challengeId()
             );
             eventPublisher.publishEvent(notificationEvent);
-            
+
             processedMessageRepository.save(
                 new ProcessedMessage(event.messageId(), "ChallengeCompletedEvent")
             );
-            
+
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             log.error("Failed to process challenge completed notification", e);
@@ -111,20 +111,20 @@ public class NotificationEventListener {
     @RabbitListener(queues = QueueNames.POINT_CHANGED)
     @Transactional
     public void handlePointChanged(
-            PointChangedEvent event,
-            Channel channel,
-            @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
-        
+        PointChangedEvent event,
+        Channel channel,
+        @Header(AmqpHeaders.DELIVERY_TAG) long deliveryTag) throws IOException {
+
         if (processedMessageRepository.existsByMessageId(event.messageId())) {
             log.info("Duplicate message: {}", event.messageId());
             channel.basicAck(deliveryTag, false);
             return;
         }
-        
+
         try {
             User user = userRepository.getById(event.userId());
             pointService.changePoint(user, event.amount(), event.reason(), PointSource.valueOf(event.source()));
-            
+
             NotificationEvent notificationEvent = NotificationEvent.of(
                 event.userId(),
                 NotificationType.POINT_EARNED,
@@ -133,11 +133,11 @@ public class NotificationEventListener {
                 null
             );
             eventPublisher.publishEvent(notificationEvent);
-            
+
             processedMessageRepository.save(
                 new ProcessedMessage(event.messageId(), "PointChangedEvent")
             );
-            
+
             channel.basicAck(deliveryTag, false);
         } catch (Exception e) {
             log.error("Failed to process point changed notification", e);

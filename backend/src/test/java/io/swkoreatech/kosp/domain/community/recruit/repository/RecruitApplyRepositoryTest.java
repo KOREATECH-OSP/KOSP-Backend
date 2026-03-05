@@ -10,18 +10,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.context.annotation.Import;
-import jakarta.persistence.PersistenceException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import io.swkoreatech.kosp.global.config.jpa.JpaConfig;
-
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
-import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.global.config.jpa.JpaConfig;
+import jakarta.persistence.PersistenceException;
 
 @DataJpaTest
 @ActiveProfiles("test")

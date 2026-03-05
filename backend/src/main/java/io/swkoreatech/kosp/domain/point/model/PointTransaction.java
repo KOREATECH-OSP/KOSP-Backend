@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.domain.point.model;
 
-import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.common.user.model.User;
-
 import static lombok.AccessLevel.PROTECTED;
 
+import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,7 +16,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
-
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -65,12 +63,12 @@ public class PointTransaction extends BaseEntity {
 
     @Builder
     private PointTransaction(
-            User user,
-            Integer amount,
-            TransactionType type,
-            PointSource source,
-            String reason,
-            Integer balanceAfter
+        User user,
+        Integer amount,
+        TransactionType type,
+        PointSource source,
+        String reason,
+        Integer balanceAfter
     ) {
         this.user = user;
         this.amount = amount;

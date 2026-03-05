@@ -1,10 +1,8 @@
 package io.swkoreatech.kosp.domain.github.dto.response;
 
-import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -15,7 +13,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class GlobalStatisticsResponse {
-    
+
     private Double avgCommitCount;
     private Double avgStarCount;
     private Double avgPrCount;

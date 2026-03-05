@@ -1,18 +1,17 @@
 package io.swkoreatech.kosp.domain.notification.controller;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.notification.api.NotificationApi;
-import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
-import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
-import io.swkoreatech.kosp.domain.notification.service.NotificationService;
-import io.swkoreatech.kosp.global.security.annotation.Permit;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.notification.api.NotificationApi;
+import io.swkoreatech.kosp.domain.notification.dto.response.NotificationListResponse;
+import io.swkoreatech.kosp.domain.notification.dto.response.UnreadCountResponse;
+import io.swkoreatech.kosp.domain.notification.service.NotificationService;
+import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
 /**

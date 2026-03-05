@@ -1,10 +1,9 @@
 package io.swkoreatech.kosp.common.challenge.model;
 
-import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.common.user.model.User;
-
 import java.time.LocalDateTime;
 
+import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -14,7 +13,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,11 +53,11 @@ public class ChallengeHistory extends BaseEntity {
 
     @Builder
     private ChallengeHistory(
-            User user,
-            Challenge challenge,
-            boolean isAchieved,
-            LocalDateTime achievedAt,
-            Integer progressAtAchievement
+        User user,
+        Challenge challenge,
+        boolean isAchieved,
+        LocalDateTime achievedAt,
+        Integer progressAtAchievement
     ) {
         this.user = user;
         this.challenge = challenge;

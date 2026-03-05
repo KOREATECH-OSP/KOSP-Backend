@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.domain.community.team.dto.response;
 
-import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
-import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
+
+import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
+import io.swkoreatech.kosp.domain.user.dto.response.AuthorResponse;
 
 /**
  * 팀 초대 응답 DTO.
@@ -29,7 +29,8 @@ public record TeamInviteResponse(
         String name,
         String imageUrl,
         int memberCount
-    ) {}
+    ) {
+    }
 
     public static TeamInviteResponse from(TeamInvite invite) {
         if (invite == null) {

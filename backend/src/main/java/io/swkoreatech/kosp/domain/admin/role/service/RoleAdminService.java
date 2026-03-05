@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.role.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
@@ -10,12 +15,6 @@ import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -29,7 +28,7 @@ import lombok.RequiredArgsConstructor;
 public class RoleAdminService {
 
     private static final String SUPERUSER_ROLE = "ROLE_SUPERUSER";
-    
+
     private final RoleRepository roleRepository;
     private final PolicyRepository policyRepository;
     private final UserRepository userRepository;
@@ -100,15 +99,15 @@ public class RoleAdminService {
     @Transactional
     public void deleteRole(String name) {
         validateNotSuperuser(name);
-        
+
         // Verify role exists before deletion
         roleRepository.getByName(name);
-        
+
         // Check if any users have this role
         if (userRepository.existsByRoles_Name(name)) {
             throw new GlobalException(ExceptionMessage.CONFLICT);
         }
-        
+
         roleRepository.deleteByName(name);
     }
 
@@ -122,7 +121,7 @@ public class RoleAdminService {
     @Transactional
     public void assignPolicy(String roleName, String policyName) {
         validateNotSuperuser(roleName);
-        
+
         Role role = roleRepository.getByName(roleName);
         Policy policy = policyRepository.getByName(policyName);
 
@@ -139,13 +138,13 @@ public class RoleAdminService {
     @Transactional
     public void removePolicy(String roleName, String policyName) {
         validateNotSuperuser(roleName);
-        
+
         Role role = roleRepository.getByName(roleName);
         Policy policy = policyRepository.getByName(policyName);
-        
+
         role.getPolicies().remove(policy);
     }
-    
+
     private void validateNotSuperuser(String roleName) {
         if (SUPERUSER_ROLE.equals(roleName)) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);

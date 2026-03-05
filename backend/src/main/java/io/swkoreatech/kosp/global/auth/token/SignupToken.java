@@ -1,7 +1,6 @@
 package io.swkoreatech.kosp.global.auth.token;
 
 import io.swkoreatech.kosp.global.auth.annotation.TokenSpec;
-
 import lombok.Builder;
 import lombok.Getter;
 
@@ -20,7 +19,7 @@ public class SignupToken extends JwtToken {
     private final String name;
     private final String avatarUrl;
     private final String encryptedGithubToken;
-    
+
     // 선택적 필드 (이메일 인증 후)
     private final String kutEmail;
     private final boolean emailVerified;

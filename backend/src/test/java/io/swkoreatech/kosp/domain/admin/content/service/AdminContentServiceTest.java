@@ -1,8 +1,6 @@
 package io.swkoreatech.kosp.domain.admin.content.service;
 
-import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createArticle;
-import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createBoard;
-import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createComment;
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.*;
 import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -22,6 +20,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeCreateRequest;
 import io.swkoreatech.kosp.domain.admin.content.dto.request.NoticeUpdateRequest;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
@@ -30,9 +31,6 @@ import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.repository.BoardRepository;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminContentService 단위 테스트")
@@ -172,7 +170,7 @@ class AdminContentServiceTest {
             User user = createUser(1L, "관리자");
             Board noticeBoard = createBoard(1L, "NOTICE");
             NoticeCreateRequest request = new NoticeCreateRequest("공지 제목", "공지 내용", false, List.of());
-            
+
             given(boardRepository.findAll()).willReturn(List.of(noticeBoard));
 
             // when
@@ -191,7 +189,7 @@ class AdminContentServiceTest {
             Board noticeBoard = createBoard(2L, "공지사항");
             Board qnaBoard = createBoard(3L, "Q&A");
             NoticeCreateRequest request = new NoticeCreateRequest("공지 제목", "공지 내용", true, List.of());
-            
+
             given(boardRepository.findAll()).willReturn(List.of(generalBoard, noticeBoard, qnaBoard));
 
             // when

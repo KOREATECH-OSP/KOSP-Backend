@@ -1,14 +1,14 @@
 package io.swkoreatech.kosp.domain.community.team.repository;
 
+import java.util.Optional;
+
+import org.springframework.data.repository.Repository;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
-
-import java.util.Optional;
-
-import org.springframework.data.repository.Repository;
 
 /**
  * 팀 초대 리포지토리.

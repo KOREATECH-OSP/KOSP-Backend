@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.global.exception.handler;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.global.dto.ErrorResponse;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +9,11 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.global.dto.ErrorResponse;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * 전역 예외 처리기.
@@ -56,12 +55,12 @@ public class GlobalExceptionHandler {
         HttpServletRequest request
     ) {
         String accept = request.getHeader("Accept");
-        
+
         // SSE 요청: 빈 응답 반환
         if (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
             return ResponseEntity.status(ex.getStatus()).build();
         }
-        
+
         // 일반 REST API: JSON 에러 응답
         ErrorResponse response = ErrorResponse.of(ex.getMessage(), ex.getStatus().value());
         return ResponseEntity.status(ex.getStatus())
@@ -97,12 +96,12 @@ public class GlobalExceptionHandler {
         HttpServletRequest request
     ) {
         String accept = request.getHeader("Accept");
-        
+
         // SSE 요청: 빈 응답 반환
         if (accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        
+
         // 일반 REST API: JSON 에러 응답
         ErrorResponse response = ErrorResponse.of(
             ExceptionMessage.AUTHENTICATION.getMessage(),

@@ -1,5 +1,15 @@
 package io.swkoreatech.kosp.domain.community.team.service;
 
+import java.time.Instant;
+import java.util.List;
+
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -22,17 +32,6 @@ import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import io.swkoreatech.kosp.global.dto.PageMeta;
 import io.swkoreatech.kosp.global.util.RsqlUtils;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.TeamInviteSendEvent;
-
-import java.time.Instant;
-import java.util.List;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -133,14 +132,14 @@ public class TeamService {
         Team team = teamRepository.getById(teamId);
         validateLeader(team, user);
 
-         User invitee = userRepository.getByKutEmail(request.email());
-         if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, invitee)) {
-             throw new GlobalException(ExceptionMessage.TEAM_ALREADY_JOINED);
-         }
+        User invitee = userRepository.getByKutEmail(request.email());
+        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, invitee)) {
+            throw new GlobalException(ExceptionMessage.TEAM_ALREADY_JOINED);
+        }
 
-         // Check/Delete existing invite
-         teamInviteRepository.findByTeamAndInviteeAndIsDeletedFalse(team, invitee)
-             .ifPresent(TeamInvite::delete);
+        // Check/Delete existing invite
+        teamInviteRepository.findByTeamAndInviteeAndIsDeletedFalse(team, invitee)
+            .ifPresent(TeamInvite::delete);
 
         TeamInvite invite = TeamInvite.builder()
             .team(team)
@@ -167,45 +166,45 @@ public class TeamService {
         ));
     }
 
-     @Transactional
-     public void acceptInvite(Long inviteId, User user) {
-         TeamInvite invite = teamInviteRepository.findByIdAndIsDeletedFalse(inviteId)
-             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND)); // Using standard 404
+    @Transactional
+    public void acceptInvite(Long inviteId, User user) {
+        TeamInvite invite = teamInviteRepository.findByIdAndIsDeletedFalse(inviteId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND)); // Using standard 404
 
         if (!invite.getInvitee().getId().equals(user.getId())) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
 
-         if (invite.isExpired()) {
-             invite.delete();
-             throw new GlobalException(ExceptionMessage.INVITATION_EXPIRED);
-         }
+        if (invite.isExpired()) {
+            invite.delete();
+            throw new GlobalException(ExceptionMessage.INVITATION_EXPIRED);
+        }
 
-         if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(invite.getTeam(), user)) {
-              invite.delete();
-              return; // Already joined
-         }
+        if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(invite.getTeam(), user)) {
+            invite.delete();
+            return; // Already joined
+        }
 
         TeamMember member = TeamMember.builder()
             .team(invite.getTeam())
             .user(user)
             .role(TeamRole.MEMBER)
             .build();
-         teamMemberRepository.save(member);
-         
-         invite.delete();
+        teamMemberRepository.save(member);
+
+        invite.delete();
     }
 
-     @Transactional
-     public void rejectInvite(Long inviteId, User user) {
-         TeamInvite invite = teamInviteRepository.findByIdAndIsDeletedFalse(inviteId)
-             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    @Transactional
+    public void rejectInvite(Long inviteId, User user) {
+        TeamInvite invite = teamInviteRepository.findByIdAndIsDeletedFalse(inviteId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
 
-         if (!invite.getInvitee().getId().equals(user.getId())) {
-             throw new GlobalException(ExceptionMessage.FORBIDDEN);
-         }
-         
-         invite.delete();
+        if (!invite.getInvitee().getId().equals(user.getId())) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+
+        invite.delete();
     }
 
     @Transactional
@@ -217,31 +216,31 @@ public class TeamService {
             throw new GlobalException(ExceptionMessage.LEADER_CANNOT_LEAVE);
         }
 
-         User targetUser = userRepository.getById(targetUserId);
-         TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, targetUser)
-             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        User targetUser = userRepository.getById(targetUserId);
+        TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, targetUser)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
 
-         member.delete();
+        member.delete();
     }
 
-     private void validateLeader(Team team, User user) {
-         TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, user)
-             .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
-        
+    private void validateLeader(Team team, User user) {
+        TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, user)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+
         if (member.getRole() != TeamRole.LEADER) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
     }
 
-      public List<TeamDetailResponse> getMyTeams(User user) {
-          return teamMemberRepository.findAllByUserAndIsDeletedFalse(user).stream()
-              .map(member -> TeamDetailResponse.from(member.getTeam()))
-              .toList();
-      }
+    public List<TeamDetailResponse> getMyTeams(User user) {
+        return teamMemberRepository.findAllByUserAndIsDeletedFalse(user).stream()
+            .map(member -> TeamDetailResponse.from(member.getTeam()))
+            .toList();
+    }
 
-      public TeamDetailResponse getMyTeam(User user) {
-          TeamMember member = teamMemberRepository.findByUser(user)
-              .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
-          return TeamDetailResponse.from(member.getTeam());
-      }
+    public TeamDetailResponse getMyTeam(User user) {
+        TeamMember member = teamMemberRepository.findByUser(user)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        return TeamDetailResponse.from(member.getTeam());
+    }
 }

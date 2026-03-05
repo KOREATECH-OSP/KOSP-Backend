@@ -1,11 +1,11 @@
 package io.swkoreatech.kosp.domain.community.recruit.dto.response;
 
-import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
-import io.swkoreatech.kosp.global.dto.PageMeta;
-
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+
+import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
+import io.swkoreatech.kosp.global.dto.PageMeta;
 
 /**
  * 모집 지원자 목록 응답 DTO.

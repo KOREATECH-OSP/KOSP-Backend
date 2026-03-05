@@ -11,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
  */
 @Entity
 @Table(name = "processed_messages",
-       indexes = @Index(name = "idx_message_id", columnList = "message_id"))
+    indexes = @Index(name = "idx_message_id", columnList = "message_id"))
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 public class ProcessedMessage {

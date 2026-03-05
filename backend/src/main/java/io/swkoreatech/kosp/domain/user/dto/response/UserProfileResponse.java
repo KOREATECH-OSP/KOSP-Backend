@@ -26,7 +26,7 @@ public record UserProfileResponse(
      */
     public static UserProfileResponse from(User user) {
         String profileImage = (user.getGithubUser() != null) ? user.getGithubUser().getGithubAvatarUrl() : null;
-        
+
         String githubUrl = null;
         if (user.getGithubUser() != null && user.getGithubUser().getGithubLogin() != null) {
             githubUrl = "https://github.com/" + user.getGithubUser().getGithubLogin();

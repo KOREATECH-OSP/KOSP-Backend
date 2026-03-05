@@ -1,12 +1,13 @@
 package io.swkoreatech.kosp.domain.auth.repository;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.repository.Repository;
+
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
-
-import java.util.List;
-
-import org.springframework.data.repository.Repository;
 
 /**
  * 권한(Permission) 저장소.
@@ -35,7 +36,7 @@ public interface PermissionRepository extends Repository<Permission, Long> {
      * @param name 권한 이름
      * @return 권한 Optional
      */
-    java.util.Optional<Permission> findByName(String name);
+    Optional<Permission> findByName(String name);
 
     /**
      * 이름으로 권한을 삭제한다.

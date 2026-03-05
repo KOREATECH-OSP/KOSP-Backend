@@ -1,10 +1,10 @@
 package io.swkoreatech.kosp.collection.repository;
 
-import io.swkoreatech.kosp.collection.entity.GithubRepositoryStatistics;
-
 import java.util.Optional;
 
 import org.springframework.data.repository.CrudRepository;
+
+import io.swkoreatech.kosp.collection.entity.GithubRepositoryStatistics;
 
 /**
  * GitHub 저장소 통계 JPA 리포지토리.

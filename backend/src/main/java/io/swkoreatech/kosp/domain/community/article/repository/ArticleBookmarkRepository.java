@@ -1,9 +1,5 @@
 package io.swkoreatech.kosp.domain.community.article.repository;
 
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
-
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
+
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.model.Article;
+import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
 
 /**
  * 게시글 북마크 리포지토리.

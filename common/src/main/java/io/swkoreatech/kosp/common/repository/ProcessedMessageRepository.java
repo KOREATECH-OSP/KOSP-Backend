@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.common.repository;
 
-import io.swkoreatech.kosp.common.entity.ProcessedMessage;
-
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import io.swkoreatech.kosp.common.entity.ProcessedMessage;
 
 /**
  * {@link ProcessedMessage} 엔티티의 데이터 접근 리포지토리.

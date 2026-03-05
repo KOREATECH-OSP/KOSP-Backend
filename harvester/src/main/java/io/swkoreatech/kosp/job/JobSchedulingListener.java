@@ -1,10 +1,5 @@
 package io.swkoreatech.kosp.job;
 
-import io.swkoreatech.kosp.client.RateLimitException;
-import io.swkoreatech.kosp.client.RateLimitManager;
-import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
-import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -16,6 +11,10 @@ import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.stereotype.Component;
 
+import io.swkoreatech.kosp.client.RateLimitException;
+import io.swkoreatech.kosp.client.RateLimitManager;
+import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
+import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -84,13 +83,13 @@ public class JobSchedulingListener implements JobExecutionListener {
 
     private void scheduleNextRun(Long userId) {
         Instant nextRun = getResetTimePlus5Min(userId);
-        int delayMs = (int) Math.max(0, Duration.between(Instant.now(), nextRun).toMillis());
+        int delayMs = (int)Math.max(0, Duration.between(Instant.now(), nextRun).toMillis());
         publishWithRetry(userId, delayMs);
         log.info("Scheduled next run for user {} at {}", userId, nextRun);
     }
 
     private void scheduleRetry(Long userId, String runId, Instant scheduledAt) {
-        int delayMs = (int) Math.max(0, Duration.between(Instant.now(), scheduledAt).toMillis());
+        int delayMs = (int)Math.max(0, Duration.between(Instant.now(), scheduledAt).toMillis());
         publishWithRetry(userId, delayMs);
         log.info("Scheduled retry for user {} at {}", userId, scheduledAt);
     }

@@ -1,13 +1,5 @@
 package io.swkoreatech.kosp.domain.user.service;
 
-import io.swkoreatech.kosp.common.exception.ExceptionMessage;
-import io.swkoreatech.kosp.common.exception.GlobalException;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.user.repository.UserRepository;
-import io.swkoreatech.kosp.domain.user.model.PasswordResetToken;
-import io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository;
-import io.swkoreatech.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
-
 import java.util.UUID;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -15,6 +7,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.user.model.PasswordResetToken;
+import io.swkoreatech.kosp.domain.user.repository.PasswordResetTokenRepository;
+import io.swkoreatech.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -41,16 +40,16 @@ public class UserPasswordService {
     @Transactional
     public void sendPasswordResetMail(String email, String clientUrl) {
         User user = userRepository.findByKutEmail(email)
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
         String token = UUID.randomUUID().toString();
-        
+
         PasswordResetToken resetToken = PasswordResetToken.builder()
-                .token(token)
-                .userId(user.getId())
-                .ttl(600L) // 10 minutes
-                .build();
-        
+            .token(token)
+            .userId(user.getId())
+            .ttl(600L) // 10 minutes
+            .build();
+
         passwordResetTokenRepository.save(resetToken);
 
         eventPublisher.publishEvent(new ResetPasswordEvent(email, clientUrl, token));
@@ -69,10 +68,10 @@ public class UserPasswordService {
         PasswordResetToken resetToken = passwordResetTokenRepository.getById(token);
 
         User user = userRepository.findById(resetToken.getUserId())
-                .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
 
         user.changePassword(newPassword, passwordEncoder);
-        
+
         passwordResetTokenRepository.delete(resetToken);
     }
 }

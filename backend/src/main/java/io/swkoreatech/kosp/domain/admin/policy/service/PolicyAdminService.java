@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.policy.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.auth.model.Permission;
 import io.swkoreatech.kosp.common.auth.model.Policy;
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
@@ -11,12 +16,6 @@ import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyDetailResponse;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.PolicyResponse;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -51,7 +50,7 @@ public class PolicyAdminService {
      * @throws GlobalException 정책을 찾을 수 없는 경우
      */
     public PolicyDetailResponse getPolicy(String name) {
-        return PolicyDetailResponse.from(findPolicy(name));
+        return PolicyDetailResponse.from(policyRepository.getByName(name));
     }
 
     /**
@@ -83,7 +82,7 @@ public class PolicyAdminService {
      */
     @Transactional
     public void updatePolicy(String name, PolicyUpdateRequest request) {
-        Policy policy = findPolicy(name);
+        Policy policy = policyRepository.getByName(name);
         policy.updateDescription(request.description());
     }
 
@@ -95,7 +94,7 @@ public class PolicyAdminService {
      */
     @Transactional
     public void deletePolicy(String name) {
-        Policy policy = findPolicy(name);
+        Policy policy = policyRepository.getByName(name);
         if (!policy.getRoles().isEmpty()) {
             throw new GlobalException(ExceptionMessage.CONFLICT); // "Policy is in use by roles"
         }
@@ -111,9 +110,9 @@ public class PolicyAdminService {
      */
     @Transactional
     public void assignPermission(String policyName, String permissionName) {
-        Policy policy = findPolicy(policyName);
-        Permission permission = findPermission(permissionName);
-        
+        Policy policy = policyRepository.getByName(policyName);
+        Permission permission = permissionRepository.getByName(permissionName);
+
         policy.getPermissions().add(permission);
         policyRepository.save(policy);
     }
@@ -127,9 +126,9 @@ public class PolicyAdminService {
      */
     @Transactional
     public void removePermission(String policyName, String permissionName) {
-        Policy policy = findPolicy(policyName);
-        Permission permission = findPermission(permissionName);
-        
+        Policy policy = policyRepository.getByName(policyName);
+        Permission permission = permissionRepository.getByName(permissionName);
+
         policy.getPermissions().remove(permission);
         policyRepository.save(policy);
     }
@@ -154,16 +153,6 @@ public class PolicyAdminService {
      * @throws GlobalException 권한을 찾을 수 없는 경우
      */
     public PermissionResponse getPermission(String name) {
-        return PermissionResponse.from(findPermission(name));
-    }
-
-    private Policy findPolicy(String name) {
-        return policyRepository.findByName(name)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
-    }
-
-    private Permission findPermission(String name) {
-        return permissionRepository.findByName(name)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        return PermissionResponse.from(permissionRepository.getByName(name));
     }
 }

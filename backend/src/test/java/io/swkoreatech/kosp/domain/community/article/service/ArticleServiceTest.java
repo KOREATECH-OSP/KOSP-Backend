@@ -25,6 +25,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
@@ -38,8 +40,6 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeReposi
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.common.user.model.User;
-import io.swkoreatech.kosp.common.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ArticleService 단위 테스트")
@@ -84,7 +84,7 @@ class ArticleServiceTest {
             User user = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             ArticleRequest request = new ArticleRequest(1L, "제목", "내용", List.of("태그1"), null);
-            
+
             Article savedArticle = createArticle(1L, user, board, "제목");
             given(articleRepository.save(any(Article.class))).willReturn(savedArticle);
 
@@ -125,7 +125,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "테스트 글");
             ReflectionTestUtils.setField(article, "views", 0);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.existsByUserAndArticle(viewer, article)).willReturn(false);
             given(articleBookmarkRepository.existsByUserAndArticle(viewer, article)).willReturn(false);
@@ -151,7 +151,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ReflectionTestUtils.setField(article, "likes", 0);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
@@ -172,9 +172,9 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ReflectionTestUtils.setField(article, "likes", 1);
-            
+
             ArticleLike existingLike = ArticleLike.builder().user(user).article(article).build();
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(existingLike));
 
@@ -199,7 +199,7 @@ class ArticleServiceTest {
             User user = createUser(1L, "사용자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
@@ -219,7 +219,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ArticleBookmark bookmark = ArticleBookmark.builder().user(user).article(article).build();
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(bookmark));
 
@@ -245,7 +245,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
             ArticleRequest request = new ArticleRequest(1L, "수정 제목", "수정 내용", List.of(), null);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when & then
@@ -262,7 +262,7 @@ class ArticleServiceTest {
             Article article = createArticle(1L, author, board, "기존 제목");
             ArticleRequest request = new ArticleRequest(
                 1L, "수정 제목", "수정 내용", List.of("새태그"), null);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when
@@ -286,7 +286,7 @@ class ArticleServiceTest {
             User other = createUser(2L, "다른 사용자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when & then
@@ -325,7 +325,7 @@ class ArticleServiceTest {
             Article article = createArticle(1L, user, board, "글");
             Pageable pageable = PageRequest.of(0, 10);
             Page<Article> page = new PageImpl<>(List.of(article), pageable, 1);
-            
+
             given(articleRepository.findByBoardAndIsDeletedFalse(board, pageable)).willReturn(page);
 
             // when

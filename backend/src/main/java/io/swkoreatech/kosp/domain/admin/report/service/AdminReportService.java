@@ -1,5 +1,10 @@
 package io.swkoreatech.kosp.domain.admin.report.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.admin.content.service.AdminContentService;
@@ -9,12 +14,6 @@ import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportStatus;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 /**

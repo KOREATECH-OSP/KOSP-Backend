@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -45,7 +44,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldNotThrowWhenRemainingAboveThreshold() {
             User user = createUserWithGithubAccount(1001L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 150);
 
@@ -61,7 +60,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWhenRemainingEqualsThreshold() {
             User user = createUserWithGithubAccount(1002L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 100);
 
@@ -77,7 +76,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWithWaitTimeWhenRemainingBelowThreshold() {
             User user = createUserWithGithubAccount(1003L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(1800);
             githubUser.updateRateLimit(futureResetTime, 50);
 
@@ -173,7 +172,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldNotThrowWhenRemainingAboveThreshold101() {
             User user = createUserWithGithubAccount(4001L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 102);
 
@@ -189,7 +188,7 @@ class RateLimitThresholdIntegrationTest {
         void shouldThrowWhenRemainingEqualsThreshold101() {
             User user = createUserWithGithubAccount(4002L);
             GithubUser githubUser = user.getGithubUser();
-            
+
             Instant futureResetTime = Instant.now().plusSeconds(3600);
             githubUser.updateRateLimit(futureResetTime, 101);
 

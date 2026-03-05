@@ -4,10 +4,10 @@ import java.time.LocalDateTime;
 
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
-import io.swkoreatech.kosp.common.user.model.User;
 
 public final class TestCommunityFixture {
 

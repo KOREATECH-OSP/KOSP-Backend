@@ -1,11 +1,5 @@
 package io.swkoreatech.kosp.global.auth.resolver;
 
-import io.swkoreatech.kosp.global.auth.annotation.Token;
-import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
-import io.swkoreatech.kosp.global.auth.token.JwtToken;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -14,6 +8,10 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
+import io.swkoreatech.kosp.global.auth.annotation.Token;
+import io.swkoreatech.kosp.global.auth.exception.InvalidTokenException;
+import io.swkoreatech.kosp.global.auth.token.JwtToken;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
