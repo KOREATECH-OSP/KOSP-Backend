@@ -15,18 +15,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.resolver.TokenHeaderResolver;
 import io.swkoreatech.kosp.global.security.filter.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * Spring Security 설정 클래스.
  * <p>CSRF 비활성화, 무상태 세션 정책, CORS 설정, JWT 인증 필터 등록,
  * 비밀번호 인코더 및 인증 매니저를 구성한다.</p>
  */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -103,4 +109,14 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * 허용되지 않은 HTTP 메서드(PROPFIND 등) 요청 시 스택트레이스 없이 405를 반환한다.
+     */
+    @Bean
+    public RequestRejectedHandler requestRejectedHandler() {
+        return (request, response, exception) -> {
+            log.debug("Rejected request: {}", exception.getMessage());
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        };
+    }
 }
