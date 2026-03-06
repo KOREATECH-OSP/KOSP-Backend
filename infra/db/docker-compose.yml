@@ -47,6 +47,7 @@ services:
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "${RABBITMQ_PORT}:5672"
+      - "${RABBITMQ_MANAGEMENT_PORT}:15672"
     volumes:
       - ${RABBITMQ_VOLUME_PATH}:/var/lib/rabbitmq
     healthcheck:
