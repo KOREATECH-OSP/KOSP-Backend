@@ -4,6 +4,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
@@ -12,11 +15,12 @@ import io.swkoreatech.kosp.domain.report.dto.request.ReportRequest;
 import io.swkoreatech.kosp.domain.report.model.Report;
 import io.swkoreatech.kosp.domain.report.model.enums.ReportTargetType;
 import io.swkoreatech.kosp.domain.report.repository.ReportRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 신고 서비스.
+ * 게시글 신고 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -26,6 +30,14 @@ public class ReportService {
     private final ArticleRepository articleRepository;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * 게시글을 신고한다.
+     *
+     * @param reporter 신고자
+     * @param articleId 게시글 ID
+     * @param request 신고 요청
+     * @throws GlobalException 자기 게시글 신고 또는 중복 신고인 경우
+     */
     @Transactional
     public void reportArticle(User reporter, Long articleId, ReportRequest request) {
         Article article = findArticle(articleId);
@@ -73,7 +85,7 @@ public class ReportService {
         Long authorId = article.getAuthor().getId();
         String title = "게시글 신고 접수";
         String message = "회원님의 게시글이 신고되었습니다.";
-        
+
         eventPublisher.publishEvent(
             NotificationEvent.of(authorId, NotificationType.ARTICLE_REPORTED, title, message, articleId)
         );

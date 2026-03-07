@@ -12,6 +12,10 @@ import io.swkoreatech.kosp.domain.point.service.PointService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 포인트 이벤트 리스너.
+ * 포인트 변경 이벤트를 처리하여 포인트를 변경하고 알림을 발행한다.
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -20,6 +24,11 @@ public class PointEventListener {
     private final PointService pointService;
     private final ApplicationEventPublisher eventPublisher;
 
+    /**
+     * 포인트 변경 이벤트를 처리한다.
+     *
+     * @param event 포인트 변경 이벤트
+     */
     @EventListener
     @Transactional
     public void handlePointChange(PointChangeEvent event) {
@@ -36,7 +45,7 @@ public class PointEventListener {
     private void publishNotification(PointChangeEvent event) {
         String title = event.source().getTitle();
         String message = buildPointMessage(event.amount(), event.reason());
-        
+
         eventPublisher.publishEvent(
             NotificationEvent.of(event.user().getId(), NotificationType.POINT_EARNED, title, message, null)
         );

@@ -15,13 +15,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.auth.dto.request.LoginRequest;
 import io.swkoreatech.kosp.domain.auth.dto.response.AuthTokenResponse;
-import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.domain.user.service.UserService;
 import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.SignupToken;
@@ -46,7 +46,7 @@ public abstract class IntegrationTestSupport {
 
     @Autowired
     protected UserService userService;
-    
+
     @Autowired
     protected PasswordEncoder passwordEncoder;
 
@@ -63,8 +63,6 @@ public abstract class IntegrationTestSupport {
             .githubName("name" + id)
             .githubToken("dummy_token_" + id)
             .githubAvatarUrl("https://dummy.url/" + id)
-            .createdAt(java.time.LocalDateTime.now())
-            .updatedAt(java.time.LocalDateTime.now())
             .build());
     }
 
@@ -85,7 +83,7 @@ public abstract class IntegrationTestSupport {
             .kutEmail(kutEmail)
             .emailVerified(true)
             .build();
-        
+
         return token.toString();
     }
 
@@ -94,17 +92,17 @@ public abstract class IntegrationTestSupport {
      */
     protected String loginAndGetToken(String email, String password) throws Exception {
         LoginRequest loginRequest = new LoginRequest(email, password);
-        
+
         MvcResult result = mockMvc.perform(post("/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
             .andExpect(status().isOk())
             .andReturn();
-        
+
         String responseBody = result.getResponse().getContentAsString();
         AuthTokenResponse tokenResponse = objectMapper.readValue(
             responseBody, AuthTokenResponse.class);
-        
+
         return tokenResponse.accessToken();
     }
 

@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.community.article.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,6 +14,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 게시글 북마크 엔티티.
+ * 사용자와 게시글 간의 북마크 관계를 나타낸다.
+ */
 @Getter
 @Entity
 @Table(name = "article_bookmark")
@@ -32,6 +36,10 @@ public class ArticleBookmark extends BaseEntity {
     @JoinColumn(name = "article_id")
     private Article article;
 
+    /**
+     * @param user    북마크한 사용자
+     * @param article 북마크 대상 게시글
+     */
     @Builder
     public ArticleBookmark(User user, Article article) {
         this.user = user;

@@ -16,51 +16,48 @@
 -- 3. GithubUserStatistics (전체 통계)
 -- ============================================
 
-INSERT INTO github_user_statistics (
-    github_id,
-    total_commits,
-    total_lines,
-    total_additions,
-    total_deletions,
-    total_prs,
-    total_issues,
-    owned_repos_count,
-    contributed_repos_count,
-    total_stars_received,
-    total_forks_received,
-    night_commits,
-    day_commits,
-    main_repo_score,
-    other_repo_score,
-    pr_issue_score,
-    reputation_score,
-    total_score,
-    calculated_at,
-    data_period_start,
-    data_period_end
-) VALUES (
-    'ImTotem',
-    850,        -- 총 커밋 수
-    38000,      -- 총 라인 수
-    24000,      -- 추가된 라인
-    14000,      -- 삭제된 라인
-    65,         -- PR 수
-    32,         -- Issue 수
-    8,          -- 소유 저장소 수
-    18,         -- 기여 저장소 수
-    420,        -- 받은 스타 수
-    85,         -- 받은 포크 수
-    280,        -- 밤 시간 커밋
-    570,        -- 낮 시간 커밋
-    680.00,     -- 메인 저장소 점수
-    420.50,     -- 기타 저장소 점수
-    185.00,     -- PR/Issue 점수
-    180.00,     -- 평판 점수
-    1465.50,    -- 총 점수
-    NOW(),
-    '2023-03-01',
-    '2024-12-31'
-);
+INSERT INTO github_user_statistics (github_id,
+                                    total_commits,
+                                    total_lines,
+                                    total_additions,
+                                    total_deletions,
+                                    total_prs,
+                                    total_issues,
+                                    owned_repos_count,
+                                    contributed_repos_count,
+                                    total_stars_received,
+                                    total_forks_received,
+                                    night_commits,
+                                    day_commits,
+                                    main_repo_score,
+                                    other_repo_score,
+                                    pr_issue_score,
+                                    reputation_score,
+                                    total_score,
+                                    calculated_at,
+                                    data_period_start,
+                                    data_period_end)
+VALUES ('ImTotem',
+        850, -- 총 커밋 수
+        38000, -- 총 라인 수
+        24000, -- 추가된 라인
+        14000, -- 삭제된 라인
+        65, -- PR 수
+        32, -- Issue 수
+        8, -- 소유 저장소 수
+        18, -- 기여 저장소 수
+        420, -- 받은 스타 수
+        85, -- 받은 포크 수
+        280, -- 밤 시간 커밋
+        570, -- 낮 시간 커밋
+        680.00, -- 메인 저장소 점수
+        420.50, -- 기타 저장소 점수
+        185.00, -- PR/Issue 점수
+        180.00, -- 평판 점수
+        1465.50, -- 총 점수
+        NOW(),
+        '2023-03-01',
+        '2024-12-31');
 
 -- ============================================
 -- 4. GithubMonthlyStatistics (월별 활동)
@@ -87,51 +84,55 @@ INSERT INTO github_user_statistics (
 -- 6. GithubRepositoryStatistics (저장소별 통계)
 -- ============================================
 
-INSERT INTO github_repository_statistics (
-    repo_owner, repo_name, contributor_github_id,
-    stargazers_count, forks_count, watchers_count,
-    total_commits_count, total_prs_count, total_issues_count,
-    user_commits_count, user_prs_count, user_issues_count,
-    last_commit_date, description, primary_language,
-    calculated_at
-) VALUES
+INSERT INTO github_repository_statistics (repo_owner, repo_name, contributor_github_id,
+                                          stargazers_count, forks_count, watchers_count,
+                                          total_commits_count, total_prs_count, total_issues_count,
+                                          user_commits_count, user_prs_count, user_issues_count,
+                                          last_commit_date, description, primary_language,
+                                          calculated_at)
+VALUES
 -- ImTotem의 메인 프로젝트
-('ImTotem', 'KOSP-Backend', 'ImTotem', 15, 5, 3, 850, 65, 32, 420, 35, 18, '2024-12-20 15:30:00', 'KOSP 프로젝트 백엔드 서버', 'Java', NOW()),
-('ImTotem', 'algorithm-study', 'ImTotem', 8, 2, 2, 180, 0, 5, 180, 0, 5, '2024-11-15 10:20:00', '알고리즘 문제 풀이 저장소', 'Python', NOW()),
-('ImTotem', 'spring-practice', 'ImTotem', 5, 1, 1, 120, 8, 3, 120, 8, 3, '2024-10-28 14:45:00', 'Spring Boot 학습 프로젝트', 'Java', NOW()),
+('ImTotem', 'KOSP-Backend', 'ImTotem', 15, 5, 3, 850, 65, 32, 420, 35, 18, '2024-12-20 15:30:00', 'KOSP 프로젝트 백엔드 서버',
+ 'Java', NOW()),
+('ImTotem', 'algorithm-study', 'ImTotem', 8, 2, 2, 180, 0, 5, 180, 0, 5, '2024-11-15 10:20:00', '알고리즘 문제 풀이 저장소',
+ 'Python', NOW()),
+('ImTotem', 'spring-practice', 'ImTotem', 5, 1, 1, 120, 8, 3, 120, 8, 3, '2024-10-28 14:45:00', 'Spring Boot 학습 프로젝트',
+ 'Java', NOW()),
 
 -- 기여한 오픈소스 프로젝트
-('KOREATECH-OSP', 'KOSP-Frontend', 'ImTotem', 12, 4, 3, 450, 28, 15, 85, 12, 4, '2024-12-18 11:00:00', 'KOSP 프로젝트 프론트엔드', 'TypeScript', NOW()),
-('spring-projects', 'spring-boot', 'ImTotem', 68000, 28000, 15000, 125000, 15000, 8500, 15, 3, 1, '2024-09-10 09:30:00', 'Spring Boot framework', 'Java', NOW());
+('KOREATECH-OSP', 'KOSP-Frontend', 'ImTotem', 12, 4, 3, 450, 28, 15, 85, 12, 4, '2024-12-18 11:00:00',
+ 'KOSP 프로젝트 프론트엔드', 'TypeScript', NOW()),
+('spring-projects', 'spring-boot', 'ImTotem', 68000, 28000, 15000, 125000, 15000, 8500, 15, 3, 1, '2024-09-10 09:30:00',
+ 'Spring Boot framework', 'Java', NOW());
 
 -- ============================================
 -- 7. GithubYearlyStatistics (연도별 통계)
 -- ============================================
 
-INSERT INTO github_yearly_statistics (
-    github_id, `year`,
-    commits, `lines`, additions, deletions,
-    prs, issues,
-    total_score, main_repo_score, other_repo_score, pr_issue_score, reputation_score,
-    `rank`, percentile,
-    best_repo_owner, best_repo_name, best_repo_commits,
-    calculated_at
-) VALUES
+INSERT INTO github_yearly_statistics (github_id, `year`,
+                                      commits, `lines`, additions, deletions,
+                                      prs, issues,
+                                      total_score, main_repo_score, other_repo_score, pr_issue_score, reputation_score,
+                                      `rank`, percentile,
+                                      best_repo_owner, best_repo_name, best_repo_commits,
+                                      calculated_at)
+VALUES
 -- 2024년
-('ImTotem', 2024, 850, 38000, 24000, 14000, 65, 32, 1465.50, 680.00, 420.50, 185.00, 180.00, 20, 80, 'ImTotem', 'KOSP-Backend', 420, NOW()),
+('ImTotem', 2024, 850, 38000, 24000, 14000, 65, 32, 1465.50, 680.00, 420.50, 185.00, 180.00, 20, 80, 'ImTotem',
+ 'KOSP-Backend', 420, NOW()),
 
 -- 2023년 (일부 데이터)
-('ImTotem', 2023, 320, 14000, 9000, 5000, 22, 12, 580.00, 280.00, 180.00, 70.00, 50.00, 45, 55, 'ImTotem', 'algorithm-study', 180, NOW());
+('ImTotem', 2023, 320, 14000, 9000, 5000, 22, 12, 580.00, 280.00, 180.00, 70.00, 50.00, 45, 55, 'ImTotem',
+ 'algorithm-study', 180, NOW());
 
 -- ============================================
 -- 8. GithubLanguageStatistics (언어 분포)
 -- ============================================
 
-INSERT INTO github_language_statistics (
-    github_id, language,
-    lines_of_code, percentage, repositories, commits,
-    calculated_at
-) VALUES
+INSERT INTO github_language_statistics (github_id, language,
+                                        lines_of_code, percentage, repositories, commits,
+                                        calculated_at)
+VALUES
 -- ImTotem의 주요 사용 언어
 ('ImTotem', 'Java', 22000, 57.9, 5, 520, NOW()),
 ('ImTotem', 'Python', 8000, 21.1, 3, 180, NOW()),

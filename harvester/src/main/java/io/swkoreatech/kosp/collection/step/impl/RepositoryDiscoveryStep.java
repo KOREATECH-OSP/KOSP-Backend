@@ -17,7 +17,6 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import io.swkoreatech.kosp.common.github.model.GithubUser;
 import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
@@ -33,22 +32,24 @@ import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
+import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.job.ContextValidationListener;
 import io.swkoreatech.kosp.job.StepCompletionListener;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Discovers repositories contributed to by the user within the past year.
+ * 사용자가 기여한 저장소를 발견하는 파이프라인 초기 스텝.
+ *
+ * <p>GitHub에서 사용자가 기여한 모든 저장소를 조회하고,
+ * 저장소 메타데이터를 MongoDB에 저장하며, 후속 스텝을 위해
+ * ExecutionContext에 인증 정보와 저장소 목록을 저장한다.
  *
  * @StepContract
- * REQUIRES: (none - initial step in pipeline)
+ * REQUIRES: (없음 - 파이프라인 초기 스텝)
  * PROVIDES: githubLogin, githubToken, githubNodeId, discoveredRepos
- * PURPOSE: Queries GitHub for all repositories the user has contributed to,
- *          stores repository metadata in MongoDB, and populates ExecutionContext
- *          with credentials and repository list for downstream steps.
  */
 @Slf4j
 @Component
@@ -67,6 +68,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final StepCompletionListener stepCompletionListener;
     private final ContextValidationListener contextValidationListener;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -80,6 +82,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;
@@ -104,8 +107,8 @@ public class RepositoryDiscoveryStep implements StepProvider {
             log.info("First collection for user {}: starting from account creation date", userId);
             startDate = fetchUserCreatedAt(login, token);
         } else {
-            log.info("Incremental collection for user {}: starting from {}", 
-                     userId, metadata.getLastFullCollection());
+            log.info("Incremental collection for user {}: starting from {}",
+                userId, metadata.getLastFullCollection());
             startDate = ZonedDateTime.ofInstant(
                 metadata.getLastFullCollection(),
                 ZoneOffset.UTC
@@ -114,7 +117,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
 
-        List<TimeChunkGenerator.TimeChunk> chunks = 
+        List<TimeChunkGenerator.TimeChunk> chunks =
             TimeChunkGenerator.generateMonthlyChunks(startDate, now);
 
         log.info("Collection range: {} to {} ({} chunks)", startDate, now, chunks.size());
@@ -125,11 +128,11 @@ public class RepositoryDiscoveryStep implements StepProvider {
         for (TimeChunkGenerator.TimeChunk chunk : chunks) {
             log.info("Collecting chunk: {} to {}", chunk.start(), chunk.end());
 
-            GraphQLResponse<ContributedReposResponse> response = 
+            GraphQLResponse<ContributedReposResponse> response =
                 fetchContributedReposInRange(
-                    login, 
-                    chunk.getStartFormatted(), 
-                    chunk.getEndFormatted(), 
+                    login,
+                    chunk.getStartFormatted(),
+                    chunk.getEndFormatted(),
                     token
                 );
 
@@ -159,8 +162,8 @@ public class RepositoryDiscoveryStep implements StepProvider {
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
         storeReposInContext(chunkContext, allRepositories);
 
-        log.info("Collection complete: {} repositories discovered from {} chunks", 
-                 allRepositories.size(), chunks.size());
+        log.info("Collection complete: {} repositories discovered from {} chunks",
+            allRepositories.size(), chunks.size());
     }
 
     private String decryptToken(String encryptedToken) {
@@ -170,14 +173,14 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private Set<RepositoryInfo> discoverRepositories(String login, String token) {
         ZonedDateTime now = ZonedDateTime.now(ZoneOffset.UTC);
         ZonedDateTime fiveYearsAgo = now.minusYears(5);
-        
+
         GraphQLResponse<ContributedReposResponse> response = fetchContributedReposInRange(
             login,
             formatDateTime(fiveYearsAgo),
             formatDateTime(now),
             token
         );
-        
+
         if (response == null || response.hasErrors()) {
             return Set.of();
         }
@@ -185,9 +188,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private ZonedDateTime fetchUserCreatedAt(String login, String token) {
-        GraphQLResponse<UserBasicInfoResponse> response = 
+        GraphQLResponse<UserBasicInfoResponse> response =
             graphQLClient.getUserBasicInfo(login, null, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-            .block();
+                .block();
 
         if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
             return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
@@ -220,10 +223,10 @@ public class RepositoryDiscoveryStep implements StepProvider {
         boolean hasNextPage = true;
 
         while (hasNextPage) {
-            GraphQLResponse<UserBasicInfoResponse> response = 
-                graphQLClient.getUserBasicInfo(login, cursor, token, 
-                    GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-                .block();
+            GraphQLResponse<UserBasicInfoResponse> response =
+                graphQLClient.getUserBasicInfo(login, cursor, token,
+                        GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
+                    .block();
 
             if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
                 break;
@@ -270,25 +273,25 @@ public class RepositoryDiscoveryStep implements StepProvider {
         setRepositoryField(repoInfo, "stargazerCount", node.getStargazerCount());
         setRepositoryField(repoInfo, "forkCount", node.getForkCount());
         setRepositoryField(repoInfo, "createdAt", node.getCreatedAt());
-        
+
         if (node.getOwner() != null) {
             ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
             setOwnerField(owner, "login", node.getOwner().getLogin());
             setRepositoryField(repoInfo, "owner", owner);
         }
-        
+
         if (node.getPrimaryLanguage() != null) {
             ContributedReposResponse.PrimaryLanguage language = new ContributedReposResponse.PrimaryLanguage();
             setLanguageField(language, "name", node.getPrimaryLanguage().getName());
             setRepositoryField(repoInfo, "primaryLanguage", language);
         }
-        
+
         if (node.getWatchers() != null) {
             ContributedReposResponse.WatchersInfo watchers = new ContributedReposResponse.WatchersInfo();
             setWatchersField(watchers, "totalCount", node.getWatchers().getTotalCount());
             setRepositoryField(repoInfo, "watchers", watchers);
         }
-        
+
         return repoInfo;
     }
 
@@ -351,10 +354,10 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private ContributedRepoDocument.ContributedRepoDocumentBuilder buildRepoMetadata(
-            ContributedRepoDocument.ContributedRepoDocumentBuilder builder,
-            String login,
-            RepositoryInfo repo,
-            Instant now) {
+        ContributedRepoDocument.ContributedRepoDocumentBuilder builder,
+        String login,
+        RepositoryInfo repo,
+        Instant now) {
         return builder
             .isOwner(login.equals(repo.getOwnerLogin()))
             .isFork(repo.isFork())

@@ -16,12 +16,10 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
-import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.PageInfo;
 import io.swkoreatech.kosp.collection.document.CommitDocument;
 import io.swkoreatech.kosp.collection.repository.CommitDocumentRepository;
 import io.swkoreatech.kosp.collection.step.StepContextKeys;
 import io.swkoreatech.kosp.collection.step.StepProvider;
-import io.swkoreatech.kosp.collection.util.GraphQLErrorHandler;
 import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.PaginationHelper;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
@@ -31,13 +29,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Mines commit data from discovered repositories.
+ * 발견된 저장소에서 커밋 데이터를 마이닝하는 스텝.
+ *
+ * <p>GraphQL API를 사용하여 사용자가 기여한 저장소의 모든 커밋을 조회하고,
+ * CommitDocument 컬렉션에 저장한다. 점수 계산 및 통계에 사용된다.
  *
  * @StepContract
- * REQUIRES: githubToken, githubNodeId, discoveredRepos (from RepositoryDiscoveryStep)
- * PROVIDES: (none - writes to MongoDB only)
- * PURPOSE: Fetches all commits authored by user across contributed repos using GraphQL,
- *          saves to CommitDocument collection for score calculation and statistics.
+ * REQUIRES: githubToken, githubNodeId, discoveredRepos (RepositoryDiscoveryStep에서)
+ * PROVIDES: (없음 - MongoDB에만 기록)
  */
 @Slf4j
 @Component
@@ -57,6 +56,7 @@ public class CommitMiningStep implements StepProvider {
     private int totalSavedCount;
     private int totalSkippedCount;
 
+    /** {@inheritDoc} */
     @Override
     public Step getStep() {
         return new StepBuilder(STEP_NAME, jobRepository)
@@ -68,16 +68,17 @@ public class CommitMiningStep implements StepProvider {
             .build();
     }
 
+    /** {@inheritDoc} */
     @Override
     public String getStepName() {
         return STEP_NAME;
     }
 
-     private void execute(ChunkContext chunkContext) {
-          ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
-          Long userId = StepContextHelper.extractUserId(chunkContext);
-         String token = context.getString(StepContextKeys.GITHUB_TOKEN);
-         String nodeId = context.getString(StepContextKeys.GITHUB_NODE_ID);
+    private void execute(ChunkContext chunkContext) {
+        ExecutionContext context = StepContextHelper.getExecutionContext(chunkContext);
+        Long userId = StepContextHelper.extractUserId(chunkContext);
+        String token = context.getString(StepContextKeys.GITHUB_TOKEN);
+        String nodeId = context.getString(StepContextKeys.GITHUB_NODE_ID);
 
         if (token == null || nodeId == null) {
             log.warn("GitHub credentials not found in context for user {}", userId);
@@ -94,101 +95,102 @@ public class CommitMiningStep implements StepProvider {
         totalSkippedCount = 0;
         int totalMined = mineCommitsFromRepos(userId, repos, nodeId, token);
         log.info(LoggingConstants.MINING_SUMMARY, totalMined, totalSavedCount, totalSkippedCount);
-     }
+    }
 
-     private String[] getDiscoveredRepos(ExecutionContext context) {
-         Object repos = context.get(StepContextKeys.DISCOVERED_REPOS);
-         if (repos instanceof String[]) {
-             return (String[]) repos;
-         }
-         return null;
-     }
+    private String[] getDiscoveredRepos(ExecutionContext context) {
+        Object repos = context.get(StepContextKeys.DISCOVERED_REPOS);
+        if (repos instanceof String[]) {
+            return (String[])repos;
+        }
+        return null;
+    }
 
     private int mineCommitsFromRepos(Long userId, String[] repos, String nodeId, String token) {
-         int total = 0;
-         for (String repoFullName : repos) {
-             total += mineCommitsForRepo(userId, repoFullName, nodeId, token);
-         }
-         return total;
-     }
+        int total = 0;
+        for (String repoFullName : repos) {
+            total += mineCommitsForRepo(userId, repoFullName, nodeId, token);
+        }
+        return total;
+    }
 
     private int mineCommitsForRepo(Long userId, String repoFullName, String nodeId, String token) {
-         String[] parts = repoFullName.split("/");
-         if (parts.length != 2) {
-             log.warn("Invalid repo name format: {}", repoFullName);
-             return 0;
-         }
+        String[] parts = repoFullName.split("/");
+        if (parts.length != 2) {
+            log.warn("Invalid repo name format: {}", repoFullName);
+            return 0;
+        }
 
-         String owner = parts[0];
-         String name = parts[1];
-         return fetchAllCommits(userId, owner, name, nodeId, token);
-     }
+        String owner = parts[0];
+        String name = parts[1];
+        return fetchAllCommits(userId, owner, name, nodeId, token);
+    }
 
-     private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
-          Instant now = Instant.now();
-          int result = paginateCommits(userId, owner, name, nodeId, token, now, DEFAULT_PAGE_SIZE);
-          
-          if (result >= 0) {
-              return result;
-          }
-          
-          if (result == -2) {
-              log.warn("Skipping repo {}/{} — non-retryable GraphQL error (pageSize retry won't help)", owner, name);
-              return 0;
-          }
-          
-          log.warn("Retrying {}/{} with reduced page size {}", owner, name, RETRY_PAGE_SIZE);
-          result = paginateCommits(userId, owner, name, nodeId, token, now, RETRY_PAGE_SIZE);
-          
-          if (result >= 0) {
-              return result;
-          }
-          
-          log.warn("Skipping repo {}/{} after retry failure", owner, name);
-          return 0;
-      }
+    private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
+        Instant now = Instant.now();
+        int result = paginateCommits(userId, owner, name, nodeId, token, now, DEFAULT_PAGE_SIZE);
 
-     private int paginateCommits(Long userId, String owner, String name, String nodeId, String token, Instant now, int pageSize) {
-         return PaginationHelper.paginate(
-             cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token, pageSize),
-             RepositoryCommitsResponse::getPageInfo,
-             (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
-             "repo",
-             owner + "/" + name,
-             RepositoryCommitsResponse.class
-         );
-     }
+        if (result >= 0) {
+            return result;
+        }
 
-     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
-         String owner,
-         String name,
-         String nodeId,
-         String cursor,
-         String token,
-         int pageSize
-     ) {
-         return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, pageSize, GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
-     }
+        if (result == -2) {
+            log.warn("Skipping repo {}/{} — non-retryable GraphQL error (pageSize retry won't help)", owner, name);
+            return 0;
+        }
 
-       private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
-          int saved = 0;
-          for (CommitNode commit : commits) {
-               if (commit == null) {
-                   totalSkippedCount++;
-                   continue;
-               }
-               if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
-                 totalSkippedCount++;
-                 continue;
-             }
+        log.warn("Retrying {}/{} with reduced page size {}", owner, name, RETRY_PAGE_SIZE);
+        result = paginateCommits(userId, owner, name, nodeId, token, now, RETRY_PAGE_SIZE);
 
-             CommitDocument document = buildDocument(userId, owner, name, commit, now);
-             commitDocumentRepository.save(document);
-             saved++;
-             totalSavedCount++;
-         }
-         return saved;
-     }
+        if (result >= 0) {
+            return result;
+        }
+
+        log.warn("Skipping repo {}/{} after retry failure", owner, name);
+        return 0;
+    }
+
+    private int paginateCommits(Long userId, String owner, String name, String nodeId, String token, Instant now, int pageSize) {
+        return PaginationHelper.paginate(
+            cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token, pageSize),
+            RepositoryCommitsResponse::getPageInfo,
+            (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
+            "repo",
+            owner + "/" + name,
+            RepositoryCommitsResponse.class
+        );
+    }
+
+    private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
+        String owner,
+        String name,
+        String nodeId,
+        String cursor,
+        String token,
+        int pageSize
+    ) {
+        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, pageSize,
+            GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
+    }
+
+    private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
+        int saved = 0;
+        for (CommitNode commit : commits) {
+            if (commit == null) {
+                totalSkippedCount++;
+                continue;
+            }
+            if (commitDocumentRepository.existsByUserIdAndRepositoryNameAndSha(userId, name, commit.getOid())) {
+                totalSkippedCount++;
+                continue;
+            }
+
+            CommitDocument document = buildDocument(userId, owner, name, commit, now);
+            commitDocumentRepository.save(document);
+            saved++;
+            totalSavedCount++;
+        }
+        return saved;
+    }
 
     private CommitDocument buildDocument(Long userId, String owner, String name, CommitNode commit, Instant now) {
         CommitDocument.CommitDocumentBuilder builder = CommitDocument.builder();

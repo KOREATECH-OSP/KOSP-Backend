@@ -10,9 +10,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * GitHub 저장소 통계 엔티티.
+ * 특정 기여자의 저장소별 기여 통계 정보를 관리한다.
+ */
 @Entity
 @Table(
     name = "github_repository_statistics",
@@ -39,37 +44,34 @@ public class GithubRepositoryStatistics {
     private String contributorGithubId;
 
     @Column(name = "is_owned")
-    private Boolean isOwned = false;
+    private Boolean isOwned;
 
-    // 저장소 기본 정보
     @Column(name = "stargazers_count", nullable = false)
-    private Integer stargazersCount = 0;
+    private Integer stargazersCount;
 
     @Column(name = "forks_count", nullable = false)
-    private Integer forksCount = 0;
+    private Integer forksCount;
 
     @Column(name = "watchers_count", nullable = false)
-    private Integer watchersCount = 0;
+    private Integer watchersCount;
 
-    // 저장소 전체 통계
     @Column(name = "total_commits_count", nullable = false)
-    private Integer totalCommitsCount = 0;
+    private Integer totalCommitsCount;
 
     @Column(name = "total_prs_count", nullable = false)
-    private Integer totalPrsCount = 0;
+    private Integer totalPrsCount;
 
     @Column(name = "total_issues_count", nullable = false)
-    private Integer totalIssuesCount = 0;
+    private Integer totalIssuesCount;
 
-    // 사용자별 기여도
     @Column(name = "user_commits_count", nullable = false)
-    private Integer userCommitsCount = 0;
+    private Integer userCommitsCount;
 
     @Column(name = "user_prs_count", nullable = false)
-    private Integer userPrsCount = 0;
+    private Integer userPrsCount;
 
     @Column(name = "user_issues_count", nullable = false)
-    private Integer userIssuesCount = 0;
+    private Integer userIssuesCount;
 
     @Column(name = "last_commit_date")
     private LocalDateTime lastCommitDate;
@@ -86,19 +88,34 @@ public class GithubRepositoryStatistics {
     @Column(name = "calculated_at", nullable = false)
     private LocalDateTime calculatedAt;
 
-    public static GithubRepositoryStatistics create(
-        String repoOwner,
-        String repoName,
-        String contributorGithubId
-    ) {
-        GithubRepositoryStatistics statistics = new GithubRepositoryStatistics();
-        statistics.repoOwner = repoOwner;
-        statistics.repoName = repoName;
-        statistics.contributorGithubId = contributorGithubId;
-        statistics.calculatedAt = LocalDateTime.now();
-        return statistics;
+    @Builder
+    private GithubRepositoryStatistics(String repoOwner, String repoName, String contributorGithubId) {
+        this.repoOwner = repoOwner;
+        this.repoName = repoName;
+        this.contributorGithubId = contributorGithubId;
+        this.isOwned = false;
+        this.stargazersCount = 0;
+        this.forksCount = 0;
+        this.watchersCount = 0;
+        this.totalCommitsCount = 0;
+        this.totalPrsCount = 0;
+        this.totalIssuesCount = 0;
+        this.userCommitsCount = 0;
+        this.userPrsCount = 0;
+        this.userIssuesCount = 0;
+        this.calculatedAt = LocalDateTime.now();
     }
 
+    /**
+     * 저장소 기본 정보를 갱신한다.
+     *
+     * @param stargazersCount 스타 수
+     * @param forksCount 포크 수
+     * @param watchersCount 워처 수
+     * @param description 저장소 설명
+     * @param primaryLanguage 주요 프로그래밍 언어
+     * @param repoCreatedAt 저장소 생성일시
+     */
     public void updateRepositoryInfo(
         Integer stargazersCount,
         Integer forksCount,
@@ -115,10 +132,23 @@ public class GithubRepositoryStatistics {
         this.repoCreatedAt = repoCreatedAt;
     }
 
+    /**
+     * 저장소 소유 여부를 갱신한다.
+     *
+     * @param isOwned 소유 여부
+     */
     public void updateOwnership(Boolean isOwned) {
         this.isOwned = isOwned;
     }
 
+    /**
+     * 사용자의 기여 정보를 갱신한다.
+     *
+     * @param userCommitsCount 사용자 커밋 수
+     * @param userPrsCount 사용자 PR 수
+     * @param userIssuesCount 사용자 이슈 수
+     * @param lastCommitDate 마지막 커밋 일시
+     */
     public void updateUserContributions(
         Integer userCommitsCount,
         Integer userPrsCount,
@@ -131,6 +161,13 @@ public class GithubRepositoryStatistics {
         this.lastCommitDate = lastCommitDate;
     }
 
+    /**
+     * 저장소의 전체 기여 수를 갱신한다.
+     *
+     * @param totalCommitsCount 전체 커밋 수
+     * @param totalPrsCount 전체 PR 수
+     * @param totalIssuesCount 전체 이슈 수
+     */
     public void updateTotalCounts(
         Integer totalCommitsCount,
         Integer totalPrsCount,

@@ -10,18 +10,24 @@ import io.swkoreatech.kosp.domain.admin.contact.service.AdminContactService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 연락처 관리 컨트롤러.
+ * <p>{@link AdminContactApi}를 구현하여 관리자 연락처 조회 및 수정 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminContactController implements AdminContactApi {
 
     private final AdminContactService adminContactService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(permitAll = true, name = "contact:read", description = "관리자 연락처 조회")
     public ResponseEntity<AdminContactResponse> getContact() {
         return ResponseEntity.ok(adminContactService.getContact());
     }
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "contact:update", description = "관리자 연락처 수정")
     public ResponseEntity<AdminContactResponse> updateContact(AdminContactUpdateRequest request) {

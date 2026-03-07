@@ -27,6 +27,13 @@ import reactor.netty.http.client.HttpClient;
 import reactor.netty.resources.ConnectionProvider;
 import reactor.util.retry.Retry;
 
+/**
+ * GitHub REST API 클라이언트.
+ *
+ * <p>WebClient를 사용하여 GitHub REST API에 요청을 보내며,
+ * Rate Limit 관리, 자동 재시도, 페이지네이션 기능을 제공한다.
+ * 커넥션 풀링과 타임아웃 설정으로 안정적인 통신을 보장한다.
+ */
 @Slf4j
 @Component
 public class GithubRestApiClient {
@@ -34,6 +41,12 @@ public class GithubRestApiClient {
     private final WebClient webClient;
     private final RateLimitManager rateLimitManager;
 
+    /**
+     * GithubRestApiClient를 생성하고 커넥션 풀, 타임아웃 등을 설정한다.
+     *
+     * @param baseUrl          GitHub REST API 기본 URL
+     * @param rateLimitManager Rate Limit 관리자
+     */
     public GithubRestApiClient(
         @Value("${github.api.base-url}") String baseUrl,
         RateLimitManager rateLimitManager
@@ -46,7 +59,7 @@ public class GithubRestApiClient {
             .maxLifeTime(Duration.ofMinutes(5))
             .evictInBackground(Duration.ofSeconds(120))
             .build();
-        
+
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
             .responseTimeout(Duration.ofMinutes(5))
@@ -57,7 +70,7 @@ public class GithubRestApiClient {
                     conn.channel().pipeline().get(SslHandler.class).setHandshakeTimeoutMillis(60000);
                 }
             });
-        
+
         this.webClient = WebClient.builder()
             .baseUrl(baseUrl)
             .clientConnector(new ReactorClientHttpConnector(httpClient))
@@ -73,6 +86,16 @@ public class GithubRestApiClient {
         this.rateLimitManager = rateLimitManager;
     }
 
+    /**
+     * Rate Limit을 확인한 후 GET 요청을 보낸다.
+     *
+     * @param <T>          응답 타입
+     * @param userId       사용자 ID
+     * @param uri          요청 URI
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 응답 결과를 담은 Mono
+     */
     public <T> Mono<T> get(Long userId, String uri, String token, Class<T> responseType) {
         return rateLimitManager.waitIfNeeded(userId, 100)
             .then(webClient.get()
@@ -92,27 +115,27 @@ public class GithubRestApiClient {
                 .toEntity(responseType)
                 .retryWhen(Retry.backoff(5, Duration.ofSeconds(2))
                     .maxBackoff(Duration.ofSeconds(30))
-                    .filter(throwable -> 
+                    .filter(throwable ->
                         throwable instanceof WebClientResponseException.TooManyRequests ||
-                        (throwable.getMessage() != null && (
-                            throwable.getMessage().contains("prematurely closed") ||
-                            throwable.getMessage().contains("Connection reset") ||
-                            throwable.getMessage().contains("Connection refused")
-                        ))
+                            (throwable.getMessage() != null && (
+                                throwable.getMessage().contains("prematurely closed") ||
+                                    throwable.getMessage().contains("Connection reset") ||
+                                    throwable.getMessage().contains("Connection refused")
+                            ))
                     ))
                 .doOnSuccess(entity -> {
                     if (entity != null) {
                         HttpHeaders headers = entity.getHeaders();
                         String remaining = headers.getFirst("X-RateLimit-Remaining");
                         String reset = headers.getFirst("X-RateLimit-Reset");
-                        
+
                         if (remaining != null && reset != null) {
                             try {
                                 long resetLong = Long.parseLong(reset) * 1000;
                                 int remainingCount = Integer.parseInt(remaining);
                                 rateLimitManager.updateRateLimitFromHeaders(userId, resetLong, remainingCount);
                             } catch (NumberFormatException e) {
-                                log.warn("Failed to parse rate limit headers: remaining={}, reset={}", 
+                                log.warn("Failed to parse rate limit headers: remaining={}, reset={}",
                                     remaining, reset);
                                 rateLimitManager.updateRateLimitFromHeaders(userId, 0, 5000);
                             }
@@ -132,6 +155,17 @@ public class GithubRestApiClient {
         return entity.getBody();
     }
 
+    /**
+     * Rate Limit을 확인한 후 POST 요청을 보낸다.
+     *
+     * @param <T>          응답 타입
+     * @param userId       사용자 ID
+     * @param uri          요청 URI
+     * @param token        GitHub 인증 토큰
+     * @param body         요청 바디
+     * @param responseType 응답 클래스 타입
+     * @return 응답 결과를 담은 Mono
+     */
     public <T> Mono<T> post(Long userId, String uri, String token, Object body, Class<T> responseType) {
         return rateLimitManager.waitIfNeeded(userId, 100)
             .then(webClient.post()
@@ -148,6 +182,18 @@ public class GithubRestApiClient {
             );
     }
 
+    /**
+     * Rate Limit 사전 확인 없이 GET 요청을 보낸다.
+     *
+     * <p>Rate Limit 확인을 우회하되, 403 응답 시에는 대기 처리를 수행한다.
+     *
+     * @param <T>          응답 타입
+     * @param userId       사용자 ID
+     * @param uri          요청 URI
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 응답 결과를 담은 Mono
+     */
     public <T> Mono<T> getBypassingRateLimit(Long userId, String uri, String token, Class<T> responseType) {
         return webClient.get()
             .uri(uri)
@@ -170,7 +216,7 @@ public class GithubRestApiClient {
                     HttpHeaders headers = entity.getHeaders();
                     String remaining = headers.getFirst("X-RateLimit-Remaining");
                     String reset = headers.getFirst("X-RateLimit-Reset");
-                    
+
                     if (remaining != null && reset != null) {
                         try {
                             long resetLong = Long.parseLong(reset) * 1000;
@@ -186,6 +232,16 @@ public class GithubRestApiClient {
             .map(this::extractBody);
     }
 
+    /**
+     * 모든 페이지를 순회하여 전체 항목 목록을 조회한다.
+     *
+     * @param <T>      항목 타입
+     * @param userId   사용자 ID
+     * @param uri      요청 URI
+     * @param token    GitHub 인증 토큰
+     * @param itemType 항목 클래스 타입
+     * @return 전체 항목 목록을 담은 Mono
+     */
     @SuppressWarnings("unchecked")
     public <T> Mono<List<T>> getAllWithPagination(
         Long userId,
@@ -210,24 +266,35 @@ public class GithubRestApiClient {
         List<T> accumulator
     ) {
         String paginatedUri = buildPaginatedUri(uri, page);
-        
+
         return get(userId, paginatedUri, token, List.class)
             .flatMap(items -> {
                 if (items == null || items.isEmpty()) {
                     return Mono.empty();
                 }
-                
-                accumulator.addAll((List<T>) items);
-                
+
+                accumulator.addAll((List<T>)items);
+
                 if (items.size() < 100) {
                     return Mono.empty();
                 }
-                
+
                 return collectAllPages(userId, uri, token, itemType, page + 1, accumulator);
             })
             .then();
     }
 
+    /**
+     * 지정된 시각 이후의 모든 항목을 페이지네이션하여 조회한다.
+     *
+     * @param <T>      항목 타입
+     * @param userId   사용자 ID
+     * @param uri      요청 URI
+     * @param token    GitHub 인증 토큰
+     * @param since    조회 시작 시각
+     * @param itemType 항목 클래스 타입
+     * @return 조건에 맞는 전체 항목 목록을 담은 Mono
+     */
     public <T> Mono<List<T>> getAllSince(
         Long userId,
         String uri,

@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.community.comment.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createComment;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -7,7 +9,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,17 +25,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.comment.dto.request.CommentCreateRequest;
 import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentListResponse;
+import io.swkoreatech.kosp.domain.community.comment.dto.response.CommentToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.comment.model.Comment;
 import io.swkoreatech.kosp.domain.community.comment.model.CommentLike;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentLikeRepository;
 import io.swkoreatech.kosp.domain.community.comment.repository.CommentRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("CommentService 단위 테스트")
@@ -51,18 +53,6 @@ class CommentServiceTest {
 
     @Mock
     private ArticleRepository articleRepository;
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
 
     private Board createBoard(Long id) {
         Board board = Board.builder()
@@ -86,17 +76,6 @@ class CommentServiceTest {
         return article;
     }
 
-    private Comment createComment(Long id, User author, Article article) {
-        Comment comment = Comment.builder()
-            .author(author)
-            .article(article)
-            .content("댓글 내용")
-            .build();
-        ReflectionTestUtils.setField(comment, "id", id);
-        ReflectionTestUtils.setField(comment, "createdAt", java.time.LocalDateTime.now());
-        return comment;
-    }
-
     @Nested
     @DisplayName("create 메서드")
     class CreateTest {
@@ -108,7 +87,7 @@ class CommentServiceTest {
             User author = createUser(1L, "작성자");
             Article article = createArticle(1L, author);
             CommentCreateRequest request = new CommentCreateRequest("새 댓글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             doAnswer(invocation -> {
                 Comment comment = invocation.getArgument(0);
@@ -139,7 +118,7 @@ class CommentServiceTest {
             User other = createUser(2L, "다른 사용자");
             Article article = createArticle(1L, author);
             Comment comment = createComment(1L, author, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
 
             // when & then
@@ -155,7 +134,7 @@ class CommentServiceTest {
             Article article = createArticle(1L, author);
             ReflectionTestUtils.setField(article, "commentsCount", 1);
             Comment comment = createComment(1L, author, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
 
             // when
@@ -163,8 +142,7 @@ class CommentServiceTest {
 
             // then
             assertThat(article.getCommentsCount()).isEqualTo(0);
-            verify(commentRepository).delete(comment);
-            verify(articleRepository).save(article);
+            assertThat(comment.isDeleted()).isTrue();
         }
     }
 
@@ -181,8 +159,9 @@ class CommentServiceTest {
             Comment comment = createComment(1L, author, article);
             Pageable pageable = PageRequest.of(0, 10);
             Page<Comment> page = new PageImpl<>(List.of(comment), pageable, 1);
-            
-            given(commentRepository.findByArticleId(1L, pageable)).willReturn(page);
+
+            given(commentRepository.findByArticleIdAndIsDeletedFalse(1L, pageable)).willReturn(page);
+            given(commentLikeRepository.existsByUserAndComment(author, comment)).willReturn(false);
 
             // when
             CommentListResponse result = commentService.getList(1L, pageable, author);
@@ -200,8 +179,8 @@ class CommentServiceTest {
             Comment comment = createComment(1L, author, article);
             Pageable pageable = PageRequest.of(0, 10);
             Page<Comment> page = new PageImpl<>(List.of(comment), pageable, 1);
-            
-            given(commentRepository.findByArticleId(1L, pageable)).willReturn(page);
+
+            given(commentRepository.findByArticleIdAndIsDeletedFalse(1L, pageable)).willReturn(page);
 
             // when
             CommentListResponse result = commentService.getList(1L, pageable, null);
@@ -222,15 +201,15 @@ class CommentServiceTest {
             User user = createUser(1L, "사용자");
             Article article = createArticle(1L, user);
             Comment comment = createComment(1L, user, article);
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.empty());
 
             // when
-            boolean result = commentService.toggleLike(user, 1L);
+            CommentToggleLikeResponse result = commentService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isLiked()).isTrue();
             verify(commentLikeRepository).save(any(CommentLike.class));
         }
 
@@ -242,15 +221,15 @@ class CommentServiceTest {
             Article article = createArticle(1L, user);
             Comment comment = createComment(1L, user, article);
             CommentLike like = CommentLike.builder().user(user).comment(comment).build();
-            
+
             given(commentRepository.getById(1L)).willReturn(comment);
             given(commentLikeRepository.findByUserAndComment(user, comment)).willReturn(Optional.of(like));
 
             // when
-            boolean result = commentService.toggleLike(user, 1L);
+            CommentToggleLikeResponse result = commentService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isLiked()).isFalse();
             verify(commentLikeRepository).delete(like);
         }
     }

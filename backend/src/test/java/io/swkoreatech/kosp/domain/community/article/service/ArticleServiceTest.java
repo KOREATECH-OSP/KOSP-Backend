@@ -1,12 +1,14 @@
 package io.swkoreatech.kosp.domain.community.article.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createArticle;
+import static io.swkoreatech.kosp.global.common.fixture.TestCommunityFixture.createBoard;
+import static io.swkoreatech.kosp.global.common.fixture.TestUserFixture.createUser;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,9 +25,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.dto.request.ArticleRequest;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleLikeResponse;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleBookmark;
 import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
@@ -34,8 +40,6 @@ import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeReposi
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ArticleService 단위 테스트")
@@ -55,41 +59,6 @@ class ArticleServiceTest {
 
     @Mock
     private AttachmentRepository attachmentRepository;
-
-    private User createUser(Long id, String name) {
-        User user = User.builder()
-            .name(name)
-            .kutId("2024" + id)
-            .kutEmail(name + "@koreatech.ac.kr")
-            .password("password")
-            .roles(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(user, "id", id);
-        return user;
-    }
-
-    private Board createBoard(Long id, String name, boolean isNotice) {
-        Board board = Board.builder()
-            .name(name)
-            .description(name + " 게시판")
-            .build();
-        ReflectionTestUtils.setField(board, "id", id);
-        ReflectionTestUtils.setField(board, "isNotice", isNotice);
-        return board;
-    }
-
-    private Article createArticle(Long id, User author, Board board, String title) {
-        Article article = Article.builder()
-            .author(author)
-            .board(board)
-            .title(title)
-            .content("내용")
-            .build();
-        ReflectionTestUtils.setField(article, "id", id);
-        ReflectionTestUtils.setField(article, "isDeleted", false);
-        ReflectionTestUtils.setField(article, "createdAt", java.time.LocalDateTime.now());
-        return article;
-    }
 
     @Nested
     @DisplayName("create 메서드")
@@ -115,7 +84,7 @@ class ArticleServiceTest {
             User user = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             ArticleRequest request = new ArticleRequest(1L, "제목", "내용", List.of("태그1"), null);
-            
+
             Article savedArticle = createArticle(1L, user, board, "제목");
             given(articleRepository.save(any(Article.class))).willReturn(savedArticle);
 
@@ -156,7 +125,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "테스트 글");
             ReflectionTestUtils.setField(article, "views", 0);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.existsByUserAndArticle(viewer, article)).willReturn(false);
             given(articleBookmarkRepository.existsByUserAndArticle(viewer, article)).willReturn(false);
@@ -182,15 +151,15 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ReflectionTestUtils.setField(article, "likes", 0);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
             // when
-            boolean result = articleService.toggleLike(user, 1L);
+            ToggleLikeResponse result = articleService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isLiked()).isTrue();
             assertThat(article.getLikes()).isEqualTo(1);
             verify(articleLikeRepository).save(any(ArticleLike.class));
         }
@@ -203,17 +172,17 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ReflectionTestUtils.setField(article, "likes", 1);
-            
+
             ArticleLike existingLike = ArticleLike.builder().user(user).article(article).build();
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleLikeRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(existingLike));
 
             // when
-            boolean result = articleService.toggleLike(user, 1L);
+            ToggleLikeResponse result = articleService.toggleLike(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isLiked()).isFalse();
             assertThat(article.getLikes()).isEqualTo(0);
             verify(articleLikeRepository).delete(existingLike);
         }
@@ -230,15 +199,15 @@ class ArticleServiceTest {
             User user = createUser(1L, "사용자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.empty());
 
             // when
-            boolean result = articleService.toggleBookmark(user, 1L);
+            ToggleBookmarkResponse result = articleService.toggleBookmark(user, 1L);
 
             // then
-            assertThat(result).isTrue();
+            assertThat(result.isBookmarked()).isTrue();
             verify(articleBookmarkRepository).save(any(ArticleBookmark.class));
         }
 
@@ -250,15 +219,15 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, user, board, "글");
             ArticleBookmark bookmark = ArticleBookmark.builder().user(user).article(article).build();
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
             given(articleBookmarkRepository.findByUserAndArticle(user, article)).willReturn(Optional.of(bookmark));
 
             // when
-            boolean result = articleService.toggleBookmark(user, 1L);
+            ToggleBookmarkResponse result = articleService.toggleBookmark(user, 1L);
 
             // then
-            assertThat(result).isFalse();
+            assertThat(result.isBookmarked()).isFalse();
             verify(articleBookmarkRepository).delete(bookmark);
         }
     }
@@ -276,7 +245,7 @@ class ArticleServiceTest {
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
             ArticleRequest request = new ArticleRequest(1L, "수정 제목", "수정 내용", List.of(), null);
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when & then
@@ -291,8 +260,9 @@ class ArticleServiceTest {
             User author = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "기존 제목");
-            ArticleRequest request = new ArticleRequest(1L, "수정 제목", "수정 내용", List.of("새태그"), null);
-            
+            ArticleRequest request = new ArticleRequest(
+                1L, "수정 제목", "수정 내용", List.of("새태그"), null);
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when
@@ -316,7 +286,7 @@ class ArticleServiceTest {
             User other = createUser(2L, "다른 사용자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when & then
@@ -331,14 +301,14 @@ class ArticleServiceTest {
             User author = createUser(1L, "작성자");
             Board board = createBoard(1L, "자유게시판", false);
             Article article = createArticle(1L, author, board, "글");
-            
+
             given(articleRepository.getById(1L)).willReturn(article);
 
             // when
             articleService.delete(author, 1L);
 
             // then
-            verify(articleRepository).delete(article);
+            assertThat(article.isDeleted()).isTrue();
         }
     }
 
@@ -355,7 +325,7 @@ class ArticleServiceTest {
             Article article = createArticle(1L, user, board, "글");
             Pageable pageable = PageRequest.of(0, 10);
             Page<Article> page = new PageImpl<>(List.of(article), pageable, 1);
-            
+
             given(articleRepository.findByBoardAndIsDeletedFalse(board, pageable)).willReturn(page);
 
             // when

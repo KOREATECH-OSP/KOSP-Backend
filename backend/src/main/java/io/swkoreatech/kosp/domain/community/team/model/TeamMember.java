@@ -1,7 +1,7 @@
 package io.swkoreatech.kosp.domain.community.team.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -18,6 +18,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 팀 멤버 엔티티.
+ * 팀과 사용자 간의 소속 관계를 나타낸다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -50,6 +54,7 @@ public class TeamMember extends BaseEntity {
         this.role = role;
     }
 
+    /** 멤버를 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }

@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -17,9 +15,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.repository.EmailVerificationRepository;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,14 +61,15 @@ class EmailVerificationServiceTest {
             // then
             ArgumentCaptor<EmailVerification> verificationCaptor = ArgumentCaptor.forClass(EmailVerification.class);
             verify(emailVerificationRepository).save(verificationCaptor.capture());
-            
+
             EmailVerification captured = verificationCaptor.getValue();
             assertThat(captured.getEmail()).isEqualTo(email);
             assertThat(captured.getCode()).hasSize(6);
             assertThat(captured.getSignupToken()).isEqualTo(signupToken);
             assertThat(captured.isVerified()).isFalse();
 
-            ArgumentCaptor<EmailVerificationSendEvent> eventCaptor = ArgumentCaptor.forClass(EmailVerificationSendEvent.class);
+            ArgumentCaptor<EmailVerificationSendEvent> eventCaptor =
+                ArgumentCaptor.forClass(EmailVerificationSendEvent.class);
             verify(eventPublisher).publishEvent(eventCaptor.capture());
             assertThat(eventCaptor.getValue().email()).isEqualTo(email);
         }
@@ -84,7 +84,8 @@ class EmailVerificationServiceTest {
         void throwsException_whenEmailNotFound() {
             // given
             String email = "test@koreatech.ac.kr";
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.empty());
+            given(emailVerificationRepository.getById(email))
+                .willThrow(new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> emailVerificationService.verifyCode(email, "123456"))
@@ -97,7 +98,7 @@ class EmailVerificationServiceTest {
             // given
             String email = "test@koreatech.ac.kr";
             EmailVerification verification = createVerification(email, "123456", false);
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.of(verification));
+            given(emailVerificationRepository.getById(email)).willReturn(verification);
 
             // when & then
             assertThatThrownBy(() -> emailVerificationService.verifyCode(email, "654321"))
@@ -111,7 +112,7 @@ class EmailVerificationServiceTest {
             String email = "test@koreatech.ac.kr";
             String code = "123456";
             EmailVerification verification = createVerification(email, code, false);
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.of(verification));
+            given(emailVerificationRepository.getById(email)).willReturn(verification);
 
             // when
             EmailVerification result = emailVerificationService.verifyCode(email, code);
@@ -131,7 +132,8 @@ class EmailVerificationServiceTest {
         void throwsException_whenEmailNotFound() {
             // given
             String email = "test@koreatech.ac.kr";
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.empty());
+            given(emailVerificationRepository.getById(email))
+                .willThrow(new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> emailVerificationService.completeSignupVerification(email))
@@ -144,7 +146,7 @@ class EmailVerificationServiceTest {
             // given
             String email = "test@koreatech.ac.kr";
             EmailVerification verification = createVerification(email, "123456", false);
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.of(verification));
+            given(emailVerificationRepository.getById(email)).willReturn(verification);
 
             // when & then
             assertThatThrownBy(() -> emailVerificationService.completeSignupVerification(email))
@@ -157,7 +159,7 @@ class EmailVerificationServiceTest {
             // given
             String email = "test@koreatech.ac.kr";
             EmailVerification verification = createVerification(email, "123456", true);
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.of(verification));
+            given(emailVerificationRepository.getById(email)).willReturn(verification);
 
             // when
             emailVerificationService.completeSignupVerification(email);
@@ -176,7 +178,8 @@ class EmailVerificationServiceTest {
         void throwsException_whenEmailNotFound() {
             // given
             String email = "test@koreatech.ac.kr";
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.empty());
+            given(emailVerificationRepository.getById(email))
+                .willThrow(new GlobalException(ExceptionMessage.EMAIL_NOT_FOUND));
 
             // when & then
             assertThatThrownBy(() -> emailVerificationService.getVerification(email))
@@ -189,7 +192,7 @@ class EmailVerificationServiceTest {
             // given
             String email = "test@koreatech.ac.kr";
             EmailVerification verification = createVerification(email, "123456", false);
-            given(emailVerificationRepository.findById(email)).willReturn(Optional.of(verification));
+            given(emailVerificationRepository.getById(email)).willReturn(verification);
 
             // when
             EmailVerification result = emailVerificationService.getVerification(email);

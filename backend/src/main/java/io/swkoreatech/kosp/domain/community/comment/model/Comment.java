@@ -1,8 +1,8 @@
 package io.swkoreatech.kosp.domain.community.comment.model;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
-import io.swkoreatech.kosp.domain.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +18,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 댓글 엔티티.
+ * 게시글에 달린 댓글 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -55,6 +59,7 @@ public class Comment extends BaseEntity {
         this.isDeleted = false;
     }
 
+    /** 댓글을 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }

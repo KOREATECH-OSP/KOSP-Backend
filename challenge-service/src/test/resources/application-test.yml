@@ -23,6 +23,11 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: false
     show-sql: false
+  rabbitmq:
+    host: "false"
+    port: 5672
+    username: guest
+    password: guest
   flyway:
     enabled: false
 

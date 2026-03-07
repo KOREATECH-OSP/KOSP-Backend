@@ -2,7 +2,8 @@
 
 **Generated:** 2026-01-23 | **Commit:** ee0d0e8 | **Branch:** fix/fix-everything
 
-**K-OSP (Korea Open Source Platform)** — Spring Boot 3.5 backend for managing open-source contributions by Korean university students.
+**K-OSP (Korea Open Source Platform)** — Spring Boot 3.5 backend for managing open-source contributions by Korean
+university students.
 
 **Stack**: Java 17, Spring Boot 3.5, Gradle (Kotlin DSL), MySQL, MongoDB, Redis, AWS (S3, SES), JWT
 
@@ -55,6 +56,7 @@ KOSP/
 ```
 
 **Key Patterns**:
+
 - **@TransactionalEventListener**: Direct RabbitMQ publish after DB commit (AFTER_COMMIT phase)
 - **Manual ACK**: RabbitMQ listeners with `channel.basicAck()` / `basicNack()` → DLQ
 - **Idempotency**: `processed_messages` table with unique messageId constraint
@@ -63,6 +65,7 @@ KOSP/
 **See**: `docs/msa-migration.md` for full migration guide
 
 ### Package Layout (backend)
+
 ```
 io.swkoreatech.kosp
 ├── domain.{feature}/   # api/, controller/, service/, repository/, model/, dto/
@@ -95,25 +98,26 @@ io.swkoreatech.kosp
 
 ## Strict Coding Rules (MUST FOLLOW)
 
-| Rule | Violation = Reject |
-|------|--------------------|
-| **Indent Depth ≤ 1** | No nested if/for. Use early returns. |
-| **No `else`/`else if`** | Always early return. |
-| **No Ternary `? :`** | Forbidden. |
-| **Method ≤ 10 lines** | Extract smaller methods. |
-| **Max 2 Instance Vars** | Except repositories. Use `@Embeddable`. |
-| **No Abbreviations** | `request` not `req`. |
-| **Max 2 Words** | Method/variable names. |
-| **No Wildcard Imports** | Explicit imports only. |
-| **Version Catalog** | Deps in `gradle/libs.versions.toml` as `libs.xxx`. |
-| **No `@Setter`** | Use business methods on entities. |
-| **No Hard Delete** | Use `isDeleted` flag (soft delete). |
+| Rule                    | Violation = Reject                                 |
+|-------------------------|----------------------------------------------------|
+| **Indent Depth ≤ 1**    | No nested if/for. Use early returns.               |
+| **No `else`/`else if`** | Always early return.                               |
+| **No Ternary `? :`**    | Forbidden.                                         |
+| **Method ≤ 10 lines**   | Extract smaller methods.                           |
+| **Max 2 Instance Vars** | Except repositories. Use `@Embeddable`.            |
+| **No Abbreviations**    | `request` not `req`.                               |
+| **Max 2 Words**         | Method/variable names.                             |
+| **No Wildcard Imports** | Explicit imports only.                             |
+| **Version Catalog**     | Deps in `gradle/libs.versions.toml` as `libs.xxx`. |
+| **No `@Setter`**        | Use business methods on entities.                  |
+| **No Hard Delete**      | Use `isDeleted` flag (soft delete).                |
 
 ---
 
 ## Code Patterns
 
 ### Controller (implements Swagger interface)
+
 ```java
 @RestController
 @RequestMapping("/v1/users")
@@ -133,6 +137,7 @@ public class UserController implements UserApi {
 ```
 
 ### API Interface (Swagger)
+
 ```java
 @Tag(name = "User", description = "사용자 관리 API")
 @RequestMapping("/v1/users")
@@ -146,6 +151,7 @@ public interface UserApi {
 ```
 
 ### Repository (getBy vs findBy)
+
 ```java
 public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     Optional<User> findById(Long id);  // Returns Optional
@@ -158,6 +164,7 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
 ```
 
 ### DTO (Record + validation)
+
 ```java
 public record UserSignupRequest(
     @NotBlank(message = "이름은 필수입니다.") String name,
@@ -166,12 +173,14 @@ public record UserSignupRequest(
 ```
 
 ### Exception (always use enum)
+
 ```java
 throw new GlobalException(ExceptionMessage.USER_NOT_FOUND);
 throw new GlobalException(ExceptionMessage.FORBIDDEN);
 ```
 
 ### Entity (business methods, no @Setter)
+
 ```java
 @Getter @Entity @Table(name = "users")
 @NoArgsConstructor(access = PROTECTED) @SuperBuilder
@@ -230,6 +239,7 @@ class UserServiceTest {
 ```
 
 **Conventions**:
+
 - Extend `IntegrationTestSupport` for controller tests
 - Use `@Nested` + `@DisplayName` (Korean OK) for service tests
 - AssertJ for assertions: `assertThat(...).isEqualTo(...)`
@@ -240,19 +250,23 @@ class UserServiceTest {
 ## Module Communication (MSA)
 
 **RabbitMQ Event Bus** (cross-service communication):
+
 - `challenge-evaluation-queue`: Harvester → challenge-service
 - `challenge-completed-queue`: challenge-service → notification-service
 - `point-changed-queue`: challenge-service → notification-service
 
 **Redis ZSET** (preserved legacy pattern):
+
 - Backend → Harvester: `JobQueueService` publishes to Redis for batch job triggering
 
 **Shared Database** (PostgreSQL):
+
 - Common entities: User, GithubUser, Challenge, Role, Permission
 - Outbox Pattern: `outbox_messages` table for transactional event publishing
 - Idempotency: `processed_messages` table for deduplication
 
 **Event Flow Example**:
+
 1. api-service saves User → outbox_messages (transactional)
 2. OutboxPublisher (scheduler) → RabbitMQ `challenge-evaluation-queue`
 3. challenge-service consumes → evaluates challenges → publishes to outbox
@@ -263,11 +277,11 @@ class UserServiceTest {
 
 ## External Integrations
 
-| Service | Package | Client | Pattern |
-|---------|---------|--------|---------|
-| GitHub | `infra/github` | `RestClient` (GraphQL) | Sync, encrypted user token |
-| Email | `infra/email` | AWS SES SDK v2 | Event-driven, Thymeleaf templates |
-| S3 | `domain/upload` | AWS S3 SDK v2 | Presigned URLs for client upload |
+| Service | Package         | Client                 | Pattern                           |
+|---------|-----------------|------------------------|-----------------------------------|
+| GitHub  | `infra/github`  | `RestClient` (GraphQL) | Sync, encrypted user token        |
+| Email   | `infra/email`   | AWS SES SDK v2         | Event-driven, Thymeleaf templates |
+| S3      | `domain/upload` | AWS S3 SDK v2          | Presigned URLs for client upload  |
 
 ---
 
@@ -286,15 +300,15 @@ AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_REGION, AWS_S3_BUCKET
 
 ## Anti-Patterns (THIS PROJECT)
 
-| ❌ Don't | ✅ Do |
-|----------|-------|
-| `@Setter` on entities | Business methods: `user.updateInfo(name)` |
-| `throw new RuntimeException("msg")` | `throw new GlobalException(ExceptionMessage.X)` |
-| Return entity from controller | Return DTO record |
-| `JpaRepository<User, Long>` | Custom interface with only needed methods |
-| Nested if/else | Early return pattern |
-| `implementation("group:artifact:1.0")` | `implementation(libs.xxx)` |
-| Directories with " 2" suffix | Clean up sync artifacts |
+| ❌ Don't                                | ✅ Do                                            |
+|----------------------------------------|-------------------------------------------------|
+| `@Setter` on entities                  | Business methods: `user.updateInfo(name)`       |
+| `throw new RuntimeException("msg")`    | `throw new GlobalException(ExceptionMessage.X)` |
+| Return entity from controller          | Return DTO record                               |
+| `JpaRepository<User, Long>`            | Custom interface with only needed methods       |
+| Nested if/else                         | Early return pattern                            |
+| `implementation("group:artifact:1.0")` | `implementation(libs.xxx)`                      |
+| Directories with " 2" suffix           | Clean up sync artifacts                         |
 
 ---
 

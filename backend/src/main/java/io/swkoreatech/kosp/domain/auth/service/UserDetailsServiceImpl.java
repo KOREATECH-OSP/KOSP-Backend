@@ -13,16 +13,21 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.domain.auth.model.Permission;
-import io.swkoreatech.kosp.domain.auth.model.Policy;
-import io.swkoreatech.kosp.domain.auth.model.Role;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Spring Security UserDetailsService 구현체.
+ * <p>이메일(kutEmail)을 기반으로 사용자를 조회하고 권한을 설정한다.
+ * SUPERUSER 역할을 가진 사용자에게는 와일드카드(*) 권한이 부여된다.</p>
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,6 +35,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
+    /** {@inheritDoc} */
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

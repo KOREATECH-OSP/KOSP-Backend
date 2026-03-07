@@ -15,16 +15,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
 
+/**
+ * 팀 API 인터페이스.
+ * 팀의 CRUD, 멤버 관리, 초대 관련 엔드포인트를 정의한다.
+ */
 @Tag(name = "Team", description = "팀 관리 API")
 public interface TeamApi {
 
@@ -32,7 +36,8 @@ public interface TeamApi {
     @GetMapping("/v1/teams")
     ResponseEntity<TeamListResponse> getList(
         @RequestParam(required = false, defaultValue = "") String search,
-        @Parameter(description = "RSQL 필터 (예: isDeleted==false, name==*test*)") @RequestParam(required = false) String rsql,
+        @Parameter(description = "RSQL 필터 (예: isDeleted==false, name==*test*)")
+        @RequestParam(required = false) String rsql,
         @Parameter(hidden = true) Pageable pageable
     );
 

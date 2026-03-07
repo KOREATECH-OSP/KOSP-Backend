@@ -1,5 +1,5 @@
 plugins {
-	jacoco
+    jacoco
     alias(libs.plugins.org.springframework.boot)
     alias(libs.plugins.io.spring.dependency.management)
 }
@@ -54,12 +54,12 @@ dependencies {
 
     compileOnly(libs.lombok)
 
-	annotationProcessor(libs.lombok)
+    annotationProcessor(libs.lombok)
 
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
     testImplementation(libs.reactor.test)
-	testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.platform.launcher)
 }
 
 tasks {
@@ -72,92 +72,92 @@ tasks.clean {
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
-	finalizedBy(tasks.jacocoTestReport)
+    useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
 jacoco {
-	toolVersion = "0.8.12"
+    toolVersion = "0.8.12"
 }
 
 tasks.jacocoTestReport {
-	dependsOn(tasks.test)
-	reports {
-		xml.required.set(true)
-		html.required.set(true)
-		html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco"))
-	}
-	classDirectories.setFrom(
-		files(classDirectories.files.map {
-			fileTree(it) {
-				exclude(
-					// DTOs and Requests/Responses
-					"**/dto/**",
-					"**/request/**",
-					"**/response/**",
-					// Entities and Models (simple data classes)
-					"**/model/**",
-					"**/document/**",
-					// Configuration classes
-					"**/config/**",
-					"**/global/config/**",
-					// Deprecated code
-					"**/deprecated/**",
-					// API interfaces (Swagger)
-					"**/api/**",
-					// Controllers (tested via integration tests)
-					"**/controller/**",
-					// Event classes
-					"**/event/**",
-					"**/eventlistener/**",
-					// Exceptions
-					"**/exception/**",
-					// Initializers and batch jobs
-					"**/initializer/**",
-					"**/batch/**",
-					// Infrastructure (external API clients)
-					"**/infra/**",
-					"**/client/**",
-					// Application entry point
-					"**/KospApplication*"
-				)
-			}
-		})
-	)
+    dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco"))
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    // DTOs and Requests/Responses
+                    "**/dto/**",
+                    "**/request/**",
+                    "**/response/**",
+                    // Entities and Models (simple data classes)
+                    "**/model/**",
+                    "**/document/**",
+                    // Configuration classes
+                    "**/config/**",
+                    "**/global/config/**",
+                    // Deprecated code
+                    "**/deprecated/**",
+                    // API interfaces (Swagger)
+                    "**/api/**",
+                    // Controllers (tested via integration tests)
+                    "**/controller/**",
+                    // Event classes
+                    "**/event/**",
+                    "**/eventlistener/**",
+                    // Exceptions
+                    "**/exception/**",
+                    // Initializers and batch jobs
+                    "**/initializer/**",
+                    "**/batch/**",
+                    // Infrastructure (external API clients)
+                    "**/infra/**",
+                    "**/client/**",
+                    // Application entry point
+                    "**/KospApplication*"
+                )
+            }
+        })
+    )
 }
 
 tasks.jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			limit {
-				minimum = "0.90".toBigDecimal()
-			}
-		}
-	}
-	classDirectories.setFrom(
-		files(classDirectories.files.map {
-			fileTree(it) {
-				exclude(
-					"**/dto/**",
-					"**/request/**",
-					"**/response/**",
-					"**/model/**",
-					"**/document/**",
-					"**/config/**",
-					"**/global/config/**",
-					"**/deprecated/**",
-					"**/api/**",
-					"**/controller/**",
-					"**/event/**",
-					"**/eventlistener/**",
-					"**/exception/**",
-					"**/initializer/**",
-					"**/batch/**",
-					"**/infra/**",
-					"**/client/**",
-					"**/KospApplication*"
-				)
-			}
-		})
-	)
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+    classDirectories.setFrom(
+        files(classDirectories.files.map {
+            fileTree(it) {
+                exclude(
+                    "**/dto/**",
+                    "**/request/**",
+                    "**/response/**",
+                    "**/model/**",
+                    "**/document/**",
+                    "**/config/**",
+                    "**/global/config/**",
+                    "**/deprecated/**",
+                    "**/api/**",
+                    "**/controller/**",
+                    "**/event/**",
+                    "**/eventlistener/**",
+                    "**/exception/**",
+                    "**/initializer/**",
+                    "**/batch/**",
+                    "**/infra/**",
+                    "**/client/**",
+                    "**/KospApplication*"
+                )
+            }
+        })
+    )
 }

@@ -1,9 +1,16 @@
 package io.swkoreatech.kosp.infra.email.model;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import jakarta.validation.constraints.Email;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
+/**
+ * 이메일 주소 값 객체.
+ *
+ * <p>이메일 형식 검증과 한국기술교육대학교(koreatech.ac.kr) 도메인 검증을 제공한다.
+ *
+ * @param email 이메일 주소 문자열
+ */
 public record EmailAddress(
     @Email(message = "이메일 형식을 지켜주세요.", regexp = EmailAddress.EMAIL_PATTERN)
     String email
@@ -15,10 +22,21 @@ public record EmailAddress(
     private static final String DOMAIN_SEPARATOR = "@";
     private static final String KOREATECH_DOMAIN = "koreatech.ac.kr";
 
+    /**
+     * 문자열로부터 {@link EmailAddress}를 생성한다.
+     *
+     * @param email 이메일 주소 문자열
+     * @return 생성된 {@link EmailAddress} 인스턴스
+     */
     public static EmailAddress from(String email) {
         return new EmailAddress(email);
     }
 
+    /**
+     * 한국기술교육대학교(koreatech.ac.kr) 이메일인지 검증한다.
+     *
+     * @throws GlobalException 도메인이 koreatech.ac.kr이 아닌 경우
+     */
     public void validateKoreatechEmail() {
         if (!domainForm().equals(KOREATECH_DOMAIN)) {
             throw new GlobalException(ExceptionMessage.INVALID_EMAIL_ADDRESS);

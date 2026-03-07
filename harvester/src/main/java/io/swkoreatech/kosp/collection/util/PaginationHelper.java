@@ -1,50 +1,33 @@
 package io.swkoreatech.kosp.collection.util;
 
-import io.swkoreatech.kosp.client.dto.GraphQLResponse;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import io.swkoreatech.kosp.collection.util.GraphQLErrorType;
+import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import lombok.extern.slf4j.Slf4j;
 
-     /**
-      * Utility class for handling GraphQL pagination with generic data types.
-      *
-      * <p>This utility abstracts the common pagination pattern used across multiple mining steps
-      * (PullRequestMiningStep, IssueMiningStep, CommitMiningStep). It manages cursor-based pagination
-      * using a do-while loop and integrates with GraphQLErrorHandler for error checking.
-      *
-      * <p><b>Generic Type Parameters:</b>
-      * <ul>
-      *   <li>{@code T} - The data class type extracted from GraphQL response (e.g., UserPullRequestsResponse,
-      *       UserIssuesResponse, RepositoryCommitsResponse). Must contain a PageInfo object for pagination metadata.</li>
-      *   <li>{@code P} - The PageInfo type (inner class of T, e.g., UserPullRequestsResponse.PageInfo).</li>
-      * </ul>
-      *
-      * <p><b>Parameters:</b>
-      * <ul>
-      *   <li>{@code fetcher} - Function that fetches a single page of data. Takes cursor (nullable) and returns
-      *       GraphQLResponse containing data of type T. Responsible for making the actual GraphQL API call.</li>
-      *   <li>{@code pageInfoExtractor} - Function that extracts PageInfo from the data object. Takes the deserialized
-      *       data (type T) and returns its PageInfo for determining if more pages exist.</li>
-      *   <li>{@code dataProcessor} - BiFunction that processes the fetched data and returns the count of items saved.
-      *       Takes the data object (type T) and current cursor, returns count of saved items. Accumulates across pages.</li>
-      *   <li>{@code entityType} - String identifier for the entity type being queried (e.g., "user", "repo").
-      *       Used in error logging for context.</li>
-      *   <li>{@code entityId} - String identifier for the specific entity (e.g., "octocat", "owner/repo").
-      *       Used in error logging for context.</li>
-      * </ul>
-      *
-      * <p><b>Return Value:</b>
-      * <ul>
-      *   <li>Total count of items saved across all pages. Returns -1 if the first page encounters a total error
-      *       (no data), enabling retry logic with different parameters. For mid-pagination errors, returns the count
-      *       of items saved so far.</li>
-      * </ul>
+/**
+ * 제네릭 데이터 타입을 지원하는 GraphQL 페이지네이션 처리 유틸리티 클래스.
  *
- * <p><b>Example Usage:</b>
+ * <p>여러 마이닝 스텝(PullRequestMiningStep, IssueMiningStep, CommitMiningStep)에서
+ * 공통으로 사용되는 페이지네이션 패턴을 추상화한다. 커서 기반 페이지네이션을
+ * do-while 루프로 관리하며, GraphQLErrorHandler와 통합하여 에러를 처리한다.
+ *
+ * <p><b>제네릭 타입 파라미터:</b>
+ * <ul>
+ *   <li>{@code T} - GraphQL 응답에서 추출된 데이터 클래스 타입
+ *       (예: UserPullRequestsResponse, UserIssuesResponse, RepositoryCommitsResponse).
+ *       페이지네이션 메타데이터를 위한 PageInfo 객체를 포함해야 한다.</li>
+ * </ul>
+ *
+ * <p><b>반환 값:</b>
+ * <ul>
+ *   <li>전체 페이지에서 저장된 항목의 총 수. 첫 페이지에서 전체 에러(데이터 없음) 발생 시
+ *       -1(재시도 가능) 또는 -2(재시도 불가)를 반환하여 호출자가 다른 파라미터로 재시도할 수 있다.
+ *       페이지네이션 중간 에러 시 그때까지 저장된 항목 수를 반환한다.</li>
+ * </ul>
+ *
+ * <p><b>사용 예시:</b>
  * <pre>{@code
  * private int fetchAllPullRequests(Long userId, String login, String token) {
  *     Instant now = Instant.now();
@@ -66,84 +49,64 @@ public final class PaginationHelper {
         throw new AssertionError("Utility class");
     }
 
-     /**
-      * Paginates through GraphQL responses using cursor-based pagination.
-      *
-      * <p>Returns -2 if the first page encounters a non-retryable error. Returns -1 if the first
-      * page encounters a retryable error or other total error (no data). Callers can use these
-      * to trigger retry with different parameters. For mid-pagination errors (after data has been
-      * accumulated), returns the count of items saved so far.
-      *
-      * @param <T> the data type contained in the GraphQL response
-      * @param fetcher function to fetch a page of data
-      * @param pageInfoExtractor function to extract PageInfo from data
-      * @param dataProcessor function to process data and return saved count
-      * @param entityType the type of entity being queried
-      * @param entityId the identifier of the entity
-      * @param dataClass the Class object for the data type T
-      * @return total count of items saved across all pages, -2 for non-retryable error, or -1 for retryable error
-      */
-     public static <T> int paginate(
-             Function<String, GraphQLResponse<T>> fetcher,
-             Function<T, Object> pageInfoExtractor,
-             BiFunction<T, String, Integer> dataProcessor,
-             String entityType,
-             String entityId,
-             Class<T> dataClass
-     ) {
-         int totalSaved = 0;
-         String cursor = null;
-         do {
-             PageResult<T> result = fetchAndProcessPage(fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
-             if (result.hasError) {
-                 if (totalSaved == 0) {
-                     return determineErrorReturnValue(result.errorType, entityType, entityId);
-                 }
-                 break;
-             }
-             totalSaved += result.saved;
-             cursor = result.nextCursor;
-         } while (cursor != null);
-         return totalSaved;
-     }
+    /**
+     * 커서 기반 페이지네이션으로 GraphQL 응답을 순회한다.
+     *
+     * <p>첫 페이지에서 재시도 불가 에러 발생 시 -2를 반환한다. 첫 페이지에서
+     * 재시도 가능 에러 또는 기타 전체 에러(데이터 없음) 발생 시 -1을 반환한다.
+     * 호출자는 이를 이용하여 다른 파라미터로 재시도할 수 있다.
+     *
+     * @param <T>               GraphQL 응답에 포함된 데이터 타입
+     * @param fetcher           단일 페이지 데이터를 가져오는 함수
+     * @param pageInfoExtractor 데이터에서 PageInfo를 추출하는 함수
+     * @param dataProcessor     데이터를 처리하고 저장 건수를 반환하는 함수
+     * @param entityType        조회 대상 엔티티 타입 (예: "user", "repo")
+     * @param entityId          엔티티 식별자 (예: 로그인 이름, "owner/name")
+     * @param dataClass         데이터 타입 T의 Class 객체
+     * @return 전체 페이지에서 저장된 항목의 총 수, 재시도 불가 에러 시 -2, 재시도 가능 에러 시 -1
+     */
+    public static <T> int paginate(
+        Function<String, GraphQLResponse<T>> fetcher,
+        Function<T, Object> pageInfoExtractor,
+        BiFunction<T, String, Integer> dataProcessor,
+        String entityType,
+        String entityId,
+        Class<T> dataClass
+    ) {
+        int totalSaved = 0;
+        String cursor = null;
+        do {
+            PageResult<T> result = fetchAndProcessPage(
+                fetcher, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass
+            );
+            if (result.hasError) {
+                if (totalSaved == 0) {
+                    return determineErrorReturnValue(result.errorType, entityType, entityId);
+                }
+                break;
+            }
+            totalSaved += result.saved;
+            cursor = result.nextCursor;
+        } while (cursor != null);
+        return totalSaved;
+    }
 
-     /**
-      * Determines the return value based on error type.
-      *
-      * @param errorType the classified error type
-      * @param entityType the entity type
-      * @param entityId the entity ID
-      * @return -2 for non-retryable errors, -1 for retryable or other errors
-      */
-     private static int determineErrorReturnValue(GraphQLErrorType errorType, String entityType, String entityId) {
-         if (errorType == GraphQLErrorType.NON_RETRYABLE) {
-             log.warn("Skipping {} {} — non-retryable GraphQL error (retry won't help)", entityType, entityId);
-             return -2;
-         }
-         return -1;
-     }
+    private static int determineErrorReturnValue(GraphQLErrorType errorType, String entityType, String entityId) {
+        if (errorType == GraphQLErrorType.NON_RETRYABLE) {
+            log.warn("Skipping {} {} — non-retryable GraphQL error (retry won't help)", entityType, entityId);
+            return -2;
+        }
+        return -1;
+    }
 
-     /**
-      * Fetches and processes a single page of GraphQL results.
-      *
-      * @param <T> the data type
-      * @param fetcher function to fetch a page
-      * @param pageInfoExtractor function to extract PageInfo
-      * @param dataProcessor function to process data
-      * @param entityType the entity type
-      * @param entityId the entity ID
-      * @param cursor the current cursor
-      * @param dataClass the Class object for type T
-      * @return page result with saved count and next cursor
-      */
-     private static <T> PageResult<T> fetchAndProcessPage(
-            Function<String, GraphQLResponse<T>> fetcher,
-            Function<T, Object> pageInfoExtractor,
-            BiFunction<T, String, Integer> dataProcessor,
-            String entityType,
-            String entityId,
-            String cursor,
-            Class<T> dataClass
+    private static <T> PageResult<T> fetchAndProcessPage(
+        Function<String, GraphQLResponse<T>> fetcher,
+        Function<T, Object> pageInfoExtractor,
+        BiFunction<T, String, Integer> dataProcessor,
+        String entityType,
+        String entityId,
+        String cursor,
+        Class<T> dataClass
     ) {
         GraphQLResponse<T> response;
         try {
@@ -155,81 +118,62 @@ public final class PaginationHelper {
         return processResponse(response, pageInfoExtractor, dataProcessor, entityType, entityId, cursor, dataClass);
     }
 
-    /**
-     * Processes a GraphQL response after successful fetch.
-     *
-     * @param <T> the data type
-     * @param response the GraphQL response
-     * @param pageInfoExtractor function to extract PageInfo
-     * @param dataProcessor function to process data
-     * @param entityType the entity type
-     * @param entityId the entity ID
-     * @param cursor the current cursor
-     * @param dataClass the Class object for type T
-     * @return page result with saved count and next cursor
-     */
-     private static <T> PageResult<T> processResponse(
-             GraphQLResponse<T> response,
-             Function<T, Object> pageInfoExtractor,
-             BiFunction<T, String, Integer> dataProcessor,
-             String entityType,
-             String entityId,
-             String cursor,
-             Class<T> dataClass
-     ) {
-         GraphQLErrorType errorType = GraphQLErrorHandler.classifyErrors(response, entityType, entityId);
-         if (errorType != null) {
-             return new PageResult<>(0, null, true, errorType);
-         }
-         T data = response.getDataAs(dataClass);
-         int saved = dataProcessor.apply(data, cursor);
-         Object pageInfo = pageInfoExtractor.apply(data);
-         String nextCursor = extractCursor(pageInfo);
-         return new PageResult<>(saved, nextCursor, false);
-     }
+    private static <T> PageResult<T> processResponse(
+        GraphQLResponse<T> response,
+        Function<T, Object> pageInfoExtractor,
+        BiFunction<T, String, Integer> dataProcessor,
+        String entityType,
+        String entityId,
+        String cursor,
+        Class<T> dataClass
+    ) {
+        GraphQLErrorType errorType = GraphQLErrorHandler.classifyErrors(response, entityType, entityId);
+        if (errorType != null) {
+            return new PageResult<>(0, null, true, errorType);
+        }
+        T data = response.getDataAs(dataClass);
+        int saved = dataProcessor.apply(data, cursor);
+        Object pageInfo = pageInfoExtractor.apply(data);
+        String nextCursor = extractCursor(pageInfo);
+        return new PageResult<>(saved, nextCursor, false);
+    }
 
-    /**
-     * Extracts cursor from PageInfo object.
-     *
-     * @param pageInfo the pagination metadata
-     * @return the next cursor, or null if no more pages
-     */
     private static String extractCursor(Object pageInfo) {
         if (pageInfo == null) {
             return null;
         }
         try {
-            boolean hasNextPage = (boolean) pageInfo.getClass().getMethod("isHasNextPage").invoke(pageInfo);
+            boolean hasNextPage = (boolean)pageInfo.getClass().getMethod("isHasNextPage").invoke(pageInfo);
             if (!hasNextPage) {
                 return null;
             }
-            return (String) pageInfo.getClass().getMethod("getEndCursor").invoke(pageInfo);
+            return (String)pageInfo.getClass().getMethod("getEndCursor").invoke(pageInfo);
         } catch (Exception exception) {
             log.warn("Failed to extract cursor from PageInfo", exception);
             return null;
         }
     }
 
-     /**
-      * Result of processing a single page.
-      *
-      * @param <T> the data type
-      */
-     private static class PageResult<T> {
-         final int saved;
-         final String nextCursor;
-         final boolean hasError;
-         final GraphQLErrorType errorType;
+    /**
+     * 단일 페이지 처리 결과.
+     *
+     * @param <T> 데이터 타입
+     */
+    private static class PageResult<T> {
+        final int saved;
+        final String nextCursor;
+        final boolean hasError;
+        final GraphQLErrorType errorType;
 
-         PageResult(int saved, String nextCursor, boolean hasError, GraphQLErrorType errorType) {
-             this.saved = saved;
-             this.nextCursor = nextCursor;
-             this.hasError = hasError;
-             this.errorType = errorType;
-         }
+        PageResult(int saved, String nextCursor, boolean hasError, GraphQLErrorType errorType) {
+            this.saved = saved;
+            this.nextCursor = nextCursor;
+            this.hasError = hasError;
+            this.errorType = errorType;
+        }
 
-         PageResult(int saved, String nextCursor, boolean hasError) {
-             this(saved, nextCursor, hasError, null);
-         }
-     }
+        PageResult(int saved, String nextCursor, boolean hasError) {
+            this(saved, nextCursor, hasError, null);
+        }
+    }
 }

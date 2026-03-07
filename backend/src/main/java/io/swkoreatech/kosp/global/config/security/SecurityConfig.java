@@ -15,13 +15,24 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.auth.resolver.TokenHeaderResolver;
 import io.swkoreatech.kosp.global.security.filter.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+/**
+ * Spring Security 설정 클래스.
+ * <p>CSRF 비활성화, 무상태 세션 정책, CORS 설정, JWT 인증 필터 등록,
+ * 비밀번호 인코더 및 인증 매니저를 구성한다.</p>
+ */
+@Slf4j
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -32,6 +43,13 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final TokenHeaderResolver tokenHeaderResolver;
 
+    /**
+     * 보안 필터 체인을 구성한다.
+     *
+     * @param http HttpSecurity 설정 객체
+     * @return 구성된 보안 필터 체인
+     * @throws Exception 보안 설정 중 오류 발생 시
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -68,15 +86,37 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * 위임 패턴 기반의 비밀번호 인코더 빈을 생성한다.
+     *
+     * @return 비밀번호 인코더
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    /**
+     * 인증 매니저 빈을 생성한다.
+     *
+     * @param authenticationConfiguration 인증 구성 객체
+     * @return 인증 매니저
+     * @throws Exception 인증 매니저 생성 중 오류 발생 시
+     */
     @Bean
     public AuthenticationManager authenticationManager(
         AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
+    /**
+     * 허용되지 않은 HTTP 메서드(PROPFIND 등) 요청 시 스택트레이스 없이 405를 반환한다.
+     */
+    @Bean
+    public RequestRejectedHandler requestRejectedHandler() {
+        return (request, response, exception) -> {
+            log.debug("Rejected request: {}", exception.getMessage());
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+        };
+    }
 }

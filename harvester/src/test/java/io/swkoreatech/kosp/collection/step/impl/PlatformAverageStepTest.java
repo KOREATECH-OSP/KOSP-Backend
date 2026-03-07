@@ -2,13 +2,10 @@ package io.swkoreatech.kosp.collection.step.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
-import java.math.BigDecimal;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -21,9 +18,9 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.job.StepCompletionListener;
 import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 
 @DisplayName("PlatformAverageStep 단위 테스트")

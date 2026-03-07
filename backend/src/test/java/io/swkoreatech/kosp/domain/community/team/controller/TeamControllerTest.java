@@ -8,8 +8,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,6 +20,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
+import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
 import io.swkoreatech.kosp.domain.community.team.model.TeamMember;
@@ -24,9 +34,6 @@ import io.swkoreatech.kosp.domain.community.team.model.TeamRole;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamInviteRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamMemberRepository;
 import io.swkoreatech.kosp.domain.community.team.repository.TeamRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
 import io.swkoreatech.kosp.global.common.IntegrationTestSupport;
 
 @DisplayName("TeamController 통합 테스트")
@@ -34,9 +41,6 @@ class TeamControllerTest extends IntegrationTestSupport {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private GithubUserRepository githubUserRepository;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -47,6 +51,12 @@ class TeamControllerTest extends IntegrationTestSupport {
     @Autowired
     private TeamInviteRepository teamInviteRepository;
 
+    @Autowired
+    private PermissionRepository permissionRepository;
+
+    @Autowired
+    private PolicyRepository policyRepository;
+
     private User leader;
     private User member;
     private Team team;
@@ -55,30 +65,34 @@ class TeamControllerTest extends IntegrationTestSupport {
 
     @BeforeEach
     void setUp() throws Exception {
-        createGithubUser(2001L);
-        createGithubUser(2002L);
-        createGithubUser(2003L);
-
         leader = User.builder()
             .name("팀장")
             .kutId("2024101")
             .kutEmail("leader@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
         leader = userRepository.save(leader);
-        ReflectionTestUtils.setField(leader, "githubUser", githubUserRepository.getByGithubId(2001L));
+
+        // Assign ROLE_STUDENT to leader (includes team:delete permission)
+        Role studentRole = roleRepository.findByName("ROLE_STUDENT")
+            .orElseThrow(() -> new RuntimeException("ROLE_STUDENT not found - PermissionInitializer didn't run"));
+        leader.getRoles().add(studentRole);
         leader = userRepository.save(leader);
+
+        // Ensure StudentPolicy includes team:delete permission
+        Permission teamDeletePermission = permissionRepository.getByName("team:delete");
+        Policy studentPolicy = policyRepository.getByName("StudentPolicy");
+        Set<Permission> updatedPermissions = new HashSet<>(studentPolicy.getPermissions());
+        updatedPermissions.add(teamDeletePermission);
+        studentPolicy.updatePermissions(updatedPermissions);
+        policyRepository.save(studentPolicy);
 
         member = User.builder()
             .name("팀원")
             .kutId("2024102")
             .kutEmail("member@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
-        member = userRepository.save(member);
-        ReflectionTestUtils.setField(member, "githubUser", githubUserRepository.getByGithubId(2002L));
         member = userRepository.save(member);
 
         team = Team.builder()
@@ -101,8 +115,8 @@ class TeamControllerTest extends IntegrationTestSupport {
             .build();
         teamMemberRepository.save(regularMember);
 
-        leaderToken = loginAndGetToken("leader@koreatech.ac.kr", getValidPassword());
-        memberToken = loginAndGetToken("member@koreatech.ac.kr", getValidPassword());
+        leaderToken = createAccessToken(leader);
+        memberToken = createAccessToken(member);
     }
 
     @Test
@@ -160,26 +174,35 @@ class TeamControllerTest extends IntegrationTestSupport {
     @Test
     @DisplayName("팀 삭제 시 모든 members + invites isDeleted=true 확인")
     void deleteTeam_cascades_toAllEntities() throws Exception {
-        User invitee = User.builder()
-            .name("초대받은사용자")
+        User invitee1 = User.builder()
+            .name("초대받은사용자1")
             .kutId("2024103")
-            .kutEmail("invitee@koreatech.ac.kr")
+            .kutEmail("invitee1@koreatech.ac.kr")
             .password(passwordEncoder.encode(getValidPassword()))
-            .roles(new HashSet<>())
             .build();
-        invitee = userRepository.save(invitee);
-        ReflectionTestUtils.setField(invitee, "githubUser", githubUserRepository.getByGithubId(2003L));
-        invitee = userRepository.save(invitee);
+        invitee1 = userRepository.save(invitee1);
+
+        User invitee2 = User.builder()
+            .name("초대받은사용자2")
+            .kutId("2024104")
+            .kutEmail("invitee2@koreatech.ac.kr")
+            .password(passwordEncoder.encode(getValidPassword()))
+            .build();
+        invitee2 = userRepository.save(invitee2);
 
         TeamInvite invite1 = TeamInvite.builder()
             .team(team)
-            .invitee(invitee)
+            .inviter(leader)
+            .invitee(invitee1)
+            .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
             .build();
         teamInviteRepository.save(invite1);
 
         TeamInvite invite2 = TeamInvite.builder()
             .team(team)
-            .invitee(invitee)
+            .inviter(leader)
+            .invitee(invitee2)
+            .expiresAt(Instant.now().plus(7, ChronoUnit.DAYS))
             .build();
         teamInviteRepository.save(invite2);
 

@@ -9,12 +9,17 @@ import io.swkoreatech.kosp.domain.admin.banner.service.BannerService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 배너 관리 컨트롤러 (관리자 전용).
+ * <p>{@link BannerApi}를 구현하여 배너 설정 토글 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
 public class AdminBannerController implements BannerApi {
 
     private final BannerService bannerService;
 
+    /** {@inheritDoc} */
     @Override
     @Permit(name = "admin:banner:toggle", description = "배너 설정 토글")
     public ResponseEntity<BannerSettingResponse> toggle() {

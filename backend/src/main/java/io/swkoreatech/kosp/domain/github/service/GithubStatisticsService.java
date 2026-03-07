@@ -1,43 +1,66 @@
 package io.swkoreatech.kosp.domain.github.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparisonResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
+import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRepository;
 import io.swkoreatech.kosp.domain.github.repository.PlatformStatisticsRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * GitHub 통계 서비스.
+ * GitHub 기여 활동, 비교 통계, 점수 조회 기능을 담당한다.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class GithubStatisticsService {
 
+    private static final Integer RECENT_ACTIVITY_LIMIT = 10;
+
     private final UserRepository userRepository;
     private final GithubUserStatisticsRepository statisticsRepository;
+    private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
     private final PlatformStatisticsRepository platformStatisticsRepository;
 
+    /**
+     * 사용자의 전체 기여 내역을 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 전체 기여 내역 응답
+     */
     public GithubOverallHistoryResponse getOverallHistory(Long userId) {
         GithubUserStatistics stats = getStatisticsByUserId(userId);
         return GithubOverallHistoryResponse.from(stats);
     }
 
+    /**
+     * 사용자와 전체 평균의 기여 내역을 비교 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 기여 내역 비교 응답
+     */
     public GithubContributionComparisonResponse getComparison(Long userId) {
         GithubUserStatistics userStats = getStatisticsByUserId(userId);
         PlatformStatistics platformStats = platformStatisticsRepository.getGlobal();
 
         if (platformStats == null) {
-            return new GithubContributionComparisonResponse(
-                0.0, 0.0, 0.0, 0.0,
+            return GithubContributionComparisonResponse.empty(
                 userStats.getTotalCommits(),
                 userStats.getTotalStarsReceived(),
                 userStats.getTotalPrs(),
@@ -45,7 +68,7 @@ public class GithubStatisticsService {
             );
         }
 
-        return new GithubContributionComparisonResponse(
+        return GithubContributionComparisonResponse.from(
             platformStats.getAvgCommitCount().doubleValue(),
             platformStats.getAvgStarCount().doubleValue(),
             platformStats.getAvgPrCount().doubleValue(),
@@ -57,11 +80,41 @@ public class GithubStatisticsService {
         );
     }
 
+    /**
+     * 사용자의 GitHub 기여 점수를 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 기여 점수 응답
+     */
     public GithubContributionScoreResponse getScore(Long userId) {
         GithubUserStatistics stats = getStatisticsByUserId(userId);
         return GithubContributionScoreResponse.from(stats);
     }
 
+    /**
+     * 사용자의 최근 기여 활동을 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @return 최근 기여 활동 목록
+     */
+    public List<GithubRecentActivityResponse> getRecentActivity(Long userId) {
+        User user = userRepository.getById(userId);
+
+        if (user.getGithubUser() == null) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
+        }
+
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        List<GithubRepositoryStatistics> repositories = repositoryStatisticsRepository
+            .findTopNByContributorGithubIdOrderByLastCommitDateDesc(githubId, RECENT_ACTIVITY_LIMIT);
+        return repositories.stream().map(GithubRecentActivityResponse::from).toList();
+    }
+
+    /**
+     * 전체 사용자의 평균 기여 통계를 조회한다.
+     *
+     * @return 전체 통계 응답
+     */
     public GlobalStatisticsResponse getGlobalStatistics() {
         PlatformStatistics stats = platformStatisticsRepository.getGlobal();
         if (stats == null) {

@@ -15,9 +15,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swkoreatech.kosp.domain.auth.model.Permission;
-import io.swkoreatech.kosp.domain.auth.model.Policy;
-import io.swkoreatech.kosp.domain.auth.model.Role;
+import io.swkoreatech.kosp.common.auth.model.Permission;
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PermissionRepository;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
@@ -25,6 +25,11 @@ import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 애플리케이션 시작 시 권한을 초기화하는 컴포넌트.
+ * <p>{@link Permit} 어노테이션이 붙은 컨트롤러 메서드를 스캔하여 권한을 자동 등록하고,
+ * 기본 역할(SUPERUSER, ADMIN, STUDENT, EMPLOYEE)과 정책을 생성한다.</p>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -35,6 +40,7 @@ public class PermissionInitializer implements CommandLineRunner {
     private final PolicyRepository policyRepository;
     private final RoleRepository roleRepository;
 
+    /** {@inheritDoc} */
     @Override
     @Transactional
     public void run(String... args) {
@@ -109,7 +115,7 @@ public class PermissionInitializer implements CommandLineRunner {
         initStudentRole(permissions);
         initEmployeeRole(permissions);
     }
-    
+
     private void initSuperuserRole() {
         roleRepository.findByName("ROLE_SUPERUSER")
             .ifPresentOrElse(
@@ -117,12 +123,12 @@ public class PermissionInitializer implements CommandLineRunner {
                 this::createSuperuserRole
             );
     }
-    
+
     private void updateRoleAccessAdmin(Role role) {
         role.updateCanAccessAdmin(true);
         roleRepository.save(role);
     }
-    
+
     private void createSuperuserRole() {
         roleRepository.save(
             Role.builder()
@@ -135,21 +141,33 @@ public class PermissionInitializer implements CommandLineRunner {
     }
 
     private void initAdminRole(Set<Permission> permissions) {
-        createRoleIfNotExists("ROLE_ADMIN", "시스템 관리자", "AdminPolicy", "시스템 관리자 정책 (모든 권한)", permissions);
+        createRoleIfNotExists(
+            "ROLE_ADMIN", "시스템 관리자",
+            "AdminPolicy", "시스템 관리자 정책 (모든 권한)",
+            permissions
+        );
     }
 
     private void initStudentRole(Set<Permission> permissions) {
         Set<Permission> nonAdminPermissions = permissions.stream()
             .filter(p -> !p.getName().startsWith("admin:"))
             .collect(Collectors.toSet());
-        createRoleIfNotExists("ROLE_STUDENT", "학생", "StudentPolicy", "학생 권한 정책 (모든 일반 권한)", nonAdminPermissions);
+        createRoleIfNotExists(
+            "ROLE_STUDENT", "학생",
+            "StudentPolicy", "학생 권한 정책 (모든 일반 권한)",
+            nonAdminPermissions
+        );
     }
 
     private void initEmployeeRole(Set<Permission> permissions) {
         Set<Permission> nonAdminPermissions = permissions.stream()
             .filter(p -> !p.getName().startsWith("admin:"))
             .collect(Collectors.toSet());
-        createRoleIfNotExists("ROLE_EMPLOYEE", "교직원", "EmployeePolicy", "교직원 권한 정책 (모든 일반 권한)", nonAdminPermissions);
+        createRoleIfNotExists(
+            "ROLE_EMPLOYEE", "교직원",
+            "EmployeePolicy", "교직원 권한 정책 (모든 일반 권한)",
+            nonAdminPermissions
+        );
     }
 
     private void createRoleIfNotExists(
@@ -169,7 +187,7 @@ public class PermissionInitializer implements CommandLineRunner {
                 () -> createNewRole(roleName, roleDesc, policy)
             );
     }
-    
+
     private void updateAdminRoleIfNeeded(String name, Role role) {
         if (!"ROLE_ADMIN".equals(name)) {
             return;
@@ -177,17 +195,17 @@ public class PermissionInitializer implements CommandLineRunner {
         role.updateCanAccessAdmin(true);
         roleRepository.save(role);
     }
-    
+
     private void createNewRole(String name, String description, Policy policy) {
-        Role.RoleBuilder builder = Role.builder()
+        var builder = Role.builder()
             .name(name)
             .description(description)
             .policies(Set.of(policy));
-        
+
         if ("ROLE_ADMIN".equals(name)) {
             builder.canAccessAdmin(true);
         }
-        
+
         roleRepository.save(builder.build());
         log.info("Initialized {}.", name);
     }

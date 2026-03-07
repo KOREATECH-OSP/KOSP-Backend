@@ -15,23 +15,27 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.challenge.model.ChallengeHistory;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
+import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeListResponse;
 import io.swkoreatech.kosp.domain.admin.challenge.dto.AdminChallengeResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.request.ChallengeRequest;
 import io.swkoreatech.kosp.domain.challenge.dto.response.ChallengeListResponse;
 import io.swkoreatech.kosp.domain.challenge.dto.response.SpelVariableResponse;
-import io.swkoreatech.kosp.domain.challenge.model.Challenge;
-import io.swkoreatech.kosp.domain.challenge.model.ChallengeHistory;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeHistoryRepository;
-import io.swkoreatech.kosp.domain.challenge.repository.ChallengeRepository;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
-import io.swkoreatech.kosp.domain.user.model.User;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 도전 과제 서비스.
+ * 도전 과제의 CRUD 및 사용자 진행도 조회, SpEL 조건 평가를 담당한다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -43,40 +47,32 @@ public class ChallengeService {
     private final GithubUserStatisticsRepository statisticsRepository;
     private final SpelExpressionParser parser = new SpelExpressionParser();
 
+    /**
+     * 모든 도전 과제를 조회한다 (관리자용).
+     *
+     * @return 관리자용 도전 과제 목록 응답
+     */
     public AdminChallengeListResponse getAllChallenges() {
-        List<Challenge> challenges = challengeRepository.findAll();
-        List<AdminChallengeListResponse.ChallengeInfo> challengeInfos = challenges.stream()
-            .map(challenge -> new AdminChallengeListResponse.ChallengeInfo(
-                challenge.getId(),
-                challenge.getName(),
-                challenge.getDescription(),
-                challenge.getCondition(),
-                challenge.getTier(),
-                challenge.getImageResource(),
-                challenge.getImageResourceType(),
-                challenge.getPoint()
-            ))
-            .toList();
-        return new AdminChallengeListResponse(challengeInfos);
+        return AdminChallengeListResponse.from(challengeRepository.findAll());
     }
 
+    /**
+     * 도전 과제 상세 정보를 조회한다 (관리자용).
+     *
+     * @param challengeId 도전 과제 ID
+     * @return 관리자용 도전 과제 응답
+     */
     public AdminChallengeResponse getChallenge(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
-        
-        return new AdminChallengeResponse(
-            challenge.getId(),
-            challenge.getName(),
-            challenge.getDescription(),
-            challenge.getCondition(),
-            challenge.getTier(),
-            challenge.getImageResource(),
-            challenge.getImageResourceType(),
-            challenge.getPoint()
-        );
+        Challenge challenge = challengeRepository.getById(challengeId);
+        return AdminChallengeResponse.from(challenge);
     }
 
-
+    /**
+     * 새로운 도전 과제를 생성한다.
+     *
+     * @param request 도전 과제 생성 요청
+     * @throws GlobalException SpEL 조건식이 유효하지 않은 경우
+     */
     @Transactional
     public void createChallenge(ChallengeRequest request) {
         validateSpelCondition(request.condition());
@@ -95,21 +91,29 @@ public class ChallengeService {
         log.info("Created challenge: {}", challenge.getName());
     }
 
+    /**
+     * 도전 과제를 삭제한다.
+     *
+     * @param challengeId 삭제할 도전 과제 ID
+     */
     @Transactional
     public void deleteChallenge(Long challengeId) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.getById(challengeId);
 
         challengeRepository.delete(challenge);
         log.info("Deleted challenge: {}", challengeId);
     }
 
-
-
+    /**
+     * 도전 과제를 수정한다.
+     *
+     * @param challengeId 수정할 도전 과제 ID
+     * @param request 도전 과제 수정 요청
+     * @throws GlobalException SpEL 조건식이 유효하지 않은 경우
+     */
     @Transactional
     public void updateChallenge(Long challengeId, ChallengeRequest request) {
-        Challenge challenge = challengeRepository.findById(challengeId)
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.CHALLENGE_NOT_FOUND));
+        Challenge challenge = challengeRepository.getById(challengeId);
 
         if (!challenge.getCondition().equals(request.condition())) {
             validateSpelCondition(request.condition());
@@ -132,14 +136,21 @@ public class ChallengeService {
             parser.parseExpression(condition);
         } catch (ParseException e) {
             log.error("Invalid SpEL condition: {}", condition, e);
-            throw new GlobalException(ExceptionMessage.INVALID_CHALLENGE_CONDITION); // Need to add INVALID_CHALLENGE_CONDITION
+            throw new GlobalException(ExceptionMessage.INVALID_CHALLENGE_CONDITION);
         }
     }
 
+    /**
+     * 사용자의 도전 과제 목록과 진행도를 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @param tier 필터링할 티어 (null이면 전체 조회)
+     * @return 도전 과제 목록 응답
+     */
     public ChallengeListResponse getChallenges(User user, Integer tier) {
         List<Challenge> challenges = findChallengesByTier(tier);
         List<ChallengeHistory> histories = challengeHistoryRepository.findAllByUserId(user.getId());
-        
+
         Map<Long, ChallengeHistory> historyMap = histories.stream()
             .collect(Collectors.toMap(h -> h.getChallenge().getId(), h -> h));
 
@@ -150,36 +161,24 @@ public class ChallengeService {
             .map(challenge -> {
                 Optional<ChallengeHistory> historyOpt = Optional.ofNullable(historyMap.get(challenge.getId()));
                 boolean isCompleted = historyOpt.map(ChallengeHistory::isAchieved).orElse(false);
-                
                 int progress = isCompleted ? 100 : evaluateProgress(challenge, context);
-
-                return new ChallengeListResponse.ChallengeResponse(
-                    challenge.getId(),
-                    challenge.getName(),
-                    challenge.getDescription(),
-                    "general",
-                    progress,
-                    isCompleted,
-                    challenge.getImageResource(),
-                    challenge.getImageResourceType(),
-                    challenge.getTier(),
-                    challenge.getPoint()
-                );
+                return ChallengeListResponse.ChallengeResponse.from(challenge, progress, isCompleted);
             })
             .toList();
 
         long completedCount = histories.stream().filter(ChallengeHistory::isAchieved).count();
         long totalChallenges = challenges.size();
         double overallProgress = calculateOverallProgress(completedCount, totalChallenges);
-        
         int totalEarnedPoints = histories.stream()
             .filter(ChallengeHistory::isAchieved)
             .mapToInt(h -> h.getChallenge().getPoint())
             .sum();
 
-        return new ChallengeListResponse(
+        return ChallengeListResponse.from(
             challengeResponses,
-            new ChallengeListResponse.ChallengeSummary(totalChallenges, completedCount, overallProgress, totalEarnedPoints)
+            ChallengeListResponse.ChallengeSummary.from(
+                totalChallenges, completedCount, overallProgress, totalEarnedPoints
+            )
         );
     }
 
@@ -230,33 +229,38 @@ public class ChallengeService {
         if (totalChallenges <= 0) {
             return 0.0;
         }
-        return (double) completedCount / totalChallenges * 100.0;
+        return (double)completedCount / totalChallenges * 100.0;
     }
 
+    /**
+     * SpEL 조건식에서 사용 가능한 변수 목록과 예제를 조회한다.
+     *
+     * @return SpEL 변수 정보 응답
+     */
     public SpelVariableResponse getSpelVariables() {
         List<SpelVariableResponse.VariableInfo> variables = buildVariablesFromEntity();
 
         List<SpelVariableResponse.ExampleExpression> examples = List.of(
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalCommits * 100 / 100, 100)", 
+                "T(Math).min(totalCommits * 100 / 100, 100)",
                 "커밋 100회 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalPrs * 100 / 10, 100)", 
+                "T(Math).min(totalPrs * 100 / 10, 100)",
                 "PR 10개 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "T(Math).min(totalStarsReceived * 100 / 50, 100)", 
+                "T(Math).min(totalStarsReceived * 100 / 50, 100)",
                 "스타 50개 달성 (0~100%)"),
             new SpelVariableResponse.ExampleExpression(
-                "(T(Math).min(totalCommits * 100 / 50, 100) + T(Math).min(totalPrs * 100 / 5, 100)) / 2", 
+                "(T(Math).min(totalCommits * 100 / 50, 100) + T(Math).min(totalPrs * 100 / 5, 100)) / 2",
                 "커밋 50회 + PR 5개 복합 조건 (평균)")
         );
 
-        return new SpelVariableResponse(variables, examples);
+        return SpelVariableResponse.from(variables, examples);
     }
 
     private List<SpelVariableResponse.VariableInfo> buildVariablesFromEntity() {
         List<SpelVariableResponse.VariableInfo> variables = new ArrayList<>();
-        
+
         Map<String, String> descriptions = Map.ofEntries(
             Map.entry("totalCommits", "총 커밋 수"),
             Map.entry("totalLines", "총 라인 수"),
@@ -279,22 +283,22 @@ public class ChallengeService {
         for (Field field : GithubUserStatistics.class.getDeclaredFields()) {
             String fieldName = field.getName();
             Class<?> fieldType = field.getType();
-            
+
             if (!isSpelCompatibleType(fieldType)) {
                 continue;
             }
 
             String description = descriptions.getOrDefault(fieldName, fieldName);
             String typeName = mapToSimpleTypeName(fieldType);
-            
+
             variables.add(new SpelVariableResponse.VariableInfo(fieldName, description, typeName));
         }
-        
+
         return variables;
     }
 
     private boolean isSpelCompatibleType(Class<?> type) {
-        return type == Integer.class || type == int.class 
+        return type == Integer.class || type == int.class
             || type == Long.class || type == long.class
             || type == BigDecimal.class
             || type == Double.class || type == double.class;

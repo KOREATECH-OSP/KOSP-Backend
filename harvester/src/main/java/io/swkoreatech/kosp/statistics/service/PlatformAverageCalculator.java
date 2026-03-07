@@ -8,12 +8,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.github.model.GithubUserStatistics;
+import io.swkoreatech.kosp.common.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.statistics.model.PlatformStatistics;
-import io.swkoreatech.kosp.domain.github.repository.GithubUserStatisticsRepository;
 import io.swkoreatech.kosp.statistics.repository.PlatformStatisticsRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 플랫폼 전체 사용자의 평균 통계를 계산하는 서비스.
+ *
+ * <p>모든 사용자의 GitHub 통계(커밋, 스타, PR, 이슈)를 집계하여
+ * 평균값을 계산하고 플랫폼 통계에 저장한다.
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,6 +31,11 @@ public class PlatformAverageCalculator {
     private final GithubUserStatisticsRepository userStatsRepository;
     private final PlatformStatisticsRepository platformStatsRepository;
 
+    /**
+     * 플랫폼 평균 통계를 계산하고 저장한다.
+     *
+     * <p>사용자 통계가 없는 경우 계산을 건너뛴다.
+     */
     @Transactional
     public void calculateAndSave() {
         List<GithubUserStatistics> allUserStats = userStatsRepository.findAll();
@@ -82,10 +93,19 @@ public class PlatformAverageCalculator {
         platformStatsRepository.save(platformStats);
     }
 
+    /**
+     * 평균 계산 결과를 담는 레코드.
+     *
+     * @param avgCommits 평균 커밋 수
+     * @param avgStars   평균 스타 수
+     * @param avgPrs     평균 PR 수
+     * @param avgIssues  평균 이슈 수
+     */
     private record AverageResult(
         BigDecimal avgCommits,
         BigDecimal avgStars,
         BigDecimal avgPrs,
         BigDecimal avgIssues
-    ) {}
+    ) {
+    }
 }

@@ -1,12 +1,13 @@
 package io.swkoreatech.kosp.domain.admin.role.service;
 
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createPolicy;
+import static io.swkoreatech.kosp.global.common.fixture.TestAuthFixture.createRole;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
-import java.util.HashSet;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,18 +17,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.auth.model.Policy;
+import io.swkoreatech.kosp.common.auth.model.Role;
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.request.RoleUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.role.dto.response.RoleResponse;
-import io.swkoreatech.kosp.domain.auth.model.Policy;
-import io.swkoreatech.kosp.domain.auth.model.Role;
 import io.swkoreatech.kosp.domain.auth.repository.PolicyRepository;
 import io.swkoreatech.kosp.domain.auth.repository.RoleRepository;
-import io.swkoreatech.kosp.domain.user.repository.UserRepository;
-import io.swkoreatech.kosp.global.exception.ExceptionMessage;
-import io.swkoreatech.kosp.global.exception.GlobalException;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("RoleAdminService 단위 테스트")
@@ -44,25 +44,6 @@ class RoleAdminServiceTest {
 
     @Mock
     private UserRepository userRepository;
-
-    private Role createRole(Long id, String name) {
-        Role role = Role.builder()
-            .name(name)
-            .description(name + " 역할")
-            .policies(new HashSet<>())
-            .build();
-        ReflectionTestUtils.setField(role, "id", id);
-        return role;
-    }
-
-    private Policy createPolicy(Long id, String name) {
-        Policy policy = Policy.builder()
-            .name(name)
-            .description(name + " 정책")
-            .build();
-        ReflectionTestUtils.setField(policy, "id", id);
-        return policy;
-    }
 
     @Nested
     @DisplayName("getAllRoles 메서드")
@@ -278,7 +259,7 @@ class RoleAdminServiceTest {
             Role role = createRole(1L, "ROLE_USER");
             Policy policy = createPolicy(1L, "POLICY_READ");
             role.getPolicies().add(policy);
-            
+
             given(roleRepository.getByName("ROLE_USER")).willReturn(role);
             given(policyRepository.getByName("POLICY_READ")).willReturn(policy);
 

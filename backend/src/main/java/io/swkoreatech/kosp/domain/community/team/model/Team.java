@@ -16,6 +16,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 팀 엔티티.
+ * 팀의 기본 정보를 관리한다.
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,12 +52,20 @@ public class Team extends BaseEntity {
         this.imageUrl = imageUrl;
     }
 
+    /**
+     * 팀 정보를 수정한다.
+     *
+     * @param name 팀 이름
+     * @param description 팀 설명
+     * @param imageUrl 팀 이미지 URL
+     */
     public void update(String name, String description, String imageUrl) {
         this.name = name;
         this.description = description;
         this.imageUrl = imageUrl;
     }
 
+    /** 팀을 논리 삭제한다. */
     public void delete() {
         this.isDeleted = true;
     }

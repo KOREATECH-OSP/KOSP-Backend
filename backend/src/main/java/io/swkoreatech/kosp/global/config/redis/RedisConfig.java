@@ -17,6 +17,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Redis 연결 및 템플릿 설정 클래스.
+ * <p>Lettuce 기반의 Redis 연결 팩토리와 직렬화 설정이 포함된 RedisTemplate을 구성한다.</p>
+ */
 @Configuration
 @EnableRedisRepositories
 @RequiredArgsConstructor
@@ -34,6 +38,11 @@ public class RedisConfig {
     @Value("${spring.data.redis.database:0}")  // 기본값 0 (production)
     private int redisDatabase;
 
+    /**
+     * Redis 연결 팩토리 빈을 생성한다.
+     *
+     * @return Lettuce 기반 Redis 연결 팩토리
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration();
@@ -52,6 +61,12 @@ public class RedisConfig {
         return new LettuceConnectionFactory(redisConfig, clientConfig);
     }
 
+    /**
+     * JSON 직렬화가 설정된 RedisTemplate 빈을 생성한다.
+     *
+     * @param redisConnectionFactory Redis 연결 팩토리
+     * @return RedisTemplate 인스턴스
+     */
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -67,6 +82,12 @@ public class RedisConfig {
         return template;
     }
 
+    /**
+     * 문자열 전용 StringRedisTemplate 빈을 생성한다.
+     *
+     * @param redisConnectionFactory Redis 연결 팩토리
+     * @return StringRedisTemplate 인스턴스
+     */
     @Bean
     public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
         return new StringRedisTemplate(redisConnectionFactory);

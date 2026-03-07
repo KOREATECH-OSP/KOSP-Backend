@@ -4,28 +4,32 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.content.api.AdminArticleApi;
 import io.swkoreatech.kosp.domain.community.article.dto.response.AdminArticleResponse;
 import io.swkoreatech.kosp.domain.community.article.dto.response.ArticleListResponse;
 import io.swkoreatech.kosp.domain.community.article.service.ArticleService;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.service.BoardService;
-import io.swkoreatech.kosp.domain.user.model.User;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 관리자 게시글 관리 컨트롤러.
+ * <p>{@link AdminArticleApi}를 구현하여 관리자 게시글 조회 기능을 제공한다.</p>
+ */
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/v1/admin/articles")
-public class AdminArticleController {
+public class AdminArticleController implements AdminArticleApi {
 
     private final ArticleService articleService;
     private final BoardService boardService;
 
+    @Override
     @GetMapping
     @Permit(name = "admin:article:read", description = "관리자 게시글 목록 조회")
     public ResponseEntity<ArticleListResponse<AdminArticleResponse>> getList(
@@ -38,6 +42,7 @@ public class AdminArticleController {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @GetMapping("/{id}")
     @Permit(name = "admin:article:read", description = "관리자 게시글 상세 조회")
     public ResponseEntity<AdminArticleResponse> getOne(

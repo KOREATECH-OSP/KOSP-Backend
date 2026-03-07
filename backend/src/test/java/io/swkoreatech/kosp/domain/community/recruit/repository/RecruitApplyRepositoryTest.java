@@ -9,18 +9,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitApply;
 import io.swkoreatech.kosp.domain.community.recruit.model.RecruitStatus;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
-import io.swkoreatech.kosp.domain.user.model.User;
+import io.swkoreatech.kosp.global.config.jpa.JpaConfig;
+import jakarta.persistence.PersistenceException;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@Import(JpaConfig.class)
 @DisplayName("RecruitApplyRepository 단위 테스트")
 class RecruitApplyRepositoryTest {
 
@@ -53,7 +57,7 @@ class RecruitApplyRepositoryTest {
             .build();
         entityManager.persistAndFlush(team);
 
-        Recruit recruit = Recruit.builder()
+        Recruit recruit = Recruit.recruitBuilder()
             .author(user)
             .board(board)
             .title("Test Recruit")
@@ -71,6 +75,7 @@ class RecruitApplyRepositoryTest {
             .reason("First application")
             .portfolioUrl("https://github.com/user")
             .build();
+        ReflectionTestUtils.setField(firstApply, "decisionReason", "");
         entityManager.persistAndFlush(firstApply);
 
         RecruitApply duplicateApply = RecruitApply.builder()
@@ -79,9 +84,10 @@ class RecruitApplyRepositoryTest {
             .reason("Duplicate application")
             .portfolioUrl("https://github.com/user")
             .build();
+        ReflectionTestUtils.setField(duplicateApply, "decisionReason", "");
 
         assertThatThrownBy(() -> {
             entityManager.persistAndFlush(duplicateApply);
-        }).isInstanceOf(DataIntegrityViolationException.class);
+        }).isInstanceOf(PersistenceException.class);
     }
 }
