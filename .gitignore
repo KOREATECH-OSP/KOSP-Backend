@@ -264,3 +264,6 @@ logs/
 
 # RabbitMQ data
 rabbitmq-data/
+
+# 보안 키 파일 (CloudFront용)
+*.pem
