@@ -57,6 +57,14 @@ public enum ExceptionMessage {
     FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED("파일 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    // Title System
+    TITLE_NOT_FOUND("칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    USER_TITLE_NOT_FOUND("보유한 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TITLE_ALREADY_GRANTED("이미 보유 중인 칭호입니다.", HttpStatus.CONFLICT),
+    TITLE_NOT_GRANTED("해당 칭호를 보유하고 있지 않습니다.", HttpStatus.BAD_REQUEST),
+    TITLE_REVOKED("이미 회수된 칭호입니다.", HttpStatus.BAD_REQUEST),
+    TITLE_DISPLAY_FORBIDDEN("본인의 칭호만 대표로 설정할 수 있습니다.", HttpStatus.FORBIDDEN),
+
     ;
 
     private final String message;

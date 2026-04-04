@@ -115,4 +115,14 @@ public interface ArticleRepository extends Repository<Article, Long>, JpaSpecifi
      * @return 게시글 페이지
      */
     Page<Article> findAll(Specification<Article> spec, Pageable pageable);
+
+    /**
+     * 작성자의 삭제되지 않은 게시글 수를 조회한다.
+     * 칭호 평가 배치에서 ARTICLE_COUNT_GTE 조건 확인에 사용한다.
+     * TODO(2차): ArticleCreatedEvent 기반 실시간 칭호 지급으로 고도화 예정
+     *
+     * @param author 작성자
+     * @return 게시글 수
+     */
+    long countByAuthorAndIsDeletedFalse(User author);
 }

@@ -48,4 +48,13 @@ public interface ChallengeHistoryRepository extends Repository<ChallengeHistory,
      * @return 해당 사용자의 챌린지 이력 목록
      */
     java.util.List<ChallengeHistory> findAllByUserId(Long userId);
+
+    /**
+     * 특정 사용자가 달성한 챌린지 수를 조회한다.
+     * 칭호 평가 배치에서 CHALLENGE_COUNT_GTE 조건 확인에 사용한다.
+     *
+     * @param user 사용자
+     * @return 달성한 챌린지 수
+     */
+    long countByUserAndIsAchievedTrue(User user);
 }

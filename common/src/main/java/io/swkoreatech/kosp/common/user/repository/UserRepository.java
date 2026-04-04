@@ -158,6 +158,14 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
     java.util.List<Long> findActiveUserIds();
 
     /**
+     * 탈퇴하지 않은 모든 유저를 조회한다.
+     * 칭호 평가 배치에서 전체 유저 순회 시 사용한다.
+     *
+     * @return 활성 유저 목록
+     */
+    java.util.List<User> findAllByIsDeletedFalse();
+
+    /**
      * ID로 사용자를 삭제한다.
      *
      * @param id 삭제할 사용자 ID
