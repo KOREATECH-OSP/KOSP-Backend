@@ -65,6 +65,10 @@ public enum ExceptionMessage {
     TITLE_REVOKED("이미 회수된 칭호입니다.", HttpStatus.BAD_REQUEST),
     TITLE_DISPLAY_FORBIDDEN("본인의 칭호만 대표로 설정할 수 있습니다.", HttpStatus.FORBIDDEN),
 
+    // Terms System
+    TERMS_NOT_FOUND("현재 유효한 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TERMS_VERSION_NOT_FOUND("해당 버전의 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+
     // Season Ranking System
     SEASON_NOT_FOUND("시즌을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ACTIVE_SEASON_NOT_FOUND("진행 중인 시즌이 없습니다.", HttpStatus.NOT_FOUND),

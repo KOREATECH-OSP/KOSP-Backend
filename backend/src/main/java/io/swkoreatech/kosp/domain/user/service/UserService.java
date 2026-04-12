@@ -27,6 +27,7 @@ import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
 import io.swkoreatech.kosp.domain.point.model.PointTransaction;
 import io.swkoreatech.kosp.domain.point.repository.PointTransactionRepository;
+import io.swkoreatech.kosp.domain.terms.service.TermsService;
 import io.swkoreatech.kosp.domain.user.dto.request.UserSignupRequest;
 import io.swkoreatech.kosp.domain.user.dto.request.UserUpdateRequest;
 import io.swkoreatech.kosp.domain.user.dto.response.MyApplicationListResponse;
@@ -58,6 +59,7 @@ public class UserService {
     private final ApplicationEventPublisher eventPublisher;
     private final EmailVerificationService emailVerificationService;
     private final RabbitTemplate rabbitTemplate;
+    private final TermsService termsService;
 
     /**
      * 회원가입을 처리하고 인증 토큰을 발급한다.
@@ -118,6 +120,9 @@ public class UserService {
             eventPublisher.publishEvent(new UserSignupEvent(this, user.getId(), githubUser.getGithubLogin()));
             log.info("Published UserSignupEvent for user {} (GitHub: {})", user.getId(), githubUser.getGithubLogin());
         }
+
+        // 7. 약관 동의 저장 (termsVersion이 제공된 경우)
+        termsService.agreeTermsIfProvided(user, request.termsVersion());
 
         emailVerificationService.completeSignupVerification(kutEmail);
         log.info("Redis cleanup completed for email: {}", kutEmail);
