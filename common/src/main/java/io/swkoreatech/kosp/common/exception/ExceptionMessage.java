@@ -65,6 +65,16 @@ public enum ExceptionMessage {
     TITLE_REVOKED("이미 회수된 칭호입니다.", HttpStatus.BAD_REQUEST),
     TITLE_DISPLAY_FORBIDDEN("본인의 칭호만 대표로 설정할 수 있습니다.", HttpStatus.FORBIDDEN),
 
+    // Season Ranking System
+    SEASON_NOT_FOUND("시즌을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ACTIVE_SEASON_NOT_FOUND("진행 중인 시즌이 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_RANKING_NOT_FOUND("시즌 랭킹 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_NOT_FOUND("시즌 프로젝트를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_ALREADY_CLOSED("이미 종료된 프로젝트입니다.", HttpStatus.BAD_REQUEST),
+    SEASON_PROJECT_MEMBER_NOT_FOUND("프로젝트 참여자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_MEMBER_ALREADY_EXISTS("이미 등록된 프로젝트 참여자입니다.", HttpStatus.CONFLICT),
+    PROJECT_SCORE_CAP_EXCEEDED("프로젝트 점수 한도(30점)를 초과합니다.", HttpStatus.BAD_REQUEST),
+
     ;
 
     private final String message;
