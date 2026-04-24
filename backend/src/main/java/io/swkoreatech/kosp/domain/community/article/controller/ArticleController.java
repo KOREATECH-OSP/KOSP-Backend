@@ -26,6 +26,7 @@ import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.community.board.service.BoardService;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+import io.swkoreatech.kosp.global.security.aop.TermsRequired;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -74,6 +75,7 @@ public class ArticleController implements ArticleApi {
     @Override
     @PostMapping
     @Permit(name = "article:create", description = "게시글 작성")
+    @TermsRequired
     public ResponseEntity<Void> create(
         @AuthUser User user,
         @RequestBody @Valid ArticleRequest request
