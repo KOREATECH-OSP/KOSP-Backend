@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "../../../../../../../../../.."
+		},
+		{
+			"path": "../../../../../../../../../../../KOSP-Frontend"
+		}
+	],
+	"settings": {
+		"typescript.validate.enable": false,
+		"javascript.validate.enable": false,
+		"java.compile.nullAnalysis.mode": "automatic"
+	}
+}
