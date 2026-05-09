@@ -84,7 +84,7 @@ public class GithubRankingService {
      * @return 내 GitHub 랭킹 응답
      */
     public MyGithubRankingResponse getMyRanking(User user) {
-        if (!user.hasGithub()) {
+        if (!user.hasGithubUser()) {
             throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
         }
         String githubId = String.valueOf(user.getGithubUser().getGithubId());
