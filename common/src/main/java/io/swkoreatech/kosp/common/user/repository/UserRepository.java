@@ -134,6 +134,15 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
     Optional<User> findByGithubUser_GithubId(Long githubId);
 
     /**
+     * GitHub ID 목록으로 사용자를 일괄 조회한다.
+     *
+     * @param githubIds GitHub 사용자 ID 목록
+     * @return 사용자 목록
+     */
+    @Query("SELECT u FROM User u JOIN u.githubUser gu WHERE gu.githubId IN :githubIds AND u.isDeleted = false")
+    java.util.List<User> findAllByGithubIds(@Param("githubIds") java.util.List<Long> githubIds);
+
+    /**
      * GitHub ID로 활성 사용자를 조회한다.
      *
      * @param githubId GitHub 사용자 ID

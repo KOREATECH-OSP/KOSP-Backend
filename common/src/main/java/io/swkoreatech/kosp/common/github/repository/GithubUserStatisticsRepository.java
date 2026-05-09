@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
@@ -45,6 +47,15 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
      * @return 총점 순으로 정렬된 통계 목록
      */
     List<GithubUserStatistics> findAllByOrderByTotalScoreDesc();
+
+    /**
+     * 총점 내림차순으로 정렬된 GitHub 사용자 통계를 페이징하여 조회한다.
+     *
+     * @param pageable 페이징 정보
+     * @return 총점 순으로 정렬된 통계 페이지
+     */
+    @Query("SELECT gs FROM GithubUserStatistics gs ORDER BY gs.totalScore DESC")
+    Page<GithubUserStatistics> findAllOrderByTotalScoreDesc(Pageable pageable);
 
     /**
      * 특정 GitHub ID의 통계 존재 여부를 확인한다.
