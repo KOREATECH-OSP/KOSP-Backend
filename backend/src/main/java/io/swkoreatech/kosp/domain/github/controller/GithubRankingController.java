@@ -4,8 +4,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.github.api.GithubRankingApi;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRankingListResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.MyGithubRankingResponse;
 import io.swkoreatech.kosp.domain.github.service.GithubRankingService;
 import lombok.RequiredArgsConstructor;
 
@@ -23,5 +25,11 @@ public class GithubRankingController implements GithubRankingApi {
     @Override
     public ResponseEntity<GithubRankingListResponse> getRankings(Pageable pageable) {
         return ResponseEntity.ok(githubRankingService.getRankings(pageable));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResponseEntity<MyGithubRankingResponse> getMyRanking(User user) {
+        return ResponseEntity.ok(githubRankingService.getMyRanking(user));
     }
 }

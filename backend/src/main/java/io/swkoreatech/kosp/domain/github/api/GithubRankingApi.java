@@ -7,8 +7,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRankingListResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.MyGithubRankingResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 
 /**
  * GitHub 기여 점수 기반 랭킹 API.
@@ -32,4 +36,14 @@ public interface GithubRankingApi {
     ResponseEntity<GithubRankingListResponse> getRankings(
         @PageableDefault(size = 50) Pageable pageable
     );
+
+    /**
+     * 로그인한 사용자의 GitHub 기여 점수 기반 랭킹을 조회한다.
+     */
+    @Operation(summary = "내 GitHub 기여 점수 랭킹 조회", description = "내 전체 기간 GitHub 활동·다양성·영향력 점수 기반 순위를 조회합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "401", description = "인증 필요")
+    @ApiResponse(responseCode = "404", description = "GitHub 연동 없음 또는 통계 없음")
+    @GetMapping("/rankings/me")
+    ResponseEntity<MyGithubRankingResponse> getMyRanking(@AuthUser User user);
 }

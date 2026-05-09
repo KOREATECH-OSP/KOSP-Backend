@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.swkoreatech.kosp.common.exception.ExceptionMessage;
+import io.swkoreatech.kosp.common.exception.GlobalException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +19,7 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRankingEntryResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRankingListResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.MyGithubRankingResponse;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -71,5 +75,22 @@ public class GithubRankingService {
             pageable.getPageNumber(),
             pageable.getPageSize()
         );
+    }
+
+    /**
+     * 로그인한 사용자의 GitHub 기여 점수 기반 랭킹을 조회한다.
+     *
+     * @param user 로그인한 사용자
+     * @return 내 GitHub 랭킹 응답
+     */
+    public MyGithubRankingResponse getMyRanking(User user) {
+        if (!user.hasGithub()) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
+        }
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        GithubUserStatistics stats = statisticsRepository.findByGithubId(githubId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND));
+        long higherCount = statisticsRepository.countByTotalScoreGreaterThan(stats.getTotalScore());
+        return MyGithubRankingResponse.of(higherCount + 1, stats);
     }
 }

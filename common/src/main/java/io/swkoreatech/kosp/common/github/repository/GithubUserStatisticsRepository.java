@@ -83,6 +83,15 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
     long count();
 
     /**
+     * 특정 점수보다 높은 총점을 가진 통계 레코드 수를 반환한다.
+     * 내 랭킹 순위 계산에 사용된다 (rank = count + 1).
+     *
+     * @param totalScore 기준 점수
+     * @return 기준 점수보다 높은 사용자 수
+     */
+    long countByTotalScoreGreaterThan(BigDecimal totalScore);
+
+    /**
      * 계산 완료된 사용자의 평균 커밋 수를 조회한다.
      *
      * @return 평균 커밋 수
