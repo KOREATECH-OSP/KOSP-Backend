@@ -7,10 +7,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
+import io.swkoreatech.kosp.common.title.model.Title;
 import io.swkoreatech.kosp.common.title.model.UserTitle;
+import io.swkoreatech.kosp.common.title.repository.TitleConditionRepository;
+import io.swkoreatech.kosp.common.title.repository.TitleRepository;
 import io.swkoreatech.kosp.common.title.repository.UserTitleRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleConditionResponse;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleDetailResponse;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleResponse;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +31,30 @@ import lombok.extern.slf4j.Slf4j;
 @Transactional(readOnly = true)
 public class TitleService {
 
+    private final TitleRepository titleRepository;
+    private final TitleConditionRepository titleConditionRepository;
     private final UserTitleRepository userTitleRepository;
     private final UserRepository userRepository;
+
+    /**
+     * 활성화된 전체 칭호 목록을 달성 조건과 함께 반환한다 (공개).
+     *
+     * @return 전체 칭호 목록 응답
+     */
+    public TitleListResponse getAllTitles() {
+        List<Title> titles = titleRepository.findAllByIsActiveTrueOrderByDisplayOrderAsc();
+        List<TitleDetailResponse> responses = titles.stream()
+            .map(title -> {
+                List<TitleConditionResponse> conditions = titleConditionRepository
+                    .findAllByTitle(title)
+                    .stream()
+                    .map(TitleConditionResponse::from)
+                    .toList();
+                return TitleDetailResponse.from(title, conditions);
+            })
+            .toList();
+        return new TitleListResponse(responses, responses.size());
+    }
 
     /**
      * 본인의 보유 칭호 목록을 조회한다.

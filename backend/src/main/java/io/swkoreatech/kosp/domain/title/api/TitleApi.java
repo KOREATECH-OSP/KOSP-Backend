@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
@@ -72,4 +73,17 @@ public interface TitleApi {
         @Parameter(description = "user_title ID") @PathVariable Long userTitleId,
         @AuthUser User user
     );
+
+    /**
+     * 활성화된 전체 칭호 목록을 달성 조건과 함께 조회한다 (공개).
+     *
+     * @return 전체 칭호 목록
+     */
+    @Operation(
+        summary = "전체 칭호 목록 조회",
+        description = "플랫폼에서 획득 가능한 모든 활성 칭호와 달성 조건을 반환합니다. 인증이 필요하지 않습니다."
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/titles")
+    ResponseEntity<TitleListResponse> getAllTitles();
 }

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.title.api.TitleApi;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleResponse;
 import io.swkoreatech.kosp.domain.title.service.TitleService;
@@ -36,5 +37,11 @@ public class TitleController implements TitleApi {
     @Override
     public ResponseEntity<UserTitleResponse> setDisplayTitle(Long userTitleId, User user) {
         return ResponseEntity.ok(titleService.setDisplayTitle(userTitleId, user));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResponseEntity<TitleListResponse> getAllTitles() {
+        return ResponseEntity.ok(titleService.getAllTitles());
     }
 }
