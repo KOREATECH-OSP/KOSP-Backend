@@ -14,7 +14,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
@@ -24,8 +24,9 @@ import lombok.NoArgsConstructor;
 /**
  * 사용자 이력서 엔티티.
  *
- * <p>한 사용자당 하나의 이력서를 가지며, 이력서 데이터는 JSONB 컬럼에 직렬화하여 저장한다.
- * 구조가 유연하고 필드가 많으므로 JSON 단일 컬럼 방식을 채택했다.</p>
+ * <p>한 사용자가 여러 개의 이력서를 가질 수 있다.
+ * 이력서 데이터는 JSONB 컬럼에 직렬화하여 저장한다.
+ * {@code isDefault}가 true인 이력서가 기본 이력서로 사용된다.</p>
  */
 @Getter
 @Entity
@@ -38,9 +39,16 @@ public class UserResume extends BaseEntity {
     private Long id;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    /**
+     * 기본 이력서 여부.
+     * 사용자당 최대 1개의 이력서가 기본 이력서로 설정된다.
+     */
+    @Column(name = "is_default", nullable = false)
+    private boolean isDefault;
 
     /**
      * 이력서 전체 데이터 (JSONB).
@@ -52,9 +60,10 @@ public class UserResume extends BaseEntity {
     private String resumeData;
 
     @Builder
-    private UserResume(User user, String resumeData) {
+    private UserResume(User user, String resumeData, boolean isDefault) {
         this.user = user;
         this.resumeData = resumeData;
+        this.isDefault = isDefault;
     }
 
     /**
@@ -64,5 +73,19 @@ public class UserResume extends BaseEntity {
      */
     public void updateResumeData(String resumeData) {
         this.resumeData = resumeData;
+    }
+
+    /**
+     * 이 이력서를 기본 이력서로 설정한다.
+     */
+    public void setAsDefault() {
+        this.isDefault = true;
+    }
+
+    /**
+     * 기본 이력서 설정을 해제한다.
+     */
+    public void unsetDefault() {
+        this.isDefault = false;
     }
 }

@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.resume.dto.request;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 이력서 저장 요청 DTO.
@@ -8,20 +9,21 @@ import java.util.List;
  * <p>프론트엔드 useResumeStorage 훅의 ResumeData 구조와 1:1 대응한다.
  * 각 필드는 null 허용 (미입력 상태로 저장 가능).</p>
  *
- * @param resumeTitle    이력서 제목
- * @param headline       한 줄 소개
- * @param bio            간단 소개
- * @param jobRole        개발 직무
- * @param techStack      기술 스택 목록
- * @param links          링크 목록
- * @param education      학력 목록
- * @param career         경력 목록
- * @param experience     교육이력 목록
- * @param projects       프로젝트 목록
- * @param awards         수상이력 목록
- * @param certifications 자격증 목록
- * @param coverLetters   자기소개서 목록
- * @param isPublic       공개 여부
+ * @param resumeTitle      이력서 제목
+ * @param headline         한 줄 소개
+ * @param bio              간단 소개
+ * @param jobRole          개발 직무
+ * @param techStack        기술 스택 목록
+ * @param links            링크 목록
+ * @param education        학력 목록
+ * @param career           경력 목록
+ * @param experience       교육이력 목록
+ * @param projects         프로젝트 목록
+ * @param awards           수상이력 목록
+ * @param certifications   자격증 목록
+ * @param coverLetters     자기소개서 목록
+ * @param isPublic         공개 여부
+ * @param visibleSections  섹션 표시 여부 맵 (key: 섹션 id, value: 표시 여부)
  */
 public record ResumeSaveRequest(
     String resumeTitle,
@@ -37,7 +39,8 @@ public record ResumeSaveRequest(
     List<AwardItem> awards,
     List<CertificationItem> certifications,
     List<CoverLetterItem> coverLetters,
-    Boolean isPublic
+    Boolean isPublic,
+    Map<String, Object> visibleSections
 ) {
 
     // ── 중첩 레코드: 프론트 타입과 1:1 대응 ──────────────────────────
