@@ -35,6 +35,9 @@ public class Title extends BaseEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @Column(nullable = false, unique = true, length = 50)
+    private String code;
+
     @Column(nullable = false, length = 255)
     private String description;
 
@@ -58,6 +61,7 @@ public class Title extends BaseEntity {
     @Builder
     private Title(
         String name,
+        String code,
         String description,
         TitleCategory category,
         TitleRarity rarity,
@@ -66,12 +70,17 @@ public class Title extends BaseEntity {
         int displayOrder
     ) {
         this.name = name;
+        this.code = code;
         this.description = description;
         this.category = category;
         this.rarity = rarity;
         this.iconUrl = iconUrl;
         this.isActive = isActive;
         this.displayOrder = displayOrder;
+    }
+
+    public void updateIconUrl(String iconUrl) {
+        this.iconUrl = iconUrl;
     }
 
     public void deactivate() {

@@ -4,6 +4,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleGrantRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleRevokeRequest;
+import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleUpdateImageRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleBatchLogListResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
@@ -58,6 +61,25 @@ public interface AdminTitleApi {
     @ApiResponse(responseCode = "404", description = "유저 칭호를 찾을 수 없음")
     @PostMapping("/revoke")
     ResponseEntity<Void> revokeTitle(@RequestBody @Valid AdminTitleRevokeRequest request, @AuthUser User admin);
+
+    /**
+     * 칭호 아이콘 URL을 수정한다.
+     *
+     * @param titleId 칭호 PK
+     * @param request 새 아이콘 URL (null 이면 초기화)
+     * @return 200 OK
+     */
+    @Operation(
+        summary = "칭호 아이콘 URL 수정",
+        description = "관리자 권한으로 칭호의 iconUrl을 수정합니다. null을 전달하면 초기화됩니다."
+    )
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "칭호를 찾을 수 없음")
+    @PatchMapping("/{titleId}/image")
+    ResponseEntity<Void> updateTitleImage(
+        @PathVariable Long titleId,
+        @RequestBody @Valid AdminTitleUpdateImageRequest request
+    );
 
     /**
      * 칭호 배치 실행 이력을 조회한다.

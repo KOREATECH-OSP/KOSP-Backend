@@ -9,6 +9,7 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.title.api.AdminTitleApi;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleGrantRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleRevokeRequest;
+import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleUpdateImageRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleBatchLogListResponse;
 import io.swkoreatech.kosp.domain.admin.title.service.AdminTitleService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
@@ -37,6 +38,14 @@ public class AdminTitleController implements AdminTitleApi {
     @Permit(name = "admin:titles:delete", description = "칭호 회수")
     public ResponseEntity<Void> revokeTitle(AdminTitleRevokeRequest request, User admin) {
         adminTitleService.revokeTitle(request, admin.getId());
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:titles:update", description = "칭호 아이콘 URL 수정")
+    public ResponseEntity<Void> updateTitleImage(Long titleId, AdminTitleUpdateImageRequest request) {
+        adminTitleService.updateTitleImage(titleId, request.iconUrl());
         return ResponseEntity.ok().build();
     }
 

@@ -111,6 +111,19 @@ public class AdminTitleService {
         return AdminTitleBatchLogListResponse.from(page);
     }
 
+    /**
+     * 칭호 아이콘 URL을 수정한다.
+     *
+     * @param titleId 칭호 PK
+     * @param iconUrl 새 아이콘 URL (null 이면 초기화)
+     */
+    @Transactional
+    public void updateTitleImage(Long titleId, String iconUrl) {
+        Title title = titleRepository.getById(titleId);
+        title.updateIconUrl(iconUrl);
+        log.info("[AdminTitle] UPDATE_IMAGE: titleId={} ({}), iconUrl={}", title.getId(), title.getName(), iconUrl);
+    }
+
     private void saveAdminLog(Long adminId, Long userId, Title title, TitleAdminAction action, String reason) {
         TitleAdminLog log = TitleAdminLog.builder()
             .adminId(adminId)

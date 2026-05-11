@@ -8,6 +8,7 @@ import io.swkoreatech.kosp.common.title.model.Title;
  * 칭호 상세 응답 DTO (전체 칭호 목록 조회용).
  *
  * @param id          칭호 PK
+ * @param code        칭호 고유 코드 (영문 슬러그, 이미지 매핑 키)
  * @param name        칭호명
  * @param description 칭호 설명
  * @param category    카테고리 (COMMIT, STREAK, CHALLENGE, ...)
@@ -17,6 +18,7 @@ import io.swkoreatech.kosp.common.title.model.Title;
  */
 public record TitleDetailResponse(
     Long id,
+    String code,
     String name,
     String description,
     String category,
@@ -27,6 +29,7 @@ public record TitleDetailResponse(
     public static TitleDetailResponse from(Title title, List<TitleConditionResponse> conditions) {
         return new TitleDetailResponse(
             title.getId(),
+            title.getCode(),
             title.getName(),
             title.getDescription(),
             title.getCategory().name(),
