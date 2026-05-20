@@ -22,6 +22,7 @@ import java.util.Map;
  * @param awards           수상이력 목록
  * @param certifications   자격증 목록
  * @param coverLetters     자기소개서 목록
+ * @param customSections   사용자 정의 섹션 목록
  * @param isPublic         공개 여부
  * @param visibleSections  섹션 표시 여부 맵 (key: 섹션 id, value: 표시 여부)
  */
@@ -39,6 +40,7 @@ public record ResumeSaveRequest(
     List<AwardItem> awards,
     List<CertificationItem> certifications,
     List<CoverLetterItem> coverLetters,
+    List<CustomSectionItem> customSections,
     Boolean isPublic,
     Map<String, Object> visibleSections
 ) {
@@ -92,4 +94,8 @@ public record ResumeSaveRequest(
     ) {}
 
     public record CoverLetterItem(String id, String title, String content) {}
+
+    public record CustomFieldItem(String id, String label, String value) {}
+
+    public record CustomSectionItem(String id, String title, List<CustomFieldItem> fields) {}
 }
