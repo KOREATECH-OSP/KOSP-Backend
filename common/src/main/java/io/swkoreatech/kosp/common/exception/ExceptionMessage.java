@@ -56,6 +56,8 @@ public enum ExceptionMessage {
     INVALID_PARAMETER("잘못된 파라미터입니다.", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED("파일 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_FILE_TYPE("허용되지 않는 파일 형식입니다. (png, jpg, jpeg, webp만 허용)", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE("파일 크기가 너무 큽니다. (최대 5MB)", HttpStatus.BAD_REQUEST),
 
     // Title System
     TITLE_NOT_FOUND("칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),

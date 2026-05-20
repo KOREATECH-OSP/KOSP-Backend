@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.admin.title.api;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,6 +21,7 @@ import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleGrantRequest
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleRevokeRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleUpdateImageRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleBatchLogListResponse;
+import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleImageResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 
@@ -70,8 +74,8 @@ public interface AdminTitleApi {
      * @return 200 OK
      */
     @Operation(
-        summary = "칭호 아이콘 URL 수정",
-        description = "관리자 권한으로 칭호의 iconUrl을 수정합니다. null을 전달하면 초기화됩니다."
+        summary = "칭호 아이콘 URL 수정 (URL 직접 입력)",
+        description = "관리자 권한으로 칭호의 iconUrl을 직접 입력하여 수정합니다. null을 전달하면 초기화됩니다."
     )
     @ApiResponse(responseCode = "200", description = "수정 성공")
     @ApiResponse(responseCode = "404", description = "칭호를 찾을 수 없음")
@@ -79,6 +83,20 @@ public interface AdminTitleApi {
     ResponseEntity<Void> updateTitleImage(
         @PathVariable Long titleId,
         @RequestBody @Valid AdminTitleUpdateImageRequest request
+    );
+
+    @Operation(
+        summary = "칭호 이미지 파일 업로드",
+        description = "관리자 권한으로 이미지 파일을 직접 업로드하여 칭호의 iconUrl을 설정합니다. "
+            + "허용 형식: png, jpg, jpeg, webp / 최대 크기: 5MB"
+    )
+    @ApiResponse(responseCode = "200", description = "업로드 성공")
+    @ApiResponse(responseCode = "400", description = "잘못된 파일 형식 또는 크기 초과")
+    @ApiResponse(responseCode = "404", description = "칭호를 찾을 수 없음")
+    @PostMapping(value = "/{titleId}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ResponseEntity<AdminTitleImageResponse> uploadTitleImage(
+        @PathVariable Long titleId,
+        @RequestParam("file") MultipartFile file
     );
 
     /**

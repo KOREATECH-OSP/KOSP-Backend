@@ -4,6 +4,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.title.api.AdminTitleApi;
@@ -11,6 +12,7 @@ import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleGrantRequest
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleRevokeRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.request.AdminTitleUpdateImageRequest;
 import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleBatchLogListResponse;
+import io.swkoreatech.kosp.domain.admin.title.dto.response.AdminTitleImageResponse;
 import io.swkoreatech.kosp.domain.admin.title.service.AdminTitleService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,14 @@ public class AdminTitleController implements AdminTitleApi {
     public ResponseEntity<Void> updateTitleImage(Long titleId, AdminTitleUpdateImageRequest request) {
         adminTitleService.updateTitleImage(titleId, request.iconUrl());
         return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:titles:update", description = "칭호 이미지 파일 업로드")
+    public ResponseEntity<AdminTitleImageResponse> uploadTitleImage(Long titleId, MultipartFile file) {
+        String iconUrl = adminTitleService.uploadTitleImage(titleId, file);
+        return ResponseEntity.ok(new AdminTitleImageResponse(iconUrl));
     }
 
     /** {@inheritDoc} */
