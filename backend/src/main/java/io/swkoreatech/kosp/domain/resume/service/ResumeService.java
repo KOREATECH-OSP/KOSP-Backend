@@ -252,6 +252,7 @@ public class ResumeService {
             request.awards(),
             sanitized,
             request.coverLetters(),
+            request.customSections(),
             request.isPublic(),
             request.visibleSections()
         );
