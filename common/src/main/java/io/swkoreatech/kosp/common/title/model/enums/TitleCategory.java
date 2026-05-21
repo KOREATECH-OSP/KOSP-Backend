@@ -14,7 +14,8 @@ public enum TitleCategory {
     PROJECT("프로젝트 계열"),
     OPEN_SOURCE("오픈소스 계열"),
     SEASON("시즌/이벤트 계열"),
-    HONOR("희소/명예 계열");
+    HONOR("희소/명예 계열"),
+    ATTENDANCE("출석 계열");
 
     private final String displayName;
 
