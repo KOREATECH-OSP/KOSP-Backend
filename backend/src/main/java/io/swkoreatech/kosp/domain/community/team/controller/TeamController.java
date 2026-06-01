@@ -18,6 +18,7 @@ import io.swkoreatech.kosp.domain.community.team.service.TeamService;
 import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+import io.swkoreatech.kosp.global.security.aop.TermsRequired;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -41,6 +42,7 @@ public class TeamController implements TeamApi {
     /** {@inheritDoc} */
     @Override
     @Permit(name = "team:create", description = "팀 생성")
+    @TermsRequired
     public ResponseEntity<Void> create(@AuthUser User user, TeamCreateRequest request) {
         Long id = teamService.create(user, request);
         return ResponseEntity.created(URI.create("/v1/teams/" + id)).build();

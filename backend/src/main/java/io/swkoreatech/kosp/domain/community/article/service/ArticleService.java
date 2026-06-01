@@ -3,6 +3,7 @@ package io.swkoreatech.kosp.domain.community.article.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import io.swkoreatech.kosp.domain.community.article.model.ArticleLike;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleBookmarkRepository;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleLikeRepository;
 import io.swkoreatech.kosp.domain.community.article.repository.ArticleRepository;
+import io.swkoreatech.kosp.domain.community.article.event.ArticleCreatedEvent;
 import io.swkoreatech.kosp.domain.community.board.model.Board;
 import io.swkoreatech.kosp.domain.upload.model.Attachment;
 import io.swkoreatech.kosp.domain.upload.repository.AttachmentRepository;
@@ -42,6 +44,7 @@ public class ArticleService {
     private final ArticleLikeRepository articleLikeRepository;
     private final ArticleBookmarkRepository articleBookmarkRepository;
     private final AttachmentRepository attachmentRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 게시글을 작성한다.
@@ -81,6 +84,9 @@ public class ArticleService {
                 attachment.setArticle(savedArticle);
             });
         }
+
+        // 시즌 커뮤니티 점수 지급 이벤트 발행 (비동기 처리)
+        eventPublisher.publishEvent(new ArticleCreatedEvent(this, author.getId(), savedArticle.getId()));
 
         return savedArticle.getId();
     }

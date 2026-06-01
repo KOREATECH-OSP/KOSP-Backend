@@ -56,6 +56,31 @@ public enum ExceptionMessage {
     INVALID_PARAMETER("잘못된 파라미터입니다.", HttpStatus.BAD_REQUEST),
     FILE_UPLOAD_FAILED("파일 업로드에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_DELETE_FAILED("파일 삭제에 실패했습니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_FILE_TYPE("허용되지 않는 파일 형식입니다. (png, jpg, jpeg, webp만 허용)", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE("파일 크기가 너무 큽니다. (최대 5MB)", HttpStatus.BAD_REQUEST),
+
+    // Title System
+    TITLE_NOT_FOUND("칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    USER_TITLE_NOT_FOUND("보유한 칭호를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TITLE_ALREADY_GRANTED("이미 보유 중인 칭호입니다.", HttpStatus.CONFLICT),
+    TITLE_NOT_GRANTED("해당 칭호를 보유하고 있지 않습니다.", HttpStatus.BAD_REQUEST),
+    TITLE_REVOKED("이미 회수된 칭호입니다.", HttpStatus.BAD_REQUEST),
+    TITLE_DISPLAY_FORBIDDEN("본인의 칭호만 대표로 설정할 수 있습니다.", HttpStatus.FORBIDDEN),
+
+    // Terms System
+    TERMS_NOT_FOUND("현재 유효한 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TERMS_VERSION_NOT_FOUND("해당 버전의 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TERMS_AGREEMENT_REQUIRED("약관 동의가 필요합니다.", HttpStatus.FORBIDDEN),
+
+    // Season Ranking System
+    SEASON_NOT_FOUND("시즌을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ACTIVE_SEASON_NOT_FOUND("진행 중인 시즌이 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_RANKING_NOT_FOUND("시즌 랭킹 정보를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_NOT_FOUND("시즌 프로젝트를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_ALREADY_CLOSED("이미 종료된 프로젝트입니다.", HttpStatus.BAD_REQUEST),
+    SEASON_PROJECT_MEMBER_NOT_FOUND("프로젝트 참여자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    SEASON_PROJECT_MEMBER_ALREADY_EXISTS("이미 등록된 프로젝트 참여자입니다.", HttpStatus.CONFLICT),
+    PROJECT_SCORE_CAP_EXCEEDED("프로젝트 점수 한도(30점)를 초과합니다.", HttpStatus.BAD_REQUEST),
 
     ;
 

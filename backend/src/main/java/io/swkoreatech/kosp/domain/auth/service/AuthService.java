@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.auth.service;
 
 import java.util.Map;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -26,6 +27,8 @@ import io.swkoreatech.kosp.domain.auth.dto.response.GithubVerificationResponse;
 import io.swkoreatech.kosp.domain.auth.oauth2.service.OAuth2UserService;
 import io.swkoreatech.kosp.domain.mail.model.EmailVerification;
 import io.swkoreatech.kosp.domain.mail.service.EmailVerificationService;
+import io.swkoreatech.kosp.domain.terms.service.TermsService;
+import io.swkoreatech.kosp.domain.user.event.UserLoginEvent;
 import io.swkoreatech.kosp.global.auth.repository.RefreshTokenRepository;
 import io.swkoreatech.kosp.global.auth.token.AccessToken;
 import io.swkoreatech.kosp.global.auth.token.JwtToken;
@@ -51,6 +54,8 @@ public class AuthService {
     private final ClientRegistrationRepository clientRegistrationRepository;
     private final TextEncryptor textEncryptor;
     private final RefreshTokenRepository refreshTokenRepository;
+    private final ApplicationEventPublisher eventPublisher;
+    private final TermsService termsService;
 
     /**
      * 이메일 인증 코드를 발송한다.
@@ -126,6 +131,10 @@ public class AuthService {
 
         User user = (User)authentication.getPrincipal();
         log.info("Login successful for user: {} (ID: {})", user.getKutEmail(), user.getId());
+
+        // 로그인 streak 갱신 이벤트 발행 (비동기 처리, 로그인 응답에 영향 없음)
+        eventPublisher.publishEvent(new UserLoginEvent(this, user.getId()));
+
         return createTokenResponse(user);
     }
 
@@ -140,6 +149,9 @@ public class AuthService {
 
         User user = userRepository.findByGithubUser_GithubId(githubId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND));
+
+        // 로그인 streak 갱신 이벤트 발행 (비동기 처리, 로그인 응답에 영향 없음)
+        eventPublisher.publishEvent(new UserLoginEvent(this, user.getId()));
 
         return createTokenResponse(user);
     }
@@ -174,9 +186,10 @@ public class AuthService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.AUTHENTICATION));
 
         AccessToken newAccessToken = AccessToken.from(user);
+        boolean needsTerms = termsService.needsTermsAgreement(user);
 
         // RefreshToken은 재발급하지 않고 기존 토큰 유지
-        return new AuthTokenResponse(newAccessToken.toString(), refreshToken.toString());
+        return new AuthTokenResponse(newAccessToken.toString(), refreshToken.toString(), needsTerms);
     }
 
     /**
@@ -205,7 +218,8 @@ public class AuthService {
         // Redis에 RefreshToken 저장
         refreshTokenRepository.save(refreshToken);
 
-        return new AuthTokenResponse(accessToken.toString(), refreshToken.toString());
+        boolean needsTerms = termsService.needsTermsAgreement(user);
+        return new AuthTokenResponse(accessToken.toString(), refreshToken.toString(), needsTerms);
     }
 
     private Long extractGithubId(Map<String, Object> attributes) {

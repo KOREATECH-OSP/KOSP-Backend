@@ -1,0 +1,71 @@
+query {
+    user(login: "%s") {
+        bio
+        company
+        followers { totalCount }
+        following { totalCount }
+        contributionsCollection {
+            contributionCalendar {
+                totalContributions
+                weeks {
+                    contributionDays {
+                        date
+                        contributionCount
+                    }
+                }
+            }
+            totalCommitContributions
+            totalIssueContributions
+            totalPullRequestContributions
+            totalRepositoryContributions
+        }
+        repositories(first: 10, after: %s, ownerAffiliations: OWNER, orderBy: {field: PUSHED_AT, direction: DESC}) {
+            totalCount
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            nodes {
+                name
+                url
+                description
+                homepageUrl
+                isFork
+                primaryLanguage { name }
+                languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+                    edges { size node { name } }
+                }
+                stargazers { totalCount }
+                forks { totalCount }
+                watchers { totalCount }
+                issues(states: OPEN) { totalCount }
+                pullRequests(states: OPEN) { totalCount }
+                diskUsage
+                createdAt
+                updatedAt
+                pushedAt
+                defaultBranchRef {
+                    target {
+                        ... on Commit {
+                            history(first: 20) {
+                                totalCount
+                                edges {
+                                    node {
+                                        committedDate
+                                        author {
+                                            user {
+                                                login
+                                            }
+                                        }
+                                        additions
+                                        deletions
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

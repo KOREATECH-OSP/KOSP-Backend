@@ -1,0 +1,51 @@
+query GetUserBasicInfo($login: String!, $after: String) {
+    user(login: $login) {
+        login
+        name
+        avatarUrl
+        bio
+        company
+        location
+        email
+        createdAt
+        followers {
+            totalCount
+        }
+        following {
+            totalCount
+        }
+        repositories(first: 100, ownerAffiliations: OWNER, after: $after) {
+            totalCount
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            nodes {
+                name
+                nameWithOwner
+                description
+                owner {
+                    login
+                }
+                isFork
+                isPrivate
+                primaryLanguage {
+                    name
+                }
+                stargazerCount
+                forkCount
+                watchers {
+                    totalCount
+                }
+                createdAt
+                updatedAt
+            }
+        }
+        contributionsCollection {
+            totalCommitContributions
+            totalIssueContributions
+            totalPullRequestContributions
+            totalPullRequestReviewContributions
+        }
+    }
+}

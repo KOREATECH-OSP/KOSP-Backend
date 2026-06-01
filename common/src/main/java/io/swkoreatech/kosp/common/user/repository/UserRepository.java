@@ -134,6 +134,15 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
     Optional<User> findByGithubUser_GithubId(Long githubId);
 
     /**
+     * GitHub ID 목록으로 사용자를 일괄 조회한다.
+     *
+     * @param githubIds GitHub 사용자 ID 목록
+     * @return 사용자 목록
+     */
+    @Query("SELECT u FROM User u JOIN u.githubUser gu WHERE gu.githubId IN :githubIds AND u.isDeleted = false")
+    java.util.List<User> findAllByGithubIds(@Param("githubIds") java.util.List<Long> githubIds);
+
+    /**
      * GitHub ID로 활성 사용자를 조회한다.
      *
      * @param githubId GitHub 사용자 ID
@@ -156,6 +165,14 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long>, 
      */
     @Query("SELECT u.id FROM User u WHERE u.isDeleted = false AND u.githubUser IS NOT NULL")
     java.util.List<Long> findActiveUserIds();
+
+    /**
+     * 탈퇴하지 않은 모든 유저를 조회한다.
+     * 칭호 평가 배치에서 전체 유저 순회 시 사용한다.
+     *
+     * @return 활성 유저 목록
+     */
+    java.util.List<User> findAllByIsDeletedFalse();
 
     /**
      * ID로 사용자를 삭제한다.

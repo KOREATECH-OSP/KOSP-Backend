@@ -35,4 +35,14 @@ public interface TeamMemberRepository extends Repository<TeamMember, Long> {
     java.util.List<TeamMember> findAllByUserAndIsDeletedFalse(User user);
 
     java.util.List<TeamMember> findAllByTeam(Team team);
+
+    /**
+     * 유저의 삭제되지 않은 팀 참여 수를 조회한다.
+     * 칭호 평가 배치에서 TEAM_JOIN_COUNT_GTE 조건 확인에 사용한다.
+     * TODO(2차): TeamJoinEvent 기반 실시간 칭호 지급으로 고도화 예정
+     *
+     * @param user 유저
+     * @return 팀 참여 수
+     */
+    long countByUserAndIsDeletedFalse(User user);
 }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
@@ -47,6 +49,15 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
     List<GithubUserStatistics> findAllByOrderByTotalScoreDesc();
 
     /**
+     * 총점 내림차순으로 정렬된 GitHub 사용자 통계를 페이징하여 조회한다.
+     *
+     * @param pageable 페이징 정보
+     * @return 총점 순으로 정렬된 통계 페이지
+     */
+    @Query("SELECT gs FROM GithubUserStatistics gs ORDER BY gs.totalScore DESC")
+    Page<GithubUserStatistics> findAllOrderByTotalScoreDesc(Pageable pageable);
+
+    /**
      * 특정 GitHub ID의 통계 존재 여부를 확인한다.
      *
      * @param githubId GitHub 사용자 ID
@@ -70,6 +81,15 @@ public interface GithubUserStatisticsRepository extends Repository<GithubUserSta
      * @return 통계 레코드 수
      */
     long count();
+
+    /**
+     * 특정 점수보다 높은 총점을 가진 통계 레코드 수를 반환한다.
+     * 내 랭킹 순위 계산에 사용된다 (rank = count + 1).
+     *
+     * @param totalScore 기준 점수
+     * @return 기준 점수보다 높은 사용자 수
+     */
+    long countByTotalScoreGreaterThan(BigDecimal totalScore);
 
     /**
      * 계산 완료된 사용자의 평균 커밋 수를 조회한다.

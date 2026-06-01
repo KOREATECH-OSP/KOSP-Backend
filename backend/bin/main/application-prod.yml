@@ -1,0 +1,10 @@
+spring:
+  data:
+    mongodb:
+      authentication-database: ${MONGODB_AUTHENTICATION_DATABASE}
+      username: ${MONGODB_USERNAME}
+      password: ${MONGODB_PASSWORD}
+
+logging:
+  level:
+    root: WARN
