@@ -512,6 +512,20 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 4 — backend domain Organization 서비스·컨트롤러·DTO (2026-06-23)
+- DTO 3개: OrganizationRegisterRequest, AvailableOrganizationResponse, OrganizationResponse, OrganizationDetailResponse
+  - 모두 record 타입, from() 정적 팩토리 메서드 적용
+- OrganizationService:
+  - getAvailableOrganizations: GitHub API 호출 후 role=="admin" 필터 + 등록 여부 표시
+  - registerOrganization: Owner 검증 → Organization 저장 → syncMembers → syncRepositories
+  - syncMembers: findAllByGithubIds로 기존 K-OSP 사용자 일괄 매핑
+  - private 메서드로 분리해 메서드 길이 10줄 이하 준수
+  - TextEncryptor 주입해 GitHub 토큰 복호화
+- OrganizationApi: Swagger 인터페이스 (4개 엔드포인트)
+- OrganizationController: implements OrganizationApi, @Permit 적용
+  - POST /v1/organizations → 201 Created + Location 헤더
+- 다음 Step 연결: OAuth2UserService에 로그인 시 NOT_JOINED → LINKED 자동 매핑 훅 추가
+
 ### Step 3 — backend infra GitHub Org API 클라이언트 (2026-06-23)
 - DTO 4개: GithubOrgMembership, GithubOrgSummary, GithubOrgMember, GithubOrgRepo (record 타입)
   - `avatar_url`, `full_name`, `html_url` 필드에 `@JsonProperty` 적용 (GitHub API snake_case 대응)
