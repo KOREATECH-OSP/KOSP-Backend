@@ -512,6 +512,12 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 8 — 기능명세서.md 업데이트 (2026-06-23)
+- 기능명세서.md에 ORG-001~ORG-004, ADM-019~ADM-023 총 9개 항목 추가
+- 최종 업데이트 날짜 갱신 (2026-05-20 → 2026-06-23)
+- 기존 ADM-018 다음 행에 순서대로 삽입
+- 모든 Step 구현 완료 — 조직 등록 기능 전체 백엔드 구현 마무리
+
 ### Step 7 — 관리자 API (2026-06-23)
 - OrganizationRepository에 findAll() 선언 누락 버그 수정 (AdminOrganizationService.getAllOrganizations() 에서 호출)
 - 응답 DTO 2개: AdminOrganizationMemberResponse, AdminOrganizationRepoResponse (record + from() 팩토리)
