@@ -512,6 +512,21 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 7 — 관리자 API (2026-06-23)
+- OrganizationRepository에 findAll() 선언 누락 버그 수정 (AdminOrganizationService.getAllOrganizations() 에서 호출)
+- 응답 DTO 2개: AdminOrganizationMemberResponse, AdminOrganizationRepoResponse (record + from() 팩토리)
+- AdminOrganizationService: getAllOrganizations, getMembers, getRepositories, sync, deactivate
+  - sync: resyncMembers + resyncRepositories (재동기화 로직 — 초기 등록과 달리 REMOVED 상태 처리 포함)
+  - resyncMembers: GitHub에 없는 멤버 → REMOVED, 신규 멤버 → saveAll
+  - resyncRepositories: GitHub에 없는 저장소 → deactivate, 신규 저장소 → saveAll
+  - TextEncryptor로 등록자의 GitHub 토큰 복호화하여 API 호출
+- AdminOrganizationApi: Swagger 인터페이스 (5개 엔드포인트)
+- AdminOrganizationController: implements AdminOrganizationApi, @Permit 적용
+  - DELETE /{organizationId} → 204 No Content
+  - POST /{organizationId}/sync → 200 OK
+- 패키지: domain/admin/organization/{api,controller,dto/response,service}
+- 다음 Step 연결: 기능명세서.md 업데이트
+
 ### Step 6 — OAuth scope 추가 및 재인증 처리 (2026-06-23)
 - application.yml: scope에 read:org 추가 (read:user, user:email, repo, read:org)
 - 재인증 흐름 전체 확인:

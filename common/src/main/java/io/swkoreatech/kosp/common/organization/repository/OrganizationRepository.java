@@ -19,6 +19,8 @@ public interface OrganizationRepository extends Repository<Organization, Long> {
 
     List<Organization> findAllByRegisteredByUserId(Long registeredByUserId);
 
+    List<Organization> findAll();
+
     boolean existsByGithubOrgId(Long githubOrgId);
 
     default Organization getById(Long id) {
