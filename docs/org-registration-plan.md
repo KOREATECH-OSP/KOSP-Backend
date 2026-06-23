@@ -512,6 +512,16 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 6 — OAuth scope 추가 및 재인증 처리 (2026-06-23)
+- application.yml: scope에 read:org 추가 (read:user, user:email, repo, read:org)
+- 재인증 흐름 전체 확인:
+  - 기존 사용자 토큰에 read:org 없을 때 GitHub API → 403
+  - GithubOrgApiClient.onStatus(403/429) → GlobalException(GITHUB_REAUTH_REQUIRED) (Step 3 완료)
+  - GlobalExceptionHandler → HTTP 403 + 에러 메시지 (기존 코드)
+  - 신규 로그인 시 read:org 포함 토큰 자동 발급 (이번 scope 추가)
+- 백엔드에서 할 수 있는 재인증 처리 모두 완료, 프론트는 GITHUB_REAUTH_REQUIRED 에러 코드 기준으로 재로그인 유도 처리 필요
+- 다음 Step 연결: 관리자 API 구현
+
 ### Step 5 — OAuth2UserService 자동 매핑 훅 (2026-06-23)
 - 수정 파일: OAuth2UserService.java
 - buildLoginAttributes()에 autoLinkOrganizationMemberships(user) 호출 추가
