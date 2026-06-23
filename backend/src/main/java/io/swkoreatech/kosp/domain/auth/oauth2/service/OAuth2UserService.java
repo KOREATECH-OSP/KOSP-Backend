@@ -4,6 +4,7 @@ import static io.swkoreatech.kosp.global.constants.AuthConstants.*;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
+import io.swkoreatech.kosp.common.organization.model.OrganizationMemberStatus;
+import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.github.repository.GithubUserRepository;
@@ -36,6 +40,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final GithubUserRepository githubUserRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
     private final TextEncryptor textEncryptor;
 
     /** {@inheritDoc} */
@@ -117,7 +122,16 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     private Map<String, Object> buildLoginAttributes(Map<String, Object> attributes, User user) {
         attributes.put(IS_REGISTERED_ATTR, true);
         attributes.put(USER_ATTR, user);
+        autoLinkOrganizationMemberships(user);
         return attributes;
+    }
+
+    private void autoLinkOrganizationMemberships(User user) {
+        Long githubId = user.getGithubUser().getGithubId();
+        List<OrganizationMember> pendingMembers = organizationMemberRepository.findAllByGithubUserId(githubId);
+        pendingMembers.stream()
+            .filter(m -> m.getStatus() == OrganizationMemberStatus.NOT_JOINED)
+            .forEach(m -> m.link(user.getId()));
     }
 
 }

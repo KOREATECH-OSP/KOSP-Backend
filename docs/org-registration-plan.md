@@ -512,6 +512,15 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 5 — OAuth2UserService 자동 매핑 훅 (2026-06-23)
+- 수정 파일: OAuth2UserService.java
+- buildLoginAttributes()에 autoLinkOrganizationMemberships(user) 호출 추가
+  - 탈퇴 사용자·신규 사용자 분기에는 발동하지 않음 (의도된 동작)
+- autoLinkOrganizationMemberships(): NOT_JOINED 상태 멤버를 github_user_id 기준으로 조회 후 link() 호출
+- JPA dirty checking 활용: loadUser()가 @Transactional 내부이므로 별도 save() 불필요
+- 주입 추가: OrganizationMemberRepository (List import도 함께 추가)
+- 다음 Step 연결: application.yml에 read:org scope 추가 + 재인증 에러 흐름 완성
+
 ### Step 4 — backend domain Organization 서비스·컨트롤러·DTO (2026-06-23)
 - DTO 3개: OrganizationRegisterRequest, AvailableOrganizationResponse, OrganizationResponse, OrganizationDetailResponse
   - 모두 record 타입, from() 정적 팩토리 메서드 적용
