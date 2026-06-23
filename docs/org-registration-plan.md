@@ -512,6 +512,17 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 3 — backend infra GitHub Org API 클라이언트 (2026-06-23)
+- DTO 4개: GithubOrgMembership, GithubOrgSummary, GithubOrgMember, GithubOrgRepo (record 타입)
+  - `avatar_url`, `full_name`, `html_url` 필드에 `@JsonProperty` 적용 (GitHub API snake_case 대응)
+- GithubOrgApiClient: WebClient 기반 경량 클라이언트, harvester와 독립
+  - getMyOrgMemberships: bodyToFlux 사용
+  - getOrgMembers / getOrgRepos: bodyToMono(ParameterizedTypeReference) 사용
+  - 403/429 → GITHUB_REAUTH_REQUIRED, 404 → ORGANIZATION_NOT_FOUND 분리 처리
+  - .block()으로 동기 호출 (Spring MVC 서블릿 컨텍스트)
+- build.gradle.kts 수정 없음: webflux 이미 포함되어 있음
+- 다음 Step 연결: OrganizationService에서 이 클라이언트를 주입받아 사용
+
 ### Step 2 — common 모듈 엔티티·레포지토리 (2026-06-23)
 - Enum 3개: OrganizationStatus, OrganizationMemberRole, OrganizationMemberStatus
 - 엔티티 3개: Organization, OrganizationMember, OrganizationRepo
