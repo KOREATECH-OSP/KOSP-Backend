@@ -46,14 +46,14 @@
 ## 전체 구현 순서
 
 ```
-Step 1. Flyway 마이그레이션 (V17~V19) — DB 스키마
-Step 2. common 모듈 — Organization 엔티티·레포지토리
-Step 3. backend infra — GitHub Org API 클라이언트
-Step 4. backend domain — Organization 서비스·컨트롤러·DTO
-Step 5. backend — OAuth2UserService 자동 매핑 훅
-Step 6. backend — OAuth scope 추가 및 재인증 처리
-Step 7. backend — 관리자 API
-Step 8. 기능명세서.md 업데이트
+Step 1. Flyway 마이그레이션 (V17~V19) — DB 스키마(완료)
+Step 2. common 모듈 — Organization 엔티티·레포지토리(완료)
+Step 3. backend infra — GitHub Org API 클라이언트(완료)
+Step 4. backend domain — Organization 서비스·컨트롤러·DTO(완료)
+Step 5. backend — OAuth2UserService 자동 매핑 훅(완료)
+Step 6. backend — OAuth scope 추가 및 재인증 처리(완료)
+Step 7. backend — 관리자 API(완료)
+Step 8. 기능명세서.md 업데이트(완료)
 ```
 
 ---
@@ -513,12 +513,14 @@ backend/.../global/exception/ExceptionMessage.java
 ## 개발일지
 
 ### Step 8 — 기능명세서.md 업데이트 (2026-06-23)
+> 조직 등록·관리 관련 기능 9개를 기능명세서에 등록하고 전체 구현을 마무리했다.
 - 기능명세서.md에 ORG-001~ORG-004, ADM-019~ADM-023 총 9개 항목 추가
 - 최종 업데이트 날짜 갱신 (2026-05-20 → 2026-06-23)
 - 기존 ADM-018 다음 행에 순서대로 삽입
 - 모든 Step 구현 완료 — 조직 등록 기능 전체 백엔드 구현 마무리
 
 ### Step 7 — 관리자 API (2026-06-23)
+> 관리자가 조직 목록 조회, 멤버·저장소 조회, 수동 동기화, 비활성화를 수행할 수 있는 Admin API를 구현했다.
 - OrganizationRepository에 findAll() 선언 누락 버그 수정 (AdminOrganizationService.getAllOrganizations() 에서 호출)
 - 응답 DTO 2개: AdminOrganizationMemberResponse, AdminOrganizationRepoResponse (record + from() 팩토리)
 - AdminOrganizationService: getAllOrganizations, getMembers, getRepositories, sync, deactivate
@@ -534,6 +536,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: 기능명세서.md 업데이트
 
 ### Step 6 — OAuth scope 추가 및 재인증 처리 (2026-06-23)
+> GitHub OAuth scope에 read:org를 추가하고, 기존 토큰에 권한이 없을 때의 재인증 에러 흐름을 완성했다.
 - application.yml: scope에 read:org 추가 (read:user, user:email, repo, read:org)
 - 재인증 흐름 전체 확인:
   - 기존 사용자 토큰에 read:org 없을 때 GitHub API → 403
@@ -544,6 +547,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: 관리자 API 구현
 
 ### Step 5 — OAuth2UserService 자동 매핑 훅 (2026-06-23)
+> 사용자가 GitHub 로그인할 때 NOT_JOINED 상태의 조직 멤버를 자동으로 LINKED 처리하는 훅을 붙였다.
 - 수정 파일: OAuth2UserService.java
 - buildLoginAttributes()에 autoLinkOrganizationMemberships(user) 호출 추가
   - 탈퇴 사용자·신규 사용자 분기에는 발동하지 않음 (의도된 동작)
@@ -553,6 +557,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: application.yml에 read:org scope 추가 + 재인증 에러 흐름 완성
 
 ### Step 4 — backend domain Organization 서비스·컨트롤러·DTO (2026-06-23)
+> 조직 등록·조회의 핵심 도메인 로직(서비스)과 REST API(컨트롤러, DTO)를 구현했다.
 - DTO 3개: OrganizationRegisterRequest, AvailableOrganizationResponse, OrganizationResponse, OrganizationDetailResponse
   - 모두 record 타입, from() 정적 팩토리 메서드 적용
 - OrganizationService:
@@ -567,6 +572,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: OAuth2UserService에 로그인 시 NOT_JOINED → LINKED 자동 매핑 훅 추가
 
 ### Step 3 — backend infra GitHub Org API 클라이언트 (2026-06-23)
+> GitHub REST API를 호출하는 경량 WebClient 기반 클라이언트와 응답 DTO를 구현했다.
 - DTO 4개: GithubOrgMembership, GithubOrgSummary, GithubOrgMember, GithubOrgRepo (record 타입)
   - `avatar_url`, `full_name`, `html_url` 필드에 `@JsonProperty` 적용 (GitHub API snake_case 대응)
 - GithubOrgApiClient: WebClient 기반 경량 클라이언트, harvester와 독립
@@ -578,6 +584,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: OrganizationService에서 이 클라이언트를 주입받아 사용
 
 ### Step 2 — common 모듈 엔티티·레포지토리 (2026-06-23)
+> 조직·멤버·저장소 JPA 엔티티와 레포지토리 인터페이스, 예외 메시지를 common 모듈에 추가했다.
 - Enum 3개: OrganizationStatus, OrganizationMemberRole, OrganizationMemberStatus
 - 엔티티 3개: Organization, OrganizationMember, OrganizationRepo
   - OrganizationRepo로 명명 (OrganizationRepository는 Spring Data Repository와 혼동 방지)
@@ -589,6 +596,7 @@ backend/.../global/exception/ExceptionMessage.java
 - 다음 Step 연결: backend infra에 GithubOrgApiClient 작성 시 이 엔티티들을 조립
 
 ### Step 1 — Flyway 마이그레이션 (2026-06-23)
+> organizations, organization_members, organization_repositories 세 테이블을 DB에 추가했다.
 - V17__create_organizations.sql: organizations 테이블 생성 (github_org_id UNIQUE, registered_by_user_id FK)
 - V18__create_organization_members.sql: organization_members 테이블 생성 (user_id nullable, github_user_id 인덱스 추가)
 - V19__create_organization_repositories.sql: organization_repositories 테이블 생성 (github_repo_id UNIQUE)
