@@ -7,13 +7,14 @@ import lombok.RequiredArgsConstructor;
 /**
  * 팀 초대 이메일 양식.
  *
- * <p>팀 초대 시 팀명, 초대자, 서버 URL, 초대 ID를 포함한 이메일 양식을 생성한다.
+ * <p>팀 초대 시 팀명, 초대자, 피초대자 이름, 서버 URL, 초대 ID를 포함한 이메일 양식을 생성한다.
  */
 @RequiredArgsConstructor
 public class TeamInviteForm implements EmailForm {
 
     private final String teamName;
     private final String inviterName;
+    private final String inviteeName;
     private final String serverUrl;
     private final Long inviteId;
 
@@ -23,7 +24,8 @@ public class TeamInviteForm implements EmailForm {
         return Map.of(
             "teamName", teamName,
             "inviterName", inviterName,
-            "contextPath", serverUrl, // Use contextPath to match convention in templates if needed, or serverUrl
+            "inviteeName", inviteeName,
+            "contextPath", serverUrl,
             "inviteId", String.valueOf(inviteId)
         );
     }
@@ -31,7 +33,7 @@ public class TeamInviteForm implements EmailForm {
     /** {@inheritDoc} */
     @Override
     public String getSubject() {
-        return String.format("[KOSP] %s 팀에 초대되었습니다.", teamName);
+        return String.format("[K-OSP] %s님이 %s 팀에 초대했습니다.", inviterName, teamName);
     }
 
     /** {@inheritDoc} */

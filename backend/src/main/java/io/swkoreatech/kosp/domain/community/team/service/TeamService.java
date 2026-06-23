@@ -187,12 +187,13 @@ public class TeamService {
             .team(team)
             .inviter(user)
             .invitee(invitee)
-            .expiresAt(Instant.now().plus(3, java.time.temporal.ChronoUnit.DAYS))
+            .expiresAt(Instant.now().plus(7, java.time.temporal.ChronoUnit.DAYS))
             .build();
         teamInviteRepository.save(invite);
 
         eventPublisher.publishEvent(new TeamInviteSendEvent(
             invitee.getKutEmail(),
+            invitee.getName(),
             team.getName(),
             user.getName(),
             invite.getId(),

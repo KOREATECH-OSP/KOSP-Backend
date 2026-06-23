@@ -49,6 +49,9 @@ public class UserTitle extends BaseEntity {
     @Column(name = "is_display", nullable = false)
     private boolean isDisplay;
 
+    @Column(name = "last_displayed_at")
+    private LocalDateTime lastDisplayedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "grant_source", nullable = false, length = 20)
     private TitleGrantSource grantSource;
@@ -88,6 +91,7 @@ public class UserTitle extends BaseEntity {
      */
     public void setAsDisplay() {
         this.isDisplay = true;
+        this.lastDisplayedAt = LocalDateTime.now();
     }
 
     /**

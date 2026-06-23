@@ -59,6 +59,7 @@ public class EmailEventListener {
         EmailForm emailForm = new TeamInviteForm(
             event.teamName(),
             event.inviterName(),
+            event.inviteeName(),
             event.clientUrl(),
             event.inviteId()
         );

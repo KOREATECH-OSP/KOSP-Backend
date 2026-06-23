@@ -1,33 +1,241 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{layout :: layout('KOSP 팀 초대', '팀 초대 알림', ~{::div})}">
-<body>
-<div style="text-align: center;">
-    <p style="font-size: 14px; line-height: 1.8; color: #6b7280; margin: 0 0 32px 0;">
-        <strong style="color: #111827;" th:text="${inviterName}">초대자</strong>님께서<br>
-        귀하를 <strong style="color: #111827;" th:text="${teamName}">팀명</strong> 팀으로 초대하였습니다.
-    </p>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>K-OSP 팀 초대</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f3f4f6;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;">
 
-    <!-- Action Button -->
-    <div style="margin: 0 0 32px 0;">
-        <a th:href="@{|${contextPath}/teams/invites/${inviteId}|}"
-           style="display: inline-block;
-                  padding: 14px 40px;
-                  background-color: #111827;
-                  color: #ffffff;
-                  text-decoration: none;
-                  font-weight: 600;
-                  border-radius: 6px;
-                  font-size: 14px;">
-            초대장 확인하기
-        </a>
-    </div>
+<table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f3f4f6;padding:40px 20px;">
+    <tr>
+        <td align="center">
+            <table align="center" border="0" cellpadding="0" cellspacing="0" width="560" style="max-width:560px;">
 
-    <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
-        <p style="font-size: 12px; color: #d1d5db; margin: 0;">
-            본인이 요청하지 않은 초대라면 이 메일을 무시하셔도 됩니다.
-        </p>
-    </div>
-</div>
+                <!-- ── Top Banner ──────────────────────────── -->
+                <tr>
+                    <td align="center" style="background-color:#2356f6;border-radius:12px 12px 0 0;padding:12px 24px;">
+                        <p style="margin:0;font-size:13px;color:#ffffff;font-weight:500;letter-spacing:0.2px;">
+                            오픈소스로 연결하고, <strong>함께 성장하자!</strong>
+                            <span style="color:#93c5fd;font-weight:700;margin-left:4px;">K-OSP</span>
+                        </p>
+                    </td>
+                </tr>
+
+                <!-- ── Main Card ────────────────────────────── -->
+                <tr>
+                    <td style="background-color:#ffffff;border-radius:0 0 12px 12px;overflow:hidden;border:1px solid #e5e7eb;border-top:none;">
+
+                        <!-- Hero: Logo + Headline -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding:36px 40px 24px 40px;">
+
+                                    <!-- K-OSP Logo Text -->
+                                    <p style="margin:0 0 2px 0;font-size:30px;font-weight:800;color:#2356f6;letter-spacing:-0.5px;">K-OSP</p>
+                                    <p style="margin:0 0 28px 0;font-size:12px;color:#9ca3af;">KOREATECH 오픈소스 포탈</p>
+
+                                    <!-- Main Headline -->
+                                    <p style="margin:0 0 28px 0;font-size:28px;font-weight:800;color:#111827;line-height:1.3;letter-spacing:-0.5px;">
+                                        당신을<br/>
+                                        <span style="color:#2356f6;">K-OSP</span>로<br/>
+                                        초대합니다!
+                                    </p>
+
+                                    <!-- Greeting -->
+                                    <p style="margin:0 0 4px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                        안녕하세요, <strong th:text="${inviteeName}">이름</strong>님!
+                                    </p>
+                                    <p style="margin:0 0 20px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                        <strong th:text="${inviterName}">발신자</strong>님께서
+                                        <strong th:text="${teamName}">팀명</strong> 팀으로 K&#8209;OSP에 초대하셨습니다.
+                                    </p>
+                                    <p style="margin:0;font-size:14px;color:#374151;line-height:1.9;">
+                                        오픈소스를 공유하고, 팀을 모집하고,<br/>
+                                        공모전과 챌린지에 도전해보세요.<br/>
+                                        <span style="color:#2356f6;font-weight:600;">K-OSP</span>에서 더 넓은 협업과 성장의 기회를 경험해보세요!
+                                    </p>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Divider -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding:0 40px;"><hr style="border:none;border-top:1px solid #e5e7eb;margin:0;"/></td>
+                            </tr>
+                        </table>
+
+                        <!-- Feature Icons Row -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%" style="margin:28px 0 20px 0;">
+                            <tr>
+                                <td align="center" style="padding:0 20px;">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <!-- 오픈소스 공유 -->
+                                            <td align="center" style="width:25%;vertical-align:top;padding:0 4px;">
+                                                <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                                    <tr>
+                                                        <td align="center" style="background-color:#eef2ff;border-radius:50%;width:48px;height:48px;">
+                                                            <!-- git-branch SVG icon -->
+                                                            <table border="0" cellpadding="0" cellspacing="0" width="48">
+                                                                <tr><td align="center" style="padding:12px;">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2356f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <line x1="6" y1="3" x2="6" y2="15"></line>
+                                                                        <circle cx="18" cy="6" r="3"></circle>
+                                                                        <circle cx="6" cy="18" r="3"></circle>
+                                                                        <path d="M18 9a9 9 0 0 1-9 9"></path>
+                                                                    </svg>
+                                                                </td></tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding-top:8px;">
+                                                            <p style="margin:0;font-size:11px;color:#6b7280;font-weight:500;">오픈소스 공유</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <!-- 팀 모집 & 협업 -->
+                                            <td align="center" style="width:25%;vertical-align:top;padding:0 4px;">
+                                                <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                                    <tr>
+                                                        <td align="center" style="background-color:#eef2ff;border-radius:50%;width:48px;height:48px;">
+                                                            <table border="0" cellpadding="0" cellspacing="0" width="48">
+                                                                <tr><td align="center" style="padding:12px;">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2356f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                                                        <circle cx="9" cy="7" r="4"></circle>
+                                                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                                                    </svg>
+                                                                </td></tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding-top:8px;">
+                                                            <p style="margin:0;font-size:11px;color:#6b7280;font-weight:500;">팀 모집 &amp; 협업</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <!-- 챌린지 활동 -->
+                                            <td align="center" style="width:25%;vertical-align:top;padding:0 4px;">
+                                                <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                                    <tr>
+                                                        <td align="center" style="background-color:#eef2ff;border-radius:50%;width:48px;height:48px;">
+                                                            <table border="0" cellpadding="0" cellspacing="0" width="48">
+                                                                <tr><td align="center" style="padding:12px;">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2356f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                                                    </svg>
+                                                                </td></tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding-top:8px;">
+                                                            <p style="margin:0;font-size:11px;color:#6b7280;font-weight:500;">챌린지 활동</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                            <!-- 커뮤니티 소통 -->
+                                            <td align="center" style="width:25%;vertical-align:top;padding:0 4px;">
+                                                <table border="0" cellpadding="0" cellspacing="0" align="center">
+                                                    <tr>
+                                                        <td align="center" style="background-color:#eef2ff;border-radius:50%;width:48px;height:48px;">
+                                                            <table border="0" cellpadding="0" cellspacing="0" width="48">
+                                                                <tr><td align="center" style="padding:12px;">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2356f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                                                                    </svg>
+                                                                </td></tr>
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td align="center" style="padding-top:8px;">
+                                                            <p style="margin:0;font-size:11px;color:#6b7280;font-weight:500;">커뮤니티 소통</p>
+                                                        </td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CTA Buttons -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding:8px 40px 36px 40px;">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td style="width:50%;padding-right:6px;">
+                                                <a th:href="${contextPath + '/team/invite/' + inviteId}"
+                                                   style="display:block;text-align:center;background-color:#2356f6;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:15px 0;border-radius:10px;">
+                                                    초대 수락하기
+                                                </a>
+                                            </td>
+                                            <td style="width:50%;padding-left:6px;">
+                                                <a th:href="${contextPath + '/team/invite/' + inviteId}"
+                                                   style="display:block;text-align:center;background-color:#ffffff;color:#374151;text-decoration:none;font-size:14px;font-weight:600;padding:15px 0;border-radius:10px;border:1px solid #d1d5db;">
+                                                    초대 거절하기
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Notice -->
+                        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                            <tr>
+                                <td style="padding:0 40px 32px 40px;border-top:1px solid #f3f4f6;">
+                                    <p style="margin:20px 0 0 0;font-size:11px;color:#9ca3af;line-height:1.6;text-align:center;">
+                                        본인이 요청하지 않은 초대라면 이 메일을 무시하셔도 됩니다.<br/>
+                                        초대 유효기간은 발송일로부터 <strong>7일</strong>입니다.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- ── Footer ─────────────────────────────────── -->
+                <tr>
+                    <td align="center" style="padding:24px 0 0 0;">
+                        <p style="margin:0 0 8px 0;font-size:11px;font-weight:600;color:#6b7280;letter-spacing:0.3px;">
+                            KOREA UNIVERSITY OF TECHNOLOGY AND EDUCATION
+                        </p>
+                        <p style="margin:0 0 8px 0;font-size:11px;color:#9ca3af;">
+                            <a href="https://www.koreatech.ac.kr/menu.es?mid=a10903000000"
+                               style="color:#9ca3af;text-decoration:none;">개인정보처리방침</a>
+                            <span style="margin:0 8px;color:#d1d5db;">|</span>
+                            <a href="https://www.koreatech.ac.kr/menu.es?mid=a10904000000"
+                               style="color:#9ca3af;text-decoration:none;">영상정보처리기기운영·관리방침</a>
+                        </p>
+                        <p style="margin:0;font-size:10px;color:#d1d5db;">
+                            [31253] 충청남도 천안시 동남구 병천면 충절로 1600 · TEL : 041-560-1114
+                        </p>
+                        <p style="margin:4px 0 0 0;font-size:10px;color:#e5e7eb;">
+                            COPYRIGHT © KOREATECH. ALL RIGHTS RESERVED.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
 </body>
 </html>

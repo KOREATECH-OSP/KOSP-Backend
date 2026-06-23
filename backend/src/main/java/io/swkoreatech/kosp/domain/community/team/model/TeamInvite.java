@@ -6,6 +6,8 @@ import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.common.user.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 팀 초대 엔티티.
+ *
+ * <p>초대 상태({@link InviteStatus})로 생명주기를 관리하며,
+ * 거절 누적 횟수가 3회 이상이면 재발송을 차단한다.
+ * 유효기간은 발송 시각 기준 7일이다.</p>
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -31,10 +40,6 @@ import lombok.NoArgsConstructor;
         )
     }
 )
-/**
- * 팀 초대 엔티티.
- * 팀 초대 정보와 만료 여부를 관리한다.
- */
 public class TeamInvite extends BaseEntity {
 
     @Id
@@ -59,25 +64,71 @@ public class TeamInvite extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private boolean isDeleted = false;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 20)
+    private InviteStatus status = InviteStatus.PENDING;
+
+    @Column(name = "rejection_count", nullable = false)
+    private int rejectionCount = 0;
+
     @Builder
     private TeamInvite(Team team, User inviter, User invitee, Instant expiresAt) {
         this.team = team;
         this.inviter = inviter;
         this.invitee = invitee;
         this.expiresAt = expiresAt;
+        this.status = InviteStatus.PENDING;
+        this.rejectionCount = 0;
     }
 
-    /**
-     * 초대 만료 여부를 확인한다.
-     *
-     * @return 만료 여부
-     */
+    /** 초대 만료 여부를 확인한다. */
     public boolean isExpired() {
         return Instant.now().isAfter(expiresAt);
     }
 
-    /** 초대를 논리 삭제한다. */
+    /** 초대를 수락한다. */
+    public void accept() {
+        this.status = InviteStatus.ACCEPTED;
+        this.isDeleted = true;
+    }
+
+    /** 초대를 거절한다. 누적 거절 횟수를 증가시킨다. */
+    public void reject() {
+        this.status = InviteStatus.REJECTED;
+        this.rejectionCount++;
+        this.isDeleted = true;
+    }
+
+    /** 초대를 취소한다 (발신자 측). */
+    public void cancel() {
+        this.status = InviteStatus.CANCELLED;
+        this.isDeleted = true;
+    }
+
+    /** 초대를 만료 처리한다. */
+    public void expire() {
+        this.status = InviteStatus.EXPIRED;
+        this.isDeleted = true;
+    }
+
+    /** 논리 삭제 (하위 호환). */
     public void delete() {
         this.isDeleted = true;
+    }
+
+    /** 3회 이상 거절된 경우 재발송 차단 여부를 반환한다. */
+    public boolean isBlocked() {
+        return this.rejectionCount >= 3;
+    }
+
+    /**
+     * 초대 상태.
+     */
+    public enum InviteStatus {
+        PENDING,    // 대기 중
+        ACCEPTED,   // 수락
+        REJECTED,   // 거절
+        CANCELLED,  // 취소 (발신자)
+        EXPIRED     // 유효기간 만료
     }
 }
