@@ -24,6 +24,10 @@
    - 연관 파일(ExceptionMessage, build.gradle 등) 수정 빠진 것 없는지
    - 컴파일 오류 가능성 있는 코드 없는지
 5. 개발일지 항목을 이 문서 하단 [개발일지] 섹션에 추가한다.
+6. 개발일지 작성 완료 후 커밋&푸시한다:
+   - git add . (해당 Step 파일만)
+   - git commit -m "조직등록 stepN"
+   - git push origin develop
 ```
 
 ### 개발일지 작성 형식
