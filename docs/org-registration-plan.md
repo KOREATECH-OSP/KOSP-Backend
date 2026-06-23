@@ -512,6 +512,17 @@ backend/.../global/exception/ExceptionMessage.java
 
 ## 개발일지
 
+### Step 2 — common 모듈 엔티티·레포지토리 (2026-06-23)
+- Enum 3개: OrganizationStatus, OrganizationMemberRole, OrganizationMemberStatus
+- 엔티티 3개: Organization, OrganizationMember, OrganizationRepo
+  - OrganizationRepo로 명명 (OrganizationRepository는 Spring Data Repository와 혼동 방지)
+  - OrganizationMember.userId는 Long 컬럼 (nullable FK, JPA 관계 없음) — Small Entities 원칙
+  - OrganizationMember 빌더에서 userId 유무로 status/joinedAt 자동 결정
+- 레포지토리 3개: OrganizationRepository, OrganizationMemberRepository, OrganizationRepoRepository
+  - saveAll 선언: OrganizationMember/OrganizationRepo는 일괄 저장 필요하므로 포함
+- ExceptionMessage 5개 추가: ORGANIZATION_NOT_FOUND, ORGANIZATION_ALREADY_REGISTERED, ORGANIZATION_OWNER_REQUIRED, ORGANIZATION_MEMBER_NOT_FOUND, GITHUB_REAUTH_REQUIRED
+- 다음 Step 연결: backend infra에 GithubOrgApiClient 작성 시 이 엔티티들을 조립
+
 ### Step 1 — Flyway 마이그레이션 (2026-06-23)
 - V17__create_organizations.sql: organizations 테이블 생성 (github_org_id UNIQUE, registered_by_user_id FK)
 - V18__create_organization_members.sql: organization_members 테이블 생성 (user_id nullable, github_user_id 인덱스 추가)

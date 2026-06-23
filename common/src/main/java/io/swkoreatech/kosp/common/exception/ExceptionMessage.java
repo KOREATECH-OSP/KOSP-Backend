@@ -72,6 +72,13 @@ public enum ExceptionMessage {
     TERMS_VERSION_NOT_FOUND("해당 버전의 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TERMS_AGREEMENT_REQUIRED("약관 동의가 필요합니다.", HttpStatus.FORBIDDEN),
 
+    // Organization System
+    ORGANIZATION_NOT_FOUND("조직을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ALREADY_REGISTERED("이미 등록된 조직입니다.", HttpStatus.CONFLICT),
+    ORGANIZATION_OWNER_REQUIRED("조직 Owner만 등록할 수 있습니다.", HttpStatus.FORBIDDEN),
+    ORGANIZATION_MEMBER_NOT_FOUND("조직 멤버를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    GITHUB_REAUTH_REQUIRED("GitHub 재인증이 필요합니다. read:org 권한을 포함하여 다시 로그인해 주세요.", HttpStatus.FORBIDDEN),
+
     // Season Ranking System
     SEASON_NOT_FOUND("시즌을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ACTIVE_SEASON_NOT_FOUND("진행 중인 시즌이 없습니다.", HttpStatus.NOT_FOUND),
