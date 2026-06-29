@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,6 +19,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.request.TeamRoleUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
@@ -98,11 +100,34 @@ public interface TeamApi {
         @PathVariable Long inviteId
     );
 
-    @Operation(summary = "팀원 제명", description = "팀장이 팀원을 제명합니다.")
+    @Operation(summary = "팀원 제명", description = "팀장 또는 관리자가 팀원을 제명합니다. 팀장은 제명할 수 없습니다.")
     @DeleteMapping("/v1/teams/{teamId}/members/{userId}")
     ResponseEntity<Void> removeMember(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long teamId,
         @PathVariable Long userId
+    );
+
+    @Operation(summary = "팀 탈퇴", description = "본인이 자발적으로 팀에서 나갑니다. 팀장은 탈퇴할 수 없습니다.")
+    @DeleteMapping("/v1/teams/{teamId}/members/me")
+    ResponseEntity<Void> leaveTeam(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId
+    );
+
+    @Operation(summary = "초대 취소", description = "팀장 또는 관리자가 발송한 초대를 취소합니다.")
+    @DeleteMapping("/v1/teams/invites/{inviteId}")
+    ResponseEntity<Void> cancelInvite(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long inviteId
+    );
+
+    @Operation(summary = "팀원 권한 변경", description = "팀장이 팀원에게 관리자 권한을 위임하거나 회수합니다.")
+    @PatchMapping("/v1/teams/{teamId}/members/{userId}/role")
+    ResponseEntity<Void> changeMemberRole(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @PathVariable Long userId,
+        @RequestBody @Valid TeamRoleUpdateRequest request
     );
 }

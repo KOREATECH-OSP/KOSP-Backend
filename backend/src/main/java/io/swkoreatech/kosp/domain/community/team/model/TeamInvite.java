@@ -105,6 +105,22 @@ public class TeamInvite extends BaseEntity {
         this.isDeleted = true;
     }
 
+    /**
+     * 종료된(취소/거절/만료/수락) 초대를 다시 PENDING 상태로 재발송한다.
+     *
+     * <p>{@code (team_id, invitee_id)} 유니크 제약 때문에 새 행을 INSERT하는 대신
+     * 기존 행을 재사용한다.</p>
+     *
+     * @param inviter   재발송하는 사용자
+     * @param expiresAt 새 만료 시각
+     */
+    public void reopen(User inviter, Instant expiresAt) {
+        this.inviter = inviter;
+        this.expiresAt = expiresAt;
+        this.status = InviteStatus.PENDING;
+        this.isDeleted = false;
+    }
+
     /** 초대를 만료 처리한다. */
     public void expire() {
         this.status = InviteStatus.EXPIRED;

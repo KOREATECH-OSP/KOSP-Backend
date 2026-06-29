@@ -83,7 +83,9 @@ public class TeamService {
      */
     public TeamDetailResponse getTeam(Long teamId) {
         Team team = teamRepository.getById(teamId);
-        return TeamDetailResponse.from(team);
+        List<TeamInvite> pendingInvites = teamInviteRepository
+            .findAllByTeamAndStatusAndIsDeletedFalse(team, TeamInvite.InviteStatus.PENDING);
+        return TeamDetailResponse.from(team, pendingInvites);
     }
 
     /**
@@ -172,24 +174,30 @@ public class TeamService {
     @Transactional
     public void inviteMember(Long teamId, User user, TeamInviteRequest request, String clientUrl) {
         Team team = teamRepository.getById(teamId);
-        validateLeader(team, user);
+        validateManager(team, user);
 
         User invitee = userRepository.getByKutEmail(request.email());
         if (teamMemberRepository.existsByTeamAndUserAndIsDeletedFalse(team, invitee)) {
             throw new GlobalException(ExceptionMessage.TEAM_ALREADY_JOINED);
         }
 
-        // Check/Delete existing invite
-        teamInviteRepository.findByTeamAndInviteeAndIsDeletedFalse(team, invitee)
-            .ifPresent(TeamInvite::delete);
+        Instant expiresAt = Instant.now().plus(7, java.time.temporal.ChronoUnit.DAYS);
 
-        TeamInvite invite = TeamInvite.builder()
-            .team(team)
-            .inviter(user)
-            .invitee(invitee)
-            .expiresAt(Instant.now().plus(7, java.time.temporal.ChronoUnit.DAYS))
-            .build();
-        teamInviteRepository.save(invite);
+        // (team_id, invitee_id) 유니크 제약이 있으므로, 기존 초대 행이 있으면 재사용(reopen)한다.
+        // 없으면 새로 발급한다. (취소/거절/만료된 초대를 다시 보낼 때 INSERT 충돌 방지)
+        TeamInvite invite = teamInviteRepository.findByTeamAndInvitee(team, invitee)
+            .map(existing -> {
+                existing.reopen(user, expiresAt);
+                return existing;
+            })
+            .orElseGet(() -> teamInviteRepository.save(
+                TeamInvite.builder()
+                    .team(team)
+                    .inviter(user)
+                    .invitee(invitee)
+                    .expiresAt(expiresAt)
+                    .build()
+            ));
 
         eventPublisher.publishEvent(new TeamInviteSendEvent(
             invitee.getKutEmail(),
@@ -263,16 +271,16 @@ public class TeamService {
     }
 
     /**
-     * 팀원을 제명한다. 팀장만 제명 가능하며 자기 자신은 제명할 수 없다.
+     * 팀원을 제명한다. 팀장 또는 관리자만 제명 가능하며 팀장은 제명할 수 없다.
      *
      * @param teamId       팀 ID
-     * @param user         요청 사용자 (팀장)
+     * @param user         요청 사용자 (팀장/관리자)
      * @param targetUserId 제명 대상 사용자 ID
      */
     @Transactional
     public void removeMember(Long teamId, User user, Long targetUserId) {
         Team team = teamRepository.getById(teamId);
-        validateLeader(team, user);
+        validateManager(team, user);
 
         if (user.getId().equals(targetUserId)) {
             throw new GlobalException(ExceptionMessage.LEADER_CANNOT_LEAVE);
@@ -282,7 +290,77 @@ public class TeamService {
         TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, targetUser)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
 
+        if (member.getRole() == TeamRole.LEADER) {
+            throw new GlobalException(ExceptionMessage.LEADER_CANNOT_LEAVE);
+        }
+
         member.delete();
+    }
+
+    /**
+     * 본인이 자발적으로 팀에서 나간다. 팀장은 탈퇴할 수 없다.
+     *
+     * @param teamId 팀 ID
+     * @param user   요청 사용자 (본인)
+     */
+    @Transactional
+    public void leaveTeam(Long teamId, User user) {
+        Team team = teamRepository.getById(teamId);
+        TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, user)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+
+        if (member.getRole() == TeamRole.LEADER) {
+            throw new GlobalException(ExceptionMessage.LEADER_CANNOT_LEAVE);
+        }
+
+        member.delete();
+    }
+
+    /**
+     * 발송한 초대를 취소한다. 팀장 또는 관리자만 취소 가능하다.
+     *
+     * @param inviteId 초대 ID
+     * @param user     요청 사용자 (팀장/관리자)
+     */
+    @Transactional
+    public void cancelInvite(Long inviteId, User user) {
+        TeamInvite invite = teamInviteRepository.findByIdAndIsDeletedFalse(inviteId)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+
+        validateManager(invite.getTeam(), user);
+
+        invite.cancel();
+    }
+
+    /**
+     * 팀원의 역할(권한)을 변경한다. 팀장만 위임/회수할 수 있다.
+     *
+     * <p>부여 가능한 역할은 ADMIN, MEMBER이며 LEADER 위임은 허용하지 않는다.
+     * 또한 다른 팀장의 역할은 변경할 수 없다.</p>
+     *
+     * @param teamId       팀 ID
+     * @param user         요청 사용자 (팀장)
+     * @param targetUserId 대상 사용자 ID
+     * @param role         변경할 역할
+     */
+    @Transactional
+    public void changeMemberRole(Long teamId, User user, Long targetUserId, TeamRole role) {
+        Team team = teamRepository.getById(teamId);
+        validateLeader(team, user);
+
+        if (role == TeamRole.LEADER) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+
+        User targetUser = userRepository.getById(targetUserId);
+        TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, targetUser)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+
+        if (member.getRole() == TeamRole.LEADER) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+
+        member.changeRole(role);
     }
 
     private void validateLeader(Team team, User user) {
@@ -290,6 +368,16 @@ public class TeamService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
 
         if (member.getRole() != TeamRole.LEADER) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+    }
+
+    /** 팀장 또는 관리자(ADMIN) 권한을 검증한다. (초대/제명/초대취소 공통) */
+    private void validateManager(Team team, User user) {
+        TeamMember member = teamMemberRepository.findByTeamAndUserAndIsDeletedFalse(team, user)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+
+        if (member.getRole() != TeamRole.LEADER && member.getRole() != TeamRole.ADMIN) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
     }
