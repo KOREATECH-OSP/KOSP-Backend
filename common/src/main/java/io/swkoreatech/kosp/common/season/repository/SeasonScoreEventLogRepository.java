@@ -36,4 +36,12 @@ public interface SeasonScoreEventLogRepository extends Repository<SeasonScoreEve
     long countBySeasonAndUserAndEventTypeAndEventDate(
         Season season, User user, ScoreEventType eventType, LocalDate eventDate
     );
+
+    /**
+     * 시즌 내 특정 이벤트 타입 발생 건수 (예: ATTENDANCE = 출석일 수).
+     * <p>엘리트 티어(Master/Challenger) 조건 평가에 사용한다.</p>
+     */
+    long countBySeasonAndUserAndEventType(
+        Season season, User user, ScoreEventType eventType
+    );
 }
