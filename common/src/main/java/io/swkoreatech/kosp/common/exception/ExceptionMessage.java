@@ -46,6 +46,7 @@ public enum ExceptionMessage {
     TEAM_NOT_FOUND("소속된 팀을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TEAM_ALREADY_JOINED("이미 팀에 소속된 사용자입니다.", HttpStatus.CONFLICT),
     INVITATION_EXPIRED("만료된 초대입니다.", HttpStatus.BAD_REQUEST),
+    INVITE_REJECTED_TOO_MANY("초대가 3회 이상 거절되었습니다. 마지막 초대 후 24시간이 지나야 다시 초대할 수 있습니다.", HttpStatus.TOO_MANY_REQUESTS),
     LEADER_CANNOT_LEAVE("팀장은 탈퇴하거나 제명될 수 없습니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_FOUND("지원 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_DECIDED("이미 처리된 지원입니다.", HttpStatus.CONFLICT),

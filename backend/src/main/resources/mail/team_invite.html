@@ -30,11 +30,11 @@
                         <!-- Hero: Logo + Headline + Character -->
                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
-                                <td style="padding:32px 40px 8px 40px;">
+                                <td style="padding:28px 24px 8px 40px;">
                                     <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                         <tr>
                                             <!-- Left: Logo + Headline -->
-                                            <td valign="top" style="vertical-align:top;">
+                                            <td valign="middle" width="250" style="vertical-align:middle;width:250px;">
                                                 <!-- K-OSP Logo Text -->
                                                 <p style="margin:0 0 2px 0;font-size:30px;font-weight:800;color:#2356f6;letter-spacing:-0.5px;">K-OSP</p>
                                                 <p style="margin:0 0 28px 0;font-size:12px;color:#9ca3af;">KOREATECH 오픈소스 포탈</p>
@@ -47,12 +47,12 @@
                                                 </p>
                                             </td>
                                             <!-- Right: Character Mascot -->
-                                            <td valign="middle" width="180" style="vertical-align:middle;width:180px;text-align:right;">
+                                            <td valign="middle" style="vertical-align:middle;text-align:right;">
                                                 <img th:src="${contextPath + '/images/titles/kori_email_photo.png'}"
                                                      src="https://koreatech-osp-static.s3.ap-northeast-2.amazonaws.com/mail/kori-invite.png"
                                                      alt="K-OSP 마스코트"
-                                                     width="170"
-                                                     style="display:block;width:170px;max-width:170px;height:auto;margin-left:auto;border:0;outline:none;text-decoration:none;"/>
+                                                     width="210"
+                                                     style="display:block;width:210px;max-width:210px;height:auto;margin-left:auto;border:0;outline:none;text-decoration:none;"/>
                                             </td>
                                         </tr>
                                     </table>
@@ -64,13 +64,22 @@
                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                                 <td style="padding:20px 40px 24px 40px;">
-                                    <!-- Greeting -->
-                                    <p style="margin:0 0 4px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                    <!-- Greeting (가입 회원) -->
+                                    <p th:unless="${pending == 'true'}" style="margin:0 0 4px 0;font-size:14px;color:#374151;line-height:1.8;">
                                         안녕하세요, <strong th:text="${inviteeName}">이름</strong>님!
                                     </p>
-                                    <p style="margin:0 0 20px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                    <p th:unless="${pending == 'true'}" style="margin:0 0 20px 0;font-size:14px;color:#374151;line-height:1.8;">
                                         <strong th:text="${inviterName}">발신자</strong>님께서
                                         <strong th:text="${teamName}">팀명</strong> 팀으로 K&#8209;OSP에 초대하셨습니다.
+                                    </p>
+                                    <!-- Greeting (미가입자: 가입 유도) -->
+                                    <p th:if="${pending == 'true'}" style="margin:0 0 4px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                        안녕하세요!
+                                    </p>
+                                    <p th:if="${pending == 'true'}" style="margin:0 0 20px 0;font-size:14px;color:#374151;line-height:1.8;">
+                                        <strong th:text="${inviterName}">발신자</strong>님께서
+                                        <strong th:text="${teamName}">팀명</strong> 팀으로 K&#8209;OSP에 초대하셨습니다.<br/>
+                                        아래 버튼으로 <strong>K-OSP에 가입</strong>하면 팀 초대를 받을 수 있어요.
                                     </p>
                                     <p style="margin:0;font-size:14px;color:#374151;line-height:1.9;">
                                         오픈소스를 공유하고, 팀을 모집하고,<br/>
@@ -196,7 +205,8 @@
                         <table border="0" cellpadding="0" cellspacing="0" width="100%">
                             <tr>
                                 <td style="padding:8px 40px 36px 40px;">
-                                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                    <!-- 가입 회원: 수락/거절 버튼 -->
+                                    <table th:unless="${pending == 'true'}" border="0" cellpadding="0" cellspacing="0" width="100%">
                                         <tr>
                                             <td style="width:50%;padding-right:6px;">
                                                 <a th:href="${contextPath + '/team/invite/' + inviteId}"
@@ -208,6 +218,17 @@
                                                 <a th:href="${contextPath + '/team/invite/' + inviteId}"
                                                    style="display:block;text-align:center;background-color:#ffffff;color:#374151;text-decoration:none;font-size:14px;font-weight:600;padding:15px 0;border-radius:10px;border:1px solid #d1d5db;">
                                                     초대 거절하기
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- 미가입자: 회원가입 버튼 -->
+                                    <table th:if="${pending == 'true'}" border="0" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td>
+                                                <a th:href="${signupUrl}"
+                                                   style="display:block;text-align:center;background-color:#2356f6;color:#ffffff;text-decoration:none;font-size:14px;font-weight:700;padding:15px 0;border-radius:10px;">
+                                                    회원가입하고 팀 합류하기
                                                 </a>
                                             </td>
                                         </tr>

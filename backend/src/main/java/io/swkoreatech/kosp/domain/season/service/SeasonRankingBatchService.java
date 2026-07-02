@@ -93,6 +93,7 @@ public class SeasonRankingBatchService {
     private final SeasonScoreService seasonScoreService;
     private final SeasonProjectMemberRepository seasonProjectMemberRepository;
     private final SeasonScoreEventLogRepository eventLogRepository;
+    private final SeasonTierTitleService seasonTierTitleService;
 
     /**
      * 시즌 랭킹 배치를 실행한다. 매일 새벽 4시 실행.
@@ -117,6 +118,7 @@ public class SeasonRankingBatchService {
             recalculateCommitAndChallengeScores(season, activeUsers);
             recalculateRanks(season);
             applyEliteTiers(season);
+            seasonTierTitleService.syncTierTitles(season);
 
             log.info("[SeasonBatch] 배치 완료. 처리 유저={}", activeUsers.size());
         } catch (Exception e) {
