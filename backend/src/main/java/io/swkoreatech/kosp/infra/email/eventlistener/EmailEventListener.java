@@ -5,10 +5,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 import io.swkoreatech.kosp.infra.email.eventlistener.event.EmailVerificationSendEvent;
+import io.swkoreatech.kosp.infra.email.eventlistener.event.OrganizationRegisteredEvent;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.ResetPasswordEvent;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.TeamInviteSendEvent;
 import io.swkoreatech.kosp.infra.email.form.EmailForm;
 import io.swkoreatech.kosp.infra.email.form.EmailVerificationForm;
+import io.swkoreatech.kosp.infra.email.form.OrganizationRegisteredForm;
 import io.swkoreatech.kosp.infra.email.form.ResetPasswordForm;
 import io.swkoreatech.kosp.infra.email.form.TeamInviteForm;
 import io.swkoreatech.kosp.infra.email.service.EmailService;
@@ -62,6 +64,22 @@ public class EmailEventListener {
             event.inviteeName(),
             event.clientUrl(),
             event.inviteId()
+        );
+        emailService.sendEmail(event.email(), emailForm);
+    }
+
+    /**
+     * 조직 등록 안내 이메일 발송 이벤트를 처리한다.
+     *
+     * @param event 조직 등록 이벤트
+     */
+    @TransactionalEventListener
+    public void onOrganizationRegisteredEvent(OrganizationRegisteredEvent event) {
+        EmailForm emailForm = new OrganizationRegisteredForm(
+            event.githubUsername(),
+            event.ownerName(),
+            event.orgName(),
+            event.clientUrl()
         );
         emailService.sendEmail(event.email(), emailForm);
     }

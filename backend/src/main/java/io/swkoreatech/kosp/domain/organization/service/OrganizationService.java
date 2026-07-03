@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberRole;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberStatus;
 import io.swkoreatech.kosp.common.organization.model.OrganizationRepo;
+import io.swkoreatech.kosp.infra.email.eventlistener.event.OrganizationRegisteredEvent;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationRepoRepository;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationRepository;
@@ -42,6 +44,7 @@ public class OrganizationService {
     private final UserRepository userRepository;
     private final GithubOrgApiClient githubOrgApiClient;
     private final TextEncryptor textEncryptor;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<AvailableOrganizationResponse> getAvailableOrganizations(User user) {
         String token = decryptToken(user);
@@ -54,12 +57,12 @@ public class OrganizationService {
     }
 
     @Transactional
-    public OrganizationResponse registerOrganization(User user, Long githubOrgId) {
+    public OrganizationResponse registerOrganization(User user, Long githubOrgId, String clientUrl) {
         validateNotRegistered(githubOrgId);
         String token = decryptToken(user);
         GithubOrgMembership membership = findOwnerMembership(token, githubOrgId);
         Organization organization = saveOrganization(membership, user.getId());
-        syncMembers(organization, token);
+        syncMembers(organization, token, user, clientUrl);
         syncRepositories(organization, token);
         return OrganizationResponse.from(organization);
     }
@@ -118,15 +121,41 @@ public class OrganizationService {
         return organizationRepository.save(organization);
     }
 
-    private void syncMembers(Organization organization, String token) {
+    private void syncMembers(Organization organization, String token, User owner, String clientUrl) {
         List<GithubOrgMember> githubMembers = githubOrgApiClient.getOrgMembers(token, organization.getGithubOrgName());
         List<Long> githubIds = githubMembers.stream().map(GithubOrgMember::id).toList();
         Map<Long, Long> githubIdToUserId = buildGithubIdToUserIdMap(githubIds);
         LocalDateTime syncedAt = LocalDateTime.now();
         List<OrganizationMember> members = githubMembers.stream()
-            .map(m -> buildMember(organization, m, githubIdToUserId.get(m.id()), syncedAt))
+            .map(m -> buildMemberWithEmailNotification(organization, m, githubIdToUserId.get(m.id()), syncedAt, token, owner, clientUrl))
             .toList();
         organizationMemberRepository.saveAll(members);
+    }
+
+    private OrganizationMember buildMemberWithEmailNotification(
+        Organization organization,
+        GithubOrgMember githubMember,
+        Long userId,
+        LocalDateTime syncedAt,
+        String token,
+        User owner,
+        String clientUrl
+    ) {
+        if (userId != null) {
+            return buildMember(organization, githubMember, userId, null, syncedAt);
+        }
+        String email = githubOrgApiClient.getUserEmail(token, githubMember.login());
+        if (email != null) {
+            eventPublisher.publishEvent(new OrganizationRegisteredEvent(
+                email,
+                githubMember.login(),
+                owner.getName(),
+                organization.getDisplayName(),
+                clientUrl
+            ));
+            return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PENDING, syncedAt);
+        }
+        return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PRIVATE, syncedAt);
     }
 
     private Map<Long, Long> buildGithubIdToUserIdMap(List<Long> githubIds) {
@@ -141,6 +170,7 @@ public class OrganizationService {
         Organization organization,
         GithubOrgMember githubMember,
         Long userId,
+        OrganizationMemberStatus status,
         LocalDateTime syncedAt
     ) {
         return OrganizationMember.builder()
@@ -149,6 +179,7 @@ public class OrganizationService {
             .githubUserId(githubMember.id())
             .githubUsername(githubMember.login())
             .role(OrganizationMemberRole.MEMBER)
+            .status(status)
             .syncedAt(syncedAt)
             .build();
     }

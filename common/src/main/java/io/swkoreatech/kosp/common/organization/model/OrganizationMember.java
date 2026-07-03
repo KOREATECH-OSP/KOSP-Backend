@@ -63,6 +63,7 @@ public class OrganizationMember extends BaseEntity {
         Long githubUserId,
         String githubUsername,
         OrganizationMemberRole role,
+        OrganizationMemberStatus status,
         LocalDateTime syncedAt
     ) {
         this.organization = organization;
@@ -71,8 +72,8 @@ public class OrganizationMember extends BaseEntity {
         this.githubUsername = githubUsername;
         this.role = role;
         this.syncedAt = syncedAt;
-        this.status = userId != null ? OrganizationMemberStatus.LINKED : OrganizationMemberStatus.NOT_JOINED;
-        this.joinedAt = userId != null ? LocalDateTime.now() : null;
+        this.status = status != null ? status : (userId != null ? OrganizationMemberStatus.LINKED : OrganizationMemberStatus.NOT_JOINED);
+        this.joinedAt = this.status == OrganizationMemberStatus.LINKED ? LocalDateTime.now() : null;
     }
 
     public void link(Long linkedUserId) {

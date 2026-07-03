@@ -18,6 +18,7 @@ import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizatio
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.service.OrganizationService;
+import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import jakarta.validation.Valid;
@@ -42,9 +43,10 @@ public class OrganizationController implements OrganizationApi {
     @Permit(name = "org:register", description = "조직 등록")
     public ResponseEntity<OrganizationResponse> register(
         @AuthUser User user,
-        @RequestBody @Valid OrganizationRegisterRequest request
+        @RequestBody @Valid OrganizationRegisterRequest request,
+        @ClientURL String clientUrl
     ) {
-        OrganizationResponse response = organizationService.registerOrganization(user, request.githubOrgId());
+        OrganizationResponse response = organizationService.registerOrganization(user, request.githubOrgId(), clientUrl);
         return ResponseEntity.created(URI.create("/v1/organizations/" + response.id())).body(response);
     }
 

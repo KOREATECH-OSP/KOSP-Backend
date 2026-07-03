@@ -16,6 +16,7 @@ import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterR
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
+import io.swkoreatech.kosp.global.host.ClientURL;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
 
@@ -38,7 +39,8 @@ public interface OrganizationApi {
     @PostMapping
     ResponseEntity<OrganizationResponse> register(
         @Parameter(hidden = true) @AuthUser User user,
-        @RequestBody @Valid OrganizationRegisterRequest request
+        @RequestBody @Valid OrganizationRegisterRequest request,
+        @Parameter(hidden = true) @ClientURL String clientUrl
     );
 
     @Operation(

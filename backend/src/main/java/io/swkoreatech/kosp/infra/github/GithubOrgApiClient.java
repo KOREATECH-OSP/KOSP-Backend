@@ -12,6 +12,7 @@ import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.infra.github.dto.GithubOrgMember;
 import io.swkoreatech.kosp.infra.github.dto.GithubOrgMembership;
 import io.swkoreatech.kosp.infra.github.dto.GithubOrgRepo;
+import io.swkoreatech.kosp.infra.github.dto.GithubUserPublicInfo;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
 
@@ -64,6 +65,18 @@ public class GithubOrgApiClient {
             .bodyToMono(new ParameterizedTypeReference<List<GithubOrgMember>>() {})
             .doOnError(error -> log.warn("GitHub 조직 멤버 조회 실패 [{}]: {}", orgName, error.getMessage()))
             .block();
+    }
+
+    public String getUserEmail(String token, String username) {
+        GithubUserPublicInfo info = webClient.get()
+            .uri("/users/{username}", username)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+            .retrieve()
+            .bodyToMono(GithubUserPublicInfo.class)
+            .doOnError(error -> log.warn("GitHub 유저 정보 조회 실패 [{}]: {}", username, error.getMessage()))
+            .onErrorReturn(new GithubUserPublicInfo(null, username, null, null))
+            .block();
+        return info != null ? info.email() : null;
     }
 
     public List<GithubOrgRepo> getOrgRepos(String token, String orgName) {
