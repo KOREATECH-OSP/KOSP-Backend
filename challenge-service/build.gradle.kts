@@ -36,6 +36,6 @@ tasks {
 
     bootRun {
         systemProperties = System.getProperties().toMap() as Map<String, Any>
-        environment = System.getenv()
+        environment(System.getenv())
     }
 }
