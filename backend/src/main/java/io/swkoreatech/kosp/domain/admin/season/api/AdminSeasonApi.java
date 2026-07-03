@@ -84,4 +84,12 @@ public interface AdminSeasonApi {
     ResponseEntity<AdminSeasonProjectMemberListResponse> getMembers(
         @PathVariable Long projectId
     );
+
+    /**
+     * 시즌 랭킹 배치를 강제 실행한다.
+     */
+    @Operation(summary = "시즌 랭킹 배치 강제 실행", description = "새벽 4시 자동 배치를 즉시 실행합니다. 커밋/챌린지 점수 재계산, 순위 갱신, 엘리트 티어 적용이 수행됩니다.")
+    @ApiResponse(responseCode = "200", description = "배치 실행 완료")
+    @PostMapping("/batch/ranking")
+    ResponseEntity<Void> runRankingBatch();
 }

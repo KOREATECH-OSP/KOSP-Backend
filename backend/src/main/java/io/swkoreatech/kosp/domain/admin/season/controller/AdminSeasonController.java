@@ -12,6 +12,7 @@ import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMem
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
+import io.swkoreatech.kosp.domain.season.service.SeasonRankingBatchService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +25,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminSeasonController implements AdminSeasonApi {
 
     private final AdminSeasonProjectService adminSeasonProjectService;
+    private final SeasonRankingBatchService seasonRankingBatchService;
 
     /** {@inheritDoc} */
     @Override
@@ -61,5 +63,13 @@ public class AdminSeasonController implements AdminSeasonApi {
     @Permit(name = "admin:seasons:read", description = "프로젝트 참여자 목록 조회")
     public ResponseEntity<AdminSeasonProjectMemberListResponse> getMembers(Long projectId) {
         return ResponseEntity.ok(adminSeasonProjectService.getMembers(projectId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "시즌 랭킹 배치 강제 실행")
+    public ResponseEntity<Void> runRankingBatch() {
+        seasonRankingBatchService.runRankingBatch();
+        return ResponseEntity.ok().build();
     }
 }
