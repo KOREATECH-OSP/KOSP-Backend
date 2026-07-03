@@ -35,7 +35,7 @@ public class GithubOrgApiClient {
     }
 
     public List<GithubOrgMembership> getMyOrgMemberships(String token) {
-        return webClient.get()
+        List<GithubOrgMembership> result = webClient.get()
             .uri("/user/memberships/orgs?per_page=" + PER_PAGE + "&state=active")
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .retrieve()
@@ -46,6 +46,11 @@ public class GithubOrgApiClient {
             .bodyToMono(new ParameterizedTypeReference<List<GithubOrgMembership>>() {})
             .doOnError(error -> log.warn("GitHub 조직 멤버십 조회 실패: {}", error.getMessage()))
             .block();
+        if (result != null) {
+            result.forEach(m -> log.info("[DEBUG] org={}, role={}, state={}",
+                m.organization().login(), m.role(), m.state()));
+        }
+        return result;
     }
 
     public List<GithubOrgMember> getOrgMembers(String token, String orgName) {
