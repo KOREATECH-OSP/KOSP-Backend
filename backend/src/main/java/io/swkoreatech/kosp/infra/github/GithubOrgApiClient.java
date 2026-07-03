@@ -40,11 +40,10 @@ public class GithubOrgApiClient {
             .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
             .retrieve()
             .onStatus(
-                status -> status.value() == 403 || status.value() == 429,
+                status -> status.value() == 403 || status.value() == 401 || status.value() == 429,
                 response -> Mono.error(new GlobalException(ExceptionMessage.GITHUB_REAUTH_REQUIRED))
             )
-            .bodyToFlux(GithubOrgMembership.class)
-            .collectList()
+            .bodyToMono(new ParameterizedTypeReference<List<GithubOrgMembership>>() {})
             .doOnError(error -> log.warn("GitHub 조직 멤버십 조회 실패: {}", error.getMessage()))
             .block();
     }
