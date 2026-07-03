@@ -16,6 +16,7 @@ import io.swkoreatech.kosp.domain.organization.api.OrganizationApi;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterRequest;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
+import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.service.OrganizationService;
 import io.swkoreatech.kosp.global.host.ClientURL;
@@ -65,5 +66,14 @@ public class OrganizationController implements OrganizationApi {
         @PathVariable Long organizationId
     ) {
         return ResponseEntity.ok(organizationService.getDetail(organizationId));
+    }
+
+    @GetMapping("/{organizationId}/members")
+    @Permit(name = "org:members", description = "조직 멤버 목록 조회")
+    public ResponseEntity<List<OrganizationMemberResponse>> getMembers(
+        @AuthUser User user,
+        @PathVariable Long organizationId
+    ) {
+        return ResponseEntity.ok(organizationService.getMembers(organizationId, user));
     }
 }

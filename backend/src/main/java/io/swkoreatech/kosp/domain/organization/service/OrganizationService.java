@@ -26,6 +26,7 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
+import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
 import io.swkoreatech.kosp.infra.github.GithubOrgApiClient;
 import io.swkoreatech.kosp.infra.github.dto.GithubOrgMember;
@@ -70,6 +71,17 @@ public class OrganizationService {
     public List<OrganizationResponse> getMyOrganizations(User user) {
         return organizationRepository.findAllByRegisteredByUserId(user.getId()).stream()
             .map(OrganizationResponse::from)
+            .toList();
+    }
+
+    public List<OrganizationMemberResponse> getMembers(Long organizationId, User user) {
+        Organization organization = organizationRepository.getById(organizationId);
+        if (!organization.getRegisteredByUserId().equals(user.getId())) {
+            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        }
+        return organizationMemberRepository.findAllByOrganizationId(organizationId).stream()
+            .filter(m -> m.getStatus() != OrganizationMemberStatus.REMOVED)
+            .map(OrganizationMemberResponse::from)
             .toList();
     }
 
