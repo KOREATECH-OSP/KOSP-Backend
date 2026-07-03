@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.title.api;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.title.dto.response.TitleListResponse;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleProgressResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
@@ -36,6 +39,20 @@ public interface TitleApi {
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/users/me/titles")
     ResponseEntity<UserTitleListResponse> getMyTitles(@AuthUser User user);
+
+    /**
+     * 내 미취득 칭호 진행도를 조회한다.
+     *
+     * @param user 인증된 사용자
+     * @return 미취득 칭호별 진행도(현재값/목표값/달성률)
+     */
+    @Operation(
+        summary = "미취득 칭호 진행도 조회",
+        description = "로그인한 유저가 아직 취득하지 않은 활성 칭호의 조건별 현재값/목표값/달성률을 반환합니다."
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/users/me/titles/progress")
+    ResponseEntity<List<TitleProgressResponse>> getMyTitleProgress(@AuthUser User user);
 
     /**
      * 특정 유저의 칭호 목록을 조회한다 (공개).

@@ -58,4 +58,9 @@ public class TeamMember extends BaseEntity {
     public void delete() {
         this.isDeleted = true;
     }
+
+    /** 멤버의 역할을 변경한다 (권한 위임/회수). */
+    public void changeRole(TeamRole role) {
+        this.role = role;
+    }
 }

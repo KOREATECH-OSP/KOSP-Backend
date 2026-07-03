@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.community.team.model;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 import io.swkoreatech.kosp.common.model.BaseEntity;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -71,6 +72,16 @@ public class TeamInvite extends BaseEntity {
     @Column(name = "rejection_count", nullable = false)
     private int rejectionCount = 0;
 
+    /** 마지막으로 초대를 발송한 시각 (재초대 쿨다운 판정 기준). */
+    @Column(name = "last_invited_at")
+    private Instant lastInvitedAt;
+
+    /** 재초대를 차단하는 누적 거절 횟수 임계값. */
+    private static final int MAX_REJECTION = 3;
+
+    /** 거절 임계값 도달 이후 다음 재초대까지 대기해야 하는 시간(시). */
+    private static final long REINVITE_COOLDOWN_HOURS = 24;
+
     @Builder
     private TeamInvite(Team team, User inviter, User invitee, Instant expiresAt) {
         this.team = team;
@@ -79,6 +90,7 @@ public class TeamInvite extends BaseEntity {
         this.expiresAt = expiresAt;
         this.status = InviteStatus.PENDING;
         this.rejectionCount = 0;
+        this.lastInvitedAt = Instant.now();
     }
 
     /** 초대 만료 여부를 확인한다. */
@@ -105,6 +117,23 @@ public class TeamInvite extends BaseEntity {
         this.isDeleted = true;
     }
 
+    /**
+     * 종료된(취소/거절/만료/수락) 초대를 다시 PENDING 상태로 재발송한다.
+     *
+     * <p>{@code (team_id, invitee_id)} 유니크 제약 때문에 새 행을 INSERT하는 대신
+     * 기존 행을 재사용한다.</p>
+     *
+     * @param inviter   재발송하는 사용자
+     * @param expiresAt 새 만료 시각
+     */
+    public void reopen(User inviter, Instant expiresAt) {
+        this.inviter = inviter;
+        this.expiresAt = expiresAt;
+        this.status = InviteStatus.PENDING;
+        this.isDeleted = false;
+        this.lastInvitedAt = Instant.now();
+    }
+
     /** 초대를 만료 처리한다. */
     public void expire() {
         this.status = InviteStatus.EXPIRED;
@@ -118,7 +147,29 @@ public class TeamInvite extends BaseEntity {
 
     /** 3회 이상 거절된 경우 재발송 차단 여부를 반환한다. */
     public boolean isBlocked() {
-        return this.rejectionCount >= 3;
+        return this.rejectionCount >= MAX_REJECTION;
+    }
+
+    /**
+     * 재초대가 쿨다운으로 차단되는지 여부를 반환한다.
+     *
+     * <p>누적 거절 횟수가 {@link #MAX_REJECTION}회 이상이면, 마지막 발송 시각
+     * ({@link #lastInvitedAt})으로부터 {@link #REINVITE_COOLDOWN_HOURS}시간이 지나야
+     * 다시 초대할 수 있다.</p>
+     */
+    public boolean isReinviteBlocked() {
+        if (rejectionCount < MAX_REJECTION || lastInvitedAt == null) {
+            return false;
+        }
+        return Instant.now().isBefore(reinviteAvailableAt());
+    }
+
+    /** 재초대가 다시 가능해지는 시각. */
+    public Instant reinviteAvailableAt() {
+        if (lastInvitedAt == null) {
+            return Instant.now();
+        }
+        return lastInvitedAt.plus(REINVITE_COOLDOWN_HOURS, ChronoUnit.HOURS);
     }
 
     /**

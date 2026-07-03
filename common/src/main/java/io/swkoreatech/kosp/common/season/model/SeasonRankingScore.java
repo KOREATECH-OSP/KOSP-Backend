@@ -130,4 +130,31 @@ public class SeasonRankingScore extends BaseEntity {
     public void updateRank(int rank) {
         this.rankInSeason = rank;
     }
+
+    /**
+     * 티어를 직접 지정한다 (엘리트 승격용).
+     *
+     * <p>{@code recalculate()}가 점수형 티어를 세팅한 뒤, 배치의 엘리트 평가에서
+     * Master/Challenger로 승격할 때 사용한다.</p>
+     *
+     * @param tier 지정할 티어
+     */
+    public void updateTier(SeasonTier tier) {
+        this.tier = tier;
+    }
+
+    /**
+     * 점수가 발생한(0보다 큰) 카테고리 수를 반환한다 (활동 다양성).
+     *
+     * @return 0보다 큰 점수를 가진 카테고리 수 (0~5)
+     */
+    public int activeCategoryCount() {
+        int count = 0;
+        if (attendanceScore.signum() > 0) count++;
+        if (commitScore.signum() > 0) count++;
+        if (challengeScore.signum() > 0) count++;
+        if (projectScore.signum() > 0) count++;
+        if (communityScore.signum() > 0) count++;
+        return count;
+    }
 }

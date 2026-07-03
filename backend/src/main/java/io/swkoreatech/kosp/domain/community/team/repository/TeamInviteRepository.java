@@ -34,6 +34,9 @@ public interface TeamInviteRepository extends Repository<TeamInvite, Long> {
 
     java.util.List<TeamInvite> findAllByTeam(Team team);
 
+    java.util.List<TeamInvite> findAllByTeamAndStatusAndIsDeletedFalse(
+        Team team, TeamInvite.InviteStatus status);
+
     default TeamInvite getById(Long id) {
         return findByIdAndIsDeletedFalse(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));

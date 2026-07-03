@@ -30,6 +30,14 @@ public interface TitleRepository extends Repository<Title, Long> {
      */
     List<Title> findAll();
 
+    /**
+     * 주어진 코드 목록에 해당하는 칭호들을 조회한다.
+     *
+     * @param codes 칭호 코드 목록
+     * @return 해당 코드의 칭호 목록
+     */
+    List<Title> findAllByCodeIn(List<String> codes);
+
     default Title getById(Long id) {
         return findById(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.TITLE_NOT_FOUND));

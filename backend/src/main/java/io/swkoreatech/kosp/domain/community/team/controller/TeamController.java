@@ -11,6 +11,7 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.api.TeamApi;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.request.TeamRoleUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
@@ -114,6 +115,38 @@ public class TeamController implements TeamApi {
     @Permit(name = "team:kick", description = "팀원 제명")
     public ResponseEntity<Void> removeMember(@AuthUser User user, Long teamId, Long userId) {
         teamService.removeMember(teamId, user, userId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    // 탈퇴는 모든 팀원이 가능하므로 별도 권한 없이 인증만 요구한다(팀 소속 여부는 서비스에서 검증).
+    @Override
+    @Permit(name = "", description = "팀 탈퇴")
+    public ResponseEntity<Void> leaveTeam(@AuthUser User user, Long teamId) {
+        teamService.leaveTeam(teamId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    // 초대 취소는 초대 권한(team:invite)을 재사용한다(팀장/관리자 여부는 서비스에서 검증).
+    @Override
+    @Permit(name = "team:invite", description = "초대 취소")
+    public ResponseEntity<Void> cancelInvite(@AuthUser User user, Long inviteId) {
+        teamService.cancelInvite(inviteId, user);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    // 권한 위임은 팀 관리 권한(team:update)을 재사용한다(팀장 여부는 서비스에서 검증).
+    @Override
+    @Permit(name = "team:update", description = "팀원 권한 변경")
+    public ResponseEntity<Void> changeMemberRole(
+        @AuthUser User user,
+        Long teamId,
+        Long userId,
+        TeamRoleUpdateRequest request
+    ) {
+        teamService.changeMemberRole(teamId, user, userId, request.role());
         return ResponseEntity.ok().build();
     }
 }
