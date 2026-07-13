@@ -71,6 +71,24 @@ public class GithubOrgApiClient {
             .block();
     }
 
+    public List<GithubOrgMember> getOrgAdminMembers(String token, String orgName) {
+        return webClient.get()
+            .uri("/orgs/{org}/members?role=admin&per_page=" + PER_PAGE, orgName)
+            .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
+            .retrieve()
+            .onStatus(
+                status -> status.value() == 403 || status.value() == 429,
+                response -> Mono.error(new GlobalException(ExceptionMessage.GITHUB_REAUTH_REQUIRED))
+            )
+            .onStatus(
+                status -> status.value() == 404,
+                response -> Mono.error(new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND))
+            )
+            .bodyToMono(new ParameterizedTypeReference<List<GithubOrgMember>>() {})
+            .doOnError(error -> log.warn("GitHub 조직 Owner 멤버 조회 실패 [{}]: {}", orgName, error.getMessage()))
+            .block();
+    }
+
     public String getUserEmail(String token, String username) {
         GithubUserPublicInfo info = webClient.get()
             .uri("/users/{username}", username)

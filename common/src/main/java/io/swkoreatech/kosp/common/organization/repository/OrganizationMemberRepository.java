@@ -25,8 +25,15 @@ public interface OrganizationMemberRepository extends Repository<OrganizationMem
 
     void deleteAllByOrganizationId(Long organizationId);
 
+    Optional<OrganizationMember> findByOrganizationIdAndUserId(Long organizationId, Long userId);
+
     default OrganizationMember getById(Long id) {
         return findById(id)
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_FOUND));
+    }
+
+    default OrganizationMember getMemberByUserId(Long organizationId, Long userId) {
+        return findByOrganizationIdAndUserId(organizationId, userId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_FOUND));
     }
 }

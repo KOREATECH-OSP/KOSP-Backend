@@ -78,10 +78,13 @@ public class AdminOrganizationService {
 
     private void resyncMembers(Organization organization, String token) {
         List<GithubOrgMember> githubMembers = githubOrgApiClient.getOrgMembers(token, organization.getGithubOrgName());
+        Set<Long> adminGithubIds = githubOrgApiClient.getOrgAdminMembers(token, organization.getGithubOrgName())
+            .stream().map(GithubOrgMember::id).collect(Collectors.toSet());
         Set<Long> currentGithubIds = toGithubIdSet(githubMembers);
         List<OrganizationMember> existing = organizationMemberRepository.findAllByOrganizationId(organization.getId());
         markRemovedMembers(existing, currentGithubIds);
-        saveNewMembers(organization, githubMembers, existing);
+        syncExistingMemberRoles(existing, currentGithubIds, adminGithubIds);
+        saveNewMembers(organization, githubMembers, existing, adminGithubIds);
     }
 
     private Set<Long> toGithubIdSet(List<GithubOrgMember> members) {
@@ -95,14 +98,26 @@ public class AdminOrganizationService {
             .forEach(OrganizationMember::remove);
     }
 
-    private void saveNewMembers(Organization organization, List<GithubOrgMember> githubMembers, List<OrganizationMember> existing) {
+    private void syncExistingMemberRoles(List<OrganizationMember> existing, Set<Long> currentGithubIds, Set<Long> adminGithubIds) {
+        existing.stream()
+            .filter(m -> currentGithubIds.contains(m.getGithubUserId()))
+            .filter(m -> m.getStatus() != OrganizationMemberStatus.REMOVED)
+            .forEach(m -> m.syncGithubRole(adminGithubIds.contains(m.getGithubUserId())));
+    }
+
+    private void saveNewMembers(Organization organization, List<GithubOrgMember> githubMembers, List<OrganizationMember> existing, Set<Long> adminGithubIds) {
         Set<Long> existingIds = existing.stream().map(OrganizationMember::getGithubUserId).collect(Collectors.toSet());
         List<Long> newIds = githubMembers.stream().map(GithubOrgMember::id).filter(id -> !existingIds.contains(id)).toList();
         Map<Long, Long> githubIdToUserId = buildGithubIdToUserIdMap(newIds);
         LocalDateTime syncedAt = LocalDateTime.now();
         List<OrganizationMember> newMembers = githubMembers.stream()
             .filter(m -> !existingIds.contains(m.id()))
-            .map(m -> buildMember(organization, m, githubIdToUserId.get(m.id()), syncedAt))
+            .map(m -> {
+                OrganizationMemberRole role = adminGithubIds.contains(m.id())
+                    ? OrganizationMemberRole.OWNER
+                    : OrganizationMemberRole.MEMBER;
+                return buildMember(organization, m, githubIdToUserId.get(m.id()), syncedAt, role);
+            })
             .toList();
         organizationMemberRepository.saveAll(newMembers);
     }
@@ -112,13 +127,13 @@ public class AdminOrganizationService {
             .collect(Collectors.toMap(u -> u.getGithubUser().getGithubId(), User::getId));
     }
 
-    private OrganizationMember buildMember(Organization org, GithubOrgMember m, Long userId, LocalDateTime syncedAt) {
+    private OrganizationMember buildMember(Organization org, GithubOrgMember m, Long userId, LocalDateTime syncedAt, OrganizationMemberRole role) {
         return OrganizationMember.builder()
             .organization(org)
             .userId(userId)
             .githubUserId(m.id())
             .githubUsername(m.login())
-            .role(OrganizationMemberRole.MEMBER)
+            .role(role)
             .syncedAt(syncedAt)
             .build();
     }

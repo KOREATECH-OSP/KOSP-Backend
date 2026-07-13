@@ -78,6 +78,10 @@ public enum ExceptionMessage {
     ORGANIZATION_ALREADY_REGISTERED("이미 등록된 조직입니다.", HttpStatus.CONFLICT),
     ORGANIZATION_OWNER_REQUIRED("조직 Owner만 등록할 수 있습니다.", HttpStatus.FORBIDDEN),
     ORGANIZATION_MEMBER_NOT_FOUND("조직 멤버를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ADMIN_REQUIRED("조직 관리자(Owner 또는 Admin)만 수행할 수 있습니다.", HttpStatus.FORBIDDEN),
+    CANNOT_CHANGE_OWNER_ROLE("GitHub Owner의 역할은 K-OSP에서 변경할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_MEMBER_ALREADY_ADMIN("이미 관리자인 멤버입니다.", HttpStatus.CONFLICT),
+    ORGANIZATION_MEMBER_NOT_ADMIN("관리자가 아닌 멤버입니다.", HttpStatus.BAD_REQUEST),
     GITHUB_REAUTH_REQUIRED("GitHub 재인증이 필요합니다. read:org 권한을 포함하여 다시 로그인해 주세요.", HttpStatus.FORBIDDEN),
 
     // Season Ranking System

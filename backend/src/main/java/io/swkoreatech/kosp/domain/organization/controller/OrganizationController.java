@@ -4,6 +4,7 @@ import java.net.URI;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -75,5 +76,27 @@ public class OrganizationController implements OrganizationApi {
         @PathVariable Long organizationId
     ) {
         return ResponseEntity.ok(organizationService.getMembers(organizationId, user));
+    }
+
+    @PostMapping("/{organizationId}/members/{memberId}/admin")
+    @Permit(name = "org:members:admin:appoint", description = "조직 멤버 관리자 임명")
+    public ResponseEntity<Void> appointAdmin(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @PathVariable Long memberId
+    ) {
+        organizationService.appointAdmin(organizationId, memberId, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{organizationId}/members/{memberId}/admin")
+    @Permit(name = "org:members:admin:dismiss", description = "조직 멤버 관리자 해임 (Owner만 가능)")
+    public ResponseEntity<Void> dismissAdmin(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @PathVariable Long memberId
+    ) {
+        organizationService.dismissAdmin(organizationId, memberId, user);
+        return ResponseEntity.noContent().build();
     }
 }

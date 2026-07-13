@@ -90,13 +90,57 @@ public class OrganizationService {
         if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
             throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
         }
-        if (!organization.getRegisteredByUserId().equals(user.getId())) {
-            throw new GlobalException(ExceptionMessage.FORBIDDEN);
+        OrganizationMember requestMember = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, user.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+        if (requestMember.getRole() == OrganizationMemberRole.MEMBER) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_ADMIN_REQUIRED);
         }
         return organizationMemberRepository.findAllByOrganizationId(organizationId).stream()
             .filter(m -> m.getStatus() != OrganizationMemberStatus.REMOVED)
             .map(OrganizationMemberResponse::from)
             .toList();
+    }
+
+    @Transactional
+    public void appointAdmin(Long organizationId, Long memberId, User requestUser) {
+        organizationRepository.getById(organizationId);
+        OrganizationMember requestMember = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, requestUser.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+        if (requestMember.getRole() == OrganizationMemberRole.MEMBER) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_ADMIN_REQUIRED);
+        }
+        OrganizationMember target = organizationMemberRepository.getById(memberId);
+        if (!target.getOrganization().getId().equals(organizationId)) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_FOUND);
+        }
+        if (target.getRole() == OrganizationMemberRole.OWNER) {
+            throw new GlobalException(ExceptionMessage.CANNOT_CHANGE_OWNER_ROLE);
+        }
+        if (target.getRole() == OrganizationMemberRole.ADMIN) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_ALREADY_ADMIN);
+        }
+        target.appointAdmin();
+    }
+
+    @Transactional
+    public void dismissAdmin(Long organizationId, Long memberId, User requestUser) {
+        organizationRepository.getById(organizationId);
+        OrganizationMember requestMember = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, requestUser.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+        if (requestMember.getRole() != OrganizationMemberRole.OWNER) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_OWNER_REQUIRED);
+        }
+        OrganizationMember target = organizationMemberRepository.getById(memberId);
+        if (!target.getOrganization().getId().equals(organizationId)) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_FOUND);
+        }
+        if (target.getRole() != OrganizationMemberRole.ADMIN) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_ADMIN);
+        }
+        target.demoteToMember();
     }
 
     public OrganizationDetailResponse getDetail(Long organizationId) {
@@ -158,11 +202,18 @@ public class OrganizationService {
 
     private void syncMembers(Organization organization, String token, User owner, String clientUrl) {
         List<GithubOrgMember> githubMembers = githubOrgApiClient.getOrgMembers(token, organization.getGithubOrgName());
+        Set<Long> adminGithubIds = githubOrgApiClient.getOrgAdminMembers(token, organization.getGithubOrgName())
+            .stream().map(GithubOrgMember::id).collect(Collectors.toSet());
         List<Long> githubIds = githubMembers.stream().map(GithubOrgMember::id).toList();
         Map<Long, Long> githubIdToUserId = buildGithubIdToUserIdMap(githubIds);
         LocalDateTime syncedAt = LocalDateTime.now();
         List<OrganizationMember> members = githubMembers.stream()
-            .map(m -> buildMemberWithEmailNotification(organization, m, githubIdToUserId.get(m.id()), syncedAt, token, owner, clientUrl))
+            .map(m -> {
+                OrganizationMemberRole role = adminGithubIds.contains(m.id())
+                    ? OrganizationMemberRole.OWNER
+                    : OrganizationMemberRole.MEMBER;
+                return buildMemberWithEmailNotification(organization, m, githubIdToUserId.get(m.id()), syncedAt, token, owner, clientUrl, role);
+            })
             .toList();
         organizationMemberRepository.saveAll(members);
     }
@@ -174,10 +225,11 @@ public class OrganizationService {
         LocalDateTime syncedAt,
         String token,
         User owner,
-        String clientUrl
+        String clientUrl,
+        OrganizationMemberRole role
     ) {
         if (userId != null) {
-            return buildMember(organization, githubMember, userId, null, syncedAt);
+            return buildMember(organization, githubMember, userId, null, syncedAt, role);
         }
         String email = githubOrgApiClient.getUserEmail(token, githubMember.login());
         if (email != null) {
@@ -188,9 +240,9 @@ public class OrganizationService {
                 organization.getDisplayName(),
                 clientUrl
             ));
-            return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PENDING, syncedAt);
+            return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PENDING, syncedAt, role);
         }
-        return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PRIVATE, syncedAt);
+        return buildMember(organization, githubMember, null, OrganizationMemberStatus.EMAIL_PRIVATE, syncedAt, role);
     }
 
     private Map<Long, Long> buildGithubIdToUserIdMap(List<Long> githubIds) {
@@ -206,14 +258,15 @@ public class OrganizationService {
         GithubOrgMember githubMember,
         Long userId,
         OrganizationMemberStatus status,
-        LocalDateTime syncedAt
+        LocalDateTime syncedAt,
+        OrganizationMemberRole role
     ) {
         return OrganizationMember.builder()
             .organization(organization)
             .userId(userId)
             .githubUserId(githubMember.id())
             .githubUsername(githubMember.login())
-            .role(OrganizationMemberRole.MEMBER)
+            .role(role)
             .status(status)
             .syncedAt(syncedAt)
             .build();

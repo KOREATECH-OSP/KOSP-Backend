@@ -85,4 +85,21 @@ public class OrganizationMember extends BaseEntity {
     public void remove() {
         this.status = OrganizationMemberStatus.REMOVED;
     }
+
+    public void appointAdmin() {
+        this.role = OrganizationMemberRole.ADMIN;
+    }
+
+    public void demoteToMember() {
+        this.role = OrganizationMemberRole.MEMBER;
+    }
+
+    public void syncGithubRole(boolean isGithubAdmin) {
+        if (isGithubAdmin) {
+            this.role = OrganizationMemberRole.OWNER;
+        } else if (this.role == OrganizationMemberRole.OWNER) {
+            this.role = OrganizationMemberRole.MEMBER;
+        }
+        // ADMIN과 MEMBER는 GitHub 동기화로 변경하지 않음
+    }
 }
