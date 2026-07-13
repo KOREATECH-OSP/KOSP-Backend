@@ -98,13 +98,14 @@ public class OrgCollectionListener {
         int page = 1;
 
         while (true) {
-            String uri = String.format("/orgs/%s/repos?per_page=%d&type=all&page=%d", orgName, PER_PAGE, page);
+            final int currentPage = page;
+            String uri = String.format("/orgs/%s/repos?per_page=%d&type=all&page=%d", orgName, PER_PAGE, currentPage);
             List<OrgRepoInfo> batch = client.get()
                 .uri(uri)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<List<OrgRepoInfo>>() {})
-                .doOnError(e -> log.warn("GitHub 조직 레포 조회 실패 [{}] page {}: {}", orgName, page, e.getMessage()))
+                .doOnError(e -> log.warn("GitHub 조직 레포 조회 실패 [{}] page {}: {}", orgName, currentPage, e.getMessage()))
                 .onErrorReturn(List.of())
                 .block();
 
