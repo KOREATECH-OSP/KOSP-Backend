@@ -61,10 +61,11 @@ public class OrganizationService {
 
     @Transactional
     public OrganizationResponse registerOrganization(User user, Long githubOrgId, String clientUrl) {
-        validateNotRegistered(githubOrgId);
         String token = decryptToken(user);
         GithubOrgMembership membership = findOwnerMembership(token, githubOrgId);
-        Organization organization = saveOrganization(membership, user.getId());
+        Organization organization = findOrCreateOrganization(membership, user.getId());
+        organizationMemberRepository.deleteAllByOrganizationId(organization.getId());
+        organizationRepoRepository.deleteAllByOrganizationId(organization.getId());
         syncMembers(organization, token, user, clientUrl);
         syncRepositories(organization, token);
         eventPublisher.publishEvent(new OrgRegisteredCollectionEvent(
@@ -121,14 +122,10 @@ public class OrganizationService {
             .map(m -> m.organization().id())
             .toList();
         return orgIds.stream()
-            .filter(organizationRepository::existsByGithubOrgId)
+            .filter(id -> organizationRepository.findByGithubOrgId(id)
+                .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
+                .isPresent())
             .collect(Collectors.toSet());
-    }
-
-    private void validateNotRegistered(Long githubOrgId) {
-        if (organizationRepository.existsByGithubOrgId(githubOrgId)) {
-            throw new GlobalException(ExceptionMessage.ORGANIZATION_ALREADY_REGISTERED);
-        }
     }
 
     private GithubOrgMembership findOwnerMembership(String token, Long githubOrgId) {
@@ -138,15 +135,25 @@ public class OrganizationService {
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ORGANIZATION_OWNER_REQUIRED));
     }
 
-    private Organization saveOrganization(GithubOrgMembership membership, Long registeredByUserId) {
-        Organization organization = Organization.builder()
-            .githubOrgId(membership.organization().id())
-            .githubOrgName(membership.organization().login())
-            .displayName(membership.organization().login())
-            .avatarUrl(membership.organization().avatarUrl())
-            .registeredByUserId(registeredByUserId)
-            .build();
-        return organizationRepository.save(organization);
+    private Organization findOrCreateOrganization(GithubOrgMembership membership, Long registeredByUserId) {
+        return organizationRepository.findByGithubOrgId(membership.organization().id())
+            .map(existing -> {
+                if (existing.getStatus() != OrganizationStatus.DISCONNECTED) {
+                    throw new GlobalException(ExceptionMessage.ORGANIZATION_ALREADY_REGISTERED);
+                }
+                existing.activate();
+                return organizationRepository.save(existing);
+            })
+            .orElseGet(() -> {
+                Organization organization = Organization.builder()
+                    .githubOrgId(membership.organization().id())
+                    .githubOrgName(membership.organization().login())
+                    .displayName(membership.organization().login())
+                    .avatarUrl(membership.organization().avatarUrl())
+                    .registeredByUserId(registeredByUserId)
+                    .build();
+                return organizationRepository.save(organization);
+            });
     }
 
     private void syncMembers(Organization organization, String token, User owner, String clientUrl) {

@@ -11,4 +11,6 @@ public interface OrganizationRepoRepository extends Repository<OrganizationRepo,
     List<OrganizationRepo> saveAll(Iterable<OrganizationRepo> repos);
 
     List<OrganizationRepo> findAllByOrganizationId(Long organizationId);
+
+    void deleteAllByOrganizationId(Long organizationId);
 }

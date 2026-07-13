@@ -23,6 +23,8 @@ public interface OrganizationMemberRepository extends Repository<OrganizationMem
 
     List<OrganizationMember> findAllByGithubUserId(Long githubUserId);
 
+    void deleteAllByOrganizationId(Long organizationId);
+
     default OrganizationMember getById(Long id) {
         return findById(id)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_NOT_FOUND));
