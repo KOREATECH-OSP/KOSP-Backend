@@ -18,6 +18,7 @@ import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberRole;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberStatus;
 import io.swkoreatech.kosp.common.organization.model.OrganizationRepo;
+import io.swkoreatech.kosp.common.organization.model.OrganizationStatus;
 import io.swkoreatech.kosp.domain.organization.event.OrgRegisteredCollectionEvent;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.OrganizationRegisteredEvent;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
@@ -78,12 +79,16 @@ public class OrganizationService {
 
     public List<OrganizationResponse> getMyOrganizations(User user) {
         return organizationRepository.findAllByRegisteredByUserId(user.getId()).stream()
+            .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
             .map(OrganizationResponse::from)
             .toList();
     }
 
     public List<OrganizationMemberResponse> getMembers(Long organizationId, User user) {
         Organization organization = organizationRepository.getById(organizationId);
+        if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
+        }
         if (!organization.getRegisteredByUserId().equals(user.getId())) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
@@ -95,6 +100,9 @@ public class OrganizationService {
 
     public OrganizationDetailResponse getDetail(Long organizationId) {
         Organization organization = organizationRepository.getById(organizationId);
+        if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
+        }
         List<OrganizationMember> members = organizationMemberRepository.findAllByOrganizationId(organizationId);
         int linkedCount = countLinked(members);
         int repoCount = organizationRepoRepository.findAllByOrganizationId(organizationId).size();
