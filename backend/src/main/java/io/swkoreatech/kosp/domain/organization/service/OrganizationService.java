@@ -18,6 +18,7 @@ import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberRole;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberStatus;
 import io.swkoreatech.kosp.common.organization.model.OrganizationRepo;
+import io.swkoreatech.kosp.domain.organization.event.OrgRegisteredCollectionEvent;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.OrganizationRegisteredEvent;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationRepoRepository;
@@ -65,6 +66,13 @@ public class OrganizationService {
         Organization organization = saveOrganization(membership, user.getId());
         syncMembers(organization, token, user, clientUrl);
         syncRepositories(organization, token);
+        eventPublisher.publishEvent(new OrgRegisteredCollectionEvent(
+            this,
+            organization.getId(),
+            organization.getGithubOrgName(),
+            organization.getGithubOrgId(),
+            user.getId()
+        ));
         return OrganizationResponse.from(organization);
     }
 

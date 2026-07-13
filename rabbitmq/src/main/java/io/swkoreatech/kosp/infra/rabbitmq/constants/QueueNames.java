@@ -29,6 +29,12 @@ public final class QueueNames {
     /** GitHub 활동 수집 익스체인지 이름 */
     public static final String GITHUB_COLLECTION_EXCHANGE = "github-collection-exchange";
 
+    /** GitHub 조직 레포지토리 수집 큐 이름 */
+    public static final String GITHUB_ORG_COLLECTION = "github-org-collection-queue";
+
+    /** GitHub 조직 레포지토리 수집 익스체인지 이름 */
+    public static final String GITHUB_ORG_COLLECTION_EXCHANGE = "github-org-collection-exchange";
+
     private QueueNames() {
     }
 }
