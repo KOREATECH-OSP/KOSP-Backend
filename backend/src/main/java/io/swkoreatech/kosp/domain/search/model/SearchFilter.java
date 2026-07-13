@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * 검색 필터.
  * articles: 게시글, recruits: 모집글, teams: 팀,
- * challenges: 챌린지, users: 사용자, repositories: 저장소.
+ * challenges: 챌린지, users: 사용자, repositories: 저장소, organizations: 조직.
  */
 public enum SearchFilter {
 
@@ -15,7 +15,8 @@ public enum SearchFilter {
     teams,
     challenges,
     users,
-    repositories;
+    repositories,
+    organizations;
 
     /**
      * JSON 직렬화 시 사용되는 필터 값을 반환한다.

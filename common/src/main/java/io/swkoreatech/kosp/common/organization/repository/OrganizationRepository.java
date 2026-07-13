@@ -21,6 +21,9 @@ public interface OrganizationRepository extends Repository<Organization, Long> {
 
     List<Organization> findAll();
 
+    List<Organization> findByGithubOrgNameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(
+        String githubOrgName, String displayName);
+
     boolean existsByGithubOrgId(Long githubOrgId);
 
     default Organization getById(Long id) {

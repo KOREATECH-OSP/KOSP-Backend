@@ -13,6 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeRepository;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.organization.model.Organization;
+import io.swkoreatech.kosp.common.organization.model.OrganizationStatus;
+import io.swkoreatech.kosp.common.organization.repository.OrganizationRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
@@ -26,6 +29,7 @@ import io.swkoreatech.kosp.domain.github.repository.GithubRepositoryStatisticsRe
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ArticleSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.ChallengeSummary;
+import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.OrganizationSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.RecruitSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.GlobalSearchResponse.TeamSummary;
 import io.swkoreatech.kosp.domain.search.dto.response.RepositorySummary;
@@ -52,6 +56,7 @@ public class SearchService {
     private final ChallengeRepository challengeRepository;
     private final UserRepository userRepository;
     private final GithubRepositoryStatisticsRepository repositoryStatisticsRepository;
+    private final OrganizationRepository organizationRepository;
 
     /**
      * 키워드로 전체 카테고리를 통합 검색한다.
@@ -92,10 +97,11 @@ public class SearchService {
         List<ChallengeSummary> challenges = searchChallenges(keyword, effectiveFilters, rsql, pageable);
         List<UserSummary> users = searchUsers(keyword, effectiveFilters, rsql, pageable);
         List<RepositorySummary> repositories = searchRepositories(keyword, effectiveFilters, rsql, pageable);
+        List<OrganizationSummary> organizations = searchOrganizations(keyword, effectiveFilters);
 
-        PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories);
+        PageMeta meta = createPageMeta(articles, recruits, teams, challenges, users, repositories, organizations);
 
-        return GlobalSearchResponse.from(articles, recruits, teams, challenges, users, repositories, meta);
+        return GlobalSearchResponse.from(articles, recruits, teams, challenges, users, repositories, organizations, meta);
     }
 
     private Set<SearchFilter> resolveFilters(Set<SearchFilter> filters) {
@@ -354,16 +360,37 @@ public class SearchService {
         );
     }
 
+    private List<OrganizationSummary> searchOrganizations(String keyword, Set<SearchFilter> filters) {
+        if (!filters.contains(SearchFilter.organizations)) {
+            return Collections.emptyList();
+        }
+
+        if (keyword == null || keyword.isBlank()) {
+            return organizationRepository.findAll().stream()
+                .filter(org -> org.getStatus() == OrganizationStatus.ACTIVE)
+                .map(OrganizationSummary::from)
+                .toList();
+        }
+
+        return organizationRepository
+            .findByGithubOrgNameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(keyword, keyword)
+            .stream()
+            .filter(org -> org.getStatus() == OrganizationStatus.ACTIVE)
+            .map(OrganizationSummary::from)
+            .toList();
+    }
+
     private PageMeta createPageMeta(
         List<ArticleSummary> articles,
         List<RecruitSummary> recruits,
         List<TeamSummary> teams,
         List<ChallengeSummary> challenges,
         List<UserSummary> users,
-        List<RepositorySummary> repositories
+        List<RepositorySummary> repositories,
+        List<OrganizationSummary> organizations
     ) {
         long totalItems = articles.size() + recruits.size() + teams.size()
-            + challenges.size() + users.size() + repositories.size();
+            + challenges.size() + users.size() + repositories.size() + organizations.size();
         return new PageMeta(0, 1, totalItems);
     }
 }
