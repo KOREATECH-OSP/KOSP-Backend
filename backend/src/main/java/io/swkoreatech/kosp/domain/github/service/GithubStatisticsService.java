@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.github.service;
 
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionComparis
 import io.swkoreatech.kosp.domain.github.dto.response.GithubContributionScoreResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubOverallHistoryResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GithubRecentActivityResponse;
+import io.swkoreatech.kosp.domain.github.dto.response.GithubResumeProjectResponse;
 import io.swkoreatech.kosp.domain.github.dto.response.GlobalStatisticsResponse;
 import io.swkoreatech.kosp.domain.github.model.GithubRepositoryStatistics;
 import io.swkoreatech.kosp.domain.github.model.PlatformStatistics;
@@ -135,6 +137,39 @@ public class GithubStatisticsService {
             .totalUsers(stats.getTotalUserCount())
             .calculatedAt(stats.getCalculatedAt())
             .build();
+    }
+
+    /**
+     * 로그인 사용자의 저장소 목록을 이력서 프로젝트 가져오기용으로 조회한다.
+     * 소유 저장소 우선, 스타 수 내림차순, 최근 커밋 내림차순으로 정렬한다.
+     *
+     * @param user 로그인 사용자
+     * @return 이력서 프로젝트 가져오기 항목 목록 (GitHub 미연동 시 빈 목록)
+     */
+    public List<GithubResumeProjectResponse> getMyRepositoriesForResume(User user) {
+        if (user.getGithubUser() == null) {
+            return List.of();
+        }
+
+        String githubId = String.valueOf(user.getGithubUser().getGithubId());
+        return repositoryStatisticsRepository.findByContributorGithubId(githubId).stream()
+            .sorted(Comparator
+                .comparing((GithubRepositoryStatistics r) -> Boolean.TRUE.equals(r.getIsOwned()))
+                .thenComparing(r -> nullSafeInt(r.getStargazersCount()))
+                .thenComparing(GithubStatisticsService::lastCommitEpoch)
+                .reversed())
+            .map(GithubResumeProjectResponse::from)
+            .toList();
+    }
+
+    private static int nullSafeInt(Integer value) {
+        return value == null ? 0 : value;
+    }
+
+    private static long lastCommitEpoch(GithubRepositoryStatistics repo) {
+        return repo.getLastCommitDate() == null
+            ? Long.MIN_VALUE
+            : repo.getLastCommitDate().toEpochSecond(java.time.ZoneOffset.UTC);
     }
 
     private GithubUserStatistics getStatisticsByUserId(Long userId) {
