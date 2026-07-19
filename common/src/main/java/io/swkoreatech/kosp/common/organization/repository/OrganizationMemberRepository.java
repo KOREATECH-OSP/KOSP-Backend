@@ -3,6 +3,8 @@ package io.swkoreatech.kosp.common.organization.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 
 import io.swkoreatech.kosp.common.exception.ExceptionMessage;
@@ -23,6 +25,8 @@ public interface OrganizationMemberRepository extends Repository<OrganizationMem
 
     List<OrganizationMember> findAllByGithubUserId(Long githubUserId);
 
+    @Modifying
+    @Query("DELETE FROM OrganizationMember m WHERE m.organization.id = :organizationId")
     void deleteAllByOrganizationId(Long organizationId);
 
     Optional<OrganizationMember> findByOrganizationIdAndUserId(Long organizationId, Long userId);
