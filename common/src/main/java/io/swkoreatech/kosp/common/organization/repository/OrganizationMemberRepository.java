@@ -26,6 +26,8 @@ public interface OrganizationMemberRepository extends Repository<OrganizationMem
 
     List<OrganizationMember> findAllByGithubUserId(Long githubUserId);
 
+    List<OrganizationMember> findAllByUserId(Long userId);
+
     @Modifying
     @Query("DELETE FROM OrganizationMember m WHERE m.organization.id = :organizationId")
     void deleteAllByOrganizationId(@Param("organizationId") Long organizationId);

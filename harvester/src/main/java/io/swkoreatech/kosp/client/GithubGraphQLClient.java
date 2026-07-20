@@ -74,10 +74,10 @@ public class GithubGraphQLClient {
 
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
-            .responseTimeout(Duration.ofMinutes(5))
+            .responseTimeout(Duration.ofSeconds(60))
             .doOnConnected(connection -> {
-                connection.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
-                connection.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+                connection.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS));
+                connection.addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS));
             });
 
         return WebClient.builder()
@@ -148,6 +148,8 @@ public class GithubGraphQLClient {
                 throwable instanceof WebClientResponseException.BadGateway ||
                 throwable instanceof WebClientResponseException.ServiceUnavailable ||
                 throwable instanceof WebClientResponseException.TooManyRequests ||
+                throwable instanceof java.util.concurrent.TimeoutException ||
+                throwable instanceof io.netty.handler.timeout.ReadTimeoutException ||
                 (throwable.getMessage() != null && (
                     throwable.getMessage().contains("prematurely closed") ||
                     throwable.getMessage().contains("Connection reset") ||

@@ -1,10 +1,12 @@
 package io.swkoreatech.kosp.domain.organization.service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -80,8 +82,20 @@ public class OrganizationService {
     }
 
     public List<OrganizationResponse> getMyOrganizations(User user) {
-        return organizationRepository.findAllByRegisteredByUserId(user.getId()).stream()
+        Set<Long> seen = new HashSet<>();
+
+        List<Organization> registeredOrgs = organizationRepository.findAllByRegisteredByUserId(user.getId()).stream()
             .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
+            .toList();
+
+        List<Organization> memberOrgs = organizationMemberRepository.findAllByUserId(user.getId()).stream()
+            .filter(m -> m.getStatus() != OrganizationMemberStatus.REMOVED)
+            .map(OrganizationMember::getOrganization)
+            .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
+            .toList();
+
+        return Stream.concat(registeredOrgs.stream(), memberOrgs.stream())
+            .filter(org -> seen.add(org.getId()))
             .map(OrganizationResponse::from)
             .toList();
     }

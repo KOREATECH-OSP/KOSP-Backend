@@ -62,10 +62,10 @@ public class GithubRestApiClient {
 
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
-            .responseTimeout(Duration.ofMinutes(5))
+            .responseTimeout(Duration.ofSeconds(60))
             .doOnConnected(conn -> {
-                conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
-                conn.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+                conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS));
+                conn.addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS));
                 if (conn.channel().pipeline().get(SslHandler.class) != null) {
                     conn.channel().pipeline().get(SslHandler.class).setHandshakeTimeoutMillis(60000);
                 }
@@ -117,6 +117,8 @@ public class GithubRestApiClient {
                     .maxBackoff(Duration.ofSeconds(30))
                     .filter(throwable ->
                         throwable instanceof WebClientResponseException.TooManyRequests ||
+                        throwable instanceof java.util.concurrent.TimeoutException ||
+                        throwable instanceof io.netty.handler.timeout.ReadTimeoutException ||
                             (throwable.getMessage() != null && (
                                 throwable.getMessage().contains("prematurely closed") ||
                                     throwable.getMessage().contains("Connection reset") ||
