@@ -82,6 +82,7 @@ public enum ExceptionMessage {
     CANNOT_CHANGE_OWNER_ROLE("GitHub Owner의 역할은 K-OSP에서 변경할 수 없습니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_MEMBER_ALREADY_ADMIN("이미 관리자인 멤버입니다.", HttpStatus.CONFLICT),
     ORGANIZATION_MEMBER_NOT_ADMIN("관리자가 아닌 멤버입니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_REPO_NOT_FOUND("조직 저장소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     GITHUB_REAUTH_REQUIRED("GitHub 재인증이 필요합니다. read:org 권한을 포함하여 다시 로그인해 주세요.", HttpStatus.FORBIDDEN),
 
     // Season Ranking System

@@ -66,4 +66,12 @@ public class Organization extends BaseEntity {
     public void activate() {
         this.status = OrganizationStatus.ACTIVE;
     }
+
+    public void reactivate(Long registeredByUserId, String githubOrgName, String displayName, String avatarUrl) {
+        this.status = OrganizationStatus.ACTIVE;
+        this.registeredByUserId = registeredByUserId;
+        this.githubOrgName = githubOrgName;
+        this.displayName = displayName;
+        this.avatarUrl = avatarUrl;
+    }
 }

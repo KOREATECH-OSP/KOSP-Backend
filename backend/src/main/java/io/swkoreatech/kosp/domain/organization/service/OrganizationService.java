@@ -29,6 +29,7 @@ import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
+import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationRepoResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
 import io.swkoreatech.kosp.infra.github.GithubOrgApiClient;
 import io.swkoreatech.kosp.infra.github.dto.GithubOrgMember;
@@ -143,6 +144,43 @@ public class OrganizationService {
         target.demoteToMember();
     }
 
+    public List<OrganizationRepoResponse> getRepositories(Long organizationId, User user) {
+        Organization organization = organizationRepository.getById(organizationId);
+        if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
+        }
+        OrganizationMember requestMember = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, user.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+
+        List<OrganizationRepo> repos = organizationRepoRepository.findAllByOrganizationId(organizationId);
+        boolean isAdmin = requestMember.getRole() != OrganizationMemberRole.MEMBER;
+        return repos.stream()
+            .filter(r -> isAdmin || r.isActive())
+            .map(OrganizationRepoResponse::from)
+            .toList();
+    }
+
+    @Transactional
+    public void activateRepo(Long organizationId, Long repoId, User user) {
+        requireAdminRole(organizationId, user);
+        OrganizationRepo repo = organizationRepoRepository.getById(repoId);
+        if (!repo.getOrganization().getId().equals(organizationId)) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_REPO_NOT_FOUND);
+        }
+        repo.activate();
+    }
+
+    @Transactional
+    public void deactivateRepo(Long organizationId, Long repoId, User user) {
+        requireAdminRole(organizationId, user);
+        OrganizationRepo repo = organizationRepoRepository.getById(repoId);
+        if (!repo.getOrganization().getId().equals(organizationId)) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_REPO_NOT_FOUND);
+        }
+        repo.deactivate();
+    }
+
     public OrganizationDetailResponse getDetail(Long organizationId) {
         Organization organization = organizationRepository.getById(organizationId);
         if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
@@ -152,6 +190,15 @@ public class OrganizationService {
         int linkedCount = countLinked(members);
         int repoCount = organizationRepoRepository.findAllByOrganizationId(organizationId).size();
         return OrganizationDetailResponse.from(organization, members.size(), linkedCount, repoCount);
+    }
+
+    private void requireAdminRole(Long organizationId, User user) {
+        OrganizationMember member = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, user.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+        if (member.getRole() == OrganizationMemberRole.MEMBER) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_ADMIN_REQUIRED);
+        }
     }
 
     private String decryptToken(User user) {
@@ -185,8 +232,18 @@ public class OrganizationService {
                 if (existing.getStatus() != OrganizationStatus.DISCONNECTED) {
                     throw new GlobalException(ExceptionMessage.ORGANIZATION_ALREADY_REGISTERED);
                 }
-                existing.activate();
-                return organizationRepository.save(existing);
+                String orgName = membership.organization().login();
+                String avatarUrl = membership.organization().avatarUrl();
+                organizationRepository.reactivate(
+                    existing.getId(),
+                    OrganizationStatus.ACTIVE,
+                    registeredByUserId,
+                    orgName,
+                    orgName,
+                    avatarUrl
+                );
+                existing.reactivate(registeredByUserId, orgName, orgName, avatarUrl);
+                return existing;
             })
             .orElseGet(() -> {
                 Organization organization = Organization.builder()

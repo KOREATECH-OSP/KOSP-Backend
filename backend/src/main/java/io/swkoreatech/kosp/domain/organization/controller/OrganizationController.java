@@ -18,6 +18,7 @@ import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterR
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
+import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationRepoResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.service.OrganizationService;
 import io.swkoreatech.kosp.global.host.ClientURL;
@@ -76,6 +77,37 @@ public class OrganizationController implements OrganizationApi {
         @PathVariable Long organizationId
     ) {
         return ResponseEntity.ok(organizationService.getMembers(organizationId, user));
+    }
+
+    @GetMapping("/{organizationId}/repositories")
+    @Permit(name = "org:repositories", description = "조직 저장소 목록 조회")
+    public ResponseEntity<List<OrganizationRepoResponse>> getRepositories(
+        @AuthUser User user,
+        @PathVariable Long organizationId
+    ) {
+        return ResponseEntity.ok(organizationService.getRepositories(organizationId, user));
+    }
+
+    @PostMapping("/{organizationId}/repositories/{repoId}/activate")
+    @Permit(name = "org:repositories:activate", description = "조직 저장소 활성화 (Owner/Admin)")
+    public ResponseEntity<Void> activateRepo(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @PathVariable Long repoId
+    ) {
+        organizationService.activateRepo(organizationId, repoId, user);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{organizationId}/repositories/{repoId}/activate")
+    @Permit(name = "org:repositories:deactivate", description = "조직 저장소 비활성화 (Owner/Admin)")
+    public ResponseEntity<Void> deactivateRepo(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @PathVariable Long repoId
+    ) {
+        organizationService.deactivateRepo(organizationId, repoId, user);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{organizationId}/members/{memberId}/admin")
