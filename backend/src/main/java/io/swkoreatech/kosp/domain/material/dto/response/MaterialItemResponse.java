@@ -20,9 +20,14 @@ import io.swkoreatech.kosp.domain.material.model.MaterialSource;
  * @param originalFileName 원본 파일명
  * @param fileSize         파일 크기(byte)
  * @param contentType      MIME 타입
- * @param isPublic         실제 적용되는 공개 여부 (아이템 override 없으면 폴더 설정 상속)
- * @param materialDate     원본 게시/제출일
- * @param updatedAt        수정 시각
+ * @param isPublic             실제 적용되는 공개 여부 (아이템 override 없으면 폴더 설정 상속)
+ * @param semesterOrder        최근학기 정렬키 (year*10 + term)
+ * @param autoImported         자동 수집 여부 (확장/동기화로 들어온 자료)
+ * @param duplicatedWithGithub GitHub 프로젝트와 중복 가능성 안내
+ * @param duplicateRepoKey     중복 후보 repo (owner/repo)
+ * @param materialDate         원본 게시/제출일
+ * @param lastSyncedAt         마지막 동기화 시각
+ * @param updatedAt            수정 시각
  */
 public record MaterialItemResponse(
     Long id,
@@ -38,7 +43,12 @@ public record MaterialItemResponse(
     Long fileSize,
     String contentType,
     boolean isPublic,
+    Integer semesterOrder,
+    boolean autoImported,
+    boolean duplicatedWithGithub,
+    String duplicateRepoKey,
     LocalDateTime materialDate,
+    LocalDateTime lastSyncedAt,
     LocalDateTime updatedAt
 ) {
 
@@ -57,7 +67,12 @@ public record MaterialItemResponse(
             item.getFileSize(),
             item.getContentType(),
             item.isPublic(),
+            item.getSemesterOrder(),
+            item.isAutoImported(),
+            item.isDuplicatedWithGithub(),
+            item.getDuplicateRepoKey(),
             item.getMaterialDate(),
+            item.getLastSyncedAt(),
             item.getUpdatedAt()
         );
     }

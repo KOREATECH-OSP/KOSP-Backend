@@ -9,12 +9,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import io.swkoreatech.kosp.domain.material.model.MaterialFolder;
+import io.swkoreatech.kosp.domain.material.model.MaterialSource;
 import io.swkoreatech.kosp.domain.material.model.Visibility;
 
 /**
  * 학습자료 폴더 저장소.
  */
 public interface MaterialFolderRepository extends JpaRepository<MaterialFolder, Long> {
+
+    /**
+     * import 자동 배정용 폴더를 출처+이름으로 조회한다 (없으면 생성 대상).
+     */
+    Optional<MaterialFolder> findFirstByUserIdAndSourceAndName(Long userId, MaterialSource source, String name);
 
     /**
      * 사용자의 전체 폴더를 정렬 순서대로 조회한다 (폴더 트리 구성용).

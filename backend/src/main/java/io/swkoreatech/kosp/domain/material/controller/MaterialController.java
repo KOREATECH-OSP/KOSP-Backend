@@ -11,10 +11,13 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.material.api.MaterialApi;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialImportRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.VisibilityUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
+import io.swkoreatech.kosp.domain.material.dto.response.MaterialImportResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
+import io.swkoreatech.kosp.domain.material.service.MaterialImportService;
 import io.swkoreatech.kosp.domain.material.service.MaterialService;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
@@ -29,6 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class MaterialController implements MaterialApi {
 
     private final MaterialService materialService;
+    private final MaterialImportService materialImportService;
 
     // ── 폴더 ──────────────────────────────────────────────────────────
 
@@ -106,6 +110,14 @@ public class MaterialController implements MaterialApi {
         @AuthUser User user, MaterialItemCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(materialService.createItem(user, request));
+    }
+
+    @Override
+    @Permit(description = "아우누리 과제/EL 자료 수집(import)")
+    public ResponseEntity<MaterialImportResponse> importMaterials(
+        @AuthUser User user, MaterialImportRequest request
+    ) {
+        return ResponseEntity.ok(materialImportService.importMaterials(user, request));
     }
 
     @Override
