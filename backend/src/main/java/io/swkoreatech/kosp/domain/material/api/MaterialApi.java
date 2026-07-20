@@ -19,9 +19,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialImportRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.VisibilityUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
+import io.swkoreatech.kosp.domain.material.dto.response.MaterialImportResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import jakarta.validation.Valid;
@@ -110,6 +112,18 @@ public interface MaterialApi {
     ResponseEntity<MaterialItemResponse> createItem(
         @Parameter(hidden = true) @AuthUser User user,
         @RequestBody @Valid MaterialItemCreateRequest request
+    );
+
+    @Operation(
+        summary = "아우누리 과제/EL 자료 수집(import)",
+        description = "브라우저 확장이 사용자의 세션에서 스크랩한 정규화 데이터를 upsert 합니다. "
+            + "학교 인증 정보는 전달하지 않으며, (source, sourceExternalId) 기준으로 멱등 처리됩니다. "
+            + "신규 자료는 출처별 자동 폴더에 비공개(PRIVATE)로 생성됩니다."
+    )
+    @PostMapping("/v1/users/me/materials/import")
+    ResponseEntity<MaterialImportResponse> importMaterials(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid MaterialImportRequest request
     );
 
     @Operation(summary = "자료 공개/비공개 변경", description = "자료 단위 공개 override 를 변경합니다.")

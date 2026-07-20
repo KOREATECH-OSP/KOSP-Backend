@@ -95,6 +95,34 @@ public class MaterialItem extends BaseEntity {
     @Column(name = "material_date")
     private LocalDateTime materialDate;
 
+    /** 아우누리 자료 고유키. (user_id, source, source_external_id) 로 upsert 멱등성을 보장한다. */
+    @Column(name = "source_external_id", length = 255)
+    private String sourceExternalId;
+
+    /** 최근학기 정렬키 (year*10 + term). 최상위 정렬 기준. */
+    @Column(name = "semester_order")
+    private Integer semesterOrder;
+
+    /** 자동 수집 여부. 확장/동기화로 들어온 자료는 true. */
+    @Column(name = "auto_imported", nullable = false)
+    private boolean autoImported;
+
+    /** 변경 감지용 콘텐츠 해시. 값이 바뀌었을 때만 동기화 갱신한다. */
+    @Column(name = "content_hash", length = 64)
+    private String contentHash;
+
+    /** 마지막 동기화 시각. */
+    @Column(name = "last_synced_at")
+    private LocalDateTime lastSyncedAt;
+
+    /** GitHub 프로젝트와 중복 가능성 안내 플래그 (자동 병합하지 않음). */
+    @Column(name = "duplicated_with_github", nullable = false)
+    private boolean duplicatedWithGithub;
+
+    /** 중복 후보 repo (owner/repo). */
+    @Column(name = "duplicate_repo_key", length = 255)
+    private String duplicateRepoKey;
+
     @Builder
     private MaterialItem(
         MaterialFolder folder,
@@ -111,7 +139,12 @@ public class MaterialItem extends BaseEntity {
         Long fileSize,
         String contentType,
         Visibility visibility,
-        LocalDateTime materialDate
+        LocalDateTime materialDate,
+        String sourceExternalId,
+        Integer semesterOrder,
+        boolean autoImported,
+        String contentHash,
+        LocalDateTime lastSyncedAt
     ) {
         this.folder = folder;
         this.user = user;
@@ -128,6 +161,11 @@ public class MaterialItem extends BaseEntity {
         this.contentType = contentType;
         this.visibility = visibility;
         this.materialDate = materialDate;
+        this.sourceExternalId = sourceExternalId;
+        this.semesterOrder = semesterOrder;
+        this.autoImported = autoImported;
+        this.contentHash = contentHash;
+        this.lastSyncedAt = lastSyncedAt;
     }
 
     /**
@@ -154,6 +192,57 @@ public class MaterialItem extends BaseEntity {
      */
     public void changeVisibility(Visibility visibility) {
         this.visibility = visibility;
+    }
+
+    /**
+     * 자동 수집 재동기화. 원본(아우누리) 내용이 바뀌었을 때 메타데이터를 갱신한다.
+     * 공개 설정({@code visibility})과 소속 폴더는 사용자가 조정했을 수 있으므로 건드리지 않는다.
+     */
+    public void syncFrom(
+        String title,
+        String subjectName,
+        Integer materialYear,
+        String semester,
+        Integer semesterOrder,
+        String sourceUrl,
+        String fileUrl,
+        String originalFileName,
+        Long fileSize,
+        String contentType,
+        LocalDateTime materialDate,
+        String contentHash,
+        LocalDateTime syncedAt
+    ) {
+        if (title != null) {
+            this.title = title;
+        }
+        this.subjectName = subjectName;
+        this.materialYear = materialYear;
+        this.semester = semester;
+        this.semesterOrder = semesterOrder;
+        this.sourceUrl = sourceUrl;
+        this.fileUrl = fileUrl;
+        this.originalFileName = originalFileName;
+        this.fileSize = fileSize;
+        this.contentType = contentType;
+        this.materialDate = materialDate;
+        this.contentHash = contentHash;
+        this.lastSyncedAt = syncedAt;
+    }
+
+    /**
+     * 내용 변경 없이 동기화 시각만 갱신한다 (변경 감지 결과 동일할 때).
+     */
+    public void touchSynced(LocalDateTime syncedAt) {
+        this.lastSyncedAt = syncedAt;
+    }
+
+    /**
+     * GitHub 프로젝트와의 중복 가능성 안내 플래그를 설정한다 (자동 병합하지 않음).
+     */
+    public void markDuplicate(boolean duplicated, String repoKey) {
+        this.duplicatedWithGithub = duplicated;
+        this.duplicateRepoKey = duplicated ? repoKey : null;
     }
 
     /**

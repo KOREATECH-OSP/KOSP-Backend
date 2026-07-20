@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.resume.api;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.resume.dto.request.AutoProjectUpdateRequest;
 import io.swkoreatech.kosp.domain.resume.dto.request.ResumeSaveRequest;
+import io.swkoreatech.kosp.domain.resume.dto.response.ResumeAutoProjectResponse;
 import io.swkoreatech.kosp.domain.resume.dto.response.ResumeListResponse;
 import io.swkoreatech.kosp.domain.resume.dto.response.ResumeResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
@@ -118,5 +122,49 @@ public interface ResumeApi {
     ResponseEntity<ResumeResponse> getPublicResumeById(
         @PathVariable Long userId,
         @PathVariable Long resumeId
+    );
+
+    // ── 자동 프로젝트 (과제/EL 자료 → 이력서 프로젝트 자동 연결) ──────────
+
+    @Operation(summary = "이력서 자동 프로젝트 조회",
+        description = "과제/EL 자료를 실시간 투영한 자동 프로젝트 목록을 반환합니다. "
+            + "원본 자료 변경이 자동 반영되며, 사용자가 삭제(tombstone)한 항목은 제외됩니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/v1/users/me/resumes/{resumeId}/auto-projects")
+    ResponseEntity<List<ResumeAutoProjectResponse>> getAutoProjects(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long resumeId
+    );
+
+    @Operation(summary = "자동 프로젝트 삭제(tombstone)",
+        description = "자동 입력된 프로젝트를 삭제합니다. 재동기화로 부활하지 않습니다(복원 전까지).")
+    @ApiResponse(responseCode = "204", description = "삭제 성공")
+    @DeleteMapping("/v1/users/me/resumes/{resumeId}/auto-projects/{materialItemId}")
+    ResponseEntity<Void> deleteAutoProject(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long resumeId,
+        @PathVariable Long materialItemId
+    );
+
+    @Operation(summary = "자동 프로젝트 복원",
+        description = "삭제(tombstone)된 자동 프로젝트를 다시 이력서에 포함시킵니다.")
+    @ApiResponse(responseCode = "204", description = "복원 성공")
+    @PostMapping("/v1/users/me/resumes/{resumeId}/auto-projects/{materialItemId}/restore")
+    ResponseEntity<Void> restoreAutoProject(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long resumeId,
+        @PathVariable Long materialItemId
+    );
+
+    @Operation(summary = "자동 프로젝트 수정",
+        description = "자동 입력된 프로젝트를 사용자 값으로 덮어씁니다(overrides). "
+            + "이후 원본 재동기화가 수정본을 덮어쓰지 않습니다. visibility 로 공개 여부도 조정합니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @PatchMapping("/v1/users/me/resumes/{resumeId}/auto-projects/{materialItemId}")
+    ResponseEntity<ResumeAutoProjectResponse> updateAutoProject(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long resumeId,
+        @PathVariable Long materialItemId,
+        @RequestBody @Valid AutoProjectUpdateRequest request
     );
 }
