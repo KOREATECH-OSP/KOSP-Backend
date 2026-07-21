@@ -54,18 +54,19 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
         run: node .github/scripts/notion-portfolio-daily.mjs
 
-      # 생성된 문서를 아티팩트로 항상 보관(설정 0으로도 다운로드 가능)
+      # 생성된 문서를 아티팩트로 항상 보관(Notion 단계가 실패해도 md 는 남으므로 always)
       - name: Upload portfolio artifact
-        if: ${{ hashFiles('portfolio-output.md') != '' }}
+        if: ${{ always() && hashFiles('portfolio-output.md') != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: portfolio-KOSP-Backend
           path: portfolio-output.md
           if-no-files-found: ignore
 
-      # 메일 발송(선택): MAIL_USERNAME/MAIL_PASSWORD 시크릿이 있을 때만. 실패해도 잡은 성공.
+      # 메일 발송(선택): MAIL_USERNAME/MAIL_PASSWORD 시크릿이 있을 때만.
+      # Notion 단계가 실패해도 문서는 이미 생성됐으니 메일은 보낸다(always).
       - name: Email portfolio
-        if: ${{ env.MAIL_USERNAME != '' && hashFiles('portfolio-output.md') != '' }}
+        if: ${{ always() && env.MAIL_USERNAME != '' && hashFiles('portfolio-output.md') != '' }}
         continue-on-error: true
         uses: dawidd6/action-send-mail@v3
         with:
