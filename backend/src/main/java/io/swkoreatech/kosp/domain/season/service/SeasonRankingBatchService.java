@@ -18,12 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.common.season.model.Season;
 import io.swkoreatech.kosp.common.season.model.SeasonRankingScore;
-import io.swkoreatech.kosp.common.season.model.enums.ScoreEventType;
 import io.swkoreatech.kosp.common.season.model.enums.SeasonTier;
-import io.swkoreatech.kosp.common.season.repository.SeasonProjectMemberRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRankingScoreRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRepository;
-import io.swkoreatech.kosp.common.season.repository.SeasonScoreEventLogRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.season.mongo.SeasonCommitDocument;
@@ -50,27 +47,6 @@ public class SeasonRankingBatchService {
     private static final BigDecimal COMMIT_SCORE_PER_UNIT = new BigDecimal("0.0500");
     private static final int COMMIT_DAILY_CAP = 3;
 
-    // ── 엘리트 티어(Master/Challenger) 조건 상수 (안 1: 성취 게이트형) ──
-    // "상위 퍼센트 ∩ 성취 조건" 교집합. 점수만으로는 도달 불가.
-    private static final double MASTER_PERCENTILE = 0.05;      // 상위 5%
-    private static final double MASTER_SCORE_FLOOR = 70.0;     // 다이아 이상
-    private static final int MASTER_MIN_POPULATION = 20;       // 최소 모집단
-    private static final int MASTER_HIGH_TIER = 8;             // 고난도 챌린지 기준 티어
-    private static final long MASTER_HIGH_TIER_COUNT = 2;
-    private static final int MASTER_PROJECT_LEVEL = 4;         // 고레벨 프로젝트 기준
-    private static final long MASTER_PROJECT_COUNT = 1;
-    private static final int MASTER_MIN_COMMITS = 50;
-    private static final long MASTER_MIN_ATTENDANCE = 20;
-
-    private static final double CHALLENGER_PERCENTILE = 0.01;  // 상위 1%
-    private static final double CHALLENGER_SCORE_FLOOR = 80.0;
-    private static final int CHALLENGER_MIN_POPULATION = 50;
-    private static final long CHALLENGER_HIGH_TIER_COUNT = 3;  // 티어 8+ 3개 이상
-    private static final long CHALLENGER_PROJECT_COUNT = 1;    // 레벨 4+ 완료 1개 이상
-    private static final int CHALLENGER_MIN_COMMITS = 100;
-    private static final long CHALLENGER_MIN_ATTENDANCE = 40;
-    private static final int CHALLENGER_MIN_DIVERSITY = 4;     // 5개 중 4개 카테고리+
-
     // 챌린지 레벨(tier)별 점수 단가
     private static final Map<Integer, BigDecimal> CHALLENGE_TIER_SCORE_MAP = Map.of(
         1, new BigDecimal("0.25"),
@@ -91,8 +67,6 @@ public class SeasonRankingBatchService {
     private final SeasonCommitRepository seasonCommitRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final SeasonScoreService seasonScoreService;
-    private final SeasonProjectMemberRepository seasonProjectMemberRepository;
-    private final SeasonScoreEventLogRepository eventLogRepository;
     private final SeasonTierTitleService seasonTierTitleService;
 
     /**
@@ -117,7 +91,7 @@ public class SeasonRankingBatchService {
 
             recalculateCommitAndChallengeScores(season, activeUsers);
             recalculateRanks(season);
-            applyEliteTiers(season);
+            assignTiers(season);
             seasonTierTitleService.syncTierTitles(season);
 
             log.info("[SeasonBatch] 배치 완료. 처리 유저={}", activeUsers.size());
@@ -238,120 +212,39 @@ public class SeasonRankingBatchService {
     }
 
     /**
-     * 엘리트 티어(Master/Challenger)를 승격 적용한다.
+     * 백분위 기반으로 전체 유저의 티어를 배정한다. 반드시 {@code recalculateRanks} 이후 실행한다.
      *
-     * <p>점수형 티어(Bronze~Diamond) 위에, "상위 퍼센트 ∩ 성취 조건"(교집합)을 만족하는
-     * 유저를 Master 또는 Challenger로 승격한다. 반드시 {@code recalculateRanks} 이후 실행한다.</p>
-     *
-     * <p>성능: 점수 하한·상위% 후보만 성취 조건 쿼리를 수행하므로 대다수 유저는 스킵된다.</p>
+     * <p>순위/전체인원으로 백분위를 구해 기본 5티어(BRONZE~DIAMOND)를 정하고,
+     * 다이아(상위 20%)이면서 총점 기준을 넘으면 MASTER({@value SeasonTier#MASTER_MIN_SCORE}+)
+     * ·CHALLENGER({@value SeasonTier#CHALLENGER_MIN_SCORE}+)로 승급한다.</p>
      */
     @Transactional
-    public void applyEliteTiers(Season season) {
+    public void assignTiers(Season season) {
         List<SeasonRankingScore> all = rankingScoreRepository.findAllBySeason(season);
         int total = all.size();
         if (total == 0) {
             return;
         }
 
-        int masterCount = 0;
-        int challengerCount = 0;
-
+        int[] counts = new int[SeasonTier.values().length];
         for (SeasonRankingScore score : all) {
             Integer rank = score.getRankInSeason();
             if (rank == null) {
                 continue;
             }
             double percentile = (double) rank / total;
-            double totalScore = score.getTotalScore().doubleValue();
-
-            // 후보 필터: Master(느슨한 게이트) 기준도 못 넘으면 성취 조건 쿼리 없이 스킵
-            if (total < MASTER_MIN_POPULATION
-                || percentile > MASTER_PERCENTILE
-                || totalScore < MASTER_SCORE_FLOOR) {
-                continue;
-            }
-
-            EliteStats stats = collectEliteStats(season, score);
-
-            if (meetsChallenger(percentile, totalScore, total, stats)) {
-                score.updateTier(SeasonTier.CHALLENGER);
-                rankingScoreRepository.save(score);
-                challengerCount++;
-            } else if (meetsMaster(stats)) {
-                score.updateTier(SeasonTier.MASTER_1);
-                rankingScoreRepository.save(score);
-                masterCount++;
-            }
+            SeasonTier tier = SeasonTier.resolve(percentile, score.getTotalScore().doubleValue());
+            score.updateTier(tier);
+            rankingScoreRepository.save(score);
+            counts[tier.ordinal()]++;
         }
 
-        log.info("[SeasonBatch] 엘리트 티어 적용 완료. seasonId={}, master={}, challenger={}",
-            season.getId(), masterCount, challengerCount);
-    }
-
-    private EliteStats collectEliteStats(Season season, SeasonRankingScore score) {
-        User user = score.getUser();
-        var startDateTime = season.getStartDate().atStartOfDay();
-        var endDateTime = season.getEndDate().plusDays(1).atStartOfDay();
-
-        List<Object[]> tierCounts = challengeHistoryRepository
-            .countAchievedGroupByTierInPeriod(user, startDateTime, endDateTime);
-        long highTierChallenges = countChallengesFromTier(tierCounts, MASTER_HIGH_TIER);
-
-        long highLevelProjects = seasonProjectMemberRepository
-            .countCompletedProjectsByLevel(user, season, MASTER_PROJECT_LEVEL);
-
-        int validCommits = score.getCommitScore()
-            .divide(COMMIT_SCORE_PER_UNIT, 0, RoundingMode.HALF_UP)
-            .intValue();
-
-        long attendanceDays = eventLogRepository
-            .countBySeasonAndUserAndEventType(season, user, ScoreEventType.ATTENDANCE);
-
-        int diversity = score.activeCategoryCount();
-
-        return new EliteStats(highTierChallenges, highLevelProjects, validCommits, attendanceDays, diversity);
-    }
-
-    private long countChallengesFromTier(List<Object[]> tierCounts, int minTier) {
-        long sum = 0;
-        for (Object[] row : tierCounts) {
-            Integer tier = (Integer) row[0];
-            Long count = (Long) row[1];
-            if (tier != null && count != null && tier >= minTier) {
-                sum += count;
-            }
-        }
-        return sum;
-    }
-
-    /** Master 승급 조건: (고난도 챌린지 OR 고레벨 프로젝트) ∩ 커밋 하한 ∩ 출석 하한. (후보 필터에서 상위%·점수 이미 통과) */
-    private boolean meetsMaster(EliteStats s) {
-        boolean achievement = s.highTierChallenges() >= MASTER_HIGH_TIER_COUNT
-            || s.highLevelProjects() >= MASTER_PROJECT_COUNT;
-        return achievement
-            && s.validCommits() >= MASTER_MIN_COMMITS
-            && s.attendanceDays() >= MASTER_MIN_ATTENDANCE;
-    }
-
-    /** Challenger 승급 조건: 상위 1% ∩ 점수 하한 ∩ 고난도 챌린지 ∩ 고레벨 프로젝트 ∩ 커밋/출석/다양성 하한. */
-    private boolean meetsChallenger(double percentile, double totalScore, int total, EliteStats s) {
-        return percentile <= CHALLENGER_PERCENTILE
-            && totalScore >= CHALLENGER_SCORE_FLOOR
-            && total >= CHALLENGER_MIN_POPULATION
-            && s.highTierChallenges() >= CHALLENGER_HIGH_TIER_COUNT
-            && s.highLevelProjects() >= CHALLENGER_PROJECT_COUNT
-            && s.validCommits() >= CHALLENGER_MIN_COMMITS
-            && s.attendanceDays() >= CHALLENGER_MIN_ATTENDANCE
-            && s.diversity() >= CHALLENGER_MIN_DIVERSITY;
-    }
-
-    /** 엘리트 티어 조건 평가용 집계값. */
-    private record EliteStats(
-        long highTierChallenges,
-        long highLevelProjects,
-        int validCommits,
-        long attendanceDays,
-        int diversity
-    ) {
+        log.info("[SeasonBatch] 티어 배정 완료. seasonId={}, total={}, "
+                + "BRONZE={}, SILVER={}, GOLD={}, PLATINUM={}, DIAMOND={}, MASTER={}, CHALLENGER={}",
+            season.getId(), total,
+            counts[SeasonTier.BRONZE.ordinal()], counts[SeasonTier.SILVER.ordinal()],
+            counts[SeasonTier.GOLD.ordinal()], counts[SeasonTier.PLATINUM.ordinal()],
+            counts[SeasonTier.DIAMOND.ordinal()], counts[SeasonTier.MASTER.ordinal()],
+            counts[SeasonTier.CHALLENGER.ordinal()]);
     }
 }
