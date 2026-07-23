@@ -13,6 +13,8 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.response.DownloadUrlResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
 import io.swkoreatech.kosp.domain.material.model.MaterialFolder;
@@ -21,6 +23,7 @@ import io.swkoreatech.kosp.domain.material.model.MaterialSource;
 import io.swkoreatech.kosp.domain.material.model.Visibility;
 import io.swkoreatech.kosp.domain.material.repository.MaterialFolderRepository;
 import io.swkoreatech.kosp.domain.material.repository.MaterialItemRepository;
+import io.swkoreatech.kosp.domain.upload.client.S3StorageClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,6 +41,7 @@ public class MaterialService {
 
     private final MaterialFolderRepository folderRepository;
     private final MaterialItemRepository itemRepository;
+    private final S3StorageClient s3StorageClient;
 
     // ── 폴더 ──────────────────────────────────────────────────────────
 
@@ -149,6 +153,33 @@ public class MaterialService {
         log.info("학습자료 폴더 삭제: userId={}, folderId={}", user.getId(), folderId);
     }
 
+    /**
+     * 폴더를 다른 상위 폴더로 이동한다 (본인 소유 검증 + 순환참조 방지).
+     * {@code parentId} 가 null 이면 최상위로 이동한다.
+     */
+    @Transactional
+    public MaterialFolderResponse moveFolder(User user, Long folderId, Long parentId) {
+        MaterialFolder folder = getOwnedFolder(user, folderId);
+
+        MaterialFolder newParent = null;
+        if (parentId != null) {
+            if (parentId.equals(folderId)) {
+                throw new GlobalException(ExceptionMessage.BAD_REQUEST);
+            }
+            newParent = getOwnedFolder(user, parentId);
+            // 자기 자신의 하위(자손) 폴더로 이동하면 순환참조가 되므로 차단한다.
+            for (MaterialFolder cursor = newParent; cursor != null; cursor = cursor.getParent()) {
+                if (cursor.getId().equals(folderId)) {
+                    throw new GlobalException(ExceptionMessage.BAD_REQUEST);
+                }
+            }
+        }
+
+        folder.changeParent(newParent);
+        log.info("학습자료 폴더 이동: userId={}, folderId={}, parentId={}", user.getId(), folderId, parentId);
+        return MaterialFolderResponse.from(folder, itemRepository.countByFolderId(folderId));
+    }
+
     // ── 자료 아이템 ────────────────────────────────────────────────────
 
     /**
@@ -230,17 +261,58 @@ public class MaterialService {
     }
 
     /**
+     * 자료 메타데이터를 수정한다 (이름 바꾸기 등, 본인 소유 검증).
+     */
+    @Transactional
+    public MaterialItemResponse updateItem(User user, Long itemId, MaterialItemUpdateRequest request) {
+        MaterialItem item = getOwnedItem(user, itemId);
+        item.update(request.title(), request.subjectName(), request.materialYear(), request.semester());
+        return MaterialItemResponse.from(item);
+    }
+
+    /**
+     * 자료를 다른 폴더로 이동한다 (자료·대상 폴더 모두 본인 소유 검증).
+     */
+    @Transactional
+    public MaterialItemResponse moveItem(User user, Long itemId, Long folderId) {
+        MaterialItem item = getOwnedItem(user, itemId);
+        MaterialFolder targetFolder = getOwnedFolder(user, folderId);
+        item.moveTo(targetFolder);
+        log.info("학습자료 이동: userId={}, itemId={}, folderId={}", user.getId(), itemId, folderId);
+        return MaterialItemResponse.from(item);
+    }
+
+    /**
      * 자료를 삭제한다 (본인 소유 검증).
      */
     @Transactional
     public void deleteItem(User user, Long itemId) {
-        MaterialItem item = itemRepository.findByIdAndUserId(itemId, user.getId())
-            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+        MaterialItem item = getOwnedItem(user, itemId);
         itemRepository.delete(item);
         log.info("학습자료 삭제: userId={}, itemId={}", user.getId(), itemId);
     }
 
+    /**
+     * 자료 파일의 다운로드 전용 presigned URL을 발급한다 (본인 소유 검증).
+     *
+     * <p>S3에 저장된 파일만 지원한다. 아우누리 원본 링크 등 외부 URL 파일은 다운로드 URL을 발급할 수 없다.</p>
+     */
+    public DownloadUrlResponse getItemDownloadUrl(User user, Long itemId) {
+        MaterialItem item = getOwnedItem(user, itemId);
+        if (item.getFileUrl() == null || item.getFileUrl().isBlank()) {
+            throw new GlobalException(ExceptionMessage.BAD_REQUEST);
+        }
+        String key = s3StorageClient.extractKeyFromUrl(item.getFileUrl());
+        String url = s3StorageClient.getPresignedDownloadUrl(key, item.getOriginalFileName());
+        return new DownloadUrlResponse(url);
+    }
+
     // ── private helpers ───────────────────────────────────────────────
+
+    private MaterialItem getOwnedItem(User user, Long itemId) {
+        return itemRepository.findByIdAndUserId(itemId, user.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
+    }
 
     private MaterialFolder getOwnedFolder(User user, Long folderId) {
         return folderRepository.findByIdAndUserId(folderId, user.getId())

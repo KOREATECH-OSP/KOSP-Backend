@@ -9,11 +9,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.material.api.MaterialApi;
+import io.swkoreatech.kosp.domain.material.dto.request.FolderMoveRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.ItemMoveRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialImportRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.VisibilityUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.response.DownloadUrlResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialImportResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
@@ -82,6 +86,14 @@ public class MaterialController implements MaterialApi {
     }
 
     @Override
+    @Permit(description = "학습자료 폴더 이동")
+    public ResponseEntity<MaterialFolderResponse> moveFolder(
+        @AuthUser User user, @PathVariable Long folderId, FolderMoveRequest request
+    ) {
+        return ResponseEntity.ok(materialService.moveFolder(user, folderId, request.parentId()));
+    }
+
+    @Override
     @Permit(description = "학습자료 폴더 삭제")
     public ResponseEntity<Void> deleteFolder(@AuthUser User user, @PathVariable Long folderId) {
         materialService.deleteFolder(user, folderId);
@@ -126,6 +138,28 @@ public class MaterialController implements MaterialApi {
         @AuthUser User user, @PathVariable Long itemId, VisibilityUpdateRequest request
     ) {
         return ResponseEntity.ok(materialService.changeItemVisibility(user, itemId, request.visibility()));
+    }
+
+    @Override
+    @Permit(description = "학습자료 수정(이름 바꾸기 등)")
+    public ResponseEntity<MaterialItemResponse> updateItem(
+        @AuthUser User user, @PathVariable Long itemId, MaterialItemUpdateRequest request
+    ) {
+        return ResponseEntity.ok(materialService.updateItem(user, itemId, request));
+    }
+
+    @Override
+    @Permit(description = "학습자료 이동")
+    public ResponseEntity<MaterialItemResponse> moveItem(
+        @AuthUser User user, @PathVariable Long itemId, ItemMoveRequest request
+    ) {
+        return ResponseEntity.ok(materialService.moveItem(user, itemId, request.folderId()));
+    }
+
+    @Override
+    @Permit(description = "학습자료 다운로드 URL 발급")
+    public ResponseEntity<DownloadUrlResponse> getItemDownloadUrl(@AuthUser User user, @PathVariable Long itemId) {
+        return ResponseEntity.ok(materialService.getItemDownloadUrl(user, itemId));
     }
 
     @Override

@@ -215,8 +215,7 @@ public class SeasonRankingBatchService {
      * 백분위 기반으로 전체 유저의 티어를 배정한다. 반드시 {@code recalculateRanks} 이후 실행한다.
      *
      * <p>순위/전체인원으로 백분위를 구해 기본 5티어(BRONZE~DIAMOND)를 정하고,
-     * 다이아(상위 20%)이면서 총점 기준을 넘으면 MASTER({@value SeasonTier#MASTER_MIN_SCORE}+)
-     * ·CHALLENGER({@value SeasonTier#CHALLENGER_MIN_SCORE}+)로 승급한다.</p>
+     * 다이아(상위 20%)이면서 총점 기준을 넘으면 CHALLENGER({@value SeasonTier#CHALLENGER_MIN_SCORE}+)로 승급한다.</p>
      */
     @Transactional
     public void assignTiers(Season season) {
@@ -240,11 +239,11 @@ public class SeasonRankingBatchService {
         }
 
         log.info("[SeasonBatch] 티어 배정 완료. seasonId={}, total={}, "
-                + "BRONZE={}, SILVER={}, GOLD={}, PLATINUM={}, DIAMOND={}, MASTER={}, CHALLENGER={}",
+                + "BRONZE={}, SILVER={}, GOLD={}, PLATINUM={}, DIAMOND={}, CHALLENGER={}",
             season.getId(), total,
             counts[SeasonTier.BRONZE.ordinal()], counts[SeasonTier.SILVER.ordinal()],
             counts[SeasonTier.GOLD.ordinal()], counts[SeasonTier.PLATINUM.ordinal()],
-            counts[SeasonTier.DIAMOND.ordinal()], counts[SeasonTier.MASTER.ordinal()],
+            counts[SeasonTier.DIAMOND.ordinal()],
             counts[SeasonTier.CHALLENGER.ordinal()]);
     }
 }

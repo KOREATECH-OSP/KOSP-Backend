@@ -17,11 +17,15 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.material.dto.request.FolderMoveRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.ItemMoveRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialImportRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemUpdateRequest;
 import io.swkoreatech.kosp.domain.material.dto.request.VisibilityUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.response.DownloadUrlResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialImportResponse;
 import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
@@ -82,6 +86,14 @@ public interface MaterialApi {
         @PathVariable Long folderId
     );
 
+    @Operation(summary = "폴더 이동", description = "폴더를 다른 상위 폴더로 이동합니다. parentId 가 null 이면 최상위로 이동. 자기 자신/자손으로 이동 시 400.")
+    @PatchMapping("/v1/users/me/material-folders/{folderId}/parent")
+    ResponseEntity<MaterialFolderResponse> moveFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId,
+        @RequestBody @Valid FolderMoveRequest request
+    );
+
     @Operation(summary = "폴더 삭제", description = "본인 소유의 빈 폴더를 삭제합니다. 자료가 남아있으면 400.")
     @ApiResponse(responseCode = "204", description = "삭제 성공")
     @DeleteMapping("/v1/users/me/material-folders/{folderId}")
@@ -132,6 +144,32 @@ public interface MaterialApi {
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long itemId,
         @RequestBody @Valid VisibilityUpdateRequest request
+    );
+
+    @Operation(summary = "자료 수정(이름 바꾸기 등)", description = "본인 소유 자료의 제목/과목/연도/학기를 수정합니다.")
+    @PatchMapping("/v1/users/me/materials/{itemId}")
+    ResponseEntity<MaterialItemResponse> updateItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId,
+        @RequestBody @Valid MaterialItemUpdateRequest request
+    );
+
+    @Operation(summary = "자료 이동", description = "자료를 다른 폴더로 이동합니다. 대상 폴더는 본인 소유여야 합니다.")
+    @PatchMapping("/v1/users/me/materials/{itemId}/folder")
+    ResponseEntity<MaterialItemResponse> moveItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId,
+        @RequestBody @Valid ItemMoveRequest request
+    );
+
+    @Operation(
+        summary = "자료 다운로드 URL 발급",
+        description = "브라우저에서 열지 않고 곧바로 내려받을 수 있는 presigned URL을 반환합니다. S3 저장 파일만 지원."
+    )
+    @GetMapping("/v1/users/me/materials/{itemId}/download")
+    ResponseEntity<DownloadUrlResponse> getItemDownloadUrl(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId
     );
 
     @Operation(summary = "자료 삭제", description = "본인 소유 자료를 삭제합니다.")

@@ -113,6 +113,13 @@ public class MaterialFolder extends BaseEntity {
     }
 
     /**
+     * 상위 폴더를 변경한다 (폴더 이동). {@code null} 이면 최상위로 이동한다.
+     */
+    public void changeParent(MaterialFolder parent) {
+        this.parent = parent;
+    }
+
+    /**
      * 시작 폴더 여부를 설정한다.
      */
     public void setStartFolder(boolean isStartFolder) {

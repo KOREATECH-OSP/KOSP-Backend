@@ -37,7 +37,6 @@ import lombok.extern.slf4j.Slf4j;
  *   <li>GOLD_* → {@code SEASON_GOLD}</li>
  *   <li>PLATINUM_* → {@code SEASON_PLATINUM}</li>
  *   <li>DIAMOND_* → {@code SEASON_DIAMOND}</li>
- *   <li>MASTER_* → {@code SEASON_MASTER}</li>
  *   <li>CHALLENGER → {@code SEASON_CHALLENGER}</li>
  * </ul>
  *
@@ -49,14 +48,13 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class SeasonTierTitleService {
 
-    /** 티어 패밀리 → 칭호 코드 매핑 (7종). */
+    /** 티어 패밀리 → 칭호 코드 매핑 (6종). MASTER 티어 폐지로 SEASON_MASTER 제외. */
     static final Map<String, String> TIER_TITLE_CODE_BY_FAMILY = Map.of(
         "BRONZE", "SEASON_BRONZE",
         "SILVER", "SEASON_SILVER",
         "GOLD", "SEASON_GOLD",
         "PLATINUM", "SEASON_PLATINUM",
         "DIAMOND", "SEASON_DIAMOND",
-        "MASTER", "SEASON_MASTER",
         "CHALLENGER", "SEASON_CHALLENGER"
     );
 
