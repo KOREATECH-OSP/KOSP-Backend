@@ -95,6 +95,11 @@ public enum ExceptionMessage {
     SEASON_PROJECT_MEMBER_ALREADY_EXISTS("이미 등록된 프로젝트 참여자입니다.", HttpStatus.CONFLICT),
     PROJECT_SCORE_CAP_EXCEEDED("프로젝트 점수 한도(30점)를 초과합니다.", HttpStatus.BAD_REQUEST),
 
+    // CoffeeChat System
+    COFFEE_CHAT_ROOM_NOT_FOUND("커피챗 방을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    COFFEE_CHAT_NOT_PARTICIPANT("커피챗 방의 참여자가 아닙니다.", HttpStatus.FORBIDDEN),
+    COFFEE_CHAT_SELF_MESSAGE("자신에게 메시지를 보낼 수 없습니다.", HttpStatus.BAD_REQUEST),
+
     ;
 
     private final String message;
