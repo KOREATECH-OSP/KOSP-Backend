@@ -100,6 +100,10 @@ public enum ExceptionMessage {
     COFFEE_CHAT_NOT_PARTICIPANT("커피챗 방의 참여자가 아닙니다.", HttpStatus.FORBIDDEN),
     COFFEE_CHAT_SELF_MESSAGE("자신에게 메시지를 보낼 수 없습니다.", HttpStatus.BAD_REQUEST),
 
+    // Code Review System
+    CODE_REVIEW_NOT_FOUND("코드 리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    CODE_REVIEW_NOT_OWNER("코드 리뷰 작성자가 아닙니다.", HttpStatus.FORBIDDEN),
+
     ;
 
     private final String message;
