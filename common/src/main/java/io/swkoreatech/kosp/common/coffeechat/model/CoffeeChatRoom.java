@@ -49,6 +49,9 @@ public class CoffeeChatRoom extends BaseEntity {
     @Column(name = "last_sender_id")
     private Long lastSenderId;
 
+    @Column(name = "is_pinned", nullable = false)
+    private boolean isPinned = false;
+
     @Builder
     private CoffeeChatRoom(User user1, User user2) {
         this.user1 = user1;
@@ -67,5 +70,9 @@ public class CoffeeChatRoom extends BaseEntity {
 
     public boolean isParticipant(Long userId) {
         return user1.getId().equals(userId) || user2.getId().equals(userId);
+    }
+
+    public void togglePin() {
+        this.isPinned = !this.isPinned;
     }
 }

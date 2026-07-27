@@ -36,6 +36,7 @@ public class CoffeeChatService {
                 long unread = messageRepository.countByRoomIdAndSenderIdNotAndIsReadFalse(room.getId(), me.getId());
                 return CoffeeChatRoomResponse.of(room, me.getId(), unread);
             })
+            .sorted((a, b) -> Boolean.compare(b.isPinned(), a.isPinned()))
             .toList();
     }
 
@@ -108,5 +109,27 @@ public class CoffeeChatService {
             .mapToLong(room -> messageRepository.countByRoomIdAndSenderIdNotAndIsReadFalse(room.getId(), me.getId()))
             .sum();
         return UnreadCountResponse.of(total);
+    }
+
+    @Transactional
+    public void deleteRoom(User me, Long roomId) {
+        CoffeeChatRoom room = roomRepository.getById(roomId);
+        if (!room.isParticipant(me.getId())) {
+            throw new GlobalException(ExceptionMessage.COFFEE_CHAT_NOT_PARTICIPANT);
+        }
+        messageRepository.deleteByRoomId(roomId);
+        roomRepository.delete(room);
+    }
+
+    @Transactional
+    public CoffeeChatRoomResponse togglePin(User me, Long roomId) {
+        CoffeeChatRoom room = roomRepository.getById(roomId);
+        if (!room.isParticipant(me.getId())) {
+            throw new GlobalException(ExceptionMessage.COFFEE_CHAT_NOT_PARTICIPANT);
+        }
+        room.togglePin();
+        roomRepository.save(room);
+        long unread = messageRepository.countByRoomIdAndSenderIdNotAndIsReadFalse(roomId, me.getId());
+        return CoffeeChatRoomResponse.of(room, me.getId(), unread);
     }
 }

@@ -9,21 +9,27 @@ public record CoffeeChatRoomResponse(
     Long roomId,
     Long partnerId,
     String partnerName,
+    String partnerGithubLogin,
     String partnerProfileImage,
     String lastMessage,
     LocalDateTime lastMessageAt,
-    long unreadCount
+    long unreadCount,
+    boolean isPinned
 ) {
     public static CoffeeChatRoomResponse of(CoffeeChatRoom room, Long myId, long unreadCount) {
         User partner = room.getPartner(myId);
+        String profileImage = partner.getGithubUser() != null ? partner.getGithubUser().getGithubAvatarUrl() : null;
+        String githubLogin = partner.getGithubUser() != null ? partner.getGithubUser().getGithubLogin() : null;
         return new CoffeeChatRoomResponse(
             room.getId(),
             partner.getId(),
             partner.getName(),
-            partner.getGithubUser() != null ? partner.getGithubUser().getGithubAvatarUrl() : null,
+            githubLogin,
+            profileImage,
             room.getLastMessage(),
             room.getLastMessageAt(),
-            unreadCount
+            unreadCount,
+            room.isPinned()
         );
     }
 }

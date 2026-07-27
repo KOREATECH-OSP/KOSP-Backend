@@ -1,0 +1,1 @@
+ALTER TABLE coffee_chat_rooms ADD COLUMN is_pinned BOOLEAN NOT NULL DEFAULT FALSE;

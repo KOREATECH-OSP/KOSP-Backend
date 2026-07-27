@@ -58,4 +58,17 @@ public class CoffeeChatController implements CoffeeChatApi {
     public ResponseEntity<UnreadCountResponse> getUnreadCount(User user) {
         return ResponseEntity.ok(coffeeChatService.getTotalUnreadCount(user));
     }
+
+    @Override
+    @Permit(description = "채팅방 삭제")
+    public ResponseEntity<Void> deleteRoom(User user, Long roomId) {
+        coffeeChatService.deleteRoom(user, roomId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(description = "채팅방 고정/해제")
+    public ResponseEntity<CoffeeChatRoomResponse> togglePin(User user, Long roomId) {
+        return ResponseEntity.ok(coffeeChatService.togglePin(user, roomId));
+    }
 }

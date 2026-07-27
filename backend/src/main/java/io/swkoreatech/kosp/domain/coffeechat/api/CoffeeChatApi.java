@@ -3,6 +3,7 @@ package io.swkoreatech.kosp.domain.coffeechat.api;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -61,4 +62,18 @@ public interface CoffeeChatApi {
     @Operation(summary = "읽지 않은 메시지 수")
     @GetMapping("/unread-count")
     ResponseEntity<UnreadCountResponse> getUnreadCount(@Parameter(hidden = true) @AuthUser User user);
+
+    @Operation(summary = "채팅방 삭제")
+    @DeleteMapping("/rooms/{roomId}")
+    ResponseEntity<Void> deleteRoom(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long roomId
+    );
+
+    @Operation(summary = "채팅방 고정/해제")
+    @PostMapping("/rooms/{roomId}/pin")
+    ResponseEntity<CoffeeChatRoomResponse> togglePin(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long roomId
+    );
 }

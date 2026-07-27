@@ -17,4 +17,6 @@ public interface CoffeeChatMessageRepository extends MongoRepository<CoffeeChatM
     List<CoffeeChatMessage> findUnreadByRoomIdsAndNotSender(List<Long> roomIds, Long senderId);
 
     List<CoffeeChatMessage> findByRoomIdAndSenderIdNotAndIsReadFalse(Long roomId, Long senderId);
+
+    void deleteByRoomId(Long roomId);
 }
