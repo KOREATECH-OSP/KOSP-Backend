@@ -20,7 +20,7 @@ public record CoffeeChatRoomResponse(
             room.getId(),
             partner.getId(),
             partner.getName(),
-            partner.getProfileImage(),
+            partner.getGithubUser() != null ? partner.getGithubUser().getGithubAvatarUrl() : null,
             room.getLastMessage(),
             room.getLastMessageAt(),
             unreadCount
