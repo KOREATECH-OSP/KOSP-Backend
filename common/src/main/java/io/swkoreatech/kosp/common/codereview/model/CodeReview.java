@@ -37,13 +37,17 @@ public class CodeReview extends BaseEntity {
     @Column(name = "parent_id")
     private Long parentId;
 
+    @Column(name = "is_private", nullable = false)
+    private boolean isPrivate = false;
+
     @Builder
-    private CodeReview(String repoOwner, String repositoryName, User user, String content, Long parentId) {
+    private CodeReview(String repoOwner, String repositoryName, User user, String content, Long parentId, boolean isPrivate) {
         this.repoOwner = repoOwner;
         this.repositoryName = repositoryName;
         this.user = user;
         this.content = content;
         this.parentId = parentId;
+        this.isPrivate = isPrivate;
     }
 
     public void incrementLikes() { this.likesCount++; }

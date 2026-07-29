@@ -7,5 +7,6 @@ public record CreateCodeReviewRequest(
     @NotBlank String repoOwner,
     @NotBlank String repositoryName,
     @NotBlank @Size(max = 2000) String content,
-    Long parentId
+    Long parentId,
+    boolean isPrivate
 ) {}

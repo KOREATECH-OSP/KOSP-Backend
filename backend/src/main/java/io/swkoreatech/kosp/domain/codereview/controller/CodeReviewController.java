@@ -20,8 +20,8 @@ public class CodeReviewController implements CodeReviewApi {
 
     @Override
     @Permit(permitAll = true, description = "코드리뷰 목록 조회")
-    public ResponseEntity<CodeReviewListResponse> getReviews(String repoOwner, String repositoryName) {
-        return ResponseEntity.ok(codeReviewService.getReviews(repoOwner, repositoryName, null));
+    public ResponseEntity<CodeReviewListResponse> getReviews(User user, String repoOwner, String repositoryName) {
+        return ResponseEntity.ok(codeReviewService.getReviews(repoOwner, repositoryName, user));
     }
 
     @Override

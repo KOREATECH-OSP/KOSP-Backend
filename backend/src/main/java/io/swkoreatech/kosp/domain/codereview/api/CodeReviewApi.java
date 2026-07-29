@@ -20,6 +20,7 @@ public interface CodeReviewApi {
     @Operation(summary = "코드리뷰 목록 조회")
     @GetMapping
     ResponseEntity<CodeReviewListResponse> getReviews(
+        @Parameter(hidden = true) @AuthUser User user,
         @RequestParam String repoOwner,
         @RequestParam String repositoryName
     );

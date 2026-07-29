@@ -15,6 +15,7 @@ public record CodeReviewResponse(
     boolean likedByMe,
     LocalDateTime createdAt,
     Long parentId,
+    boolean isPrivate,
     List<CodeReviewResponse> replies
 ) {
     public static CodeReviewResponse of(CodeReview review, boolean likedByMe, List<CodeReviewResponse> replies) {
@@ -30,6 +31,7 @@ public record CodeReviewResponse(
             likedByMe,
             review.getCreatedAt(),
             review.getParentId(),
+            review.isPrivate(),
             replies
         );
     }

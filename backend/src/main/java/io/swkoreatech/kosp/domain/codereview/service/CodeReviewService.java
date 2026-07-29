@@ -31,7 +31,10 @@ public class CodeReviewService {
 
     public CodeReviewListResponse getReviews(String repoOwner, String repositoryName, User me) {
         List<CodeReview> reviews = codeReviewRepository
-            .findByRepoOwnerAndRepositoryNameAndParentIdIsNullOrderByCreatedAtDesc(repoOwner, repositoryName);
+            .findByRepoOwnerAndRepositoryNameAndParentIdIsNullOrderByCreatedAtDesc(repoOwner, repositoryName)
+            .stream()
+            .filter(review -> canViewReview(review, me, repoOwner))
+            .toList();
 
         List<Long> reviewIds = reviews.stream().map(CodeReview::getId).toList();
         Set<Long> likedIds = me != null
@@ -58,6 +61,13 @@ public class CodeReviewService {
         return new CodeReviewListResponse(reviews.size(), responses);
     }
 
+    private boolean canViewReview(CodeReview review, User me, String repoOwner) {
+        if (!review.isPrivate()) return true;
+        if (me == null) return false;
+        if (me.getId().equals(review.getUser().getId())) return true;
+        return me.getGithubUser() != null && repoOwner.equals(me.getGithubUser().getGithubLogin());
+    }
+
     @Transactional
     public CodeReviewResponse createReview(User me, CreateCodeReviewRequest request) {
         CodeReview review = CodeReview.builder()
@@ -66,6 +76,7 @@ public class CodeReviewService {
             .user(me)
             .content(request.content())
             .parentId(request.parentId())
+            .isPrivate(request.isPrivate())
             .build();
         codeReviewRepository.save(review);
         return CodeReviewResponse.of(review, false, List.of());
