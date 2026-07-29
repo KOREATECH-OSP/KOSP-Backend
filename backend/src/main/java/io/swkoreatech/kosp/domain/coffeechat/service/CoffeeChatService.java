@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.coffeechat.service;
 
 import java.util.List;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,8 @@ import io.swkoreatech.kosp.domain.coffeechat.dto.response.CoffeeChatMessageRespo
 import io.swkoreatech.kosp.domain.coffeechat.dto.response.CoffeeChatRoomResponse;
 import io.swkoreatech.kosp.domain.coffeechat.dto.response.UnreadCountResponse;
 import io.swkoreatech.kosp.domain.coffeechat.repository.CoffeeChatMessageRepository;
+import io.swkoreatech.kosp.domain.notification.event.NotificationEvent;
+import io.swkoreatech.kosp.domain.notification.model.NotificationType;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +31,7 @@ public class CoffeeChatService {
     private final CoffeeChatRoomRepository roomRepository;
     private final CoffeeChatMessageRepository messageRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<CoffeeChatRoomResponse> getRooms(User me) {
         List<CoffeeChatRoom> rooms = roomRepository.findAllByUserId(me.getId());
@@ -78,6 +82,8 @@ public class CoffeeChatService {
             throw new GlobalException(ExceptionMessage.COFFEE_CHAT_NOT_PARTICIPANT);
         }
 
+        boolean isFirstMessage = room.getLastMessage() == null;
+
         CoffeeChatMessage message = messageRepository.save(
             CoffeeChatMessage.builder()
                 .roomId(roomId)
@@ -88,6 +94,17 @@ public class CoffeeChatService {
 
         room.updateLastMessage(request.content(), me.getId());
         roomRepository.save(room);
+
+        if (isFirstMessage) {
+            Long partnerId = room.getPartner(me.getId()).getId();
+            eventPublisher.publishEvent(NotificationEvent.of(
+                partnerId,
+                NotificationType.COFFEE_CHAT_RECEIVED,
+                "새 커피챗 요청",
+                me.getName() + "님이 커피챗을 요청했어요.",
+                me.getId()
+            ));
+        }
 
         return CoffeeChatMessageResponse.from(message);
     }
