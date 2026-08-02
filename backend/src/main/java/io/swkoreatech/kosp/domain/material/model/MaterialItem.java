@@ -246,12 +246,38 @@ public class MaterialItem extends BaseEntity {
     }
 
     /**
-     * 실제 적용되는 공개 여부. 아이템 override 가 없으면 폴더 설정을 따른다.
+     * 실제로 타인에게 노출되는지 여부.
+     *
+     * <p>공개 폴더 안에 있을 때만 공개될 수 있다. 폴더가 비공개면 아이템을 PUBLIC 으로
+     * 지정했더라도 노출되지 않는다 (공개 조회 API 가 공개 폴더로 먼저 걸러내기 때문).</p>
+     *
+     * <p>과거에는 아이템 override 만 보고 {@code true} 를 돌려줬기 때문에,
+     * 비공개 폴더 안의 자료를 공개로 바꾸면 화면에는 "공개"로 표시되면서
+     * 실제로는 아무에게도 보이지 않는 불일치가 있었다. 이 메서드가 공개 조회
+     * 필터와 같은 기준을 쓰도록 맞춘다.</p>
      */
     public boolean isPublic() {
+        if (this.folder == null || !this.folder.isPublic()) {
+            return false;
+        }
         if (this.visibility != null) {
             return this.visibility == Visibility.PUBLIC;
         }
+        return true;
+    }
+
+    /**
+     * 사용자가 이 자료를 공개로 지정했는지 여부 (폴더 상속 여부와 무관한 본인 설정).
+     *
+     * <p>"공개로 설정했지만 상위 폴더가 비공개라 노출되지 않는" 상태를
+     * 화면에서 구분해 안내하기 위해 사용한다.</p>
+     */
+    public boolean isMarkedPublic() {
+        return this.visibility == Visibility.PUBLIC;
+    }
+
+    /** 소속 폴더가 공개인지 여부. */
+    public boolean isFolderPublic() {
         return this.folder != null && this.folder.isPublic();
     }
 }

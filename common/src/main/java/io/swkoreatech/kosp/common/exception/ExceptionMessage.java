@@ -26,6 +26,7 @@ public enum ExceptionMessage {
     INVALID_TOKEN("유효하지 않은 토큰이거나 토큰이 없습니다.", HttpStatus.UNAUTHORIZED),
     USER_ALREADY_EXISTS("이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
     CONFLICT("이미 존재하는 리소스입니다.", HttpStatus.CONFLICT),
+    LAST_RESUME_CANNOT_BE_DELETED("이력서는 최소 1개 이상 유지해야 합니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND("리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     CHALLENGE_NOT_FOUND("챌린지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CHALLENGE_CONDITION("유효하지 않은 챌린지 조건식입니다.", HttpStatus.BAD_REQUEST),

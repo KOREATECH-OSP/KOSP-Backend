@@ -65,6 +65,9 @@ class TeamServiceTest {
     @Mock
     private ApplicationEventPublisher eventPublisher;
 
+    @Mock
+    private InviteRestrictionService inviteRestrictionService;
+
     private Team createTeam(Long id, String name) {
         Team team = Team.builder()
             .name(name)
@@ -328,9 +331,11 @@ class TeamServiceTest {
         void deletesInvite() {
             // given
             User invitee = createUser(1L, "초대받은자");
+            User inviter = createUser(2L, "초대한자");
             Team team = createTeam(1L, "테스트팀");
             TeamInvite invite = TeamInvite.builder()
                 .team(team)
+                .inviter(inviter)
                 .invitee(invitee)
                 .expiresAt(Instant.now().plusSeconds(3600))
                 .build();
@@ -343,6 +348,9 @@ class TeamServiceTest {
 
             // then
             assertThat(invite.isDeleted()).isTrue();
+            // 거절은 TEAM/INVITER 두 축의 제한 집계에도 반영되어야 한다
+            verify(inviteRestrictionService)
+                .recordRejection(team.getId(), inviter.getId(), invitee.getId());
         }
 
         @Test

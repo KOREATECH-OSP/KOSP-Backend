@@ -21,6 +21,7 @@ import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamRoleUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.response.InviteAvailabilityResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
 import io.swkoreatech.kosp.global.host.ClientURL;
@@ -84,6 +85,18 @@ public interface TeamApi {
         @PathVariable Long teamId,
         @RequestBody @Valid TeamInviteRequest request,
         @Parameter(hidden = true) @ClientURL String clientUrl
+    );
+
+    @Operation(
+        summary = "초대 가능 여부 조회",
+        description = "해당 이메일의 사용자를 지금 초대할 수 있는지 확인합니다. "
+            + "반복 거절로 제한된 경우 누적 거절 횟수·최근 거절 시각·제한 종료 시각을 함께 반환합니다."
+    )
+    @GetMapping("/v1/teams/{teamId}/invites/availability")
+    ResponseEntity<InviteAvailabilityResponse> getInviteAvailability(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @Parameter(description = "피초대자 KUT 이메일") @RequestParam String email
     );
 
     @Operation(summary = "초대 수락", description = "초대받은 사용자가 초대를 수락합니다.")

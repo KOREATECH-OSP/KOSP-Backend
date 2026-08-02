@@ -3,6 +3,8 @@ package io.swkoreatech.kosp.domain.resume.dto.request;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
 /**
  * 이력서 저장 요청 DTO.
  *
@@ -30,7 +32,9 @@ public record ResumeSaveRequest(
     String resumeTitle,
     String headline,
     String bio,
-    String jobRole,
+    @JsonDeserialize(using = StringListDeserializer.class)
+    List<String> jobRole,
+    @JsonDeserialize(using = StringListDeserializer.class)
     List<String> techStack,
     List<LinkItem> links,
     List<EducationItem> education,
@@ -49,19 +53,45 @@ public record ResumeSaveRequest(
 
     public record LinkItem(String id, String label, String url) {}
 
-    public record EducationItem(String id, String school, String major, String period) {}
+    /**
+     * 학력. {@code startDate}/{@code endDate} 가 정식 필드이며 형식은 {@code YYYY.MM.DD} 다.
+     * {@code period} 는 과거 자유 입력 형식과의 호환 및 표시용으로 유지한다.
+     */
+    public record EducationItem(
+        String id, String school, String major,
+        String period, String startDate, String endDate
+    ) {}
 
-    public record CareerItem(String id, String company, String role, String period) {}
+    /** 경력. 날짜 규칙은 {@link EducationItem} 과 동일하다. */
+    public record CareerItem(
+        String id, String company, String role,
+        String period, String startDate, String endDate
+    ) {}
 
-    public record ExperienceItem(String id, String title, String description, String period) {}
+    /** 교육이력. 날짜 규칙은 {@link EducationItem} 과 동일하다. */
+    public record ExperienceItem(
+        String id, String title, String description,
+        String period, String startDate, String endDate
+    ) {}
 
+    /**
+     * 프로젝트.
+     *
+     * <p>{@code techStack} 은 문자열 배열이다. 프론트엔드는 편집 시 콤마 구분 문자열로 다루지만
+     * 전송(ResumePageClient.handleSave) 및 렌더링(ProjectCarousel) 시점에는 배열을 사용하므로
+     * 저장 포맷의 기준은 배열이다. 과거 단일 문자열로 저장된 데이터와의 호환을 위해
+     * {@code @JsonFormat(WRITE_SINGLE_ELEM_ARRAYS_UNWRAPPED)} 대신 커스텀 팩토리로 흡수한다.</p>
+     */
     public record ProjectItem(
         String id,
         String name,
         String period,
+        String startDate,
+        String endDate,
         String summary,
         String role,
-        String techStack,
+        @JsonDeserialize(using = StringListDeserializer.class)
+        List<String> techStack,
         String mainFeatures,
         String myContributions,
         String problemSolving,

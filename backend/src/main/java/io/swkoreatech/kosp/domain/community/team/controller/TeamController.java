@@ -13,6 +13,7 @@ import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamRoleUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.response.InviteAvailabilityResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
 import io.swkoreatech.kosp.domain.community.team.service.TeamService;
@@ -92,6 +93,19 @@ public class TeamController implements TeamApi {
     ) {
         teamService.inviteMember(teamId, user, request, clientUrl);
         return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    // 초대 가능 여부 조회는 초대 권한(team:invite)을 재사용한다(팀장/관리자 여부는 서비스에서 검증).
+    @Override
+    @Permit(name = "team:invite", description = "초대 가능 여부 조회")
+    public ResponseEntity<InviteAvailabilityResponse> getInviteAvailability(
+        @AuthUser User user,
+        Long teamId,
+        String email
+    ) {
+        InviteAvailabilityResponse response = teamService.getInviteAvailability(teamId, user, email);
+        return ResponseEntity.ok(response);
     }
 
     /** {@inheritDoc} */

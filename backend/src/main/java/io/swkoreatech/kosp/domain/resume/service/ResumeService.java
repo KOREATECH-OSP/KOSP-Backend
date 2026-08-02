@@ -30,6 +30,9 @@ import lombok.extern.slf4j.Slf4j;
  * "기본 이력서" 기준으로 동작하도록 유지하여 하위 호환성을 보장한다.
  * 신규 다중 이력서 API(getMyResumes, createResume, getMyResumeById,
  * updateResumeById, deleteResumeById, setDefaultResume)를 추가한다.</p>
+ *
+ * <p>사용자당 이력서는 항상 최소 1개를 유지한다. 목록 조회 시 0개면 기본 이력서를 자동 생성하고,
+ * 마지막 1개는 삭제를 거부한다.</p>
  */
 @Slf4j
 @Service
@@ -39,6 +42,9 @@ public class ResumeService {
 
     /** 허용 가능한 자격증 상태 값. */
     private static final Set<String> ALLOWED_CERT_STATUSES = Set.of("ACQUIRED", "EXPIRED");
+
+    /** 이력서가 0개인 사용자에게 자동 생성해 주는 기본 이력서의 제목. */
+    private static final String DEFAULT_RESUME_TITLE = "내 이력서";
 
     private final UserResumeRepository userResumeRepository;
     private final ObjectMapper objectMapper;
@@ -112,9 +118,16 @@ public class ResumeService {
 
     /**
      * 내 전체 이력서 목록을 최신 수정순으로 조회한다.
+     *
+     * <p>이력서가 하나도 없으면(신규 가입자 또는 최초 포트폴리오 진입) 기본 이력서 1개를 자동 생성한다.
+     * "이력서 최소 1개 보장" 정책의 진입점이다.</p>
      */
+    @Transactional
     public ResumeListResponse getMyResumes(User user) {
         List<UserResume> resumes = userResumeRepository.findAllByUserIdOrderByUpdatedAtDesc(user.getId());
+        if (resumes.isEmpty()) {
+            resumes = List.of(createDefaultResume(user));
+        }
         List<ResumeSummaryResponse> summaries = resumes.stream()
             .map(r -> ResumeSummaryResponse.from(r, objectMapper))
             .toList();
@@ -171,24 +184,32 @@ public class ResumeService {
 
     /**
      * 특정 이력서를 삭제한다 (본인 소유 검증).
-     * 기본 이력서를 삭제할 경우, 남은 이력서 중 가장 최근 것을 새 기본으로 승격한다.
+     *
+     * <p>이력서는 최소 1개를 유지해야 하므로 마지막 1개는 삭제할 수 없다
+     * ({@link ExceptionMessage#LAST_RESUME_CANNOT_BE_DELETED}).
+     * 동시에 들어온 삭제 요청이 각자 개수를 세어 0개로 만드는 것을 막기 위해
+     * 사용자의 이력서 행 전체를 비관적 쓰기 잠금으로 먼저 잠근 뒤 개수를 판정한다.</p>
+     *
+     * <p>기본 이력서를 삭제한 경우, 남은 이력서 중 가장 최근 것을 새 기본으로 승격한다.</p>
      */
     @Transactional
     public void deleteResumeById(User user, Long resumeId) {
-        UserResume resume = userResumeRepository.findByIdAndUserId(resumeId, user.getId())
+        List<UserResume> owned = userResumeRepository.findAllByUserIdForUpdate(user.getId());
+
+        UserResume resume = owned.stream()
+            .filter(r -> r.getId().equals(resumeId))
+            .findFirst()
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
 
-        boolean wasDefault = resume.isDefault();
-        userResumeRepository.delete(resume);
-
-        if (wasDefault) {
-            List<UserResume> remaining = userResumeRepository.findAllByUserIdOrderByUpdatedAtDesc(user.getId());
-            if (!remaining.isEmpty()) {
-                remaining.get(0).setAsDefault();
-                userResumeRepository.save(remaining.get(0));
-                log.info("기본 이력서 자동 승격: userId={}, newDefaultId={}", user.getId(), remaining.get(0).getId());
-            }
+        if (owned.size() <= 1) {
+            log.info("마지막 이력서 삭제 차단: userId={}, resumeId={}", user.getId(), resumeId);
+            throw new GlobalException(ExceptionMessage.LAST_RESUME_CANNOT_BE_DELETED);
         }
+
+        userResumeRepository.delete(resume);
+        userResumeRepository.flush();
+
+        ensureDefaultExists(user);
         log.info("이력서 삭제 완료: userId={}, resumeId={}", user.getId(), resumeId);
     }
 
@@ -210,6 +231,47 @@ public class ResumeService {
     }
 
     // ── private helpers ──────────────────────────────────────────────
+
+    /**
+     * 이력서가 0개인 사용자에게 빈 기본 이력서 1개를 생성한다.
+     * 저장되는 JSON 은 프론트엔드 ResumeData 구조와 동일하며 비공개(isPublic=false)로 시작한다.
+     */
+    private UserResume createDefaultResume(User user) {
+        ResumeSaveRequest empty = new ResumeSaveRequest(
+            DEFAULT_RESUME_TITLE,
+            "", "",
+            List.of(),  // jobRole (개발 직무: 다중 입력)
+            List.of(), List.of(), List.of(), List.of(), List.of(),
+            List.of(), List.of(), List.of(), List.of(), List.of(),
+            false,
+            null
+        );
+        UserResume created = userResumeRepository.save(UserResume.builder()
+            .user(user)
+            .resumeData(serializeToJson(empty))
+            .isDefault(true)
+            .build());
+        log.info("기본 이력서 자동 생성: userId={}, resumeId={}", user.getId(), created.getId());
+        return created;
+    }
+
+    /**
+     * 사용자의 이력서 중 기본 이력서가 하나도 없으면 가장 최근 이력서를 기본으로 승격한다.
+     * 기본 이력서 삭제 후 호출해 "기본 이력서는 항상 1개" 불변식을 유지한다.
+     */
+    private void ensureDefaultExists(User user) {
+        if (userResumeRepository.findByUserIdAndIsDefaultTrue(user.getId()).isPresent()) {
+            return;
+        }
+        List<UserResume> remaining = userResumeRepository.findAllByUserIdOrderByUpdatedAtDesc(user.getId());
+        if (remaining.isEmpty()) {
+            return;
+        }
+        UserResume promoted = remaining.get(0);
+        promoted.setAsDefault();
+        userResumeRepository.save(promoted);
+        log.info("기본 이력서 자동 승격: userId={}, newDefaultId={}", user.getId(), promoted.getId());
+    }
 
     private ResumeResponse toResponse(UserResume resume) {
         Object parsed = parseJson(resume.getResumeData());

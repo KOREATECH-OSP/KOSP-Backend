@@ -19,6 +19,7 @@ import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.response.InviteAvailabilityResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamResponse;
@@ -57,6 +58,7 @@ public class TeamService {
     private final PendingTeamInviteRepository pendingTeamInviteRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final InviteRestrictionService inviteRestrictionService;
 
     /**
      * 팀을 생성하고 요청자를 팀장으로 등록한다.
@@ -205,14 +207,20 @@ public class TeamService {
             throw new GlobalException(ExceptionMessage.TEAM_ALREADY_JOINED);
         }
 
+        // 반복 거절 제한 검사.
+        //
+        // 제한은 team_invite 행이 아니라 invite_restriction 에서 두 축으로 집계한다.
+        //   - TEAM    : 같은 팀의 다른 관리자가 우회 초대하는 것을 막는다
+        //   - INVITER : 같은 초대자가 자신의 다른 팀으로 우회 초대하는 것을 막는다
+        // 둘 중 하나라도 차단이면 초대를 거부한다.
+        if (inviteRestrictionService.isBlocked(team.getId(), inviter.getId(), invitee.getId())) {
+            throw new GlobalException(ExceptionMessage.INVITE_REJECTED_TOO_MANY);
+        }
+
         // (team_id, invitee_id) 유니크 제약이 있으므로, 기존 초대 행이 있으면 재사용(reopen)한다.
         // 없으면 새로 발급한다. (취소/거절/만료된 초대를 다시 보낼 때 INSERT 충돌 방지)
         TeamInvite invite = teamInviteRepository.findByTeamAndInvitee(team, invitee)
             .map(existing -> {
-                // 3회 이상 거절되었다면 마지막 발송 시각으로부터 24시간이 지나야 재초대할 수 있다.
-                if (existing.isReinviteBlocked()) {
-                    throw new GlobalException(ExceptionMessage.INVITE_REJECTED_TOO_MANY);
-                }
                 existing.reopen(inviter, expiresAt);
                 return existing;
             })
@@ -388,7 +396,34 @@ public class TeamService {
         }
 
         // 거절 시 누적 거절 횟수를 증가시킨다 (3회 이상이면 재초대 24시간 제한 적용).
+        // team_invite 의 rejection_count 는 하위 호환을 위해 유지하고,
+        // 실제 제한 판정은 두 축(TEAM/INVITER)으로 집계하는 invite_restriction 이 담당한다.
         invite.reject();
+        inviteRestrictionService.recordRejection(
+            invite.getTeam().getId(),
+            invite.getInviter().getId(),
+            user.getId()
+        );
+    }
+
+    /**
+     * 특정 이메일의 사용자를 해당 팀에 초대할 수 있는지 조회한다.
+     *
+     * <p>초대 버튼을 누르기 전에 제한 상태를 안내하기 위한 API 다.
+     * 가입하지 않은 이메일은 제한 대상이 아니므로 항상 초대 가능으로 응답한다.</p>
+     *
+     * @param teamId 팀 ID
+     * @param user   초대자 (팀장/관리자)
+     * @param email  피초대자 이메일
+     * @return 초대 가능 여부와 제한 상세
+     */
+    public InviteAvailabilityResponse getInviteAvailability(Long teamId, User user, String email) {
+        Team team = teamRepository.getById(teamId);
+        validateManager(team, user);
+
+        return userRepository.findByKutEmail(email)
+            .map(invitee -> inviteRestrictionService.getAvailability(teamId, user.getId(), invitee.getId()))
+            .orElseGet(() -> InviteAvailabilityResponse.available(0, null));
     }
 
     /**
