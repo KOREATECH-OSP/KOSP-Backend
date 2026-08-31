@@ -94,6 +94,7 @@ public enum ExceptionMessage {
     SEASON_PROJECT_ALREADY_CLOSED("이미 종료된 프로젝트입니다.", HttpStatus.BAD_REQUEST),
     SEASON_PROJECT_MEMBER_NOT_FOUND("프로젝트 참여자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     SEASON_PROJECT_MEMBER_ALREADY_EXISTS("이미 등록된 프로젝트 참여자입니다.", HttpStatus.CONFLICT),
+    SEASON_PROJECT_MEMBER_ALREADY_GRANTED("이미 점수가 지급된 참여자는 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     PROJECT_SCORE_CAP_EXCEEDED("프로젝트 점수 한도(30점)를 초과합니다.", HttpStatus.BAD_REQUEST),
 
     // CoffeeChat System

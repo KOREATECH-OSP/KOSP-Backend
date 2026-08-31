@@ -24,6 +24,8 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.domain.season.service.SeasonScoreService;
@@ -164,6 +166,57 @@ public class AdminSeasonProjectService {
         SeasonProject project = seasonProjectRepository.getById(projectId);
         List<SeasonProjectMember> members = projectMemberRepository.findAllByProject(project);
         return AdminSeasonProjectMemberListResponse.from(project, members);
+    }
+
+    /**
+     * 프로젝트 참여자의 역할을 변경한다.
+     *
+     * <p>이미 점수가 지급된 참여자는 변경 불가.</p>
+     *
+     * @param memberId 참여자 레코드 ID
+     * @param request  역할 변경 요청
+     */
+    @Transactional
+    public void changeMemberRole(Long memberId, AdminSeasonProjectMemberRoleChangeRequest request) {
+        SeasonProjectMember member = projectMemberRepository.getById(memberId);
+
+        if (!member.getProject().isOpen()) {
+            throw new GlobalException(ExceptionMessage.SEASON_PROJECT_ALREADY_CLOSED);
+        }
+
+        member.changeRole(request.roleType());
+        projectMemberRepository.save(member);
+        log.info("[AdminSeason] Member role changed: memberId={}, newRole={}", memberId, request.roleType());
+    }
+
+    /**
+     * 프로젝트 참여자를 삭제한다.
+     *
+     * <p>이미 점수가 지급된 참여자는 삭제 불가.</p>
+     *
+     * @param memberId 참여자 레코드 ID
+     */
+    @Transactional
+    public void removeMember(Long memberId) {
+        SeasonProjectMember member = projectMemberRepository.getById(memberId);
+
+        if (!member.getProject().isOpen()) {
+            throw new GlobalException(ExceptionMessage.SEASON_PROJECT_ALREADY_CLOSED);
+        }
+
+        if (member.isScoreGranted()) {
+            throw new GlobalException(ExceptionMessage.SEASON_PROJECT_MEMBER_ALREADY_GRANTED);
+        }
+
+        projectMemberRepository.delete(member);
+        log.info("[AdminSeason] Member removed: memberId={}, userId={}", memberId, member.getUser().getId());
+    }
+
+    /**
+     * 현재 활성 시즌 정보를 반환한다.
+     */
+    public AdminCurrentSeasonResponse getCurrentSeason() {
+        return AdminCurrentSeasonResponse.from(seasonRepository.getActiveSeason());
     }
 
     /**

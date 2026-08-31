@@ -29,6 +29,8 @@ public interface SeasonProjectMemberRepository extends Repository<SeasonProjectM
 
     boolean existsByProjectAndUser(SeasonProject project, User user);
 
+    void delete(SeasonProjectMember member);
+
     /**
      * 특정 시즌에서 유저가 완료(점수 지급 완료)한 {@code minLevel} 이상 레벨의 프로젝트 수.
      * <p>엘리트 티어(Master/Challenger) 조건 평가에 사용한다.</p>

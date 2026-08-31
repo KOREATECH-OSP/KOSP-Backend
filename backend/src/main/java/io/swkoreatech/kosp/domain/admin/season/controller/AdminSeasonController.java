@@ -9,6 +9,8 @@ import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.season.api.AdminSeasonApi;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
@@ -26,6 +28,13 @@ public class AdminSeasonController implements AdminSeasonApi {
 
     private final AdminSeasonProjectService adminSeasonProjectService;
     private final SeasonRankingBatchService seasonRankingBatchService;
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "현재 활성 시즌 조회")
+    public ResponseEntity<AdminCurrentSeasonResponse> getCurrentSeason() {
+        return ResponseEntity.ok(adminSeasonProjectService.getCurrentSeason());
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -63,6 +72,22 @@ public class AdminSeasonController implements AdminSeasonApi {
     @Permit(name = "admin:seasons:read", description = "프로젝트 참여자 목록 조회")
     public ResponseEntity<AdminSeasonProjectMemberListResponse> getMembers(Long projectId) {
         return ResponseEntity.ok(adminSeasonProjectService.getMembers(projectId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "프로젝트 참여자 역할 변경")
+    public ResponseEntity<Void> changeMemberRole(Long memberId, AdminSeasonProjectMemberRoleChangeRequest request) {
+        adminSeasonProjectService.changeMemberRole(memberId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "프로젝트 참여자 삭제")
+    public ResponseEntity<Void> removeMember(Long memberId) {
+        adminSeasonProjectService.removeMember(memberId);
+        return ResponseEntity.noContent().build();
     }
 
     /** {@inheritDoc} */
