@@ -7,10 +7,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.season.api.AdminSeasonApi;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
@@ -28,6 +31,29 @@ public class AdminSeasonController implements AdminSeasonApi {
 
     private final AdminSeasonProjectService adminSeasonProjectService;
     private final SeasonRankingBatchService seasonRankingBatchService;
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "시즌 목록 조회")
+    public ResponseEntity<AdminSeasonListResponse> getSeasons() {
+        return ResponseEntity.ok(adminSeasonProjectService.getSeasons());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:create", description = "시즌 생성")
+    public ResponseEntity<Void> createSeason(AdminSeasonCreateRequest request) {
+        adminSeasonProjectService.createSeason(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "시즌 정보 수정")
+    public ResponseEntity<Void> updateSeason(Long seasonId, AdminSeasonUpdateRequest request) {
+        adminSeasonProjectService.updateSeason(seasonId, request);
+        return ResponseEntity.ok().build();
+    }
 
     /** {@inheritDoc} */
     @Override

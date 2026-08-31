@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +34,31 @@ import jakarta.validation.Valid;
 @Tag(name = "Admin - Season", description = "관리자 전용 시즌 프로젝트 점수 관리 API")
 @RequestMapping("/v1/admin/seasons")
 public interface AdminSeasonApi {
+
+    /**
+     * 전체 시즌 목록을 조회한다.
+     */
+    @Operation(summary = "시즌 목록 조회", description = "전체 시즌 목록을 시작일 내림차순으로 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping
+    ResponseEntity<AdminSeasonListResponse> getSeasons();
+
+    /**
+     * 새 시즌을 생성한다.
+     */
+    @Operation(summary = "시즌 생성", description = "새 시즌을 비활성 상태로 생성합니다.")
+    @ApiResponse(responseCode = "201", description = "생성 성공")
+    @PostMapping
+    ResponseEntity<Void> createSeason(@RequestBody @Valid AdminSeasonCreateRequest request);
+
+    /**
+     * 시즌 정보를 수정한다.
+     */
+    @Operation(summary = "시즌 수정", description = "시즌 이름, 기간, 활성 여부를 수정합니다. isActive를 true로 변경하면 기존 활성 시즌이 자동 비활성화됩니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 없음")
+    @PatchMapping("/{seasonId}")
+    ResponseEntity<Void> updateSeason(@PathVariable Long seasonId, @RequestBody AdminSeasonUpdateRequest request);
 
     /**
      * 현재 활성 시즌 정보를 조회한다.

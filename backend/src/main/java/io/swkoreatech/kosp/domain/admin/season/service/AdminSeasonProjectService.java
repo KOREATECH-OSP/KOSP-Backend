@@ -22,10 +22,13 @@ import io.swkoreatech.kosp.common.season.repository.SeasonProjectRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.domain.season.service.SeasonScoreService;
@@ -217,6 +220,64 @@ public class AdminSeasonProjectService {
      */
     public AdminCurrentSeasonResponse getCurrentSeason() {
         return AdminCurrentSeasonResponse.from(seasonRepository.getActiveSeason());
+    }
+
+    /**
+     * 전체 시즌 목록을 시작일 내림차순으로 반환한다.
+     */
+    public AdminSeasonListResponse getSeasons() {
+        return AdminSeasonListResponse.from(seasonRepository.findAllByOrderByStartDateDesc());
+    }
+
+    /**
+     * 새 시즌을 생성한다. 기본적으로 비활성 상태로 생성된다.
+     *
+     * @param request 시즌 생성 요청
+     */
+    @Transactional
+    public void createSeason(AdminSeasonCreateRequest request) {
+        Season season = Season.builder()
+            .name(request.name())
+            .startDate(request.startDate())
+            .endDate(request.endDate())
+            .isActive(false)
+            .build();
+        seasonRepository.save(season);
+        log.info("[AdminSeason] Season created: name={}, startDate={}, endDate={}",
+            request.name(), request.startDate(), request.endDate());
+    }
+
+    /**
+     * 시즌 정보를 수정한다.
+     *
+     * <p>isActive를 true로 변경하면 기존 활성 시즌이 자동으로 비활성화된다.</p>
+     *
+     * @param seasonId 수정할 시즌 ID
+     * @param request  수정 요청
+     */
+    @Transactional
+    public void updateSeason(Long seasonId, AdminSeasonUpdateRequest request) {
+        Season season = seasonRepository.getById(seasonId);
+
+        if (Boolean.TRUE.equals(request.isActive())) {
+            seasonRepository.findByIsActiveTrue().ifPresent(active -> {
+                if (!active.getId().equals(seasonId)) {
+                    active.deactivate();
+                    seasonRepository.save(active);
+                }
+            });
+            season.activate();
+        } else if (Boolean.FALSE.equals(request.isActive())) {
+            season.deactivate();
+        }
+
+        season.update(
+            request.name() != null ? request.name() : season.getName(),
+            request.startDate() != null ? request.startDate() : season.getStartDate(),
+            request.endDate() != null ? request.endDate() : season.getEndDate()
+        );
+        seasonRepository.save(season);
+        log.info("[AdminSeason] Season updated: seasonId={}", seasonId);
     }
 
     /**

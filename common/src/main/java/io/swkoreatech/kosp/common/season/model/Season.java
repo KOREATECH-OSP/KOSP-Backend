@@ -49,7 +49,17 @@ public class Season extends BaseEntity {
         this.isActive = isActive;
     }
 
+    public void activate() {
+        this.isActive = true;
+    }
+
     public void deactivate() {
         this.isActive = false;
+    }
+
+    public void update(String name, LocalDate startDate, LocalDate endDate) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 }
