@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.domain.user.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -150,6 +151,14 @@ public class UserService {
     public UserProfileResponse getProfile(Long userId) {
         User user = userRepository.getById(userId);
         return UserProfileResponse.from(user);
+    }
+
+    public List<UserProfileResponse> searchUsers(String keyword) {
+        return userRepository.findByNameContaining(keyword).stream()
+            .filter(u -> !u.isDeleted())
+            .limit(10)
+            .map(UserProfileResponse::from)
+            .toList();
     }
 
     /**
