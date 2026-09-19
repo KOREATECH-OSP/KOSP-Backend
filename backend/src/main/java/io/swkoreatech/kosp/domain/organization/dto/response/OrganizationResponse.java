@@ -10,6 +10,8 @@ public record OrganizationResponse(
     String githubOrgName,
     String displayName,
     String avatarUrl,
+    String description,
+    String tags,
     String status,
     LocalDateTime createdAt
 ) {
@@ -20,6 +22,8 @@ public record OrganizationResponse(
             organization.getGithubOrgName(),
             organization.getDisplayName(),
             organization.getAvatarUrl(),
+            organization.getDescription(),
+            organization.getTags(),
             organization.getStatus().name(),
             organization.getCreatedAt()
         );

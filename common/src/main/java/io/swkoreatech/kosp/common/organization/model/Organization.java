@@ -36,6 +36,12 @@ public class Organization extends BaseEntity {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
+    @Column(name = "description", columnDefinition = "TEXT")
+    private String description;
+
+    @Column(name = "tags", length = 500)
+    private String tags;
+
     @Column(name = "registered_by_user_id", nullable = false)
     private Long registeredByUserId;
 
@@ -73,5 +79,11 @@ public class Organization extends BaseEntity {
         this.githubOrgName = githubOrgName;
         this.displayName = displayName;
         this.avatarUrl = avatarUrl;
+    }
+
+    public void updateProfile(String displayName, String description, String tags) {
+        this.displayName = displayName;
+        this.description = description;
+        this.tags = tags;
     }
 }

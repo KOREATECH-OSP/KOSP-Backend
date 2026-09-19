@@ -28,6 +28,8 @@ import io.swkoreatech.kosp.common.organization.repository.OrganizationRepoReposi
 import io.swkoreatech.kosp.common.organization.repository.OrganizationRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
+import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
+import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationUpdateRequest;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
@@ -204,6 +206,67 @@ public class OrganizationService {
         int linkedCount = countLinked(members);
         int repoCount = organizationRepoRepository.findAllByOrganizationId(organizationId).size();
         return OrganizationDetailResponse.from(organization, members.size(), linkedCount, repoCount);
+    }
+
+    public List<OrganizationResponse> getAllOrganizations(String search) {
+        List<Organization> orgs;
+        if (search != null && !search.isBlank()) {
+            orgs = organizationRepository.findByGithubOrgNameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(search, search);
+        } else {
+            orgs = organizationRepository.findAll();
+        }
+        return orgs.stream()
+            .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
+            .map(OrganizationResponse::from)
+            .toList();
+    }
+
+    @Transactional
+    public void updateOrganization(Long organizationId, OrganizationUpdateRequest request, User user) {
+        Organization organization = organizationRepository.getById(organizationId);
+        if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
+        }
+        OrganizationMember requestMember = organizationMemberRepository
+            .findByOrganizationIdAndUserId(organizationId, user.getId())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.FORBIDDEN));
+        if (requestMember.getRole() != OrganizationMemberRole.OWNER) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_OWNER_REQUIRED);
+        }
+        organization.updateProfile(request.displayName(), request.description(), request.tags());
+    }
+
+    @Transactional
+    public OrganizationMemberResponse addMember(Long organizationId, OrganizationAddMemberRequest request, User user) {
+        Organization organization = organizationRepository.getById(organizationId);
+        if (organization.getStatus() == OrganizationStatus.DISCONNECTED) {
+            throw new GlobalException(ExceptionMessage.ORGANIZATION_NOT_FOUND);
+        }
+        requireAdminRole(organizationId, user);
+
+        User targetUser = userRepository.findByGithubUser_GithubLogin(request.githubUsername())
+            .orElseThrow(() -> new GlobalException(ExceptionMessage.USER_NOT_FOUND));
+
+        if (targetUser.getGithubUser() == null) {
+            throw new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND);
+        }
+
+        organizationMemberRepository.findByOrganizationIdAndGithubUserId(organizationId, targetUser.getGithubUser().getGithubId())
+            .ifPresent(existing -> {
+                throw new GlobalException(ExceptionMessage.ORGANIZATION_MEMBER_ALREADY_EXISTS);
+            });
+
+        OrganizationMember newMember = OrganizationMember.builder()
+            .organization(organization)
+            .userId(targetUser.getId())
+            .githubUserId(targetUser.getGithubUser().getGithubId())
+            .githubUsername(targetUser.getGithubUser().getGithubLogin())
+            .role(OrganizationMemberRole.MEMBER)
+            .status(null)
+            .syncedAt(LocalDateTime.now())
+            .build();
+
+        return OrganizationMemberResponse.from(organizationMemberRepository.save(newMember));
     }
 
     private void requireAdminRole(Long organizationId, User user) {

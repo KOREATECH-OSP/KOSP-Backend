@@ -6,15 +6,19 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.organization.api.OrganizationApi;
+import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterRequest;
+import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationUpdateRequest;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationDetailResponse;
 import io.swkoreatech.kosp.domain.organization.dto.response.OrganizationMemberResponse;
@@ -33,6 +37,16 @@ import lombok.RequiredArgsConstructor;
 public class OrganizationController implements OrganizationApi {
 
     private final OrganizationService organizationService;
+
+    @Override
+    @GetMapping
+    @Permit(name = "org:all", description = "전체 조직 목록 조회")
+    public ResponseEntity<List<OrganizationResponse>> getAllOrganizations(
+        @AuthUser User user,
+        @RequestParam(required = false) String search
+    ) {
+        return ResponseEntity.ok(organizationService.getAllOrganizations(search));
+    }
 
     @Override
     @GetMapping("/available")
@@ -55,7 +69,7 @@ public class OrganizationController implements OrganizationApi {
 
     @Override
     @GetMapping("/my")
-    @Permit(name = "org:my", description = "내가 등록한 조직 목록 조회")
+    @Permit(name = "org:my", description = "내가 속한 조직 목록 조회")
     public ResponseEntity<List<OrganizationResponse>> getMyOrganizations(@AuthUser User user) {
         return ResponseEntity.ok(organizationService.getMyOrganizations(user));
     }
@@ -70,6 +84,18 @@ public class OrganizationController implements OrganizationApi {
         return ResponseEntity.ok(organizationService.getDetail(organizationId));
     }
 
+    @Override
+    @PatchMapping("/{organizationId}")
+    @Permit(name = "org:update", description = "조직 정보 수정 (Owner만 가능)")
+    public ResponseEntity<Void> updateOrganization(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @RequestBody @Valid OrganizationUpdateRequest request
+    ) {
+        organizationService.updateOrganization(organizationId, request, user);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{organizationId}/members")
     @Permit(name = "org:members", description = "조직 멤버 목록 조회")
     public ResponseEntity<List<OrganizationMemberResponse>> getMembers(
@@ -77,6 +103,18 @@ public class OrganizationController implements OrganizationApi {
         @PathVariable Long organizationId
     ) {
         return ResponseEntity.ok(organizationService.getMembers(organizationId, user));
+    }
+
+    @Override
+    @PostMapping("/{organizationId}/members")
+    @Permit(name = "org:members:add", description = "조직 멤버 추가 (Owner/Admin만 가능)")
+    public ResponseEntity<OrganizationMemberResponse> addMember(
+        @AuthUser User user,
+        @PathVariable Long organizationId,
+        @RequestBody @Valid OrganizationAddMemberRequest request
+    ) {
+        OrganizationMemberResponse response = organizationService.addMember(organizationId, request, user);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{organizationId}/repositories")
