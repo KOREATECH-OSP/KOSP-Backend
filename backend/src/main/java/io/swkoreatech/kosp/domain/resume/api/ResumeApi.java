@@ -31,6 +31,9 @@ import jakarta.validation.Valid;
 @Tag(name = "Resume", description = "이력서 관리 API")
 public interface ResumeApi {
 
+    /** 한글(hwpx) 문서 MIME 타입. */
+    String HWPX_MEDIA_TYPE = "application/vnd.hancom.hwpx";
+
     // ── 하위 호환 API (기본 이력서 기준) ──────────────────────────────
 
     @Operation(summary = "내 기본 이력서 조회 (하위 호환)",
@@ -166,5 +169,28 @@ public interface ResumeApi {
         @PathVariable Long resumeId,
         @PathVariable Long materialItemId,
         @RequestBody @Valid AutoProjectUpdateRequest request
+    );
+
+    // ── hwpx(한글) 내려받기 ────────────────────────────────────────────
+
+    @Operation(summary = "내 이력서 hwpx 내려받기",
+        description = "본인 이력서를 한글(hwpx) 문서로 내려받습니다. 편집 가능한 텍스트 문단으로 생성됩니다.")
+    @ApiResponse(responseCode = "200", description = "생성 성공")
+    @ApiResponse(responseCode = "404", description = "이력서가 없거나 본인 소유가 아님")
+    @GetMapping(value = "/v1/users/me/resumes/{resumeId}/hwpx", produces = HWPX_MEDIA_TYPE)
+    ResponseEntity<byte[]> exportMyResumeHwpx(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long resumeId
+    );
+
+    @Operation(summary = "공개 이력서 hwpx 내려받기",
+        description = "공개(isPublic=true)로 설정된 타인의 이력서를 한글(hwpx) 문서로 내려받습니다. "
+            + "비공개이거나 없으면 404 입니다.")
+    @ApiResponse(responseCode = "200", description = "생성 성공")
+    @ApiResponse(responseCode = "404", description = "이력서가 없거나 비공개")
+    @GetMapping(value = "/v1/users/{userId}/resumes/{resumeId}/hwpx", produces = HWPX_MEDIA_TYPE)
+    ResponseEntity<byte[]> exportPublicResumeHwpx(
+        @PathVariable Long userId,
+        @PathVariable Long resumeId
     );
 }

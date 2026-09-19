@@ -266,3 +266,8 @@ logs/
 rabbitmq-data/
 
 *.pem
+# IDE 워크스페이스 파일 (개인 설정)
+*.code-workspace
+
+# Eclipse/IDE 빌드 산출물 (flyway 모듈)
+flyway/bin/

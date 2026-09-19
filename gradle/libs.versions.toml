@@ -5,6 +5,7 @@ jjwt = "0.12.3"
 webmvc-ui = "2.8.14"
 awssdk = "2.40.16"
 jsoup = "1.17.2"
+hwpxlib = "1.0.9"
 rsql-jpa = "6.0.33"
 logback-slack-appender = "1.6.1"
 logstash-logback-encoder = "7.4"
@@ -58,6 +59,7 @@ flyway-database-postgresql = { module = "org.flywaydb:flyway-database-postgresql
 rsql-jpa-spring-boot-starter = { group = "io.github.perplexhub", name = "rsql-jpa-spring-boot-starter", version.ref = "rsql-jpa" }
 
 jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
+hwpxlib = { module = "kr.dogfoot:hwpxlib", version.ref = "hwpxlib" }
 
 spring-retry = { module = "org.springframework.retry:spring-retry" }
 spring-aspects = { module = "org.springframework:spring-aspects" }

@@ -39,6 +39,8 @@ dependencies {
 
     implementation(libs.jsoup)  // HTML 파싱용
 
+    implementation(libs.hwpxlib) // 이력서 hwpx(한글) 출력용
+
     implementation(libs.logback.slack.appender)
     implementation(libs.logstash.logback.encoder)
 
