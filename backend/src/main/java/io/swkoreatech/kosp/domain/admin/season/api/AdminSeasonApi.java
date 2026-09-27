@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -157,4 +158,21 @@ public interface AdminSeasonApi {
     @ApiResponse(responseCode = "200", description = "배치 실행 완료")
     @PostMapping("/batch/ranking")
     ResponseEntity<Void> runRankingBatch();
+
+    /**
+     * 시즌별 유저 수집 현황을 조회한다.
+     */
+    @Operation(summary = "시즌 수집 현황 조회", description = "해당 시즌의 전체 유저별 GitHub 데이터 수집 현황을 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 없음")
+    @GetMapping("/{seasonId}/collection-status")
+    ResponseEntity<CollectionStatusListResponse> getCollectionStatus(@PathVariable Long seasonId);
+
+    /**
+     * 특정 유저의 GitHub 데이터 수집을 즉시 요청한다.
+     */
+    @Operation(summary = "유저 수집 강제 실행", description = "특정 유저의 GitHub 데이터 수집을 즉시 요청합니다. 이미 수집 중이면 무시됩니다.")
+    @ApiResponse(responseCode = "200", description = "수집 요청 완료")
+    @PostMapping("/collection/{userId}/force")
+    ResponseEntity<Void> forceCollect(@PathVariable Long userId);
 }

@@ -16,6 +16,8 @@ import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonRe
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
+import io.swkoreatech.kosp.domain.admin.season.service.AdminCollectionService;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
 import io.swkoreatech.kosp.domain.season.service.SeasonRankingBatchService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
@@ -31,6 +33,7 @@ public class AdminSeasonController implements AdminSeasonApi {
 
     private final AdminSeasonProjectService adminSeasonProjectService;
     private final SeasonRankingBatchService seasonRankingBatchService;
+    private final AdminCollectionService adminCollectionService;
 
     /** {@inheritDoc} */
     @Override
@@ -121,6 +124,21 @@ public class AdminSeasonController implements AdminSeasonApi {
     @Permit(name = "admin:seasons:batch", description = "시즌 랭킹 배치 강제 실행")
     public ResponseEntity<Void> runRankingBatch() {
         seasonRankingBatchService.runRankingBatch();
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "시즌 수집 현황 조회")
+    public ResponseEntity<CollectionStatusListResponse> getCollectionStatus(Long seasonId) {
+        return ResponseEntity.ok(adminCollectionService.getCollectionStatus(seasonId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "유저 수집 강제 실행")
+    public ResponseEntity<Void> forceCollect(Long userId) {
+        adminCollectionService.forceCollect(userId);
         return ResponseEntity.ok().build();
     }
 }

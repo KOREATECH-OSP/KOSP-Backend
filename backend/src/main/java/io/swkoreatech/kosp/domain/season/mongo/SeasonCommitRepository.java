@@ -16,4 +16,9 @@ public interface SeasonCommitRepository extends MongoRepository<SeasonCommitDocu
      * 특정 사용자의 기간 내 커밋 목록을 조회한다 (일별 cap 계산용).
      */
     List<SeasonCommitDocument> findByUserIdAndAuthoredAtBetween(Long userId, Instant start, Instant end);
+
+    /**
+     * 특정 사용자의 기간 내 커밋 수를 반환한다 (수집 현황 표시용).
+     */
+    long countByUserIdAndAuthoredAtBetween(Long userId, Instant start, Instant end);
 }
