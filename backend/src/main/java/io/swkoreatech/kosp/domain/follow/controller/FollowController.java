@@ -1,7 +1,5 @@
 package io.swkoreatech.kosp.domain.follow.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -9,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.follow.api.FollowApi;
 import io.swkoreatech.kosp.domain.follow.dto.response.FollowSummaryResponse;
-import io.swkoreatech.kosp.domain.follow.dto.response.FollowUserResponse;
+import io.swkoreatech.kosp.domain.follow.dto.response.FollowUserListResponse;
 import io.swkoreatech.kosp.domain.follow.service.FollowService;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
@@ -41,14 +39,18 @@ public class FollowController implements FollowApi {
 
     @Override
     @Permit(permitAll = true, description = "팔로워 목록 조회")
-    public ResponseEntity<List<FollowUserResponse>> getFollowers(@PathVariable Long userId) {
-        return ResponseEntity.ok(followService.getFollowers(userId));
+    public ResponseEntity<FollowUserListResponse> getFollowers(
+        @AuthUser User user, @PathVariable Long userId, int page, int size
+    ) {
+        return ResponseEntity.ok(followService.getFollowers(user, userId, page, size));
     }
 
     @Override
     @Permit(permitAll = true, description = "팔로잉 목록 조회")
-    public ResponseEntity<List<FollowUserResponse>> getFollowing(@PathVariable Long userId) {
-        return ResponseEntity.ok(followService.getFollowing(userId));
+    public ResponseEntity<FollowUserListResponse> getFollowing(
+        @AuthUser User user, @PathVariable Long userId, int page, int size
+    ) {
+        return ResponseEntity.ok(followService.getFollowing(user, userId, page, size));
     }
 
     @Override

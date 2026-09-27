@@ -184,4 +184,18 @@ public class MaterialController implements MaterialApi {
     ) {
         return ResponseEntity.ok(materialService.getPublicFolderItems(userId, folderId));
     }
+
+    @Override
+    @Permit(permitAll = true, description = "공개 자료 전체 조회 (포트폴리오)")
+    public ResponseEntity<List<MaterialItemResponse>> getPublicItems(@PathVariable Long userId, int limit) {
+        return ResponseEntity.ok(materialService.getPublicItems(userId, limit));
+    }
+
+    @Override
+    @Permit(permitAll = true, description = "공개 자료 다운로드 URL 발급 (타인)")
+    public ResponseEntity<DownloadUrlResponse> getPublicItemDownloadUrl(
+        @PathVariable Long userId, @PathVariable Long itemId
+    ) {
+        return ResponseEntity.ok(materialService.getPublicItemDownloadUrl(userId, itemId));
+    }
 }

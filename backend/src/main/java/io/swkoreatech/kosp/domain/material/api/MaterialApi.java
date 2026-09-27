@@ -182,16 +182,46 @@ public interface MaterialApi {
 
     // ── 타인 공개 조회 ─────────────────────────────────────────────────
 
-    @Operation(summary = "공개 폴더 조회 (타인)", description = "특정 사용자의 공개 폴더 트리를 반환합니다.")
+    @Operation(
+        summary = "공개 폴더 조회 (타인)",
+        description = "특정 사용자의 공개 폴더 트리를 반환합니다. 상위 폴더가 비공개인 폴더는 제외되며, "
+            + "itemCount 에는 공개 자료 수만 포함됩니다."
+    )
     @GetMapping("/v1/users/{userId}/material-folders")
     ResponseEntity<List<MaterialFolderResponse>> getPublicFolders(
         @PathVariable Long userId
     );
 
-    @Operation(summary = "공개 폴더 자료 조회 (타인)", description = "특정 사용자의 공개 폴더 내 공개 자료를 반환합니다. 비공개면 404.")
+    @Operation(
+        summary = "공개 폴더 자료 조회 (타인)",
+        description = "특정 사용자의 공개 폴더 내 공개 자료를 최근 학기·최신순으로 반환합니다. "
+            + "폴더 또는 그 상위 폴더가 비공개면 404."
+    )
     @GetMapping("/v1/users/{userId}/material-folders/{folderId}/items")
     ResponseEntity<List<MaterialItemResponse>> getPublicFolderItems(
         @PathVariable Long userId,
         @PathVariable Long folderId
+    );
+
+    @Operation(
+        summary = "공개 자료 전체 조회 (포트폴리오)",
+        description = "특정 사용자의 공개 자료를 폴더 구분 없이 최근 학기·최신순으로 반환합니다. "
+            + "포트폴리오 페이지의 학습자료 영역에서 사용합니다."
+    )
+    @GetMapping("/v1/users/{userId}/materials/public")
+    ResponseEntity<List<MaterialItemResponse>> getPublicItems(
+        @PathVariable Long userId,
+        @Parameter(description = "최대 반환 개수 (0 이하이면 전체)") @RequestParam(defaultValue = "0") int limit
+    );
+
+    @Operation(
+        summary = "공개 자료 다운로드 URL 발급 (타인)",
+        description = "공개 자료에 한해 만료 시간이 있는 presigned URL 을 발급합니다. "
+            + "비공개 자료의 ID 로 직접 호출하면 404 입니다."
+    )
+    @GetMapping("/v1/users/{userId}/materials/{itemId}/download")
+    ResponseEntity<DownloadUrlResponse> getPublicItemDownloadUrl(
+        @PathVariable Long userId,
+        @PathVariable Long itemId
     );
 }

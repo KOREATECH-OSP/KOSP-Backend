@@ -43,4 +43,26 @@ public record MaterialFolderResponse(
             itemCount
         );
     }
+
+    /**
+     * 타인 공개 조회용 응답.
+     *
+     * <p>{@code itemCount}에는 공개 자료 수만 담아 비공개 자료의 존재 개수가 새어나가지 않게 하고,
+     * 소유자 전용 설정인 시작 폴더 여부는 항상 false 로 내린다.</p>
+     *
+     * @param publicItemCount 폴더 내 공개 자료 수
+     */
+    public static MaterialFolderResponse fromPublic(MaterialFolder folder, long publicItemCount) {
+        return new MaterialFolderResponse(
+            folder.getId(),
+            folder.getParent() == null ? null : folder.getParent().getId(),
+            folder.getName(),
+            folder.getFolderType(),
+            folder.getSource(),
+            folder.getVisibility(),
+            false,
+            folder.getSortOrder(),
+            publicItemCount
+        );
+    }
 }

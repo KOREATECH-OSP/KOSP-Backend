@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import io.swkoreatech.kosp.domain.material.model.MaterialItem;
 import io.swkoreatech.kosp.domain.material.model.MaterialSource;
@@ -45,4 +47,14 @@ public interface MaterialItemRepository extends JpaRepository<MaterialItem, Long
      * 폴더에 속한 자료 수를 반환한다.
      */
     long countByFolderId(Long folderId);
+
+    /**
+     * 여러 폴더에 속한 자료를 최근학기 우선·최신순으로 조회한다 (공개 자료 노출용).
+     *
+     * <p>학기 정보가 없는 자료가 최신 학기 자료보다 위로 올라오지 않도록 {@code NULLS LAST} 를 명시한다.
+     * 자료 단위 공개 override 판정은 서비스에서 수행한다.</p>
+     */
+    @Query("SELECT i FROM MaterialItem i WHERE i.folder.id IN :folderIds "
+        + "ORDER BY i.semesterOrder DESC NULLS LAST, i.materialDate DESC NULLS LAST, i.id DESC")
+    List<MaterialItem> findAllByFolderIdsOrderByRecentSemester(@Param("folderIds") List<Long> folderIds);
 }
