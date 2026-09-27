@@ -28,4 +28,6 @@ public interface StepContextKeys {
     String GITHUB_NODE_ID = "githubNodeId";
 
     String DISCOVERED_REPOS = "discoveredRepos";
+
+    String COMMIT_SAVED_COUNT = "commitSavedCount";
 }

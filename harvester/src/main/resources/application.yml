@@ -71,6 +71,8 @@ slack:
   logging:
     error: ${SLACK_LOGGING_ERROR_WEBHOOK_URL:}
   event-notification-url: ${SLACK_EVENT_NOTIFICATION_URL:}
+  infra:
+    webhook-url: ${SLACK_INFRA_WEBHOOK_URL:}
 
 server:
   shutdown: graceful

@@ -95,6 +95,7 @@ public class CommitMiningStep implements StepProvider {
         totalSkippedCount = 0;
         int totalMined = mineCommitsFromRepos(userId, repos, nodeId, token);
         log.info(LoggingConstants.MINING_SUMMARY, totalMined, totalSavedCount, totalSkippedCount);
+        context.putLong(StepContextKeys.COMMIT_SAVED_COUNT, totalSavedCount);
     }
 
     private String[] getDiscoveredRepos(ExecutionContext context) {
