@@ -46,6 +46,7 @@ public class GithubGraphQLClient {
     private String userPullRequestsQuery;
     private String userIssuesQuery;
     private String repositoryCommitsQuery;
+    private String repositoryBranchesQuery;
 
     /**
      * GithubGraphQLClient를 생성하고 GraphQL 쿼리를 로드한다.
@@ -95,6 +96,7 @@ public class GithubGraphQLClient {
             userPullRequestsQuery = loadQuery("classpath:graphql/user-pull-requests.graphql");
             userIssuesQuery = loadQuery("classpath:graphql/user-issues.graphql");
             repositoryCommitsQuery = loadQuery("classpath:graphql/repository-commits.graphql");
+            repositoryBranchesQuery = loadQuery("classpath:graphql/repository-branches.graphql");
             log.info("GraphQL queries loaded successfully");
         } catch (IOException e) {
             log.warn("GraphQL queries not found: {}", e.getMessage());
@@ -247,11 +249,12 @@ public class GithubGraphQLClient {
     }
 
     /**
-     * 특정 저장소에서 지정된 작성자의 커밋 목록을 조회한다.
+     * 특정 저장소의 특정 브랜치에서 지정된 작성자의 커밋 목록을 조회한다.
      *
      * @param <T>          응답 타입
      * @param owner        저장소 소유자
      * @param name         저장소 이름
+     * @param branch       브랜치 qualified name (예: "refs/heads/main")
      * @param authorId     작성자의 GitHub 노드 ID
      * @param cursor       페이지네이션 커서 (첫 페이지는 null)
      * @param token        GitHub 인증 토큰
@@ -262,6 +265,7 @@ public class GithubGraphQLClient {
     public <T> Mono<T> getRepositoryCommits(
         String owner,
         String name,
+        String branch,
         String authorId,
         String cursor,
         String token,
@@ -271,11 +275,32 @@ public class GithubGraphQLClient {
         Map<String, Object> variables = new HashMap<>();
         variables.put("owner", owner);
         variables.put("name", name);
+        variables.put("branch", branch);
         variables.put("authorId", authorId);
         variables.put("first", pageSize);
         if (cursor != null) {
             variables.put("after", cursor);
         }
         return query(repositoryCommitsQuery, variables, token, responseType);
+    }
+
+    /**
+     * 특정 저장소의 전체 브랜치 목록을 조회한다.
+     *
+     * @param <T>          응답 타입
+     * @param owner        저장소 소유자
+     * @param name         저장소 이름
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 브랜치 목록 응답을 담은 Mono
+     */
+    public <T> Mono<T> getRepositoryBranches(
+        String owner,
+        String name,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = Map.of("owner", owner, "name", name);
+        return query(repositoryBranchesQuery, variables, token, responseType);
     }
 }

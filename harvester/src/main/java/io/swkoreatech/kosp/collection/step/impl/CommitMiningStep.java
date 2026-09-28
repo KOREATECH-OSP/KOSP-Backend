@@ -14,6 +14,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.RepositoryBranchesResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse;
 import io.swkoreatech.kosp.client.dto.RepositoryCommitsResponse.CommitNode;
 import io.swkoreatech.kosp.collection.document.CommitDocument;
@@ -123,40 +124,69 @@ public class CommitMiningStep implements StepProvider {
 
         String owner = parts[0];
         String name = parts[1];
-        return fetchAllCommits(userId, owner, name, nodeId, token);
+        List<String> branches = fetchBranches(owner, name, token);
+        int total = 0;
+        for (String branch : branches) {
+            total += fetchAllCommits(userId, owner, name, branch, nodeId, token);
+        }
+        return total;
     }
 
-    private int fetchAllCommits(Long userId, String owner, String name, String nodeId, String token) {
+    private List<String> fetchBranches(String owner, String name, String token) {
+        try {
+            GraphQLResponse<RepositoryBranchesResponse> response = graphQLClient
+                .getRepositoryBranches(owner, name, token,
+                    GraphQLTypeFactory.<RepositoryBranchesResponse>responseType())
+                .block();
+            if (response != null && !response.hasErrors()) {
+                RepositoryBranchesResponse data = response.getDataAs(RepositoryBranchesResponse.class);
+                if (data != null) {
+                    List<String> branches = data.getBranchQualifiedNames();
+                    if (!branches.isEmpty()) {
+                        return branches;
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch branches for {}/{}, falling back to main: {}", owner, name, e.getMessage());
+        }
+        return List.of("refs/heads/main");
+    }
+
+    private int fetchAllCommits(Long userId, String owner, String name, String branch, String nodeId, String token) {
         Instant now = Instant.now();
-        int result = paginateCommits(userId, owner, name, nodeId, token, now, DEFAULT_PAGE_SIZE);
+        int result = paginateCommits(userId, owner, name, branch, nodeId, token, now, DEFAULT_PAGE_SIZE);
 
         if (result >= 0) {
             return result;
         }
 
         if (result == -2) {
-            log.warn("Skipping repo {}/{} — non-retryable GraphQL error (pageSize retry won't help)", owner, name);
+            log.warn("Skipping repo {}/{} branch {} — non-retryable GraphQL error (pageSize retry won't help)",
+                owner, name, branch);
             return 0;
         }
 
-        log.warn("Retrying {}/{} with reduced page size {}", owner, name, RETRY_PAGE_SIZE);
-        result = paginateCommits(userId, owner, name, nodeId, token, now, RETRY_PAGE_SIZE);
+        log.warn("Retrying {}/{} branch {} with reduced page size {}", owner, name, branch, RETRY_PAGE_SIZE);
+        result = paginateCommits(userId, owner, name, branch, nodeId, token, now, RETRY_PAGE_SIZE);
 
         if (result >= 0) {
             return result;
         }
 
-        log.warn("Skipping repo {}/{} after retry failure", owner, name);
+        log.warn("Skipping repo {}/{} branch {} after retry failure", owner, name, branch);
         return 0;
     }
 
-    private int paginateCommits(Long userId, String owner, String name, String nodeId, String token, Instant now, int pageSize) {
+    private int paginateCommits(
+        Long userId, String owner, String name, String branch, String nodeId, String token, Instant now, int pageSize
+    ) {
         return PaginationHelper.paginate(
-            cursor -> fetchCommitsPage(owner, name, nodeId, cursor, token, pageSize),
+            cursor -> fetchCommitsPage(owner, name, branch, nodeId, cursor, token, pageSize),
             RepositoryCommitsResponse::getPageInfo,
             (data, cursor) -> saveCommits(userId, owner, name, data.getCommits(), now),
             "repo",
-            owner + "/" + name,
+            owner + "/" + name + "#" + branch,
             RepositoryCommitsResponse.class
         );
     }
@@ -164,12 +194,13 @@ public class CommitMiningStep implements StepProvider {
     private GraphQLResponse<RepositoryCommitsResponse> fetchCommitsPage(
         String owner,
         String name,
+        String branch,
         String nodeId,
         String cursor,
         String token,
         int pageSize
     ) {
-        return graphQLClient.getRepositoryCommits(owner, name, nodeId, cursor, token, pageSize,
+        return graphQLClient.getRepositoryCommits(owner, name, branch, nodeId, cursor, token, pageSize,
             GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
     }
 
