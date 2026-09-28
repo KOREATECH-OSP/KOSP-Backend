@@ -45,8 +45,8 @@ public class AdminCollectionService {
     @Transactional(readOnly = true)
     public CollectionStatusListResponse getCollectionStatus(Long seasonId) {
         Season season = seasonRepository.getById(seasonId);
-        Instant seasonStart = season.getStartDate().atStartOfDay().toInstant(ZoneOffset.UTC);
-        Instant seasonEnd = season.getEndDate().plusDays(1).atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant seasonStart = season.getStartDate().atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant seasonEnd = season.getEndDate().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
 
         List<SeasonRankingScore> scores = seasonRankingScoreRepository.findAllBySeason(season);
 
@@ -83,8 +83,9 @@ public class AdminCollectionService {
 
         long commitCount = 0;
         if (githubUser != null) {
-            commitCount = seasonCommitRepository.countByUserIdAndAuthoredAtBetween(
-                user.getId(), seasonStart, seasonEnd);
+            commitCount = seasonCommitRepository
+                .findByUserIdAndAuthoredAtBetween(user.getId(), seasonStart, seasonEnd)
+                .size();
         }
 
         return new CollectionStatusResponse(
