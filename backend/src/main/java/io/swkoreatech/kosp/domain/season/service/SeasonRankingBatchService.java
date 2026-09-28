@@ -46,6 +46,7 @@ public class SeasonRankingBatchService {
 
     private static final BigDecimal COMMIT_SCORE_PER_UNIT = new BigDecimal("0.0500");
     private static final int COMMIT_DAILY_CAP = 3;
+    private static final int COMMIT_MIN_CHANGED_LINES = 5;
 
     // 챌린지 레벨(tier)별 점수 단가
     private static final Map<Integer, BigDecimal> CHALLENGE_TIER_SCORE_MAP = Map.of(
@@ -138,6 +139,11 @@ public class SeasonRankingBatchService {
         // 일별 커밋 수 집계 후 일별 cap 적용
         Map<LocalDate, Long> dailyCommitCounts = commits.stream()
             .filter(c -> !isBotCommit(c.getMessage()))
+            .filter(c -> {
+                int changed = (c.getAdditions() != null ? c.getAdditions() : 0)
+                    + (c.getDeletions() != null ? c.getDeletions() : 0);
+                return changed >= COMMIT_MIN_CHANGED_LINES;
+            })
             .collect(Collectors.groupingBy(
                 c -> c.getAuthoredAt().atZone(ZoneOffset.UTC).toLocalDate(),
                 Collectors.counting()
