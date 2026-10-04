@@ -144,6 +144,14 @@ public class AdminSeasonController implements AdminSeasonApi {
 
     /** {@inheritDoc} */
     @Override
+    @Permit(name = "admin:seasons:batch", description = "전체 유저 수집 강제 실행")
+    public ResponseEntity<Void> forceCollectAll(Long seasonId) {
+        adminCollectionService.forceCollectAll(seasonId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
     @Permit(name = "admin:seasons:batch", description = "유저 수집 강제 실행")
     public ResponseEntity<Void> forceCollect(Long userId) {
         adminCollectionService.forceCollect(userId);

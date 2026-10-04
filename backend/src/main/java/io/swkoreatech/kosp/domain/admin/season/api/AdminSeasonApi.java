@@ -182,6 +182,14 @@ public interface AdminSeasonApi {
     );
 
     /**
+     * 시즌 전체 유저의 GitHub 데이터 수집을 즉시 요청한다.
+     */
+    @Operation(summary = "전체 유저 수집 강제 실행", description = "해당 시즌에 등록된 전체 유저의 GitHub 데이터 수집을 즉시 요청합니다.")
+    @ApiResponse(responseCode = "200", description = "수집 요청 완료")
+    @PostMapping("/{seasonId}/collection/force-all")
+    ResponseEntity<Void> forceCollectAll(@PathVariable Long seasonId);
+
+    /**
      * 특정 유저의 GitHub 데이터 수집을 즉시 요청한다.
      */
     @Operation(summary = "유저 수집 강제 실행", description = "특정 유저의 GitHub 데이터 수집을 즉시 요청합니다. 이미 수집 중이면 무시됩니다.")

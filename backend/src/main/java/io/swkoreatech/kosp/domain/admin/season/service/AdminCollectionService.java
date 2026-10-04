@@ -123,6 +123,28 @@ public class AdminCollectionService {
      * 특정 유저의 GitHub 데이터 수집을 즉시 요청한다.
      */
     public void forceCollect(Long userId) {
+        sendCollectionRequest(userId);
+        log.info("Force collection requested for user {}", userId);
+    }
+
+    /**
+     * 시즌에 등록된 전체 유저의 GitHub 데이터 수집을 즉시 요청한다.
+     */
+    @Transactional(readOnly = true)
+    public int forceCollectAll(Long seasonId) {
+        Season season = seasonRepository.getById(seasonId);
+        List<SeasonRankingScore> scores = seasonRankingScoreRepository.findAllBySeason(season);
+
+        List<Long> userIds = scores.stream()
+            .map(score -> score.getUser().getId())
+            .toList();
+
+        userIds.forEach(this::sendCollectionRequest);
+        log.info("Force collection requested for all {} users in season {}", userIds.size(), seasonId);
+        return userIds.size();
+    }
+
+    private void sendCollectionRequest(Long userId) {
         GithubCollectionRequest request = new GithubCollectionRequest(userId);
         rabbitTemplate.convertAndSend(
             QueueNames.GITHUB_COLLECTION_EXCHANGE,
@@ -133,7 +155,6 @@ public class AdminCollectionService {
                 return message;
             }
         );
-        log.info("Force collection requested for user {}", userId);
     }
 
     private CollectionStatusResponse toResponse(SeasonRankingScore score, Instant seasonStart, Instant seasonEnd) {
