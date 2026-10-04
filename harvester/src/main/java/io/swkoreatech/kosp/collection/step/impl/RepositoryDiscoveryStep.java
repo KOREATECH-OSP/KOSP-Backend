@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -160,7 +161,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
-        storeReposInContext(chunkContext, allRepositories);
+        storeReposInContext(chunkContext, allRepositories, userId);
 
         log.info("Collection complete: {} repositories discovered from {} chunks",
             allRepositories.size(), chunks.size());
@@ -388,15 +389,25 @@ public class RepositoryDiscoveryStep implements StepProvider {
         context.putString(StepContextKeys.GITHUB_NODE_ID, nodeId);
     }
 
-    private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories) {
-        String[] repoFullNames = repositories.stream()
+    private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories, Long userId) {
+        Set<String> repoFullNames = repositories.stream()
             .map(RepositoryInfo::getNameWithOwner)
-            .toArray(String[]::new);
+            .collect(Collectors.toCollection(HashSet::new));
+
+        // 이전에 발견된 레포도 합산 (feature 브랜치 커밋은 contributionsCollection API에서 감지되지 않아
+        // 증분 수집 시 발견 레포가 0건이 되는 문제 방지)
+        repoDocumentRepository.findByUserId(userId)
+            .stream()
+            .map(ContributedRepoDocument::getFullName)
+            .filter(name -> name != null && !name.isBlank())
+            .forEach(repoFullNames::add);
+
+        log.info("Total repos to mine (new + known): {} for user {}", repoFullNames.size(), userId);
 
         chunkContext.getStepContext()
             .getStepExecution()
             .getJobExecution()
             .getExecutionContext()
-            .put(StepContextKeys.DISCOVERED_REPOS, repoFullNames);
+            .put(StepContextKeys.DISCOVERED_REPOS, repoFullNames.toArray(new String[0]));
     }
 }
