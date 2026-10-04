@@ -16,6 +16,7 @@ import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonRe
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminCollectionService;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
@@ -132,6 +133,13 @@ public class AdminSeasonController implements AdminSeasonApi {
     @Permit(name = "admin:seasons:read", description = "시즌 수집 현황 조회")
     public ResponseEntity<CollectionStatusListResponse> getCollectionStatus(Long seasonId) {
         return ResponseEntity.ok(adminCollectionService.getCollectionStatus(seasonId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "유저 수집 현황 상세 조회")
+    public ResponseEntity<CollectionStatusDetailResponse> getCollectionStatusDetail(Long seasonId, Long userId) {
+        return ResponseEntity.ok(adminCollectionService.getCollectionStatusDetail(seasonId, userId));
     }
 
     /** {@inheritDoc} */

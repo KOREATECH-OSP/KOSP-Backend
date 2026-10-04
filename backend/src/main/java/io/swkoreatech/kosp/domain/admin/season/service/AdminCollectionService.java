@@ -3,7 +3,10 @@ package io.swkoreatech.kosp.domain.admin.season.service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
@@ -16,9 +19,12 @@ import io.swkoreatech.kosp.common.season.model.SeasonRankingScore;
 import io.swkoreatech.kosp.common.season.repository.SeasonRankingScoreRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRepository;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse.RepositoryCommitStat;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusResponse.CollectionStatus;
+import io.swkoreatech.kosp.domain.season.mongo.SeasonCommitDocument;
 import io.swkoreatech.kosp.domain.season.mongo.SeasonCommitRepository;
 import io.swkoreatech.kosp.infra.rabbitmq.constants.QueueNames;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AdminCollectionService {
 
     private static final int ANOMALY_DAYS_THRESHOLD = 2;
+    private static final int COMMIT_MIN_CHANGED_LINES = 5;
 
     private final SeasonRepository seasonRepository;
     private final SeasonRankingScoreRepository seasonRankingScoreRepository;
@@ -55,6 +62,61 @@ public class AdminCollectionService {
             .toList();
 
         return new CollectionStatusListResponse(responses);
+    }
+
+    /**
+     * 특정 유저의 시즌 내 커밋 수집 현황을 레포지토리 단위로 조회한다.
+     */
+    @Transactional(readOnly = true)
+    public CollectionStatusDetailResponse getCollectionStatusDetail(Long seasonId, Long userId) {
+        Season season = seasonRepository.getById(seasonId);
+        Instant seasonStart = season.getStartDate().atStartOfDay(ZoneOffset.UTC).toInstant();
+        Instant seasonEnd = season.getEndDate().plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+
+        SeasonRankingScore score = seasonRankingScoreRepository.findAllBySeason(season).stream()
+            .filter(s -> s.getUser().getId().equals(userId))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("해당 시즌에 등록된 유저가 아닙니다."));
+
+        User user = score.getUser();
+        GithubUser githubUser = user.getGithubUser();
+
+        String githubLogin = githubUser != null ? githubUser.getGithubLogin() : null;
+        LocalDateTime lastCrawling = githubUser != null ? githubUser.getLastCrawling() : null;
+
+        if (githubUser == null) {
+            return new CollectionStatusDetailResponse(
+                userId, user.getName(), null, null,
+                CollectionStatus.NOT_COLLECTED, 0L, 0L, List.of()
+            );
+        }
+
+        List<SeasonCommitDocument> commits = seasonCommitRepository
+            .findByUserIdAndAuthoredAtBetween(userId, seasonStart, seasonEnd);
+
+        Map<String, List<SeasonCommitDocument>> byRepo = commits.stream()
+            .collect(Collectors.groupingBy(SeasonCommitDocument::getRepositoryName));
+
+        List<RepositoryCommitStat> repoStats = byRepo.entrySet().stream()
+            .map(entry -> {
+                List<SeasonCommitDocument> repoCommits = entry.getValue();
+                long total = repoCommits.size();
+                long scored = repoCommits.stream()
+                    .filter(c -> c.getAdditions() != null && c.getDeletions() != null
+                        && (c.getAdditions() + c.getDeletions()) >= COMMIT_MIN_CHANGED_LINES)
+                    .count();
+                return new RepositoryCommitStat(entry.getKey(), total, scored);
+            })
+            .sorted(Comparator.comparingLong(RepositoryCommitStat::totalCommitCount).reversed())
+            .toList();
+
+        long totalCommitCount = commits.size();
+        long scoredCommitCount = repoStats.stream().mapToLong(RepositoryCommitStat::scoredCommitCount).sum();
+
+        return new CollectionStatusDetailResponse(
+            userId, user.getName(), githubLogin, lastCrawling,
+            determineStatus(lastCrawling), totalCommitCount, scoredCommitCount, repoStats
+        );
     }
 
     /**

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -167,6 +168,18 @@ public interface AdminSeasonApi {
     @ApiResponse(responseCode = "404", description = "시즌 없음")
     @GetMapping("/{seasonId}/collection-status")
     ResponseEntity<CollectionStatusListResponse> getCollectionStatus(@PathVariable Long seasonId);
+
+    /**
+     * 특정 유저의 수집 현황을 레포지토리 단위로 상세 조회한다.
+     */
+    @Operation(summary = "유저 수집 현황 상세 조회", description = "해당 시즌에서 특정 유저의 레포지토리별 커밋 수집 현황을 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 또는 유저 없음")
+    @GetMapping("/{seasonId}/collection-status/{userId}")
+    ResponseEntity<CollectionStatusDetailResponse> getCollectionStatusDetail(
+        @PathVariable Long seasonId,
+        @PathVariable Long userId
+    );
 
     /**
      * 특정 유저의 GitHub 데이터 수집을 즉시 요청한다.
