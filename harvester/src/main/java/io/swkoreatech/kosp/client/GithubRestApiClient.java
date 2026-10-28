@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -182,6 +183,20 @@ public class GithubRestApiClient {
                 })
                 .doOnError(error -> log.error("POST {} - Error: {}", uri, error.getMessage()))
             );
+    }
+
+    /**
+     * 사용자의 GitHub 이벤트 목록을 페이지 단위로 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @param login  GitHub 로그인 이름
+     * @param token  GitHub 인증 토큰
+     * @param page   페이지 번호 (1부터 시작)
+     * @return 이벤트 배열을 담은 Mono
+     */
+    public Mono<GithubUserEventResponse[]> getUserEvents(Long userId, String login, String token, int page) {
+        String uri = "/users/" + login + "/events?per_page=100&page=" + page;
+        return get(userId, uri, token, GithubUserEventResponse[].class);
     }
 
     /**

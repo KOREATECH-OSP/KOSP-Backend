@@ -21,7 +21,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.GithubRestApiClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
+import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
 import io.swkoreatech.kosp.client.dto.RepositoriesContributedToResponse;
@@ -67,6 +69,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final PlatformTransactionManager transactionManager;
     private final UserRepository userRepository;
     private final GithubGraphQLClient graphQLClient;
+    private final GithubRestApiClient restApiClient;
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final CollectionMetadataRepository metadataRepository;
@@ -165,6 +168,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
         Set<RepositoryInfo> allContributedRepos = fetchAllContributedToRepositories(login, token);
         allRepositories.addAll(allContributedRepos);
+
+        Set<RepositoryInfo> eventRepos = fetchReposFromPushEvents(userId, login, token);
+        allRepositories.addAll(eventRepos);
 
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
@@ -286,6 +292,51 @@ public class RepositoryDiscoveryStep implements StepProvider {
         }
 
         return ownedRepos;
+    }
+
+    private Set<RepositoryInfo> fetchReposFromPushEvents(Long userId, String login, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubUserEventResponse[] events;
+            try {
+                events = restApiClient.getUserEvents(userId, login, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Events API timeout for user {}, stopping at page {}", login, page);
+                break;
+            }
+
+            if (events == null || events.length == 0) {
+                break;
+            }
+
+            for (GithubUserEventResponse event : events) {
+                if (!"PushEvent".equals(event.getType()) || event.getRepo() == null) {
+                    continue;
+                }
+                String fullName = event.getRepo().getName();
+                if (fullName == null || !fullName.contains("/")) {
+                    continue;
+                }
+                String[] parts = fullName.split("/", 2);
+                RepositoryInfo repoInfo = new RepositoryInfo();
+                setRepositoryField(repoInfo, "name", parts[1]);
+                setRepositoryField(repoInfo, "nameWithOwner", fullName);
+
+                ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+                setOwnerField(owner, "login", parts[0]);
+                setRepositoryField(repoInfo, "owner", owner);
+
+                repos.add(repoInfo);
+            }
+
+            if (events.length < 100) {
+                break;
+            }
+        }
+
+        log.info("Discovered {} repos from push events for user {}", repos.size(), login);
+        return repos;
     }
 
     private Set<RepositoryInfo> fetchAllContributedToRepositories(String login, String token) {
