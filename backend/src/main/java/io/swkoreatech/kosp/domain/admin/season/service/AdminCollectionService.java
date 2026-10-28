@@ -3,6 +3,7 @@ package io.swkoreatech.kosp.domain.admin.season.service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +118,7 @@ public class AdminCollectionService {
             );
         }
 
+
         List<SeasonCommitDocument> commits = seasonCommitRepository
             .findByUserIdAndAuthoredAtBetween(userId, seasonStart, seasonEnd);
 
@@ -140,7 +142,7 @@ public class AdminCollectionService {
         long scoredCommitCount = repoStats.stream().mapToLong(RepositoryCommitStat::scoredCommitCount).sum();
 
         return new CollectionStatusDetailResponse(
-            userId, user.getName(), githubLogin, lastCrawling,
+            userId, user.getName(), githubLogin, toUtcIso(lastCrawling),
             determineStatus(lastCrawling), totalCommitCount, scoredCommitCount, repoStats
         );
     }
@@ -213,10 +215,17 @@ public class AdminCollectionService {
             user.getId(),
             user.getName(),
             githubLogin,
-            lastCrawling,
+            toUtcIso(lastCrawling),
             commitCount,
             status
         );
+    }
+
+    private String toUtcIso(LocalDateTime lastCrawling) {
+        if (lastCrawling == null) {
+            return null;
+        }
+        return lastCrawling.atOffset(ZoneOffset.UTC).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
     }
 
     private CollectionStatus determineStatus(LocalDateTime lastCrawling) {

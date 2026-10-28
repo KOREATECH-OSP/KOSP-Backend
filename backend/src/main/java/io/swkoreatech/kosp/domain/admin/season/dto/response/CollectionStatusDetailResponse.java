@@ -1,6 +1,5 @@
 package io.swkoreatech.kosp.domain.admin.season.dto.response;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusResponse.CollectionStatus;
@@ -14,7 +13,7 @@ public record CollectionStatusDetailResponse(
     Long userId,
     String userName,
     String githubLogin,
-    LocalDateTime lastCrawling,
+    String lastCrawling,
     CollectionStatus collectionStatus,
     long totalCommitCount,
     long scoredCommitCount,
