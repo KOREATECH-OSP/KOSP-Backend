@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -7,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.stream.Collectors;
 
 import org.springframework.batch.core.Step;
@@ -58,6 +60,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RepositoryDiscoveryStep implements StepProvider {
 
     private static final String STEP_NAME = "repositoryDiscoveryStep";
+    private static final Duration GRAPHQL_TIMEOUT = Duration.ofMinutes(2);
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -189,9 +192,15 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private ZonedDateTime fetchUserCreatedAt(String login, String token) {
-        GraphQLResponse<UserBasicInfoResponse> response =
-            graphQLClient.getUserBasicInfo(login, null, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-                .block();
+        GraphQLResponse<UserBasicInfoResponse> response;
+        try {
+            response = graphQLClient.getUserBasicInfo(login, null, token,
+                    GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
+                .block(GRAPHQL_TIMEOUT);
+        } catch (RuntimeException e) {
+            log.warn("GitHub API timeout while fetching user info for {}, defaulting to 5 years ago", login);
+            return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
+        }
 
         if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
             return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
@@ -208,10 +217,16 @@ public class RepositoryDiscoveryStep implements StepProvider {
         String to,
         String token
     ) {
-        return graphQLClient.getContributedRepos(
-            login, from, to, token,
-            GraphQLTypeFactory.<ContributedReposResponse>responseType()
-        ).block();
+        try {
+            return graphQLClient.getContributedRepos(
+                login, from, to, token,
+                GraphQLTypeFactory.<ContributedReposResponse>responseType()
+            ).block(GRAPHQL_TIMEOUT);
+        } catch (RuntimeException e) {
+            log.warn("GitHub API timeout while fetching contributed repos for user {}, skipping chunk ({} ~ {})",
+                login, from, to);
+            return null;
+        }
     }
 
     private String formatDateTime(ZonedDateTime dateTime) {
@@ -224,10 +239,15 @@ public class RepositoryDiscoveryStep implements StepProvider {
         boolean hasNextPage = true;
 
         while (hasNextPage) {
-            GraphQLResponse<UserBasicInfoResponse> response =
-                graphQLClient.getUserBasicInfo(login, cursor, token,
+            GraphQLResponse<UserBasicInfoResponse> response;
+            try {
+                response = graphQLClient.getUserBasicInfo(login, cursor, token,
                         GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-                    .block();
+                    .block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub API timeout while fetching owned repos for {}, stopping pagination", login);
+                break;
+            }
 
             if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
                 break;
