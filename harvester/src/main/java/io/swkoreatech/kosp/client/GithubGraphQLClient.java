@@ -43,6 +43,7 @@ public class GithubGraphQLClient {
     private String userBasicInfoQuery;
     private String userContributionsQuery;
     private String contributedReposQuery;
+    private String repositoriesContributedToQuery;
     private String userPullRequestsQuery;
     private String userIssuesQuery;
     private String repositoryCommitsQuery;
@@ -93,6 +94,7 @@ public class GithubGraphQLClient {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
             contributedReposQuery = loadQuery("classpath:graphql/contributed-repositories.graphql");
+            repositoriesContributedToQuery = loadQuery("classpath:graphql/repositories-contributed-to.graphql");
             userPullRequestsQuery = loadQuery("classpath:graphql/user-pull-requests.graphql");
             userIssuesQuery = loadQuery("classpath:graphql/user-issues.graphql");
             repositoryCommitsQuery = loadQuery("classpath:graphql/repository-commits.graphql");
@@ -184,6 +186,25 @@ public class GithubGraphQLClient {
             "to", to
         );
         return query(contributedReposQuery, variables, token, responseType);
+    }
+
+    /**
+     * 브랜치에 관계없이 사용자가 기여한 저장소 목록을 페이지네이션하여 조회한다.
+     *
+     * @param <T>          응답 타입
+     * @param login        GitHub 로그인 이름
+     * @param cursor       페이지네이션 커서 (첫 페이지는 null)
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 기여 저장소 응답을 담은 Mono
+     */
+    public <T> Mono<T> getRepositoriesContributedTo(String login, String cursor, String token, Class<T> responseType) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("login", login);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
+        return query(repositoriesContributedToQuery, variables, token, responseType);
     }
 
     /**

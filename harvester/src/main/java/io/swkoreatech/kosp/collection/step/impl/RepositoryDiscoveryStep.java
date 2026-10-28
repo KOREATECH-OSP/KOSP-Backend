@@ -24,6 +24,7 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.RepositoriesContributedToResponse;
 import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
@@ -162,6 +163,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
         Set<RepositoryInfo> ownedRepos = fetchOwnedRepositories(login, token);
         allRepositories.addAll(ownedRepos);
 
+        Set<RepositoryInfo> allContributedRepos = fetchAllContributedToRepositories(login, token);
+        allRepositories.addAll(allContributedRepos);
+
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
         storeReposInContext(chunkContext, allRepositories, userId);
@@ -282,6 +286,85 @@ public class RepositoryDiscoveryStep implements StepProvider {
         }
 
         return ownedRepos;
+    }
+
+    private Set<RepositoryInfo> fetchAllContributedToRepositories(String login, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+        String cursor = null;
+        boolean hasNextPage = true;
+
+        while (hasNextPage) {
+            RepositoriesContributedToResponse response;
+            try {
+                response = graphQLClient.getRepositoriesContributedTo(
+                        login, cursor, token,
+                        RepositoriesContributedToResponse.class)
+                    .block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub API timeout while fetching repositoriesContributedTo for {}, stopping", login);
+                break;
+            }
+
+            if (response == null || response.getUser() == null) {
+                break;
+            }
+
+            RepositoriesContributedToResponse.RepositoriesData data =
+                response.getUser().getRepositoriesContributedTo();
+            if (data == null || data.getNodes() == null) {
+                break;
+            }
+
+            for (RepositoriesContributedToResponse.RepositoryNode node : data.getNodes()) {
+                repos.add(convertContributedToRepositoryInfo(node));
+            }
+
+            hasNextPage = data.getPageInfo() != null && data.getPageInfo().isHasNextPage();
+            cursor = data.getPageInfo() != null ? data.getPageInfo().getEndCursor() : null;
+
+            if (hasNextPage) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        return repos;
+    }
+
+    private RepositoryInfo convertContributedToRepositoryInfo(RepositoriesContributedToResponse.RepositoryNode node) {
+        RepositoryInfo repoInfo = new RepositoryInfo();
+        setRepositoryField(repoInfo, "name", node.getName());
+        setRepositoryField(repoInfo, "nameWithOwner", node.getNameWithOwner());
+        setRepositoryField(repoInfo, "description", node.getDescription());
+        setRepositoryField(repoInfo, "isFork", node.isFork());
+        setRepositoryField(repoInfo, "isPrivate", node.isPrivate());
+        setRepositoryField(repoInfo, "stargazerCount", node.getStargazerCount());
+        setRepositoryField(repoInfo, "forkCount", node.getForkCount());
+        setRepositoryField(repoInfo, "createdAt", node.getCreatedAt());
+
+        if (node.getOwner() != null) {
+            ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+            setOwnerField(owner, "login", node.getOwner().getLogin());
+            setRepositoryField(repoInfo, "owner", owner);
+        }
+
+        if (node.getPrimaryLanguage() != null) {
+            ContributedReposResponse.PrimaryLanguage language = new ContributedReposResponse.PrimaryLanguage();
+            setLanguageField(language, "name", node.getPrimaryLanguage().getName());
+            setRepositoryField(repoInfo, "primaryLanguage", language);
+        }
+
+        if (node.getWatchers() != null) {
+            ContributedReposResponse.WatchersInfo watchers = new ContributedReposResponse.WatchersInfo();
+            setWatchersField(watchers, "totalCount", node.getWatchers().getTotalCount());
+            setRepositoryField(repoInfo, "watchers", watchers);
+        }
+
+        return repoInfo;
     }
 
     private RepositoryInfo convertToRepositoryInfo(UserBasicInfoResponse.RepositoryNode node) {
