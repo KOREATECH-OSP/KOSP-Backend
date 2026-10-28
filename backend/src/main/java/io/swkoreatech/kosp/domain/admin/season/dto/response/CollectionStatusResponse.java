@@ -14,8 +14,10 @@ public record CollectionStatusResponse(
     CollectionStatus collectionStatus
 ) {
     public enum CollectionStatus {
+        COLLECTING,
         NORMAL,
         ANOMALY,
+        FAILED,
         NOT_COLLECTED
     }
 }

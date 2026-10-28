@@ -8,7 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.batch.core.explore.JobExplorer;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,10 +46,22 @@ public class AdminCollectionService {
     private static final int ANOMALY_DAYS_THRESHOLD = 2;
     private static final int COMMIT_MIN_CHANGED_LINES = 5;
 
+    private static final String JOB_NAME = "githubCollectionJob";
+    private static final String FAILED_USER_IDS_QUERY = """
+        SELECT CAST(p.parameter_value AS BIGINT)
+        FROM batch_job_execution e
+        JOIN batch_job_execution_params p ON e.job_execution_id = p.job_execution_id
+        WHERE e.status = 'FAILED'
+        AND p.parameter_name = 'userId'
+        AND e.end_time > NOW() - INTERVAL '1 hour'
+        """;
+
     private final SeasonRepository seasonRepository;
     private final SeasonRankingScoreRepository seasonRankingScoreRepository;
     private final SeasonCommitRepository seasonCommitRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final JobExplorer jobExplorer;
+    private final JdbcTemplate jdbcTemplate;
 
     /**
      * 시즌별 전체 유저 수집 현황을 조회한다.
@@ -57,8 +74,17 @@ public class AdminCollectionService {
 
         List<SeasonRankingScore> scores = seasonRankingScoreRepository.findAllBySeason(season);
 
+        Set<Long> collectingUserIds = jobExplorer.findRunningJobExecutions(JOB_NAME)
+            .stream()
+            .map(e -> e.getJobParameters().getLong("userId"))
+            .collect(Collectors.toSet());
+
+        Set<Long> failedUserIds = new java.util.HashSet<>(
+            jdbcTemplate.queryForList(FAILED_USER_IDS_QUERY, Long.class)
+        );
+
         List<CollectionStatusResponse> responses = scores.stream()
-            .map(score -> toResponse(score, seasonStart, seasonEnd))
+            .map(score -> toResponse(score, seasonStart, seasonEnd, collectingUserIds, failedUserIds))
             .toList();
 
         return new CollectionStatusListResponse(responses);
@@ -157,7 +183,10 @@ public class AdminCollectionService {
         );
     }
 
-    private CollectionStatusResponse toResponse(SeasonRankingScore score, Instant seasonStart, Instant seasonEnd) {
+    private CollectionStatusResponse toResponse(
+        SeasonRankingScore score, Instant seasonStart, Instant seasonEnd,
+        Set<Long> collectingUserIds, Set<Long> failedUserIds
+    ) {
         User user = score.getUser();
         GithubUser githubUser = user.getGithubUser();
 
@@ -171,13 +200,22 @@ public class AdminCollectionService {
                 .size();
         }
 
+        CollectionStatus status;
+        if (collectingUserIds.contains(user.getId())) {
+            status = CollectionStatus.COLLECTING;
+        } else if (failedUserIds.contains(user.getId())) {
+            status = CollectionStatus.FAILED;
+        } else {
+            status = determineStatus(lastCrawling);
+        }
+
         return new CollectionStatusResponse(
             user.getId(),
             user.getName(),
             githubLogin,
             lastCrawling,
             commitCount,
-            determineStatus(lastCrawling)
+            status
         );
     }
 
