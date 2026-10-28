@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class CommitMiningStep implements StepProvider {
     private static final String STEP_NAME = "commitMiningStep";
     private static final int DEFAULT_PAGE_SIZE = 30;
     private static final int RETRY_PAGE_SIZE = 10;
+    private static final Duration GRAPHQL_TIMEOUT = Duration.ofMinutes(2);
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -137,7 +139,7 @@ public class CommitMiningStep implements StepProvider {
             GraphQLResponse<RepositoryBranchesResponse> response = graphQLClient
                 .getRepositoryBranches(owner, name, token,
                     GraphQLTypeFactory.<RepositoryBranchesResponse>responseType())
-                .block();
+                .block(GRAPHQL_TIMEOUT);
             if (response != null && !response.hasErrors()) {
                 RepositoryBranchesResponse data = response.getDataAs(RepositoryBranchesResponse.class);
                 if (data != null) {
@@ -200,8 +202,14 @@ public class CommitMiningStep implements StepProvider {
         String token,
         int pageSize
     ) {
-        return graphQLClient.getRepositoryCommits(owner, name, branch, nodeId, cursor, token, pageSize,
-            GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block();
+        try {
+            return graphQLClient.getRepositoryCommits(owner, name, branch, nodeId, cursor, token, pageSize,
+                GraphQLTypeFactory.<RepositoryCommitsResponse>responseType()).block(GRAPHQL_TIMEOUT);
+        } catch (RuntimeException e) {
+            log.warn("GitHub API timeout while fetching commits for {}/{} branch {}, skipping page",
+                owner, name, branch);
+            return null;
+        }
     }
 
     private int saveCommits(Long userId, String owner, String name, List<CommitNode> commits, Instant now) {
