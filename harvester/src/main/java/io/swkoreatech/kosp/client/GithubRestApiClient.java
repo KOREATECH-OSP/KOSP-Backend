@@ -17,6 +17,7 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
 import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslHandler;
@@ -197,6 +198,23 @@ public class GithubRestApiClient {
     public Mono<GithubUserEventResponse[]> getUserEvents(Long userId, String login, String token, int page) {
         String uri = "/users/" + login + "/events?per_page=100&page=" + page;
         return get(userId, uri, token, GithubUserEventResponse[].class);
+    }
+
+    /**
+     * 작성자 기준으로 커밋을 검색하여 기여 저장소를 탐색한다.
+     *
+     * <p>GitHub Search Commits API를 사용하며, feature 브랜치에만 커밋한 경우에도
+     * 해당 저장소를 발견할 수 있다. Search API는 별도 Rate Limit(30req/min)을 사용한다.
+     *
+     * @param userId 사용자 ID
+     * @param login  GitHub 로그인 이름
+     * @param token  GitHub 인증 토큰
+     * @param page   페이지 번호 (1부터 시작)
+     * @return 커밋 검색 결과를 담은 Mono
+     */
+    public Mono<GithubCommitSearchResponse> searchCommitsByAuthor(Long userId, String login, String token, int page) {
+        String uri = "/search/commits?q=author:" + login + "&sort=committer-date&order=desc&per_page=100&page=" + page;
+        return get(userId, uri, token, GithubCommitSearchResponse.class);
     }
 
     /**
