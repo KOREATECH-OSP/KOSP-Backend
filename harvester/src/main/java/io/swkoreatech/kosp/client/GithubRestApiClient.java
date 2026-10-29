@@ -19,7 +19,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 
 import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
 import io.swkoreatech.kosp.client.dto.GithubOrgRepoResponse;
-import io.swkoreatech.kosp.client.dto.GithubOrgResponse;
 import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslHandler;
@@ -217,19 +216,6 @@ public class GithubRestApiClient {
     public Mono<GithubCommitSearchResponse> searchCommitsByAuthor(Long userId, String login, String token, int page) {
         String uri = "/search/commits?q=author:" + login + "&sort=committer-date&order=desc&per_page=100&page=" + page;
         return get(userId, uri, token, GithubCommitSearchResponse.class);
-    }
-
-    /**
-     * 사용자가 소속된 GitHub 조직 목록을 조회한다.
-     *
-     * @param userId 사용자 ID
-     * @param token  GitHub 인증 토큰
-     * @param page   페이지 번호 (1부터 시작)
-     * @return 조직 목록을 담은 Mono
-     */
-    public Mono<GithubOrgResponse[]> getUserOrgs(Long userId, String token, int page) {
-        String uri = "/user/orgs?per_page=100&page=" + page;
-        return get(userId, uri, token, GithubOrgResponse[].class);
     }
 
     /**

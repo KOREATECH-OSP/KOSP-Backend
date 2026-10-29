@@ -25,7 +25,6 @@ import io.swkoreatech.kosp.client.GithubRestApiClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
 import io.swkoreatech.kosp.client.dto.GithubOrgRepoResponse;
-import io.swkoreatech.kosp.client.dto.GithubOrgResponse;
 import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
@@ -42,6 +41,8 @@ import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
+import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.job.ContextValidationListener;
@@ -76,6 +77,7 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final CollectionMetadataRepository metadataRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
     private final StepCompletionListener stepCompletionListener;
     private final ContextValidationListener contextValidationListener;
 
@@ -349,33 +351,14 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private Set<RepositoryInfo> fetchReposFromUserOrgs(Long userId, String login, String token) {
-        Set<String> orgLogins = new HashSet<>();
+        List<OrganizationMember> members = organizationMemberRepository.findAllByUserId(userId);
 
-        for (int page = 1; page <= 10; page++) {
-            GithubOrgResponse[] orgs;
-            try {
-                orgs = restApiClient.getUserOrgs(userId, token, page).block(GRAPHQL_TIMEOUT);
-            } catch (RuntimeException e) {
-                log.warn("GitHub Orgs API timeout for user {}, stopping at page {}", login, page);
-                break;
-            }
+        Set<String> orgLogins = members.stream()
+            .filter(m -> m.getOrganization() != null && m.getOrganization().getGithubOrgName() != null)
+            .map(m -> m.getOrganization().getGithubOrgName())
+            .collect(Collectors.toSet());
 
-            if (orgs == null || orgs.length == 0) {
-                break;
-            }
-
-            for (GithubOrgResponse org : orgs) {
-                if (org.getLogin() != null) {
-                    orgLogins.add(org.getLogin());
-                }
-            }
-
-            if (orgs.length < 100) {
-                break;
-            }
-        }
-
-        log.info("Found {} orgs for user {}: {}", orgLogins.size(), login, orgLogins);
+        log.info("Found {} orgs for user {} from DB: {}", orgLogins.size(), login, orgLogins);
 
         Set<RepositoryInfo> repos = new HashSet<>();
         for (String orgLogin : orgLogins) {
