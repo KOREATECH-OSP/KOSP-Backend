@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.rabbitmq.client.AMQP;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,6 +26,8 @@ import io.swkoreatech.kosp.common.season.model.SeasonRankingScore;
 import io.swkoreatech.kosp.common.season.repository.SeasonRankingScoreRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRepository;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.ClearQueueResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.QueueStatusResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse.RepositoryCommitStat;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
@@ -170,6 +173,38 @@ public class AdminCollectionService {
         userIds.forEach(this::sendCollectionRequest);
         log.info("Force collection requested for all {} users in season {}", userIds.size(), seasonId);
         return userIds.size();
+    }
+
+    /**
+     * 수집 큐의 현재 대기 메시지 수를 반환한다.
+     */
+    public QueueStatusResponse getQueueStatus() {
+        Integer pendingCount = rabbitTemplate.execute(channel -> {
+            AMQP.Queue.DeclareOk result = channel.queueDeclarePassive(QueueNames.GITHUB_COLLECTION);
+            return result.getMessageCount();
+        });
+        return new QueueStatusResponse(pendingCount != null ? pendingCount : 0);
+    }
+
+    /**
+     * 수집 큐를 비우고 stuck 상태의 배치 잡을 정리한다.
+     *
+     * @return 제거된 메시지 수 및 정리된 배치 잡 수
+     */
+    public ClearQueueResponse clearCollectionQueue() {
+        Integer purgedCount = rabbitTemplate.execute(channel -> {
+            AMQP.Queue.PurgeOk result = channel.queuePurge(QueueNames.GITHUB_COLLECTION);
+            return result.getMessageCount();
+        });
+        int purged = purgedCount != null ? purgedCount : 0;
+        log.info("Purged {} messages from collection queue", purged);
+
+        int clearedJobs = jdbcTemplate.update(
+            "UPDATE batch_job_execution SET status = 'FAILED', exit_code = 'FAILED', end_time = NOW() WHERE status = 'STARTED'"
+        );
+        log.info("Marked {} stuck batch jobs as FAILED", clearedJobs);
+
+        return new ClearQueueResponse(purged, clearedJobs);
     }
 
     private void sendCollectionRequest(Long userId) {

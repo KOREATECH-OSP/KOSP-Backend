@@ -16,6 +16,8 @@ import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonRe
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.ClearQueueResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.QueueStatusResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminCollectionService;
@@ -156,5 +158,19 @@ public class AdminSeasonController implements AdminSeasonApi {
     public ResponseEntity<Void> forceCollect(Long userId) {
         adminCollectionService.forceCollect(userId);
         return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "수집 큐 상태 조회")
+    public ResponseEntity<QueueStatusResponse> getQueueStatus() {
+        return ResponseEntity.ok(adminCollectionService.getQueueStatus());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "수집 큐 비우기")
+    public ResponseEntity<ClearQueueResponse> clearCollectionQueue() {
+        return ResponseEntity.ok(adminCollectionService.clearCollectionQueue());
     }
 }

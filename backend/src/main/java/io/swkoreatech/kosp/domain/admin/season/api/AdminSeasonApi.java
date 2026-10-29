@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.ClearQueueResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.QueueStatusResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 
@@ -196,4 +198,23 @@ public interface AdminSeasonApi {
     @ApiResponse(responseCode = "200", description = "수집 요청 완료")
     @PostMapping("/collection/{userId}/force")
     ResponseEntity<Void> forceCollect(@PathVariable Long userId);
+
+    /**
+     * 수집 큐를 비우고 stuck 배치 잡을 정리한다.
+     */
+    /**
+     * 수집 큐의 현재 대기 메시지 수를 조회한다.
+     */
+    @Operation(summary = "수집 큐 상태 조회", description = "현재 RabbitMQ 수집 큐에 대기 중인 메시지 수를 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/collection/queue/status")
+    ResponseEntity<QueueStatusResponse> getQueueStatus();
+
+    /**
+     * 수집 큐를 비우고 stuck 배치 잡을 정리한다.
+     */
+    @Operation(summary = "수집 큐 비우기", description = "RabbitMQ 수집 큐의 대기 메시지를 모두 제거하고, STARTED 상태로 멈춘 배치 잡을 FAILED로 정리합니다.")
+    @ApiResponse(responseCode = "200", description = "큐 비우기 완료")
+    @DeleteMapping("/collection/queue")
+    ResponseEntity<ClearQueueResponse> clearCollectionQueue();
 }

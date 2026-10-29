@@ -24,6 +24,8 @@ import io.swkoreatech.kosp.client.GithubGraphQLClient;
 import io.swkoreatech.kosp.client.GithubRestApiClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
 import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
+import io.swkoreatech.kosp.client.dto.GithubOrgRepoResponse;
+import io.swkoreatech.kosp.client.dto.GithubOrgResponse;
 import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
@@ -175,6 +177,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
 
         Set<RepositoryInfo> searchRepos = fetchReposFromCommitSearch(userId, login, token);
         allRepositories.addAll(searchRepos);
+
+        Set<RepositoryInfo> orgRepos = fetchReposFromUserOrgs(userId, login, token);
+        allRepositories.addAll(orgRepos);
 
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
@@ -340,6 +345,92 @@ public class RepositoryDiscoveryStep implements StepProvider {
         }
 
         log.info("Discovered {} repos from push events for user {}", repos.size(), login);
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchReposFromUserOrgs(Long userId, String login, String token) {
+        Set<String> orgLogins = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubOrgResponse[] orgs;
+            try {
+                orgs = restApiClient.getUserOrgs(userId, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Orgs API timeout for user {}, stopping at page {}", login, page);
+                break;
+            }
+
+            if (orgs == null || orgs.length == 0) {
+                break;
+            }
+
+            for (GithubOrgResponse org : orgs) {
+                if (org.getLogin() != null) {
+                    orgLogins.add(org.getLogin());
+                }
+            }
+
+            if (orgs.length < 100) {
+                break;
+            }
+        }
+
+        log.info("Found {} orgs for user {}: {}", orgLogins.size(), login, orgLogins);
+
+        Set<RepositoryInfo> repos = new HashSet<>();
+        for (String orgLogin : orgLogins) {
+            repos.addAll(fetchOrgRepos(userId, orgLogin, token));
+        }
+
+        log.info("Discovered {} repos from user orgs for user {}", repos.size(), login);
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchOrgRepos(Long userId, String orgLogin, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubOrgRepoResponse[] batch;
+            try {
+                batch = restApiClient.getOrgRepos(userId, orgLogin, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Org Repos API timeout for org {}, stopping at page {}", orgLogin, page);
+                break;
+            }
+
+            if (batch == null || batch.length == 0) {
+                break;
+            }
+
+            for (GithubOrgRepoResponse repo : batch) {
+                if (repo.getFullName() == null || !repo.getFullName().contains("/")) {
+                    continue;
+                }
+                String[] parts = repo.getFullName().split("/", 2);
+                RepositoryInfo repoInfo = new RepositoryInfo();
+                setRepositoryField(repoInfo, "name", parts[1]);
+                setRepositoryField(repoInfo, "nameWithOwner", repo.getFullName());
+                setRepositoryField(repoInfo, "isPrivate", repo.isPrivate());
+
+                ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+                setOwnerField(owner, "login", parts[0]);
+                setRepositoryField(repoInfo, "owner", owner);
+
+                repos.add(repoInfo);
+            }
+
+            if (batch.length < 100) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
         return repos;
     }
 
@@ -550,6 +641,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private void saveRepositories(Long userId, String login, Set<RepositoryInfo> repositories) {
         Instant now = Instant.now();
         for (RepositoryInfo repo : repositories) {
+            if (repoDocumentRepository.existsByUserIdAndFullName(userId, repo.getNameWithOwner())) {
+                continue;
+            }
             ContributedRepoDocument document = buildRepoDocument(userId, login, repo, now);
             repoDocumentRepository.save(document);
         }
