@@ -150,6 +150,15 @@ public class AuthService {
         User user = userRepository.findByGithubUser_GithubId(githubId)
             .orElseThrow(() -> new GlobalException(ExceptionMessage.GITHUB_USER_NOT_FOUND));
 
+        // 재인증 시 새 GitHub 토큰(조직 접근 권한 포함 가능)을 DB에 업데이트
+        String encryptedToken = textEncryptor.encrypt(githubAccessToken);
+        user.getGithubUser().updateProfile(
+            oAuth2User.getAttribute("login"),
+            oAuth2User.getAttribute("name"),
+            oAuth2User.getAttribute("avatar_url"),
+            encryptedToken
+        );
+
         // 로그인 streak 갱신 이벤트 발행 (비동기 처리, 로그인 응답에 영향 없음)
         eventPublisher.publishEvent(new UserLoginEvent(this, user.getId()));
 

@@ -1,13 +1,17 @@
 package io.swkoreatech.kosp.domain.title.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.title.api.TitleApi;
 import io.swkoreatech.kosp.domain.title.dto.response.TitleListResponse;
+import io.swkoreatech.kosp.domain.title.dto.response.TitleProgressResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleListResponse;
 import io.swkoreatech.kosp.domain.title.dto.response.UserTitleResponse;
+import io.swkoreatech.kosp.domain.title.service.TitleProgressService;
 import io.swkoreatech.kosp.domain.title.service.TitleService;
 import lombok.RequiredArgsConstructor;
 
@@ -20,11 +24,18 @@ import lombok.RequiredArgsConstructor;
 public class TitleController implements TitleApi {
 
     private final TitleService titleService;
+    private final TitleProgressService titleProgressService;
 
     /** {@inheritDoc} */
     @Override
     public ResponseEntity<UserTitleListResponse> getMyTitles(User user) {
         return ResponseEntity.ok(titleService.getMyTitles(user));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public ResponseEntity<List<TitleProgressResponse>> getMyTitleProgress(User user) {
+        return ResponseEntity.ok(titleProgressService.getMyProgress(user));
     }
 
     /** {@inheritDoc} */

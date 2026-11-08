@@ -2,6 +2,8 @@ package io.swkoreatech.kosp.domain.upload.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -17,9 +19,11 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ObjectCannedACL;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
@@ -80,6 +84,36 @@ public class S3StorageClient {
             domainUrlPrefix + uploadFilePath,
             LocalDateTime.now(clock).plusMinutes(URL_EXPIRATION_MINUTES)
         );
+    }
+
+    /**
+     * S3 다운로드용 presigned GET URL을 생성한다.
+     *
+     * <p>브라우저에서 열지 않고 곧바로 내려받도록 {@code Content-Disposition: attachment} 를 강제한다.
+     * 버킷/객체가 비공개여도 서명된 URL로 접근할 수 있다.</p>
+     *
+     * @param s3Key            S3 객체 키
+     * @param downloadFileName 내려받을 때 표시할 파일명 (null 이면 원본 키 사용)
+     * @return presigned GET URL
+     */
+    public String getPresignedDownloadUrl(String s3Key, String downloadFileName) {
+        GetObjectRequest.Builder objectBuilder = GetObjectRequest.builder()
+            .bucket(bucketName)
+            .key(s3Key);
+
+        if (downloadFileName != null && !downloadFileName.isBlank()) {
+            String encoded = URLEncoder.encode(downloadFileName, StandardCharsets.UTF_8).replace("+", "%20");
+            objectBuilder.responseContentDisposition("attachment; filename*=UTF-8''" + encoded);
+        } else {
+            objectBuilder.responseContentDisposition("attachment");
+        }
+
+        GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+            .signatureDuration(Duration.ofMinutes(URL_EXPIRATION_MINUTES))
+            .getObjectRequest(objectBuilder.build())
+            .build();
+
+        return s3Presigner.presignGetObject(presignRequest).url().toExternalForm();
     }
 
     /**

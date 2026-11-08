@@ -1,8 +1,11 @@
 package io.swkoreatech.kosp.domain.user.controller;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -103,5 +106,15 @@ public class UserController implements UserApi {
     @Permit(description = "본인 포인트 내역 조회")
     public ResponseEntity<MyPointHistoryResponse> getMyPointHistory(@AuthUser User user, Pageable pageable) {
         return ResponseEntity.ok(userService.getMyPointHistory(user, pageable));
+    }
+
+    @Override
+    @GetMapping("/search")
+    @Permit(name = "users:search", description = "사용자 이름 검색")
+    public ResponseEntity<List<UserProfileResponse>> searchUsers(
+        @AuthUser User user,
+        @RequestParam String q
+    ) {
+        return ResponseEntity.ok(userService.searchUsers(q));
     }
 }

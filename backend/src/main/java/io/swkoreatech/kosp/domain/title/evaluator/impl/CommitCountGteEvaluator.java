@@ -22,4 +22,9 @@ public class CommitCountGteEvaluator implements TitleConditionEvaluator {
     public boolean evaluate(UserTitleContext context, int thresholdValue) {
         return context.getCommitCount() >= thresholdValue;
     }
+
+    @Override
+    public int currentValue(UserTitleContext context) {
+        return context.getCommitCount();
+    }
 }

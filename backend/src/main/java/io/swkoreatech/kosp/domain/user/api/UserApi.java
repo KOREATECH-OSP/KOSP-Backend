@@ -1,5 +1,7 @@
 package io.swkoreatech.kosp.domain.user.api;
 
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -144,5 +146,12 @@ public interface UserApi {
     ResponseEntity<MyPointHistoryResponse> getMyPointHistory(
         @Parameter(hidden = true) @AuthUser User user,
         @Parameter(hidden = true) Pageable pageable
+    );
+
+    @Operation(summary = "사용자 검색", description = "이름으로 사용자를 검색합니다. 최대 10명까지 반환합니다.")
+    @GetMapping("/search")
+    ResponseEntity<List<UserProfileResponse>> searchUsers(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestParam String q
     );
 }

@@ -26,4 +26,10 @@ public class ManualEvaluator implements TitleConditionEvaluator {
         // 수동 지급 전용 칭호는 배치 자동 평가 불가
         return false;
     }
+
+    @Override
+    public int currentValue(UserTitleContext context) {
+        // 수동 지급 칭호는 수치 진행도를 측정할 수 없음
+        return -1;
+    }
 }

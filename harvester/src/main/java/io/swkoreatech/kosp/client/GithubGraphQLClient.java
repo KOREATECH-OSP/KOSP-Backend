@@ -43,9 +43,11 @@ public class GithubGraphQLClient {
     private String userBasicInfoQuery;
     private String userContributionsQuery;
     private String contributedReposQuery;
+    private String repositoriesContributedToQuery;
     private String userPullRequestsQuery;
     private String userIssuesQuery;
     private String repositoryCommitsQuery;
+    private String repositoryBranchesQuery;
 
     /**
      * GithubGraphQLClient를 생성하고 GraphQL 쿼리를 로드한다.
@@ -74,10 +76,10 @@ public class GithubGraphQLClient {
 
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
-            .responseTimeout(Duration.ofMinutes(5))
+            .responseTimeout(Duration.ofSeconds(60))
             .doOnConnected(connection -> {
-                connection.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
-                connection.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+                connection.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS));
+                connection.addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS));
             });
 
         return WebClient.builder()
@@ -92,9 +94,11 @@ public class GithubGraphQLClient {
             userBasicInfoQuery = loadQuery("classpath:graphql/user-basic-info.graphql");
             userContributionsQuery = loadQuery("classpath:graphql/user-contributions.graphql");
             contributedReposQuery = loadQuery("classpath:graphql/contributed-repositories.graphql");
+            repositoriesContributedToQuery = loadQuery("classpath:graphql/repositories-contributed-to.graphql");
             userPullRequestsQuery = loadQuery("classpath:graphql/user-pull-requests.graphql");
             userIssuesQuery = loadQuery("classpath:graphql/user-issues.graphql");
             repositoryCommitsQuery = loadQuery("classpath:graphql/repository-commits.graphql");
+            repositoryBranchesQuery = loadQuery("classpath:graphql/repository-branches.graphql");
             log.info("GraphQL queries loaded successfully");
         } catch (IOException e) {
             log.warn("GraphQL queries not found: {}", e.getMessage());
@@ -148,6 +152,8 @@ public class GithubGraphQLClient {
                 throwable instanceof WebClientResponseException.BadGateway ||
                 throwable instanceof WebClientResponseException.ServiceUnavailable ||
                 throwable instanceof WebClientResponseException.TooManyRequests ||
+                throwable instanceof java.util.concurrent.TimeoutException ||
+                throwable instanceof io.netty.handler.timeout.ReadTimeoutException ||
                 (throwable.getMessage() != null && (
                     throwable.getMessage().contains("prematurely closed") ||
                     throwable.getMessage().contains("Connection reset") ||
@@ -180,6 +186,25 @@ public class GithubGraphQLClient {
             "to", to
         );
         return query(contributedReposQuery, variables, token, responseType);
+    }
+
+    /**
+     * 브랜치에 관계없이 사용자가 기여한 저장소 목록을 페이지네이션하여 조회한다.
+     *
+     * @param <T>          응답 타입
+     * @param login        GitHub 로그인 이름
+     * @param cursor       페이지네이션 커서 (첫 페이지는 null)
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 기여 저장소 응답을 담은 Mono
+     */
+    public <T> Mono<T> getRepositoriesContributedTo(String login, String cursor, String token, Class<T> responseType) {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("login", login);
+        if (cursor != null) {
+            variables.put("after", cursor);
+        }
+        return query(repositoriesContributedToQuery, variables, token, responseType);
     }
 
     /**
@@ -245,11 +270,12 @@ public class GithubGraphQLClient {
     }
 
     /**
-     * 특정 저장소에서 지정된 작성자의 커밋 목록을 조회한다.
+     * 특정 저장소의 특정 브랜치에서 지정된 작성자의 커밋 목록을 조회한다.
      *
      * @param <T>          응답 타입
      * @param owner        저장소 소유자
      * @param name         저장소 이름
+     * @param branch       브랜치 qualified name (예: "refs/heads/main")
      * @param authorId     작성자의 GitHub 노드 ID
      * @param cursor       페이지네이션 커서 (첫 페이지는 null)
      * @param token        GitHub 인증 토큰
@@ -260,6 +286,7 @@ public class GithubGraphQLClient {
     public <T> Mono<T> getRepositoryCommits(
         String owner,
         String name,
+        String branch,
         String authorId,
         String cursor,
         String token,
@@ -269,11 +296,32 @@ public class GithubGraphQLClient {
         Map<String, Object> variables = new HashMap<>();
         variables.put("owner", owner);
         variables.put("name", name);
+        variables.put("branch", branch);
         variables.put("authorId", authorId);
         variables.put("first", pageSize);
         if (cursor != null) {
             variables.put("after", cursor);
         }
         return query(repositoryCommitsQuery, variables, token, responseType);
+    }
+
+    /**
+     * 특정 저장소의 전체 브랜치 목록을 조회한다.
+     *
+     * @param <T>          응답 타입
+     * @param owner        저장소 소유자
+     * @param name         저장소 이름
+     * @param token        GitHub 인증 토큰
+     * @param responseType 응답 클래스 타입
+     * @return 브랜치 목록 응답을 담은 Mono
+     */
+    public <T> Mono<T> getRepositoryBranches(
+        String owner,
+        String name,
+        String token,
+        Class<T> responseType
+    ) {
+        Map<String, Object> variables = Map.of("owner", owner, "name", name);
+        return query(repositoryBranchesQuery, variables, token, responseType);
     }
 }

@@ -24,4 +24,9 @@ public class StreakDaysGteEvaluator implements TitleConditionEvaluator {
     public boolean evaluate(UserTitleContext context, int thresholdValue) {
         return context.getLoginStreakDays() >= thresholdValue;
     }
+
+    @Override
+    public int currentValue(UserTitleContext context) {
+        return context.getLoginStreakDays();
+    }
 }

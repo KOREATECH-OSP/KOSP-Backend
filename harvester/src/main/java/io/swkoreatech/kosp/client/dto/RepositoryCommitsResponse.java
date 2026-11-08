@@ -26,10 +26,10 @@ public class RepositoryCommitsResponse {
      * @return 커밋 노드 목록, 데이터 없으면 빈 목록
      */
     public List<CommitNode> getCommits() {
-        if (repository == null || repository.getDefaultBranchRef() == null) {
+        if (repository == null || repository.getRef() == null) {
             return Collections.emptyList();
         }
-        var target = repository.getDefaultBranchRef().getTarget();
+        var target = repository.getRef().getTarget();
         if (target == null || target.getHistory() == null) {
             return Collections.emptyList();
         }
@@ -42,10 +42,10 @@ public class RepositoryCommitsResponse {
      * @return 페이지 정보, 데이터 없으면 null
      */
     public PageInfo getPageInfo() {
-        if (repository == null || repository.getDefaultBranchRef() == null) {
+        if (repository == null || repository.getRef() == null) {
             return null;
         }
-        var target = repository.getDefaultBranchRef().getTarget();
+        var target = repository.getRef().getTarget();
         if (target == null || target.getHistory() == null) {
             return null;
         }
@@ -56,13 +56,13 @@ public class RepositoryCommitsResponse {
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Repository {
-        private DefaultBranchRef defaultBranchRef;
+        private Ref ref;
     }
 
-    /** 기본 브랜치 참조 정보를 담는 내부 DTO. */
+    /** 브랜치 참조 정보를 담는 내부 DTO. */
     @Getter
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class DefaultBranchRef {
+    public static class Ref {
         private Target target;
     }
 

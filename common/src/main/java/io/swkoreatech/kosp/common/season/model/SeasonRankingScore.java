@@ -72,7 +72,7 @@ public class SeasonRankingScore extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private SeasonTier tier = SeasonTier.BRONZE_4;
+    private SeasonTier tier = SeasonTier.BRONZE;
 
     @Column(name = "rank_in_season")
     private Integer rankInSeason;
@@ -90,7 +90,7 @@ public class SeasonRankingScore extends BaseEntity {
         this.projectScore = BigDecimal.ZERO;
         this.communityScore = BigDecimal.ZERO;
         this.totalScore = BigDecimal.ZERO;
-        this.tier = SeasonTier.BRONZE_4;
+        this.tier = SeasonTier.BRONZE;
     }
 
     public void addAttendanceScore(BigDecimal delta) {
@@ -114,7 +114,10 @@ public class SeasonRankingScore extends BaseEntity {
     }
 
     /**
-     * 총점과 티어를 재계산한다. 커밋+챌린지 합산 35pt cap 적용.
+     * 총점을 재계산한다. 커밋+챌린지 합산 35pt cap 적용.
+     *
+     * <p>티어는 백분위(전체 인원 기준)로 결정되므로 여기서 세팅하지 않고,
+     * 배치({@code SeasonRankingBatchService.assignTiers})가 순위 계산 후 {@link #updateTier}로 지정한다.</p>
      */
     public void recalculate() {
         BigDecimal commitChallenge = this.commitScore.add(this.challengeScore).min(MAX_COMMIT_CHALLENGE_SCORE);
@@ -123,11 +126,37 @@ public class SeasonRankingScore extends BaseEntity {
             .add(this.projectScore)
             .add(this.communityScore);
         this.totalScore = raw.min(MAX_TOTAL_SCORE).setScale(4, RoundingMode.HALF_UP);
-        this.tier = SeasonTier.from(this.totalScore.doubleValue());
         this.lastCalculatedAt = LocalDateTime.now();
     }
 
     public void updateRank(int rank) {
         this.rankInSeason = rank;
+    }
+
+    /**
+     * 티어를 직접 지정한다 (엘리트 승격용).
+     *
+     * <p>{@code recalculate()}가 점수형 티어를 세팅한 뒤, 배치의 엘리트 평가에서
+     * Master/Challenger로 승격할 때 사용한다.</p>
+     *
+     * @param tier 지정할 티어
+     */
+    public void updateTier(SeasonTier tier) {
+        this.tier = tier;
+    }
+
+    /**
+     * 점수가 발생한(0보다 큰) 카테고리 수를 반환한다 (활동 다양성).
+     *
+     * @return 0보다 큰 점수를 가진 카테고리 수 (0~5)
+     */
+    public int activeCategoryCount() {
+        int count = 0;
+        if (attendanceScore.signum() > 0) count++;
+        if (commitScore.signum() > 0) count++;
+        if (challengeScore.signum() > 0) count++;
+        if (projectScore.signum() > 0) count++;
+        if (communityScore.signum() > 0) count++;
+        return count;
     }
 }

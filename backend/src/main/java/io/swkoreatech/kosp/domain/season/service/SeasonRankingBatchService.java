@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.swkoreatech.kosp.common.challenge.repository.ChallengeHistoryRepository;
 import io.swkoreatech.kosp.common.season.model.Season;
 import io.swkoreatech.kosp.common.season.model.SeasonRankingScore;
+import io.swkoreatech.kosp.common.season.model.enums.SeasonTier;
 import io.swkoreatech.kosp.common.season.repository.SeasonRankingScoreRepository;
 import io.swkoreatech.kosp.common.season.repository.SeasonRepository;
 import io.swkoreatech.kosp.common.user.model.User;
@@ -45,6 +46,7 @@ public class SeasonRankingBatchService {
 
     private static final BigDecimal COMMIT_SCORE_PER_UNIT = new BigDecimal("0.0500");
     private static final int COMMIT_DAILY_CAP = 3;
+    private static final int COMMIT_MIN_CHANGED_LINES = 5;
 
     // 챌린지 레벨(tier)별 점수 단가
     private static final Map<Integer, BigDecimal> CHALLENGE_TIER_SCORE_MAP = Map.of(
@@ -66,6 +68,7 @@ public class SeasonRankingBatchService {
     private final SeasonCommitRepository seasonCommitRepository;
     private final ChallengeHistoryRepository challengeHistoryRepository;
     private final SeasonScoreService seasonScoreService;
+    private final SeasonTierTitleService seasonTierTitleService;
 
     /**
      * 시즌 랭킹 배치를 실행한다. 매일 새벽 4시 실행.
@@ -89,6 +92,8 @@ public class SeasonRankingBatchService {
 
             recalculateCommitAndChallengeScores(season, activeUsers);
             recalculateRanks(season);
+            assignTiers(season);
+            seasonTierTitleService.syncTierTitles(season);
 
             log.info("[SeasonBatch] 배치 완료. 처리 유저={}", activeUsers.size());
         } catch (Exception e) {
@@ -134,6 +139,11 @@ public class SeasonRankingBatchService {
         // 일별 커밋 수 집계 후 일별 cap 적용
         Map<LocalDate, Long> dailyCommitCounts = commits.stream()
             .filter(c -> !isBotCommit(c.getMessage()))
+            .filter(c -> {
+                int changed = (c.getAdditions() != null ? c.getAdditions() : 0)
+                    + (c.getDeletions() != null ? c.getDeletions() : 0);
+                return changed >= COMMIT_MIN_CHANGED_LINES;
+            })
             .collect(Collectors.groupingBy(
                 c -> c.getAuthoredAt().atZone(ZoneOffset.UTC).toLocalDate(),
                 Collectors.counting()
@@ -205,5 +215,41 @@ public class SeasonRankingBatchService {
         }
 
         log.info("[SeasonBatch] 순위 재계산 완료. seasonId={}, totalUsers={}", season.getId(), all.size());
+    }
+
+    /**
+     * 백분위 기반으로 전체 유저의 티어를 배정한다. 반드시 {@code recalculateRanks} 이후 실행한다.
+     *
+     * <p>순위/전체인원으로 백분위를 구해 기본 5티어(BRONZE~DIAMOND)를 정하고,
+     * 다이아(상위 20%)이면서 총점 기준을 넘으면 CHALLENGER({@value SeasonTier#CHALLENGER_MIN_SCORE}+)로 승급한다.</p>
+     */
+    @Transactional
+    public void assignTiers(Season season) {
+        List<SeasonRankingScore> all = rankingScoreRepository.findAllBySeason(season);
+        int total = all.size();
+        if (total == 0) {
+            return;
+        }
+
+        int[] counts = new int[SeasonTier.values().length];
+        for (SeasonRankingScore score : all) {
+            Integer rank = score.getRankInSeason();
+            if (rank == null) {
+                continue;
+            }
+            double percentile = (double) rank / total;
+            SeasonTier tier = SeasonTier.resolve(percentile, score.getTotalScore().doubleValue());
+            score.updateTier(tier);
+            rankingScoreRepository.save(score);
+            counts[tier.ordinal()]++;
+        }
+
+        log.info("[SeasonBatch] 티어 배정 완료. seasonId={}, total={}, "
+                + "BRONZE={}, SILVER={}, GOLD={}, PLATINUM={}, DIAMOND={}, CHALLENGER={}",
+            season.getId(), total,
+            counts[SeasonTier.BRONZE.ordinal()], counts[SeasonTier.SILVER.ordinal()],
+            counts[SeasonTier.GOLD.ordinal()], counts[SeasonTier.PLATINUM.ordinal()],
+            counts[SeasonTier.DIAMOND.ordinal()],
+            counts[SeasonTier.CHALLENGER.ordinal()]);
     }
 }

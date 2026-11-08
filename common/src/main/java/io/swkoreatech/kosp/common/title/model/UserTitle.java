@@ -49,6 +49,9 @@ public class UserTitle extends BaseEntity {
     @Column(name = "is_display", nullable = false)
     private boolean isDisplay;
 
+    @Column(name = "last_displayed_at")
+    private LocalDateTime lastDisplayedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "grant_source", nullable = false, length = 20)
     private TitleGrantSource grantSource;
@@ -88,6 +91,7 @@ public class UserTitle extends BaseEntity {
      */
     public void setAsDisplay() {
         this.isDisplay = true;
+        this.lastDisplayedAt = LocalDateTime.now();
     }
 
     /**
@@ -107,5 +111,15 @@ public class UserTitle extends BaseEntity {
         this.revokedAt = LocalDateTime.now();
         this.revokedBy = revokedBy;
         this.isDisplay = false;
+    }
+
+    /**
+     * 시스템이 자동으로 칭호를 회수한다 (관리자 없이).
+     *
+     * <p>시즌 티어 하락 시 티어 칭호를 자동 회수하는 등, 관리자 개입 없이
+     * 시스템 배치가 회수할 때 사용한다. {@code revokedBy}는 {@code null}로 남는다.</p>
+     */
+    public void revokeBySystem() {
+        revoke(null);
     }
 }

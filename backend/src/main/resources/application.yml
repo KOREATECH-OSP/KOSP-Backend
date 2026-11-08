@@ -36,7 +36,7 @@ spring:
           github:
             client-name: Github
             authorization-grant-type: authorization_code
-            scope: read:user, user:email, repo
+            scope: read:user, user:email, repo, read:org
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
 

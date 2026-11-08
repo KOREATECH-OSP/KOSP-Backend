@@ -1,0 +1,34 @@
+query GetRepositoriesContributedTo($login: String!, $after: String) {
+    user(login: $login) {
+        repositoriesContributedTo(
+            first: 100
+            after: $after
+            includeUserRepositories: true
+            contributionTypes: [COMMIT, PULL_REQUEST, ISSUE, REPOSITORY]
+        ) {
+            pageInfo {
+                hasNextPage
+                endCursor
+            }
+            nodes {
+                name
+                nameWithOwner
+                description
+                owner {
+                    login
+                }
+                isFork
+                isPrivate
+                primaryLanguage {
+                    name
+                }
+                stargazerCount
+                forkCount
+                createdAt
+                watchers {
+                    totalCount
+                }
+            }
+        }
+    }
+}

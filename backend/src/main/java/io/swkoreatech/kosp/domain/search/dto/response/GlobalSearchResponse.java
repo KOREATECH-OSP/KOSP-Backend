@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import io.swkoreatech.kosp.common.challenge.model.Challenge;
+import io.swkoreatech.kosp.common.organization.model.Organization;
 import io.swkoreatech.kosp.domain.community.article.model.Article;
 import io.swkoreatech.kosp.domain.community.recruit.model.Recruit;
 import io.swkoreatech.kosp.domain.community.team.model.Team;
@@ -27,6 +28,7 @@ public record GlobalSearchResponse(
     List<ChallengeSummary> challenges,
     List<UserSummary> users,
     List<RepositorySummary> repositories,
+    List<OrganizationSummary> organizations,
     PageMeta meta
 ) {
     /** 각 카테고리별 검색 결과로부터 통합 검색 응답을 생성한다. */
@@ -37,9 +39,10 @@ public record GlobalSearchResponse(
         List<ChallengeSummary> challenges,
         List<UserSummary> users,
         List<RepositorySummary> repositories,
+        List<OrganizationSummary> organizations,
         PageMeta meta
     ) {
-        return new GlobalSearchResponse(articles, recruits, teams, challenges, users, repositories, meta);
+        return new GlobalSearchResponse(articles, recruits, teams, challenges, users, repositories, organizations, meta);
     }
 
     /**
@@ -161,6 +164,30 @@ public record GlobalSearchResponse(
                 challenge.getName(),
                 challenge.getDescription(),
                 challenge.getTier()
+            );
+        }
+    }
+
+    /**
+     * 조직 요약 정보.
+     *
+     * @param id 조직 ID
+     * @param githubOrgName GitHub 조직명
+     * @param displayName 표시 이름
+     * @param avatarUrl 아바타 URL
+     */
+    public record OrganizationSummary(
+        Long id,
+        String githubOrgName,
+        String displayName,
+        String avatarUrl
+    ) {
+        public static OrganizationSummary from(Organization organization) {
+            return new OrganizationSummary(
+                organization.getId(),
+                organization.getGithubOrgName(),
+                organization.getDisplayName(),
+                organization.getAvatarUrl()
             );
         }
     }

@@ -33,4 +33,15 @@ public interface TitleConditionEvaluator {
      * @return 조건 충족 시 {@code true}
      */
     boolean evaluate(UserTitleContext context, int thresholdValue);
+
+    /**
+     * 미취득 칭호 진행도 표시용 현재값을 반환한다.
+     *
+     * <p>진행률 = min(currentValue / threshold, 1). 수치 측정이 불가능한 조건
+     * (예: {@code MANUAL})은 {@code -1}을 반환한다.</p>
+     *
+     * @param context 유저의 집계 컨텍스트
+     * @return 현재 달성값 (측정 불가 시 -1)
+     */
+    int currentValue(UserTitleContext context);
 }

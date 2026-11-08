@@ -31,6 +31,7 @@ public class GithubCollectionJobConfig {
 
     private final JobRepository jobRepository;
     private final JobSchedulingListener jobSchedulingListener;
+    private final CollectionResultListener collectionResultListener;
 
     private final RepositoryDiscoveryStep repositoryDiscoveryStep;
     private final CommitMiningStep commitMiningStep;
@@ -51,6 +52,7 @@ public class GithubCollectionJobConfig {
     public Job githubCollectionJob() {
         return new JobBuilder("githubCollectionJob", jobRepository)
             .listener(jobSchedulingListener)
+            .listener(collectionResultListener)
             .start(repositoryDiscoveryStep.getStep())
             .next(pullRequestMiningStep.getStep())
             .next(issueMiningStep.getStep())

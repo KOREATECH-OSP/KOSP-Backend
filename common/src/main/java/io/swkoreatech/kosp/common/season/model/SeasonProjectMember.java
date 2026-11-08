@@ -66,4 +66,8 @@ public class SeasonProjectMember extends BaseEntity {
         this.scoreGranted = true;
         this.grantedAt = LocalDateTime.now();
     }
+
+    public void changeRole(SeasonProjectRole newRole) {
+        this.roleType = newRole;
+    }
 }

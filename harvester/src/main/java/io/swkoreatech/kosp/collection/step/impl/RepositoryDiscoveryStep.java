@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.collection.step.impl;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
@@ -7,6 +8,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import java.util.stream.Collectors;
 
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.repository.JobRepository;
@@ -18,9 +21,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import io.swkoreatech.kosp.client.GithubGraphQLClient;
+import io.swkoreatech.kosp.client.GithubRestApiClient;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse;
+import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
+import io.swkoreatech.kosp.client.dto.GithubOrgRepoResponse;
+import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.swkoreatech.kosp.client.dto.ContributedReposResponse.RepositoryInfo;
 import io.swkoreatech.kosp.client.dto.GraphQLResponse;
+import io.swkoreatech.kosp.client.dto.RepositoriesContributedToResponse;
 import io.swkoreatech.kosp.client.dto.UserBasicInfoResponse;
 import io.swkoreatech.kosp.collection.document.CollectionMetadataDocument;
 import io.swkoreatech.kosp.collection.document.ContributedRepoDocument;
@@ -33,6 +41,8 @@ import io.swkoreatech.kosp.collection.util.GraphQLTypeFactory;
 import io.swkoreatech.kosp.collection.util.StepContextHelper;
 import io.swkoreatech.kosp.collection.util.TimeChunkGenerator;
 import io.swkoreatech.kosp.common.github.model.GithubUser;
+import io.swkoreatech.kosp.common.organization.model.OrganizationMember;
+import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
 import io.swkoreatech.kosp.job.ContextValidationListener;
@@ -57,14 +67,17 @@ import lombok.extern.slf4j.Slf4j;
 public class RepositoryDiscoveryStep implements StepProvider {
 
     private static final String STEP_NAME = "repositoryDiscoveryStep";
+    private static final Duration GRAPHQL_TIMEOUT = Duration.ofMinutes(2);
 
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
     private final UserRepository userRepository;
     private final GithubGraphQLClient graphQLClient;
+    private final GithubRestApiClient restApiClient;
     private final TextEncryptor textEncryptor;
     private final ContributedRepoDocumentRepository repoDocumentRepository;
     private final CollectionMetadataRepository metadataRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
     private final StepCompletionListener stepCompletionListener;
     private final ContextValidationListener contextValidationListener;
 
@@ -158,9 +171,21 @@ public class RepositoryDiscoveryStep implements StepProvider {
         Set<RepositoryInfo> ownedRepos = fetchOwnedRepositories(login, token);
         allRepositories.addAll(ownedRepos);
 
+        Set<RepositoryInfo> allContributedRepos = fetchAllContributedToRepositories(login, token);
+        allRepositories.addAll(allContributedRepos);
+
+        Set<RepositoryInfo> eventRepos = fetchReposFromPushEvents(userId, login, token);
+        allRepositories.addAll(eventRepos);
+
+        Set<RepositoryInfo> searchRepos = fetchReposFromCommitSearch(userId, login, token);
+        allRepositories.addAll(searchRepos);
+
+        Set<RepositoryInfo> orgRepos = fetchReposFromUserOrgs(userId, login, token);
+        allRepositories.addAll(orgRepos);
+
         saveRepositories(userId, login, allRepositories);
         storeUserInfoInContext(chunkContext, login, token, userNodeId);
-        storeReposInContext(chunkContext, allRepositories);
+        storeReposInContext(chunkContext, allRepositories, userId);
 
         log.info("Collection complete: {} repositories discovered from {} chunks",
             allRepositories.size(), chunks.size());
@@ -188,9 +213,15 @@ public class RepositoryDiscoveryStep implements StepProvider {
     }
 
     private ZonedDateTime fetchUserCreatedAt(String login, String token) {
-        GraphQLResponse<UserBasicInfoResponse> response =
-            graphQLClient.getUserBasicInfo(login, null, token, GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-                .block();
+        GraphQLResponse<UserBasicInfoResponse> response;
+        try {
+            response = graphQLClient.getUserBasicInfo(login, null, token,
+                    GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
+                .block(GRAPHQL_TIMEOUT);
+        } catch (RuntimeException e) {
+            log.warn("GitHub API timeout while fetching user info for {}, defaulting to 5 years ago", login);
+            return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
+        }
 
         if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
             return ZonedDateTime.now(ZoneOffset.UTC).minusYears(5);
@@ -207,10 +238,16 @@ public class RepositoryDiscoveryStep implements StepProvider {
         String to,
         String token
     ) {
-        return graphQLClient.getContributedRepos(
-            login, from, to, token,
-            GraphQLTypeFactory.<ContributedReposResponse>responseType()
-        ).block();
+        try {
+            return graphQLClient.getContributedRepos(
+                login, from, to, token,
+                GraphQLTypeFactory.<ContributedReposResponse>responseType()
+            ).block(GRAPHQL_TIMEOUT);
+        } catch (RuntimeException e) {
+            log.warn("GitHub API timeout while fetching contributed repos for user {}, skipping chunk ({} ~ {})",
+                login, from, to);
+            return null;
+        }
     }
 
     private String formatDateTime(ZonedDateTime dateTime) {
@@ -223,10 +260,15 @@ public class RepositoryDiscoveryStep implements StepProvider {
         boolean hasNextPage = true;
 
         while (hasNextPage) {
-            GraphQLResponse<UserBasicInfoResponse> response =
-                graphQLClient.getUserBasicInfo(login, cursor, token,
+            GraphQLResponse<UserBasicInfoResponse> response;
+            try {
+                response = graphQLClient.getUserBasicInfo(login, cursor, token,
                         GraphQLTypeFactory.<UserBasicInfoResponse>responseType())
-                    .block();
+                    .block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub API timeout while fetching owned repos for {}, stopping pagination", login);
+                break;
+            }
 
             if (GraphQLErrorHandler.classifyErrors(response, "user", login) != null) {
                 break;
@@ -261,6 +303,250 @@ public class RepositoryDiscoveryStep implements StepProvider {
         }
 
         return ownedRepos;
+    }
+
+    private Set<RepositoryInfo> fetchReposFromPushEvents(Long userId, String login, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubUserEventResponse[] events;
+            try {
+                events = restApiClient.getUserEvents(userId, login, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Events API timeout for user {}, stopping at page {}", login, page);
+                break;
+            }
+
+            if (events == null || events.length == 0) {
+                break;
+            }
+
+            for (GithubUserEventResponse event : events) {
+                if (!"PushEvent".equals(event.getType()) || event.getRepo() == null) {
+                    continue;
+                }
+                String fullName = event.getRepo().getName();
+                if (fullName == null || !fullName.contains("/")) {
+                    continue;
+                }
+                String[] parts = fullName.split("/", 2);
+                RepositoryInfo repoInfo = new RepositoryInfo();
+                setRepositoryField(repoInfo, "name", parts[1]);
+                setRepositoryField(repoInfo, "nameWithOwner", fullName);
+
+                ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+                setOwnerField(owner, "login", parts[0]);
+                setRepositoryField(repoInfo, "owner", owner);
+
+                repos.add(repoInfo);
+            }
+
+            if (events.length < 100) {
+                break;
+            }
+        }
+
+        log.info("Discovered {} repos from push events for user {}", repos.size(), login);
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchReposFromUserOrgs(Long userId, String login, String token) {
+        List<OrganizationMember> members = organizationMemberRepository.findAllByUserId(userId);
+
+        Set<String> orgLogins = members.stream()
+            .filter(m -> m.getOrganization() != null && m.getOrganization().getGithubOrgName() != null)
+            .map(m -> m.getOrganization().getGithubOrgName())
+            .collect(Collectors.toSet());
+
+        log.info("Found {} orgs for user {} from DB: {}", orgLogins.size(), login, orgLogins);
+
+        Set<RepositoryInfo> repos = new HashSet<>();
+        for (String orgLogin : orgLogins) {
+            repos.addAll(fetchOrgRepos(userId, orgLogin, token));
+        }
+
+        log.info("Discovered {} repos from user orgs for user {}", repos.size(), login);
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchOrgRepos(Long userId, String orgLogin, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubOrgRepoResponse[] batch;
+            try {
+                batch = restApiClient.getOrgRepos(userId, orgLogin, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Org Repos API timeout for org {}, stopping at page {}", orgLogin, page);
+                break;
+            }
+
+            if (batch == null || batch.length == 0) {
+                break;
+            }
+
+            for (GithubOrgRepoResponse repo : batch) {
+                if (repo.getFullName() == null || !repo.getFullName().contains("/")) {
+                    continue;
+                }
+                String[] parts = repo.getFullName().split("/", 2);
+                RepositoryInfo repoInfo = new RepositoryInfo();
+                setRepositoryField(repoInfo, "name", parts[1]);
+                setRepositoryField(repoInfo, "nameWithOwner", repo.getFullName());
+                setRepositoryField(repoInfo, "isPrivate", repo.isPrivate());
+
+                ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+                setOwnerField(owner, "login", parts[0]);
+                setRepositoryField(repoInfo, "owner", owner);
+
+                repos.add(repoInfo);
+            }
+
+            if (batch.length < 100) {
+                break;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchReposFromCommitSearch(Long userId, String login, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+
+        for (int page = 1; page <= 10; page++) {
+            GithubCommitSearchResponse response;
+            try {
+                response = restApiClient.searchCommitsByAuthor(userId, login, token, page).block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub Commit Search API timeout for user {}, stopping at page {}", login, page);
+                break;
+            }
+
+            if (response == null || response.getItems() == null || response.getItems().isEmpty()) {
+                break;
+            }
+
+            for (GithubCommitSearchResponse.CommitItem item : response.getItems()) {
+                if (item.getRepository() == null || item.getRepository().getFullName() == null) {
+                    continue;
+                }
+                String fullName = item.getRepository().getFullName();
+                if (!fullName.contains("/")) {
+                    continue;
+                }
+                String[] parts = fullName.split("/", 2);
+                RepositoryInfo repoInfo = new RepositoryInfo();
+                setRepositoryField(repoInfo, "name", parts[1]);
+                setRepositoryField(repoInfo, "nameWithOwner", fullName);
+                setRepositoryField(repoInfo, "isPrivate", item.getRepository().isPrivate());
+
+                ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+                setOwnerField(owner, "login", parts[0]);
+                setRepositoryField(repoInfo, "owner", owner);
+
+                repos.add(repoInfo);
+            }
+
+            if (response.getItems().size() < 100) {
+                break;
+            }
+
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+
+        log.info("Discovered {} repos from commit search for user {}", repos.size(), login);
+        return repos;
+    }
+
+    private Set<RepositoryInfo> fetchAllContributedToRepositories(String login, String token) {
+        Set<RepositoryInfo> repos = new HashSet<>();
+        String cursor = null;
+        boolean hasNextPage = true;
+
+        while (hasNextPage) {
+            RepositoriesContributedToResponse response;
+            try {
+                response = graphQLClient.getRepositoriesContributedTo(
+                        login, cursor, token,
+                        RepositoriesContributedToResponse.class)
+                    .block(GRAPHQL_TIMEOUT);
+            } catch (RuntimeException e) {
+                log.warn("GitHub API timeout while fetching repositoriesContributedTo for {}, stopping", login);
+                break;
+            }
+
+            if (response == null || response.getUser() == null) {
+                break;
+            }
+
+            RepositoriesContributedToResponse.RepositoriesData data =
+                response.getUser().getRepositoriesContributedTo();
+            if (data == null || data.getNodes() == null) {
+                break;
+            }
+
+            for (RepositoriesContributedToResponse.RepositoryNode node : data.getNodes()) {
+                repos.add(convertContributedToRepositoryInfo(node));
+            }
+
+            hasNextPage = data.getPageInfo() != null && data.getPageInfo().isHasNextPage();
+            cursor = data.getPageInfo() != null ? data.getPageInfo().getEndCursor() : null;
+
+            if (hasNextPage) {
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+
+        return repos;
+    }
+
+    private RepositoryInfo convertContributedToRepositoryInfo(RepositoriesContributedToResponse.RepositoryNode node) {
+        RepositoryInfo repoInfo = new RepositoryInfo();
+        setRepositoryField(repoInfo, "name", node.getName());
+        setRepositoryField(repoInfo, "nameWithOwner", node.getNameWithOwner());
+        setRepositoryField(repoInfo, "description", node.getDescription());
+        setRepositoryField(repoInfo, "isFork", node.isFork());
+        setRepositoryField(repoInfo, "isPrivate", node.isPrivate());
+        setRepositoryField(repoInfo, "stargazerCount", node.getStargazerCount());
+        setRepositoryField(repoInfo, "forkCount", node.getForkCount());
+        setRepositoryField(repoInfo, "createdAt", node.getCreatedAt());
+
+        if (node.getOwner() != null) {
+            ContributedReposResponse.Owner owner = new ContributedReposResponse.Owner();
+            setOwnerField(owner, "login", node.getOwner().getLogin());
+            setRepositoryField(repoInfo, "owner", owner);
+        }
+
+        if (node.getPrimaryLanguage() != null) {
+            ContributedReposResponse.PrimaryLanguage language = new ContributedReposResponse.PrimaryLanguage();
+            setLanguageField(language, "name", node.getPrimaryLanguage().getName());
+            setRepositoryField(repoInfo, "primaryLanguage", language);
+        }
+
+        if (node.getWatchers() != null) {
+            ContributedReposResponse.WatchersInfo watchers = new ContributedReposResponse.WatchersInfo();
+            setWatchersField(watchers, "totalCount", node.getWatchers().getTotalCount());
+            setRepositoryField(repoInfo, "watchers", watchers);
+        }
+
+        return repoInfo;
     }
 
     private RepositoryInfo convertToRepositoryInfo(UserBasicInfoResponse.RepositoryNode node) {
@@ -338,6 +624,9 @@ public class RepositoryDiscoveryStep implements StepProvider {
     private void saveRepositories(Long userId, String login, Set<RepositoryInfo> repositories) {
         Instant now = Instant.now();
         for (RepositoryInfo repo : repositories) {
+            if (repoDocumentRepository.existsByUserIdAndFullName(userId, repo.getNameWithOwner())) {
+                continue;
+            }
             ContributedRepoDocument document = buildRepoDocument(userId, login, repo, now);
             repoDocumentRepository.save(document);
         }
@@ -388,15 +677,25 @@ public class RepositoryDiscoveryStep implements StepProvider {
         context.putString(StepContextKeys.GITHUB_NODE_ID, nodeId);
     }
 
-    private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories) {
-        String[] repoFullNames = repositories.stream()
+    private void storeReposInContext(ChunkContext chunkContext, Set<RepositoryInfo> repositories, Long userId) {
+        Set<String> repoFullNames = repositories.stream()
             .map(RepositoryInfo::getNameWithOwner)
-            .toArray(String[]::new);
+            .collect(Collectors.toCollection(HashSet::new));
+
+        // 이전에 발견된 레포도 합산 (feature 브랜치 커밋은 contributionsCollection API에서 감지되지 않아
+        // 증분 수집 시 발견 레포가 0건이 되는 문제 방지)
+        repoDocumentRepository.findByUserId(userId)
+            .stream()
+            .map(ContributedRepoDocument::getFullName)
+            .filter(name -> name != null && !name.isBlank())
+            .forEach(repoFullNames::add);
+
+        log.info("Total repos to mine (new + known): {} for user {}", repoFullNames.size(), userId);
 
         chunkContext.getStepContext()
             .getStepExecution()
             .getJobExecution()
             .getExecutionContext()
-            .put(StepContextKeys.DISCOVERED_REPOS, repoFullNames);
+            .put(StepContextKeys.DISCOVERED_REPOS, repoFullNames.toArray(new String[0]));
     }
 }

@@ -223,4 +223,52 @@ public class RabbitMQConfig {
             .with(GITHUB_COLLECTION)
             .noargs();
     }
+
+    /**
+     * GitHub 조직 레포지토리 수집용 지연 메시지 익스체인지를 생성한다.
+     *
+     * @return 지연 메시지를 지원하는 {@link CustomExchange}
+     */
+    @Bean
+    public CustomExchange githubOrgCollectionExchange() {
+        Map<String, Object> args = new HashMap<>();
+        args.put("x-delayed-type", "direct");
+        return new CustomExchange(GITHUB_ORG_COLLECTION_EXCHANGE, "x-delayed-message", true, false, args);
+    }
+
+    /**
+     * GitHub 조직 레포지토리 수집 큐를 생성한다.
+     *
+     * @return 데드 레터 설정이 적용된 내구성(durable) 큐
+     */
+    @Bean
+    public Queue githubOrgCollectionQueue() {
+        return QueueBuilder.durable(GITHUB_ORG_COLLECTION)
+            .withArgument(X_DEAD_LETTER_EXCHANGE, "")
+            .withArgument(X_DEAD_LETTER_ROUTING_KEY, "github-org-collection-queue.dlq")
+            .build();
+    }
+
+    /**
+     * GitHub 조직 레포지토리 수집 데드 레터 큐(DLQ)를 생성한다.
+     *
+     * @return 내구성(durable) 데드 레터 큐
+     */
+    @Bean
+    public Queue githubOrgCollectionDLQ() {
+        return QueueBuilder.durable("github-org-collection-queue.dlq").build();
+    }
+
+    /**
+     * GitHub 조직 레포지토리 수집 큐와 익스체인지를 바인딩한다.
+     *
+     * @return 큐와 익스체인지 간의 {@link Binding}
+     */
+    @Bean
+    public Binding githubOrgCollectionBinding() {
+        return BindingBuilder.bind(githubOrgCollectionQueue())
+            .to(githubOrgCollectionExchange())
+            .with(GITHUB_ORG_COLLECTION)
+            .noargs();
+    }
 }

@@ -1,18 +1,27 @@
 package io.swkoreatech.kosp.domain.resume.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.resume.api.ResumeApi;
+import io.swkoreatech.kosp.domain.resume.dto.request.AutoProjectUpdateRequest;
 import io.swkoreatech.kosp.domain.resume.dto.request.ResumeSaveRequest;
+import io.swkoreatech.kosp.domain.resume.dto.response.ResumeAutoProjectResponse;
 import io.swkoreatech.kosp.domain.resume.dto.response.ResumeListResponse;
 import io.swkoreatech.kosp.domain.resume.dto.response.ResumeResponse;
+import io.swkoreatech.kosp.domain.resume.service.ResumeAutoProjectService;
+import io.swkoreatech.kosp.domain.resume.service.ResumeExportService;
 import io.swkoreatech.kosp.domain.resume.service.ResumeService;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
+import io.swkoreatech.kosp.global.util.ContentDispositionUtil;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -24,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 public class ResumeController implements ResumeApi {
 
     private final ResumeService resumeService;
+    private final ResumeAutoProjectService resumeAutoProjectService;
+    private final ResumeExportService resumeExportService;
 
     // ── 하위 호환 API ──────────────────────────────────────────────
 
@@ -92,5 +103,80 @@ public class ResumeController implements ResumeApi {
         @PathVariable Long userId, @PathVariable Long resumeId
     ) {
         return ResponseEntity.ok(resumeService.getPublicResumeById(userId, resumeId));
+    }
+
+    // ── 자동 프로젝트 ─────────────────────────────────────────────
+
+    @Override
+    @Permit(description = "이력서 자동 프로젝트 조회")
+    public ResponseEntity<List<ResumeAutoProjectResponse>> getAutoProjects(
+        @AuthUser User user, @PathVariable Long resumeId
+    ) {
+        return ResponseEntity.ok(resumeAutoProjectService.getAutoProjects(user, resumeId));
+    }
+
+    @Override
+    @Permit(description = "자동 프로젝트 삭제(tombstone)")
+    public ResponseEntity<Void> deleteAutoProject(
+        @AuthUser User user, @PathVariable Long resumeId, @PathVariable Long materialItemId
+    ) {
+        resumeAutoProjectService.deleteAutoProject(user, resumeId, materialItemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(description = "자동 프로젝트 복원")
+    public ResponseEntity<Void> restoreAutoProject(
+        @AuthUser User user, @PathVariable Long resumeId, @PathVariable Long materialItemId
+    ) {
+        resumeAutoProjectService.restoreAutoProject(user, resumeId, materialItemId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @Permit(description = "자동 프로젝트 수정")
+    public ResponseEntity<ResumeAutoProjectResponse> updateAutoProject(
+        @AuthUser User user, @PathVariable Long resumeId, @PathVariable Long materialItemId,
+        AutoProjectUpdateRequest request
+    ) {
+        return ResponseEntity.ok(
+            resumeAutoProjectService.updateAutoProject(user, resumeId, materialItemId, request));
+    }
+
+    // ── hwpx(한글) 내려받기 ────────────────────────────────────────────
+
+    /**
+     * 본인 이력서만 허용한다. {@code @Permit} 에 {@code permitAll} 을 주지 않았으므로
+     * {@code PermissionAspect} 가 인증을 요구한다.
+     */
+    @Override
+    @Permit(description = "내 이력서 hwpx 내려받기")
+    public ResponseEntity<byte[]> exportMyResumeHwpx(@AuthUser User user, @PathVariable Long resumeId) {
+        return toHwpxResponse(resumeExportService.exportMine(user, resumeId));
+    }
+
+    /**
+     * 공개 이력서만 허용한다. 비공개·부재는 서비스에서 404 로 처리한다.
+     */
+    @Override
+    @Permit(permitAll = true, description = "공개 이력서 hwpx 내려받기")
+    public ResponseEntity<byte[]> exportPublicResumeHwpx(
+        @PathVariable Long userId, @PathVariable Long resumeId
+    ) {
+        return toHwpxResponse(resumeExportService.exportPublic(userId, resumeId));
+    }
+
+    /**
+     * 생성된 문서를 메모리에서 곧바로 응답으로 내보낸다 (디스크·S3 저장 없음).
+     *
+     * <p>파일명은 사용자 자유 입력인 이력서 제목에서 오므로 RFC 5987 로 인코딩한다.</p>
+     */
+    private ResponseEntity<byte[]> toHwpxResponse(ResumeExportService.HwpxDocument document) {
+        return ResponseEntity.ok()
+            .contentType(MediaType.parseMediaType(ResumeApi.HWPX_MEDIA_TYPE))
+            .header(HttpHeaders.CONTENT_DISPOSITION,
+                ContentDispositionUtil.attachment(document.fileName(), "이력서.hwpx"))
+            .contentLength(document.content().length)
+            .body(document.content());
     }
 }

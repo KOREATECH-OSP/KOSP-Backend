@@ -100,7 +100,7 @@ class UserServiceTest {
         void throwsException_whenEmailNotVerified() {
             // given
             UserSignupRequest request = new UserSignupRequest(
-                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
+                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!", null);
             SignupToken token = createSignupToken(false);
 
             // when & then
@@ -113,7 +113,7 @@ class UserServiceTest {
         void throwsException_whenUserAlreadyExists() {
             // given
             UserSignupRequest request = new UserSignupRequest(
-                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!");
+                "홍길동", "2024123456", "test@koreatech.ac.kr", "Password1!", null);
             SignupToken token = createSignupToken(true);
             User existingUser = createUser(1L, "기존유저");
 

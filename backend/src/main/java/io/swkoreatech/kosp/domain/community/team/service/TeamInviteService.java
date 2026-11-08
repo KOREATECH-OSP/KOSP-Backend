@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.domain.community.team.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamInviteResponse;
 import io.swkoreatech.kosp.domain.community.team.model.TeamInvite;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class TeamInviteService {
 
     private final TeamInviteRepository teamInviteRepository;

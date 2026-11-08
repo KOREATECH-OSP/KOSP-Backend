@@ -3,11 +3,21 @@ package io.swkoreatech.kosp.domain.admin.season.api;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.ClearQueueResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.QueueStatusResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,6 +25,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
 import io.swkoreatech.kosp.global.security.annotation.AuthUser;
@@ -26,6 +38,40 @@ import jakarta.validation.Valid;
 @Tag(name = "Admin - Season", description = "관리자 전용 시즌 프로젝트 점수 관리 API")
 @RequestMapping("/v1/admin/seasons")
 public interface AdminSeasonApi {
+
+    /**
+     * 전체 시즌 목록을 조회한다.
+     */
+    @Operation(summary = "시즌 목록 조회", description = "전체 시즌 목록을 시작일 내림차순으로 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping
+    ResponseEntity<AdminSeasonListResponse> getSeasons();
+
+    /**
+     * 새 시즌을 생성한다.
+     */
+    @Operation(summary = "시즌 생성", description = "새 시즌을 비활성 상태로 생성합니다.")
+    @ApiResponse(responseCode = "201", description = "생성 성공")
+    @PostMapping
+    ResponseEntity<Void> createSeason(@RequestBody @Valid AdminSeasonCreateRequest request);
+
+    /**
+     * 시즌 정보를 수정한다.
+     */
+    @Operation(summary = "시즌 수정", description = "시즌 이름, 기간, 활성 여부를 수정합니다. isActive를 true로 변경하면 기존 활성 시즌이 자동 비활성화됩니다.")
+    @ApiResponse(responseCode = "200", description = "수정 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 없음")
+    @PatchMapping("/{seasonId}")
+    ResponseEntity<Void> updateSeason(@PathVariable Long seasonId, @RequestBody AdminSeasonUpdateRequest request);
+
+    /**
+     * 현재 활성 시즌 정보를 조회한다.
+     */
+    @Operation(summary = "현재 활성 시즌 조회", description = "현재 활성 시즌의 ID와 기본 정보를 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "활성 시즌 없음")
+    @GetMapping("/current")
+    ResponseEntity<AdminCurrentSeasonResponse> getCurrentSeason();
 
     /**
      * 시즌 프로젝트를 오픈한다.
@@ -84,4 +130,91 @@ public interface AdminSeasonApi {
     ResponseEntity<AdminSeasonProjectMemberListResponse> getMembers(
         @PathVariable Long projectId
     );
+
+    /**
+     * 프로젝트 참여자의 역할을 변경한다.
+     */
+    @Operation(summary = "프로젝트 참여자 역할 변경", description = "OPEN 상태의 프로젝트에서 참여자의 역할을 변경합니다. 이미 점수가 지급된 경우 변경 불가.")
+    @ApiResponse(responseCode = "200", description = "변경 성공")
+    @ApiResponse(responseCode = "400", description = "이미 종료된 프로젝트")
+    @ApiResponse(responseCode = "404", description = "참여자를 찾을 수 없음")
+    @PatchMapping("/projects/members/{memberId}/role")
+    ResponseEntity<Void> changeMemberRole(
+        @PathVariable Long memberId,
+        @RequestBody @Valid AdminSeasonProjectMemberRoleChangeRequest request
+    );
+
+    /**
+     * 프로젝트 참여자를 삭제한다.
+     */
+    @Operation(summary = "프로젝트 참여자 삭제", description = "OPEN 상태의 프로젝트에서 참여자를 삭제합니다. 이미 점수가 지급된 경우 삭제 불가.")
+    @ApiResponse(responseCode = "204", description = "삭제 성공")
+    @ApiResponse(responseCode = "400", description = "이미 종료된 프로젝트 또는 점수 지급 완료된 참여자")
+    @ApiResponse(responseCode = "404", description = "참여자를 찾을 수 없음")
+    @DeleteMapping("/projects/members/{memberId}")
+    ResponseEntity<Void> removeMember(@PathVariable Long memberId);
+
+    /**
+     * 시즌 랭킹 배치를 강제 실행한다.
+     */
+    @Operation(summary = "시즌 랭킹 배치 강제 실행", description = "새벽 4시 자동 배치를 즉시 실행합니다. 커밋/챌린지 점수 재계산, 순위 갱신, 엘리트 티어 적용이 수행됩니다.")
+    @ApiResponse(responseCode = "200", description = "배치 실행 완료")
+    @PostMapping("/batch/ranking")
+    ResponseEntity<Void> runRankingBatch();
+
+    /**
+     * 시즌별 유저 수집 현황을 조회한다.
+     */
+    @Operation(summary = "시즌 수집 현황 조회", description = "해당 시즌의 전체 유저별 GitHub 데이터 수집 현황을 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 없음")
+    @GetMapping("/{seasonId}/collection-status")
+    ResponseEntity<CollectionStatusListResponse> getCollectionStatus(@PathVariable Long seasonId);
+
+    /**
+     * 특정 유저의 수집 현황을 레포지토리 단위로 상세 조회한다.
+     */
+    @Operation(summary = "유저 수집 현황 상세 조회", description = "해당 시즌에서 특정 유저의 레포지토리별 커밋 수집 현황을 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @ApiResponse(responseCode = "404", description = "시즌 또는 유저 없음")
+    @GetMapping("/{seasonId}/collection-status/{userId}")
+    ResponseEntity<CollectionStatusDetailResponse> getCollectionStatusDetail(
+        @PathVariable Long seasonId,
+        @PathVariable Long userId
+    );
+
+    /**
+     * 시즌 전체 유저의 GitHub 데이터 수집을 즉시 요청한다.
+     */
+    @Operation(summary = "전체 유저 수집 강제 실행", description = "해당 시즌에 등록된 전체 유저의 GitHub 데이터 수집을 즉시 요청합니다.")
+    @ApiResponse(responseCode = "200", description = "수집 요청 완료")
+    @PostMapping("/{seasonId}/collection/force-all")
+    ResponseEntity<Void> forceCollectAll(@PathVariable Long seasonId);
+
+    /**
+     * 특정 유저의 GitHub 데이터 수집을 즉시 요청한다.
+     */
+    @Operation(summary = "유저 수집 강제 실행", description = "특정 유저의 GitHub 데이터 수집을 즉시 요청합니다. 이미 수집 중이면 무시됩니다.")
+    @ApiResponse(responseCode = "200", description = "수집 요청 완료")
+    @PostMapping("/collection/{userId}/force")
+    ResponseEntity<Void> forceCollect(@PathVariable Long userId);
+
+    /**
+     * 수집 큐를 비우고 stuck 배치 잡을 정리한다.
+     */
+    /**
+     * 수집 큐의 현재 대기 메시지 수를 조회한다.
+     */
+    @Operation(summary = "수집 큐 상태 조회", description = "현재 RabbitMQ 수집 큐에 대기 중인 메시지 수를 반환합니다.")
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/collection/queue/status")
+    ResponseEntity<QueueStatusResponse> getQueueStatus();
+
+    /**
+     * 수집 큐를 비우고 stuck 배치 잡을 정리한다.
+     */
+    @Operation(summary = "수집 큐 비우기", description = "RabbitMQ 수집 큐의 대기 메시지를 모두 제거하고, STARTED 상태로 멈춘 배치 잡을 FAILED로 정리합니다.")
+    @ApiResponse(responseCode = "200", description = "큐 비우기 완료")
+    @DeleteMapping("/collection/queue")
+    ResponseEntity<ClearQueueResponse> clearCollectionQueue();
 }

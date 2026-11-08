@@ -24,4 +24,9 @@ public class ArticleCountGteEvaluator implements TitleConditionEvaluator {
     public boolean evaluate(UserTitleContext context, int thresholdValue) {
         return context.getArticleCount() >= thresholdValue;
     }
+
+    @Override
+    public int currentValue(UserTitleContext context) {
+        return (int) context.getArticleCount();
+    }
 }

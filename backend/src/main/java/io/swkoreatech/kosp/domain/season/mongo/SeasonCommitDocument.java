@@ -26,4 +26,7 @@ public class SeasonCommitDocument {
     private String repositoryOwner;
     private String repositoryName;
     private Instant authoredAt;
+
+    private Integer additions;
+    private Integer deletions;
 }

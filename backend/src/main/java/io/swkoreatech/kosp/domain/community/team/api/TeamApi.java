@@ -6,6 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,7 +19,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamCreateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamInviteRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.request.TeamRoleUpdateRequest;
 import io.swkoreatech.kosp.domain.community.team.dto.request.TeamUpdateRequest;
+import io.swkoreatech.kosp.domain.community.team.dto.response.InviteAvailabilityResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamDetailResponse;
 import io.swkoreatech.kosp.domain.community.team.dto.response.TeamListResponse;
 import io.swkoreatech.kosp.global.host.ClientURL;
@@ -84,6 +87,18 @@ public interface TeamApi {
         @Parameter(hidden = true) @ClientURL String clientUrl
     );
 
+    @Operation(
+        summary = "초대 가능 여부 조회",
+        description = "해당 이메일의 사용자를 지금 초대할 수 있는지 확인합니다. "
+            + "반복 거절로 제한된 경우 누적 거절 횟수·최근 거절 시각·제한 종료 시각을 함께 반환합니다."
+    )
+    @GetMapping("/v1/teams/{teamId}/invites/availability")
+    ResponseEntity<InviteAvailabilityResponse> getInviteAvailability(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @Parameter(description = "피초대자 KUT 이메일") @RequestParam String email
+    );
+
     @Operation(summary = "초대 수락", description = "초대받은 사용자가 초대를 수락합니다.")
     @PostMapping("/v1/teams/invites/{inviteId}/accept")
     ResponseEntity<Void> acceptInvite(
@@ -98,11 +113,34 @@ public interface TeamApi {
         @PathVariable Long inviteId
     );
 
-    @Operation(summary = "팀원 제명", description = "팀장이 팀원을 제명합니다.")
+    @Operation(summary = "팀원 제명", description = "팀장 또는 관리자가 팀원을 제명합니다. 팀장은 제명할 수 없습니다.")
     @DeleteMapping("/v1/teams/{teamId}/members/{userId}")
     ResponseEntity<Void> removeMember(
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long teamId,
         @PathVariable Long userId
+    );
+
+    @Operation(summary = "팀 탈퇴", description = "본인이 자발적으로 팀에서 나갑니다. 팀장은 탈퇴할 수 없습니다.")
+    @DeleteMapping("/v1/teams/{teamId}/members/me")
+    ResponseEntity<Void> leaveTeam(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId
+    );
+
+    @Operation(summary = "초대 취소", description = "팀장 또는 관리자가 발송한 초대를 취소합니다.")
+    @DeleteMapping("/v1/teams/invites/{inviteId}")
+    ResponseEntity<Void> cancelInvite(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long inviteId
+    );
+
+    @Operation(summary = "팀원 권한 변경", description = "팀장이 팀원에게 관리자 권한을 위임하거나 회수합니다.")
+    @PatchMapping("/v1/teams/{teamId}/members/{userId}/role")
+    ResponseEntity<Void> changeMemberRole(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long teamId,
+        @PathVariable Long userId,
+        @RequestBody @Valid TeamRoleUpdateRequest request
     );
 }

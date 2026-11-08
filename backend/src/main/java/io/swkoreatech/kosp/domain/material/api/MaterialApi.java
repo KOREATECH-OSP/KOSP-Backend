@@ -1,0 +1,227 @@
+package io.swkoreatech.kosp.domain.material.api;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.material.dto.request.FolderMoveRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.ItemMoveRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderCreateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialFolderUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialImportRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemCreateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.MaterialItemUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.request.VisibilityUpdateRequest;
+import io.swkoreatech.kosp.domain.material.dto.response.DownloadUrlResponse;
+import io.swkoreatech.kosp.domain.material.dto.response.MaterialFolderResponse;
+import io.swkoreatech.kosp.domain.material.dto.response.MaterialImportResponse;
+import io.swkoreatech.kosp.domain.material.dto.response.MaterialItemResponse;
+import io.swkoreatech.kosp.global.security.annotation.AuthUser;
+import jakarta.validation.Valid;
+
+/**
+ * 학습자료(과제/EL) 관리 API.
+ *
+ * <p>연도·학기·과목 폴더 계층, 폴더별 공개/비공개, 마이페이지 최신 자료 노출,
+ * 첨부파일 페이지 진입(시작 폴더)을 제공한다.</p>
+ */
+@Tag(name = "Material", description = "학습자료(과제/EL) 관리 API")
+public interface MaterialApi {
+
+    // ── 폴더 ──────────────────────────────────────────────────────────
+
+    @Operation(summary = "내 폴더 트리 조회", description = "로그인 사용자의 전체 폴더를 정렬 순서대로 반환합니다.")
+    @GetMapping("/v1/users/me/material-folders")
+    ResponseEntity<List<MaterialFolderResponse>> getMyFolders(
+        @Parameter(hidden = true) @AuthUser User user
+    );
+
+    @Operation(summary = "시작 폴더 조회", description = "첨부파일 페이지 진입 시 기본 선택할 폴더를 반환합니다. 폴더가 없으면 본문 없음.")
+    @GetMapping("/v1/users/me/material-folders/start")
+    ResponseEntity<MaterialFolderResponse> getStartFolder(
+        @Parameter(hidden = true) @AuthUser User user
+    );
+
+    @Operation(summary = "폴더 생성", description = "학습자료 폴더를 생성합니다. parentId 지정 시 하위 폴더로 생성됩니다.")
+    @ApiResponse(responseCode = "201", description = "생성 성공")
+    @PostMapping("/v1/users/me/material-folders")
+    ResponseEntity<MaterialFolderResponse> createFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid MaterialFolderCreateRequest request
+    );
+
+    @Operation(summary = "폴더 수정", description = "본인 소유 폴더의 이름/유형/정렬을 수정합니다.")
+    @PutMapping("/v1/users/me/material-folders/{folderId}")
+    ResponseEntity<MaterialFolderResponse> updateFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId,
+        @RequestBody @Valid MaterialFolderUpdateRequest request
+    );
+
+    @Operation(summary = "폴더 공개/비공개 변경", description = "폴더 단위 공개 범위를 변경합니다.")
+    @PatchMapping("/v1/users/me/material-folders/{folderId}/visibility")
+    ResponseEntity<MaterialFolderResponse> changeFolderVisibility(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId,
+        @RequestBody @Valid VisibilityUpdateRequest request
+    );
+
+    @Operation(summary = "시작 폴더 지정", description = "첨부파일 페이지 진입 기본 폴더로 지정합니다. 기존 시작 폴더는 해제됩니다.")
+    @PatchMapping("/v1/users/me/material-folders/{folderId}/start")
+    ResponseEntity<MaterialFolderResponse> setStartFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId
+    );
+
+    @Operation(summary = "폴더 이동", description = "폴더를 다른 상위 폴더로 이동합니다. parentId 가 null 이면 최상위로 이동. 자기 자신/자손으로 이동 시 400.")
+    @PatchMapping("/v1/users/me/material-folders/{folderId}/parent")
+    ResponseEntity<MaterialFolderResponse> moveFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId,
+        @RequestBody @Valid FolderMoveRequest request
+    );
+
+    @Operation(summary = "폴더 삭제", description = "본인 소유의 빈 폴더를 삭제합니다. 자료가 남아있으면 400.")
+    @ApiResponse(responseCode = "204", description = "삭제 성공")
+    @DeleteMapping("/v1/users/me/material-folders/{folderId}")
+    ResponseEntity<Void> deleteFolder(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId
+    );
+
+    // ── 자료 아이템 ────────────────────────────────────────────────────
+
+    @Operation(summary = "폴더 내 자료 조회", description = "특정 폴더의 자료를 최신순으로 반환합니다.")
+    @GetMapping("/v1/users/me/material-folders/{folderId}/items")
+    ResponseEntity<List<MaterialItemResponse>> getFolderItems(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long folderId
+    );
+
+    @Operation(summary = "최신 자료 조회 (마이페이지)", description = "로그인 사용자의 최신 자료를 limit 개수만큼 반환합니다.")
+    @GetMapping("/v1/users/me/materials/recent")
+    ResponseEntity<List<MaterialItemResponse>> getRecentItems(
+        @Parameter(hidden = true) @AuthUser User user,
+        @Parameter(description = "가져올 개수") @RequestParam(defaultValue = "5") int limit
+    );
+
+    @Operation(summary = "자료 등록", description = "폴더에 자료를 등록합니다. 파일은 presigned URL 업로드 후 fileUrl 을 전달합니다.")
+    @ApiResponse(responseCode = "201", description = "등록 성공")
+    @PostMapping("/v1/users/me/materials")
+    ResponseEntity<MaterialItemResponse> createItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid MaterialItemCreateRequest request
+    );
+
+    @Operation(
+        summary = "아우누리 과제/EL 자료 수집(import)",
+        description = "브라우저 확장이 사용자의 세션에서 스크랩한 정규화 데이터를 upsert 합니다. "
+            + "학교 인증 정보는 전달하지 않으며, (source, sourceExternalId) 기준으로 멱등 처리됩니다. "
+            + "신규 자료는 출처별 자동 폴더에 비공개(PRIVATE)로 생성됩니다."
+    )
+    @PostMapping("/v1/users/me/materials/import")
+    ResponseEntity<MaterialImportResponse> importMaterials(
+        @Parameter(hidden = true) @AuthUser User user,
+        @RequestBody @Valid MaterialImportRequest request
+    );
+
+    @Operation(summary = "자료 공개/비공개 변경", description = "자료 단위 공개 override 를 변경합니다.")
+    @PatchMapping("/v1/users/me/materials/{itemId}/visibility")
+    ResponseEntity<MaterialItemResponse> changeItemVisibility(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId,
+        @RequestBody @Valid VisibilityUpdateRequest request
+    );
+
+    @Operation(summary = "자료 수정(이름 바꾸기 등)", description = "본인 소유 자료의 제목/과목/연도/학기를 수정합니다.")
+    @PatchMapping("/v1/users/me/materials/{itemId}")
+    ResponseEntity<MaterialItemResponse> updateItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId,
+        @RequestBody @Valid MaterialItemUpdateRequest request
+    );
+
+    @Operation(summary = "자료 이동", description = "자료를 다른 폴더로 이동합니다. 대상 폴더는 본인 소유여야 합니다.")
+    @PatchMapping("/v1/users/me/materials/{itemId}/folder")
+    ResponseEntity<MaterialItemResponse> moveItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId,
+        @RequestBody @Valid ItemMoveRequest request
+    );
+
+    @Operation(
+        summary = "자료 다운로드 URL 발급",
+        description = "브라우저에서 열지 않고 곧바로 내려받을 수 있는 presigned URL을 반환합니다. S3 저장 파일만 지원."
+    )
+    @GetMapping("/v1/users/me/materials/{itemId}/download")
+    ResponseEntity<DownloadUrlResponse> getItemDownloadUrl(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId
+    );
+
+    @Operation(summary = "자료 삭제", description = "본인 소유 자료를 삭제합니다.")
+    @ApiResponse(responseCode = "204", description = "삭제 성공")
+    @DeleteMapping("/v1/users/me/materials/{itemId}")
+    ResponseEntity<Void> deleteItem(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long itemId
+    );
+
+    // ── 타인 공개 조회 ─────────────────────────────────────────────────
+
+    @Operation(
+        summary = "공개 폴더 조회 (타인)",
+        description = "특정 사용자의 공개 폴더 트리를 반환합니다. 상위 폴더가 비공개인 폴더는 제외되며, "
+            + "itemCount 에는 공개 자료 수만 포함됩니다."
+    )
+    @GetMapping("/v1/users/{userId}/material-folders")
+    ResponseEntity<List<MaterialFolderResponse>> getPublicFolders(
+        @PathVariable Long userId
+    );
+
+    @Operation(
+        summary = "공개 폴더 자료 조회 (타인)",
+        description = "특정 사용자의 공개 폴더 내 공개 자료를 최근 학기·최신순으로 반환합니다. "
+            + "폴더 또는 그 상위 폴더가 비공개면 404."
+    )
+    @GetMapping("/v1/users/{userId}/material-folders/{folderId}/items")
+    ResponseEntity<List<MaterialItemResponse>> getPublicFolderItems(
+        @PathVariable Long userId,
+        @PathVariable Long folderId
+    );
+
+    @Operation(
+        summary = "공개 자료 전체 조회 (포트폴리오)",
+        description = "특정 사용자의 공개 자료를 폴더 구분 없이 최근 학기·최신순으로 반환합니다. "
+            + "포트폴리오 페이지의 학습자료 영역에서 사용합니다."
+    )
+    @GetMapping("/v1/users/{userId}/materials/public")
+    ResponseEntity<List<MaterialItemResponse>> getPublicItems(
+        @PathVariable Long userId,
+        @Parameter(description = "최대 반환 개수 (0 이하이면 전체)") @RequestParam(defaultValue = "0") int limit
+    );
+
+    @Operation(
+        summary = "공개 자료 다운로드 URL 발급 (타인)",
+        description = "공개 자료에 한해 만료 시간이 있는 presigned URL 을 발급합니다. "
+            + "비공개 자료의 ID 로 직접 호출하면 404 입니다."
+    )
+    @GetMapping("/v1/users/{userId}/materials/{itemId}/download")
+    ResponseEntity<DownloadUrlResponse> getPublicItemDownloadUrl(
+        @PathVariable Long userId,
+        @PathVariable Long itemId
+    );
+}

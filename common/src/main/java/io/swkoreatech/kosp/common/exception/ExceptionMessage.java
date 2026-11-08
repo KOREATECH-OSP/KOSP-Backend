@@ -26,6 +26,7 @@ public enum ExceptionMessage {
     INVALID_TOKEN("유효하지 않은 토큰이거나 토큰이 없습니다.", HttpStatus.UNAUTHORIZED),
     USER_ALREADY_EXISTS("이미 존재하는 유저입니다.", HttpStatus.CONFLICT),
     CONFLICT("이미 존재하는 리소스입니다.", HttpStatus.CONFLICT),
+    LAST_RESUME_CANNOT_BE_DELETED("이력서는 최소 1개 이상 유지해야 합니다.", HttpStatus.BAD_REQUEST),
     NOT_FOUND("리소스를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     CHALLENGE_NOT_FOUND("챌린지를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     INVALID_CHALLENGE_CONDITION("유효하지 않은 챌린지 조건식입니다.", HttpStatus.BAD_REQUEST),
@@ -46,6 +47,7 @@ public enum ExceptionMessage {
     TEAM_NOT_FOUND("소속된 팀을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TEAM_ALREADY_JOINED("이미 팀에 소속된 사용자입니다.", HttpStatus.CONFLICT),
     INVITATION_EXPIRED("만료된 초대입니다.", HttpStatus.BAD_REQUEST),
+    INVITE_REJECTED_TOO_MANY("초대가 3회 이상 거절되었습니다. 마지막 초대 후 24시간이 지나야 다시 초대할 수 있습니다.", HttpStatus.TOO_MANY_REQUESTS),
     LEADER_CANNOT_LEAVE("팀장은 탈퇴하거나 제명될 수 없습니다.", HttpStatus.BAD_REQUEST),
     APPLICATION_NOT_FOUND("지원 내역을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ALREADY_DECIDED("이미 처리된 지원입니다.", HttpStatus.CONFLICT),
@@ -72,6 +74,19 @@ public enum ExceptionMessage {
     TERMS_VERSION_NOT_FOUND("해당 버전의 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TERMS_AGREEMENT_REQUIRED("약관 동의가 필요합니다.", HttpStatus.FORBIDDEN),
 
+    // Organization System
+    ORGANIZATION_NOT_FOUND("조직을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ALREADY_REGISTERED("이미 등록된 조직입니다.", HttpStatus.CONFLICT),
+    ORGANIZATION_OWNER_REQUIRED("조직 Owner만 등록할 수 있습니다.", HttpStatus.FORBIDDEN),
+    ORGANIZATION_MEMBER_NOT_FOUND("조직 멤버를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_ADMIN_REQUIRED("조직 관리자(Owner 또는 Admin)만 수행할 수 있습니다.", HttpStatus.FORBIDDEN),
+    CANNOT_CHANGE_OWNER_ROLE("GitHub Owner의 역할은 K-OSP에서 변경할 수 없습니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_MEMBER_ALREADY_ADMIN("이미 관리자인 멤버입니다.", HttpStatus.CONFLICT),
+    ORGANIZATION_MEMBER_NOT_ADMIN("관리자가 아닌 멤버입니다.", HttpStatus.BAD_REQUEST),
+    ORGANIZATION_MEMBER_ALREADY_EXISTS("이미 조직에 속한 멤버입니다.", HttpStatus.CONFLICT),
+    ORGANIZATION_REPO_NOT_FOUND("조직 저장소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    GITHUB_REAUTH_REQUIRED("GitHub 재인증이 필요합니다. read:org 권한을 포함하여 다시 로그인해 주세요.", HttpStatus.FORBIDDEN),
+
     // Season Ranking System
     SEASON_NOT_FOUND("시즌을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     ACTIVE_SEASON_NOT_FOUND("진행 중인 시즌이 없습니다.", HttpStatus.NOT_FOUND),
@@ -80,7 +95,17 @@ public enum ExceptionMessage {
     SEASON_PROJECT_ALREADY_CLOSED("이미 종료된 프로젝트입니다.", HttpStatus.BAD_REQUEST),
     SEASON_PROJECT_MEMBER_NOT_FOUND("프로젝트 참여자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     SEASON_PROJECT_MEMBER_ALREADY_EXISTS("이미 등록된 프로젝트 참여자입니다.", HttpStatus.CONFLICT),
+    SEASON_PROJECT_MEMBER_ALREADY_GRANTED("이미 점수가 지급된 참여자는 삭제할 수 없습니다.", HttpStatus.BAD_REQUEST),
     PROJECT_SCORE_CAP_EXCEEDED("프로젝트 점수 한도(30점)를 초과합니다.", HttpStatus.BAD_REQUEST),
+
+    // CoffeeChat System
+    COFFEE_CHAT_ROOM_NOT_FOUND("커피챗 방을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    COFFEE_CHAT_NOT_PARTICIPANT("커피챗 방의 참여자가 아닙니다.", HttpStatus.FORBIDDEN),
+    COFFEE_CHAT_SELF_MESSAGE("자신에게 메시지를 보낼 수 없습니다.", HttpStatus.BAD_REQUEST),
+
+    // Code Review System
+    CODE_REVIEW_NOT_FOUND("코드 리뷰를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    CODE_REVIEW_NOT_OWNER("코드 리뷰 작성자가 아닙니다.", HttpStatus.FORBIDDEN),
 
     ;
 

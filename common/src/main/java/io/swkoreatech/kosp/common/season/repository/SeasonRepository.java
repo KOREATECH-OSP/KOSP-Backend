@@ -1,5 +1,6 @@
 package io.swkoreatech.kosp.common.season.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.repository.Repository;
@@ -18,6 +19,8 @@ public interface SeasonRepository extends Repository<Season, Long> {
     Optional<Season> findById(Long id);
 
     Optional<Season> findByIsActiveTrue();
+
+    List<Season> findAllByOrderByStartDateDesc();
 
     default Season getById(Long id) {
         return findById(id).orElseThrow(() -> new GlobalException(ExceptionMessage.SEASON_NOT_FOUND));

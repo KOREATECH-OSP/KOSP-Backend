@@ -17,6 +17,9 @@ import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import io.swkoreatech.kosp.client.dto.GithubCommitSearchResponse;
+import io.swkoreatech.kosp.client.dto.GithubOrgRepoResponse;
+import io.swkoreatech.kosp.client.dto.GithubUserEventResponse;
 import io.netty.channel.ChannelOption;
 import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -62,10 +65,10 @@ public class GithubRestApiClient {
 
         HttpClient httpClient = HttpClient.create(connectionProvider)
             .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 60000)
-            .responseTimeout(Duration.ofMinutes(5))
+            .responseTimeout(Duration.ofSeconds(60))
             .doOnConnected(conn -> {
-                conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES));
-                conn.addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES));
+                conn.addHandlerLast(new ReadTimeoutHandler(60, TimeUnit.SECONDS));
+                conn.addHandlerLast(new WriteTimeoutHandler(60, TimeUnit.SECONDS));
                 if (conn.channel().pipeline().get(SslHandler.class) != null) {
                     conn.channel().pipeline().get(SslHandler.class).setHandshakeTimeoutMillis(60000);
                 }
@@ -117,6 +120,8 @@ public class GithubRestApiClient {
                     .maxBackoff(Duration.ofSeconds(30))
                     .filter(throwable ->
                         throwable instanceof WebClientResponseException.TooManyRequests ||
+                        throwable instanceof java.util.concurrent.TimeoutException ||
+                        throwable instanceof io.netty.handler.timeout.ReadTimeoutException ||
                             (throwable.getMessage() != null && (
                                 throwable.getMessage().contains("prematurely closed") ||
                                     throwable.getMessage().contains("Connection reset") ||
@@ -180,6 +185,51 @@ public class GithubRestApiClient {
                 })
                 .doOnError(error -> log.error("POST {} - Error: {}", uri, error.getMessage()))
             );
+    }
+
+    /**
+     * 사용자의 GitHub 이벤트 목록을 페이지 단위로 조회한다.
+     *
+     * @param userId 사용자 ID
+     * @param login  GitHub 로그인 이름
+     * @param token  GitHub 인증 토큰
+     * @param page   페이지 번호 (1부터 시작)
+     * @return 이벤트 배열을 담은 Mono
+     */
+    public Mono<GithubUserEventResponse[]> getUserEvents(Long userId, String login, String token, int page) {
+        String uri = "/users/" + login + "/events?per_page=100&page=" + page;
+        return get(userId, uri, token, GithubUserEventResponse[].class);
+    }
+
+    /**
+     * 작성자 기준으로 커밋을 검색하여 기여 저장소를 탐색한다.
+     *
+     * <p>GitHub Search Commits API를 사용하며, feature 브랜치에만 커밋한 경우에도
+     * 해당 저장소를 발견할 수 있다. Search API는 별도 Rate Limit(30req/min)을 사용한다.
+     *
+     * @param userId 사용자 ID
+     * @param login  GitHub 로그인 이름
+     * @param token  GitHub 인증 토큰
+     * @param page   페이지 번호 (1부터 시작)
+     * @return 커밋 검색 결과를 담은 Mono
+     */
+    public Mono<GithubCommitSearchResponse> searchCommitsByAuthor(Long userId, String login, String token, int page) {
+        String uri = "/search/commits?q=author:" + login + "&sort=committer-date&order=desc&per_page=100&page=" + page;
+        return get(userId, uri, token, GithubCommitSearchResponse.class);
+    }
+
+    /**
+     * 조직의 레포지토리 목록을 조회한다.
+     *
+     * @param userId   사용자 ID
+     * @param orgName  조직 이름
+     * @param token    GitHub 인증 토큰
+     * @param page     페이지 번호 (1부터 시작)
+     * @return 레포지토리 목록을 담은 Mono
+     */
+    public Mono<GithubOrgRepoResponse[]> getOrgRepos(Long userId, String orgName, String token, int page) {
+        String uri = "/orgs/" + orgName + "/repos?per_page=100&type=all&page=" + page;
+        return get(userId, uri, token, GithubOrgRepoResponse[].class);
     }
 
     /**

@@ -7,11 +7,22 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.admin.season.api.AdminSeasonApi;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectCreateRequest;
 import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberAddRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonProjectMemberRoleChangeRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.request.AdminSeasonUpdateRequest;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminCurrentSeasonResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectListResponse;
 import io.swkoreatech.kosp.domain.admin.season.dto.response.AdminSeasonProjectMemberListResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.ClearQueueResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.QueueStatusResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusDetailResponse;
+import io.swkoreatech.kosp.domain.admin.season.dto.response.CollectionStatusListResponse;
+import io.swkoreatech.kosp.domain.admin.season.service.AdminCollectionService;
 import io.swkoreatech.kosp.domain.admin.season.service.AdminSeasonProjectService;
+import io.swkoreatech.kosp.domain.season.service.SeasonRankingBatchService;
 import io.swkoreatech.kosp.global.security.annotation.Permit;
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +35,38 @@ import lombok.RequiredArgsConstructor;
 public class AdminSeasonController implements AdminSeasonApi {
 
     private final AdminSeasonProjectService adminSeasonProjectService;
+    private final SeasonRankingBatchService seasonRankingBatchService;
+    private final AdminCollectionService adminCollectionService;
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "시즌 목록 조회")
+    public ResponseEntity<AdminSeasonListResponse> getSeasons() {
+        return ResponseEntity.ok(adminSeasonProjectService.getSeasons());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:create", description = "시즌 생성")
+    public ResponseEntity<Void> createSeason(AdminSeasonCreateRequest request) {
+        adminSeasonProjectService.createSeason(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "시즌 정보 수정")
+    public ResponseEntity<Void> updateSeason(Long seasonId, AdminSeasonUpdateRequest request) {
+        adminSeasonProjectService.updateSeason(seasonId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "현재 활성 시즌 조회")
+    public ResponseEntity<AdminCurrentSeasonResponse> getCurrentSeason() {
+        return ResponseEntity.ok(adminSeasonProjectService.getCurrentSeason());
+    }
 
     /** {@inheritDoc} */
     @Override
@@ -61,5 +104,73 @@ public class AdminSeasonController implements AdminSeasonApi {
     @Permit(name = "admin:seasons:read", description = "프로젝트 참여자 목록 조회")
     public ResponseEntity<AdminSeasonProjectMemberListResponse> getMembers(Long projectId) {
         return ResponseEntity.ok(adminSeasonProjectService.getMembers(projectId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "프로젝트 참여자 역할 변경")
+    public ResponseEntity<Void> changeMemberRole(Long memberId, AdminSeasonProjectMemberRoleChangeRequest request) {
+        adminSeasonProjectService.changeMemberRole(memberId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:update", description = "프로젝트 참여자 삭제")
+    public ResponseEntity<Void> removeMember(Long memberId) {
+        adminSeasonProjectService.removeMember(memberId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "시즌 랭킹 배치 강제 실행")
+    public ResponseEntity<Void> runRankingBatch() {
+        seasonRankingBatchService.runRankingBatch();
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "시즌 수집 현황 조회")
+    public ResponseEntity<CollectionStatusListResponse> getCollectionStatus(Long seasonId) {
+        return ResponseEntity.ok(adminCollectionService.getCollectionStatus(seasonId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "유저 수집 현황 상세 조회")
+    public ResponseEntity<CollectionStatusDetailResponse> getCollectionStatusDetail(Long seasonId, Long userId) {
+        return ResponseEntity.ok(adminCollectionService.getCollectionStatusDetail(seasonId, userId));
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "전체 유저 수집 강제 실행")
+    public ResponseEntity<Void> forceCollectAll(Long seasonId) {
+        adminCollectionService.forceCollectAll(seasonId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "유저 수집 강제 실행")
+    public ResponseEntity<Void> forceCollect(Long userId) {
+        adminCollectionService.forceCollect(userId);
+        return ResponseEntity.ok().build();
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:read", description = "수집 큐 상태 조회")
+    public ResponseEntity<QueueStatusResponse> getQueueStatus() {
+        return ResponseEntity.ok(adminCollectionService.getQueueStatus());
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    @Permit(name = "admin:seasons:batch", description = "수집 큐 비우기")
+    public ResponseEntity<ClearQueueResponse> clearCollectionQueue() {
+        return ResponseEntity.ok(adminCollectionService.clearCollectionQueue());
     }
 }
