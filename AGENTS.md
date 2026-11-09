@@ -5,7 +5,7 @@
 **K-OSP (Korea Open Source Platform)** — Spring Boot 3.5 backend for managing open-source contributions by Korean
 university students.
 
-**Stack**: Java 17, Spring Boot 3.5, Gradle (Kotlin DSL), MySQL, MongoDB, Redis, AWS (S3, SES), JWT
+**Stack**: Java 17, Spring Boot 3.5, Gradle (Kotlin DSL), PostgreSQL (Flyway), MongoDB, Redis(Valkey), RabbitMQ, AWS (S3, SES), JWT
 
 ---
 
@@ -92,7 +92,7 @@ io.swkoreatech.kosp
 ./gradlew :harvester:bootRun       # Start harvester module
 ```
 
-**Test Profile**: `@ActiveProfiles("test")` → H2 (MySQL mode), Redis DB 1, MongoDB `kosp_test`
+**Test Profile**: `@ActiveProfiles("test")` → H2 (Flyway 비활성, create-drop), Redis DB 1, MongoDB `kosp_test`
 
 ---
 
