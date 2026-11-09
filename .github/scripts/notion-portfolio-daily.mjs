@@ -26,6 +26,17 @@ function fail(msg) {
   process.exit(1);
 }
 
+// 시크릿 값 자체가 잘못된 경우를 즉시 잡는다.
+// 2026-07~11: NOTION_DB_ID 에 integration 토큰(ntn_...)이 들어가 이 저장소의 노션 기록이 전부 실패했다.
+if (/^ntn_/i.test(process.env.NOTION_DB_ID || '')) {
+  console.error('NOTION_DB_ID 에 integration 토큰(ntn_...)이 들어 있습니다. DB 주소의 32자리 ID 를 넣으세요. 예) 39c197909e6b81d49a21c8fca0e62fc6');
+  process.exit(1);
+}
+if (!/^[0-9a-f]{32}$/i.test((process.env.NOTION_DB_ID || '').replace(/-/g, ''))) {
+  console.error(`NOTION_DB_ID 형식이 아닙니다(32자리 hex): "${process.env.NOTION_DB_ID}"`);
+  process.exit(1);
+}
+
 const missing = ['NOTION_TOKEN', 'NOTION_DB_ID'].filter((k) => !P[k]);
 if (missing.length) {
   fail(`필수 시크릿 누락: ${missing.join(', ')} — 레포 Settings → Secrets and variables → Actions 에 등록하세요.`);

@@ -61,3 +61,16 @@ KOSP-Backend 의 PR/배포 활동을 팀 노션 DB 에 자동으로 남기는 �
 - 이 워크플로는 **팀 공유 레포**에 올라가며, **팀원 전원의** develop PR/push 가 팀 노션에 기록됩니다.
 - 배포 자동화(SSH → `infra/deploy.sh`)는 이 MVP 에 **포함되지 않음**. 현재 `배포성공`은
   "develop push + 테스트 통과" 기준의 논리값이며, 실제 서버 배포 연동은 2차 확장 항목입니다.
+
+## 2026-11-09 장애 기록 — 7월 중순부터 기록이 전부 실패한 이유
+Actions 로그: `Could not find database with ID: ntn_...` → **`NOTION_DB_ID` 시크릿에 integration 토큰이 들어가 있었다.**
+KOSP-Frontend 는 올바른 값이라 정상 기록됐고, Backend 만 실패했다. CI 의 `test_passed` 와는 무관하다(`if: always()`).
+
+조치:
+1. Settings → Secrets → `NOTION_DB_ID` 를 `39c197909e6b81d49a21c8fca0e62fc6` 로 교체 (Frontend 와 같은 값)
+2. 스크립트에 형식 가드 추가 — 같은 실수면 첫 줄에서 멈추고 이유를 출력
+3. 누락분 백필: `backfill-missing-2026-07-16-to-11.json` (develop, yoonwoosung 커밋 16건)
+   ```bash
+   NOTION_TOKEN=ntn_xxx NOTION_DB_ID=39c197909e6b81d49a21c8fca0e62fc6 \
+     node .github/scripts/backfill-notion.mjs .github/scripts/backfill-missing-2026-07-16-to-11.json
+   ```

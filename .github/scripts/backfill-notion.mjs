@@ -19,6 +19,17 @@ if (!token || !dbId) {
   process.exit(1);
 }
 
+// 시크릿 값 자체가 잘못된 경우를 즉시 잡는다.
+// 2026-07~11: NOTION_DB_ID 에 integration 토큰(ntn_...)이 들어가 이 저장소의 노션 기록이 전부 실패했다.
+if (/^ntn_/i.test(process.env.NOTION_DB_ID || '')) {
+  console.error('NOTION_DB_ID 에 integration 토큰(ntn_...)이 들어 있습니다. DB 주소의 32자리 ID 를 넣으세요. 예) 39c197909e6b81d49a21c8fca0e62fc6');
+  process.exit(1);
+}
+if (!/^[0-9a-f]{32}$/i.test((process.env.NOTION_DB_ID || '').replace(/-/g, ''))) {
+  console.error(`NOTION_DB_ID 형식이 아닙니다(32자리 hex): "${process.env.NOTION_DB_ID}"`);
+  process.exit(1);
+}
+
 const commits = JSON.parse(readFileSync(file, 'utf8'));
 const projectName = process.env.PROJECT_NAME || 'KOSP-Backend';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
