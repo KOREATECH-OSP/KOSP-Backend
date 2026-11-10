@@ -1,6 +1,7 @@
 package io.swkoreatech.kosp.client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 
@@ -9,6 +10,7 @@ import lombok.Getter;
  *
  * <p>PushEvent에서 레포지토리 이름(owner/repo)을 추출하여
  * default 브랜치 외 feature 브랜치 커밋 레포를 발견하는 데 사용된다.
+ * createdAt은 활동 감지(ActivityChecker)에서 lastCrawling 이후 활동 여부 판단에 사용된다.
  */
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -16,6 +18,9 @@ public class GithubUserEventResponse {
 
     private String type;
     private Repo repo;
+
+    @JsonProperty("created_at")
+    private String createdAt;
 
     /** 이벤트 대상 저장소 정보를 담는 내부 DTO. */
     @Getter

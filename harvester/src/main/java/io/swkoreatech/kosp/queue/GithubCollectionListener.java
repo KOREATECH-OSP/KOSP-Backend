@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.rabbitmq.client.Channel;
 
+import io.swkoreatech.kosp.collection.ActivityChecker;
 import io.swkoreatech.kosp.common.event.GithubCollectionRequest;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.common.user.repository.UserRepository;
@@ -25,6 +26,8 @@ import lombok.extern.slf4j.Slf4j;
  * RabbitMQ에서 GitHub 수집 요청 메시지를 수신하는 리스너.
  *
  * <p>삭제된 사용자나 이미 실행 중인 작업을 건너뛰고,
+ * 활동 감지(ActivityChecker)를 통해 lastCrawling 이후 활동이 없는 사용자는
+ * 전체 수집 없이 다음 슬롯으로 재예약한다.
  * 유효한 요청에 대해 {@link PriorityJobLauncher}를 통해 배치 작업을 실행한다.
  */
 @Service
@@ -35,12 +38,11 @@ public class GithubCollectionListener {
     private final PriorityJobLauncher jobLauncher;
     private final UserRepository userRepository;
     private final JobExplorer jobExplorer;
+    private final ActivityChecker activityChecker;
+    private final CollectionPublisher collectionPublisher;
 
     /**
      * GitHub 수집 요청 메시지를 처리한다.
-     *
-     * <p>삭제된 사용자 및 이미 실행 중인 작업을 확인한 후
-     * 유효한 요청에 대해 배치 작업을 실행한다.
      *
      * @param request     수집 요청 DTO
      * @param deliveryTag 메시지 전달 태그
@@ -60,6 +62,13 @@ public class GithubCollectionListener {
             }
             if (isJobRunningForUser(request.userId())) {
                 log.info("Job already running for user {}, discarding message", request.userId());
+                channel.basicAck(deliveryTag, false);
+                return;
+            }
+            if (!activityChecker.hasActivitySince(request.userId())) {
+                log.info("No activity since last crawling for user {}, rescheduling to next slot",
+                    request.userId());
+                collectionPublisher.scheduleNextSlot(request.userId());
                 channel.basicAck(deliveryTag, false);
                 return;
             }
