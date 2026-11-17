@@ -12,6 +12,7 @@ public record OrganizationResponse(
     String avatarUrl,
     String description,
     String tags,
+    String organizationType,
     String status,
     LocalDateTime createdAt
 ) {
@@ -24,6 +25,7 @@ public record OrganizationResponse(
             organization.getAvatarUrl(),
             organization.getDescription(),
             organization.getTags(),
+            organization.getOrganizationType() != null ? organization.getOrganizationType().name() : null,
             organization.getStatus().name(),
             organization.getCreatedAt()
         );

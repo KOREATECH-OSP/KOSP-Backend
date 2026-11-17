@@ -81,7 +81,7 @@
 
         <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
             <encoder>
-                <pattern>${consoleLogPattern}</pattern>
+                <pattern>${defaultLogPattern}</pattern>
             </encoder>
         </appender>
 
@@ -100,7 +100,7 @@
             </filter>
         </appender>
 
-        <root level="warn">
+        <root level="error">
             <appender-ref ref="console"/>
             <appender-ref ref="FILE"/>
             <appender-ref ref="ASYNC_SLACK"/>

@@ -21,6 +21,7 @@ import io.swkoreatech.kosp.common.organization.model.OrganizationMemberRole;
 import io.swkoreatech.kosp.common.organization.model.OrganizationMemberStatus;
 import io.swkoreatech.kosp.common.organization.model.OrganizationRepo;
 import io.swkoreatech.kosp.common.organization.model.OrganizationStatus;
+import io.swkoreatech.kosp.common.organization.model.OrganizationType;
 import io.swkoreatech.kosp.domain.organization.event.OrgRegisteredCollectionEvent;
 import io.swkoreatech.kosp.infra.email.eventlistener.event.OrganizationRegisteredEvent;
 import io.swkoreatech.kosp.common.organization.repository.OrganizationMemberRepository;
@@ -208,7 +209,7 @@ public class OrganizationService {
         return OrganizationDetailResponse.from(organization, members.size(), linkedCount, repoCount);
     }
 
-    public List<OrganizationResponse> getAllOrganizations(String search) {
+    public List<OrganizationResponse> getAllOrganizations(String search, OrganizationType type) {
         List<Organization> orgs;
         if (search != null && !search.isBlank()) {
             orgs = organizationRepository.findByGithubOrgNameContainingIgnoreCaseOrDisplayNameContainingIgnoreCase(search, search);
@@ -217,6 +218,7 @@ public class OrganizationService {
         }
         return orgs.stream()
             .filter(org -> org.getStatus() != OrganizationStatus.DISCONNECTED)
+            .filter(org -> type == null || type == org.getOrganizationType())
             .map(OrganizationResponse::from)
             .toList();
     }
@@ -233,7 +235,7 @@ public class OrganizationService {
         if (requestMember.getRole() != OrganizationMemberRole.OWNER) {
             throw new GlobalException(ExceptionMessage.ORGANIZATION_OWNER_REQUIRED);
         }
-        organization.updateProfile(request.displayName(), request.description(), request.tags());
+        organization.updateProfile(request.displayName(), request.description(), request.tags(), request.avatarUrl(), request.organizationType());
     }
 
     @Transactional
