@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swkoreatech.kosp.common.organization.model.OrganizationType;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.organization.api.OrganizationApi;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
@@ -43,9 +44,10 @@ public class OrganizationController implements OrganizationApi {
     @Permit(name = "org:all", description = "전체 조직 목록 조회")
     public ResponseEntity<List<OrganizationResponse>> getAllOrganizations(
         @AuthUser User user,
-        @RequestParam(required = false) String search
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) OrganizationType type
     ) {
-        return ResponseEntity.ok(organizationService.getAllOrganizations(search));
+        return ResponseEntity.ok(organizationService.getAllOrganizations(search, type));
     }
 
     @Override

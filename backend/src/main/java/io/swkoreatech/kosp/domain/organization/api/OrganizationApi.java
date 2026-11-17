@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swkoreatech.kosp.common.organization.model.OrganizationType;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterRequest;
@@ -35,7 +36,8 @@ public interface OrganizationApi {
     @GetMapping
     ResponseEntity<List<OrganizationResponse>> getAllOrganizations(
         @Parameter(hidden = true) @AuthUser User user,
-        @RequestParam(required = false) String search
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) OrganizationType type
     );
 
     @Operation(

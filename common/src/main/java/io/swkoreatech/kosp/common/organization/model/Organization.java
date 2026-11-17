@@ -46,6 +46,10 @@ public class Organization extends BaseEntity {
     private Long registeredByUserId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "organization_type", length = 20)
+    private OrganizationType organizationType;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 20)
     private OrganizationStatus status;
 
@@ -81,12 +85,15 @@ public class Organization extends BaseEntity {
         this.avatarUrl = avatarUrl;
     }
 
-    public void updateProfile(String displayName, String description, String tags, String avatarUrl) {
+    public void updateProfile(String displayName, String description, String tags, String avatarUrl, OrganizationType organizationType) {
         this.displayName = displayName;
         this.description = description;
         this.tags = tags;
         if (avatarUrl != null) {
             this.avatarUrl = avatarUrl;
+        }
+        if (organizationType != null) {
+            this.organizationType = organizationType;
         }
     }
 }
