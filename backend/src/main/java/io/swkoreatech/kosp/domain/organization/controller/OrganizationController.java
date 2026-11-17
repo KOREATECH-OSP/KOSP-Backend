@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import io.swkoreatech.kosp.common.organization.model.OrganizationType;
 import io.swkoreatech.kosp.common.user.model.User;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
 import io.swkoreatech.kosp.domain.organization.api.OrganizationApi;
+import io.swkoreatech.kosp.domain.organization.service.OrganizationBookmarkService;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterRequest;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationUpdateRequest;
@@ -38,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 public class OrganizationController implements OrganizationApi {
 
     private final OrganizationService organizationService;
+    private final OrganizationBookmarkService organizationBookmarkService;
 
     @Override
     @GetMapping
@@ -170,5 +173,23 @@ public class OrganizationController implements OrganizationApi {
     ) {
         organizationService.dismissAdmin(organizationId, memberId, user);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @PostMapping("/{organizationId}/bookmark")
+    @Permit(name = "org:bookmark:toggle", description = "조직 찜하기 토글")
+    public ResponseEntity<ToggleBookmarkResponse> toggleBookmark(
+        @AuthUser User user,
+        @PathVariable Long organizationId
+    ) {
+        boolean isBookmarked = organizationBookmarkService.toggleBookmark(organizationId, user);
+        return ResponseEntity.ok(ToggleBookmarkResponse.from(isBookmarked));
+    }
+
+    @Override
+    @GetMapping("/bookmarked")
+    @Permit(name = "org:bookmarked", description = "찜한 조직 목록 조회")
+    public ResponseEntity<List<OrganizationResponse>> getBookmarkedOrganizations(@AuthUser User user) {
+        return ResponseEntity.ok(organizationBookmarkService.getBookmarkedOrganizations(user));
     }
 }

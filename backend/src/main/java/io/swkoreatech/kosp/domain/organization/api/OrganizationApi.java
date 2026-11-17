@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swkoreatech.kosp.common.organization.model.OrganizationType;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationAddMemberRequest;
+import io.swkoreatech.kosp.domain.community.article.dto.response.ToggleBookmarkResponse;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationRegisterRequest;
 import io.swkoreatech.kosp.domain.organization.dto.request.OrganizationUpdateRequest;
 import io.swkoreatech.kosp.domain.organization.dto.response.AvailableOrganizationResponse;
@@ -88,6 +89,25 @@ public interface OrganizationApi {
         @Parameter(hidden = true) @AuthUser User user,
         @PathVariable Long organizationId,
         @RequestBody @Valid OrganizationUpdateRequest request
+    );
+
+    @Operation(
+        summary = "조직 찜하기 토글",
+        description = "조직을 찜하거나 취소합니다."
+    )
+    @PostMapping("/{organizationId}/bookmark")
+    ResponseEntity<ToggleBookmarkResponse> toggleBookmark(
+        @Parameter(hidden = true) @AuthUser User user,
+        @PathVariable Long organizationId
+    );
+
+    @Operation(
+        summary = "찜한 조직 목록 조회",
+        description = "현재 사용자가 찜한 조직 목록을 조회합니다."
+    )
+    @GetMapping("/bookmarked")
+    ResponseEntity<List<OrganizationResponse>> getBookmarkedOrganizations(
+        @Parameter(hidden = true) @AuthUser User user
     );
 
     @Operation(
