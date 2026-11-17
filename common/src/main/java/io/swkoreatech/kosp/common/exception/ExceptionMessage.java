@@ -85,6 +85,8 @@ public enum ExceptionMessage {
     ORGANIZATION_MEMBER_NOT_ADMIN("관리자가 아닌 멤버입니다.", HttpStatus.BAD_REQUEST),
     ORGANIZATION_MEMBER_ALREADY_EXISTS("이미 조직에 속한 멤버입니다.", HttpStatus.CONFLICT),
     ORGANIZATION_REPO_NOT_FOUND("조직 저장소를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_POST_NOT_FOUND("조직 게시글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    ORGANIZATION_POST_COMMENT_NOT_FOUND("조직 게시글 댓글을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     GITHUB_REAUTH_REQUIRED("GitHub 재인증이 필요합니다. read:org 권한을 포함하여 다시 로그인해 주세요.", HttpStatus.FORBIDDEN),
 
     // Season Ranking System
