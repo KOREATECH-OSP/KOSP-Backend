@@ -139,9 +139,8 @@ public class OrganizationPostService {
         if (!isAuthor && !isAdmin) {
             throw new GlobalException(ExceptionMessage.FORBIDDEN);
         }
-        commentRepository.delete(comment);
-
         OrganizationPost post = comment.getPost();
+        commentRepository.delete(comment);
         post.decrementCommentsCount();
     }
 
