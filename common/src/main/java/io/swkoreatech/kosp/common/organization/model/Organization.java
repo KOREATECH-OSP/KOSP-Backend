@@ -81,9 +81,12 @@ public class Organization extends BaseEntity {
         this.avatarUrl = avatarUrl;
     }
 
-    public void updateProfile(String displayName, String description, String tags) {
+    public void updateProfile(String displayName, String description, String tags, String avatarUrl) {
         this.displayName = displayName;
         this.description = description;
         this.tags = tags;
+        if (avatarUrl != null) {
+            this.avatarUrl = avatarUrl;
+        }
     }
 }

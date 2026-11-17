@@ -233,7 +233,7 @@ public class OrganizationService {
         if (requestMember.getRole() != OrganizationMemberRole.OWNER) {
             throw new GlobalException(ExceptionMessage.ORGANIZATION_OWNER_REQUIRED);
         }
-        organization.updateProfile(request.displayName(), request.description(), request.tags());
+        organization.updateProfile(request.displayName(), request.description(), request.tags(), request.avatarUrl());
     }
 
     @Transactional
