@@ -11,6 +11,7 @@ import io.swkoreatech.kosp.common.exception.ExceptionMessage;
 import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.user.model.User;
 import io.swkoreatech.kosp.domain.resume.export.ResumeHwpxExporter;
+import io.swkoreatech.kosp.domain.resume.export.ResumeProfile;
 import io.swkoreatech.kosp.domain.resume.model.UserResume;
 import io.swkoreatech.kosp.domain.resume.repository.UserResumeRepository;
 import lombok.RequiredArgsConstructor;
@@ -51,7 +52,8 @@ public class ResumeExportService {
     public HwpxDocument exportMine(User user, Long resumeId) {
         UserResume resume = userResumeRepository.findByIdAndUserId(resumeId, user.getId())
             .orElseThrow(() -> new GlobalException(ExceptionMessage.NOT_FOUND));
-        return toDocument(resume);
+        // 본인 다운로드에만 이메일을 넣는다.
+        return toDocument(resume, ResumeProfile.of(user, true));
     }
 
     /**
@@ -69,12 +71,13 @@ public class ResumeExportService {
             log.info("[ResumeHwpx] 비공개 이력서 내려받기 차단: ownerId={}, resumeId={}", userId, resumeId);
             throw new GlobalException(ExceptionMessage.NOT_FOUND);
         }
-        return toDocument(resume);
+        // 공개 다운로드는 비인증 호출이 가능하고 약관 제11조 공개 항목에 이메일이 없으므로 이메일을 뺀다.
+        return toDocument(resume, ResumeProfile.of(resume.getUser(), false));
     }
 
-    private HwpxDocument toDocument(UserResume resume) {
+    private HwpxDocument toDocument(UserResume resume, ResumeProfile profile) {
         String title = hwpxExporter.resolveTitle(resume.getResumeData());
-        byte[] content = hwpxExporter.export(resume.getResumeData(), resume.getId());
+        byte[] content = hwpxExporter.export(resume.getResumeData(), resume.getId(), profile);
         return new HwpxDocument(title + ".hwpx", content);
     }
 

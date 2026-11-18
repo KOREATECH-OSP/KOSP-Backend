@@ -2,6 +2,7 @@ package io.swkoreatech.kosp.domain.resume.export;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,19 @@ public class ResumeHwpxExporter {
     private final ObjectMapper objectMapper;
 
     /**
+     * 표 기반 양식 사용 여부. {@code false} 면 기존 문단 방식으로만 출력한다.
+     * 한글이 표 출력물을 거부하는 경우 설정 {@code resume.hwpx.table-layout=false} 로 즉시 되돌린다.
+     * (생성자 주입 대상이 아니라서 {@code new ResumeHwpxExporter(objectMapper)} 로 만든 테스트에서는 기본값 true)
+     */
+    @Value("${resume.hwpx.table-layout:true}")
+    private boolean tableLayout = true;
+
+    /** 테스트에서 문단 방식을 강제할 때 쓴다. */
+    void setTableLayout(boolean tableLayout) {
+        this.tableLayout = tableLayout;
+    }
+
+    /**
      * 이력서 JSON 을 hwpx 바이트로 변환한다.
      *
      * @param resumeData {@code user_resume.resume_data} 원본 JSON 문자열
@@ -40,9 +54,37 @@ public class ResumeHwpxExporter {
      * @throws GlobalException 문서 생성에 실패한 경우
      */
     public byte[] export(String resumeData, Long resumeId) {
+        return export(resumeData, resumeId, ResumeProfile.EMPTY);
+    }
+
+    /**
+     * 이력서 JSON 과 사용자 정보(이름·이메일·GitHub)로 hwpx 바이트를 만든다.
+     *
+     * <p>{@code tableLayout} 이 켜져 있으면 표 기반 정형 양식({@link ResumeHwpxTableLayout}),
+     * 꺼져 있으면 기존 문단 방식으로 쓴다.</p>
+     *
+     * @param profile 머리에 들어갈 사용자 정보. 이메일은 본인 다운로드에만 채워 넘긴다.
+     */
+    public byte[] export(String resumeData, Long resumeId, ResumeProfile profile) {
         ResumeDataReader reader = ResumeDataReader.of(parse(resumeData, resumeId));
         HwpxDocumentBuilder doc = new HwpxDocumentBuilder();
 
+        if (tableLayout) {
+            new ResumeHwpxTableLayout(reader, profile, resumeId).write(doc);
+        } else {
+            writeParagraphLayout(doc, reader, resumeId);
+        }
+
+        try {
+            return doc.toBytes();
+        } catch (Exception e) {
+            log.error("hwpx 생성 실패: resumeId={}", resumeId, e);
+            throw new GlobalException(ExceptionMessage.SERVER_ERROR);
+        }
+    }
+
+    /** 기존 문단 방식. 표 양식에 문제가 생기면 {@code resume.hwpx.table-layout=false} 로 이쪽을 쓴다. */
+    private void writeParagraphLayout(HwpxDocumentBuilder doc, ResumeDataReader reader, Long resumeId) {
         writeTitle(doc, reader, resumeId);
         writeBasic(doc, reader, resumeId);
         writeJobRole(doc, reader);
@@ -57,13 +99,6 @@ public class ResumeHwpxExporter {
         writeCertifications(doc, reader, resumeId);
         writeCoverLetters(doc, reader, resumeId);
         writeCustomSections(doc, reader, resumeId);
-
-        try {
-            return doc.toBytes();
-        } catch (Exception e) {
-            log.error("hwpx 생성 실패: resumeId={}", resumeId, e);
-            throw new GlobalException(ExceptionMessage.SERVER_ERROR);
-        }
     }
 
     /**
