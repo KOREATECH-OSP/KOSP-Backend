@@ -9,7 +9,7 @@ dependencies {
     implementation(projects.rabbitmq)
     implementation(projects.flyway)
 
-    implementation(libs.spring.boot.devtools)
+    developmentOnly(libs.spring.boot.devtools)
     implementation(libs.spring.boot.starter.actuator)
     implementation(libs.spring.boot.starter.aop)
 
