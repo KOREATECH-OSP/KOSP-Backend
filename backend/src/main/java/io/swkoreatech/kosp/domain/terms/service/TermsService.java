@@ -1,11 +1,11 @@
 package io.swkoreatech.kosp.domain.terms.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.swkoreatech.kosp.common.exception.GlobalException;
 import io.swkoreatech.kosp.common.terms.model.Terms;
 import io.swkoreatech.kosp.common.terms.model.UserTermsAgreement;
 import io.swkoreatech.kosp.common.terms.repository.TermsRepository;
@@ -30,7 +30,7 @@ public class TermsService {
     private final UserRepository userRepository;
 
     /**
-     * 현재 유효한 약관을 조회한다.
+     * 현재 유효한 서비스 이용약관(SERVICE)을 조회한다.
      *
      * @return 현재 약관 응답
      */
@@ -50,38 +50,25 @@ public class TermsService {
     public void agreeTerms(Long userId, AgreeTermsRequest request) {
         User user = userRepository.getById(userId);
         Terms terms = termsRepository.getByVersion(request.version());
-
-        if (userTermsAgreementRepository.existsByUserAndTerms(user, terms)) {
-            return;
-        }
-
-        userTermsAgreementRepository.save(UserTermsAgreement.builder()
-            .user(user)
-            .terms(terms)
-            .agreedAt(LocalDateTime.now())
-            .build());
+        saveAgreement(user, terms);
     }
 
     /**
-     * 사용자가 현재 유효한 약관에 동의했는지 여부를 판단한다.
+     * 사용자가 현재 활성화된 약관(종류별 1개씩) 중 하나라도 동의하지 않았는지 판단한다.
+     * 활성 약관이 하나도 없으면 동의가 필요 없다.
      *
      * @param user 대상 사용자
-     * @return 미동의 상태이면 {@code true}
+     * @return 미동의 약관이 하나라도 있으면 {@code true}
      */
     public boolean needsTermsAgreement(User user) {
-        Terms activeTerms;
-        try {
-            activeTerms = termsRepository.getActive();
-        } catch (GlobalException e) {
-            // 활성 약관이 없으면 동의 불필요
-            return false;
-        }
-        return !userTermsAgreementRepository.existsByUserAndTerms(user, activeTerms);
+        return termsRepository.findAllByIsActiveTrue().stream()
+            .anyMatch(terms -> !userTermsAgreementRepository.existsByUserAndTerms(user, terms));
     }
 
     /**
      * 회원가입 시 약관 버전이 제공된 경우 동의를 저장한다.
      * 버전이 null이거나 빈 문자열이거나 존재하지 않는 버전이면 저장하지 않는다.
+     * 같은 버전 문자열이 여러 종류에 있어 약관을 특정할 수 없을 때도 저장하지 않는다.
      *
      * @param user         가입 완료된 사용자
      * @param termsVersion 동의한 약관 버전 (nullable)
@@ -92,14 +79,21 @@ public class TermsService {
             return;
         }
 
-        termsRepository.findByVersion(termsVersion).ifPresent(terms -> {
-            if (!userTermsAgreementRepository.existsByUserAndTerms(user, terms)) {
-                userTermsAgreementRepository.save(UserTermsAgreement.builder()
-                    .user(user)
-                    .terms(terms)
-                    .agreedAt(LocalDateTime.now())
-                    .build());
-            }
-        });
+        List<Terms> matched = termsRepository.findByVersion(termsVersion);
+        if (matched.size() != 1) {
+            return;
+        }
+        saveAgreement(user, matched.get(0));
+    }
+
+    private void saveAgreement(User user, Terms terms) {
+        if (userTermsAgreementRepository.existsByUserAndTerms(user, terms)) {
+            return;
+        }
+        userTermsAgreementRepository.save(UserTermsAgreement.builder()
+            .user(user)
+            .terms(terms)
+            .agreedAt(LocalDateTime.now())
+            .build());
     }
 }

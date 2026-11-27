@@ -72,6 +72,7 @@ public enum ExceptionMessage {
     // Terms System
     TERMS_NOT_FOUND("현재 유효한 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
     TERMS_VERSION_NOT_FOUND("해당 버전의 약관을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    TERMS_VERSION_AMBIGUOUS("같은 버전의 약관이 여러 종류에 존재해 특정할 수 없습니다.", HttpStatus.CONFLICT),
     TERMS_AGREEMENT_REQUIRED("약관 동의가 필요합니다.", HttpStatus.FORBIDDEN),
 
     // Organization System
