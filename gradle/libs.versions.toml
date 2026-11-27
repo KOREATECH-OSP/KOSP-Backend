@@ -9,6 +9,8 @@ hwpxlib = "1.0.9"
 rsql-jpa = "6.0.33"
 logback-slack-appender = "1.6.1"
 logstash-logback-encoder = "7.4"
+embedded-postgres = "2.2.3"
+embedded-postgres-binaries = "18.7.0"
 
 [libraries]
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
@@ -42,6 +44,9 @@ jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 
 postgresql = { module = "org.postgresql:postgresql" }
 h2database = { module = "com.h2database:h2" }
+embedded-postgres = { module = "io.zonky.test:embedded-postgres", version.ref = "embedded-postgres" }
+embedded-postgres-binaries-bom = { module = "io.zonky.test.postgres:embedded-postgres-binaries-bom", version.ref = "embedded-postgres-binaries" }
+embedded-postgres-binaries-darwin-arm64 = { module = "io.zonky.test.postgres:embedded-postgres-binaries-darwin-arm64v8" }
 
 lombok = { module = "org.projectlombok:lombok" }
 

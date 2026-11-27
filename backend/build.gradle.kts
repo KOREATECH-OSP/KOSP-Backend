@@ -61,6 +61,10 @@ dependencies {
     testImplementation(libs.spring.boot.starter.test)
     testImplementation(libs.spring.security.test)
     testImplementation(libs.reactor.test)
+    // Flyway 마이그레이션을 실제 PostgreSQL 에서 검증 (H2 는 부분 인덱스 등 PG 문법 미지원)
+    testImplementation(libs.embedded.postgres)
+    testImplementation(platform(libs.embedded.postgres.binaries.bom))
+    testRuntimeOnly(libs.embedded.postgres.binaries.darwin.arm64)
     testRuntimeOnly(libs.junit.platform.launcher)
 }
 
